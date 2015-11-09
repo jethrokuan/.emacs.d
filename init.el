@@ -87,6 +87,8 @@
 (use-package helm
   :diminish helm-mode
   :bind* (("C-c h" . helm-mini)
+	  ("C-x C-f" . helm-find-files)
+	  ("C-o" . helm-find-files)
 	  ("C-c f" . helm-recentf)
 	  ("C-h a" . helm-apropos)
 	  ("C-x C-b" . helm-buffers-list)
