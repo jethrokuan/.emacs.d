@@ -3,3 +3,6 @@
 
 /init.el~
 /eshell/history
+*~
+recentf
+projectile-*

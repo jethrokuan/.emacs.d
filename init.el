@@ -159,6 +159,35 @@
   :config (use-package flycheck-pos-tip
 	    :config (progn
 		      (custom-set-variables '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages)))))
+;;   Org Mode
+(use-package org-plus-contrib
+  :bind* (("C-c c" . org-capture)
+	  ("C-c a" . org-agenda)
+	  ("C-c l" . org-store-link))
+  :mode ("\\.org\\'" . org-mode)
+  :init (progn
+	  (setq org-modules '(org-drill))
+	  (setq org-directory "~/.org")
+	  (setq org-default-notes-directory (concat org-directory "/notes.org"))
+	  (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
+	  (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
+	  (setq org-refile-targets
+		'((nil :maxlevel . 3)
+		  (org-agenda-files :maxlevel . 3)))
+	  (setq org-use-fast-todo-selection t)
+	  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+	  (setq org-capture-templates
+		'(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
+		   "* TODO %? %i\n")
+		  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
+		   "* TODO %? %i\n")
+		  ("b" "Book" entry (file "~/.org/books.org")
+		   "* TO-READ %(org-set-tags) %? %i\n")
+		  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
+		   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
+		  ("i" "Idea" entry (file+datatree "~/.org/ideas.org")
+		   "* %? %i\n")))
+	  ))
 
 ;;   Markdown mode
 (use-package markdown-mode
