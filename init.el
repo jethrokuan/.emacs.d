@@ -24,6 +24,10 @@
   (require 'cl)
   (require 'use-package))
 
+(use-package use-package-chords
+  :init (require 'key-chord)
+  :config (key-chord-mode 1))
+
 (require 'bind-key)
 (require 'diminish nil t)
 
@@ -49,11 +53,11 @@
 ;;;; Theming
 ;;   Color Schemes
 (use-package monokai-theme
-  :disabled t
   :config (load-theme 'monokai t)
   (setq org-fontify-whole-heading-line t))
 
 (use-package material-theme
+  :disabled t
   :config (load-theme 'material t)
   (setq org-fontify-whole-heading-line t))
 
@@ -68,7 +72,6 @@
 
 ;; Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
-  :ensure t
   :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 ;; Rainbow-mode for displaying colors for RGB and hex values
@@ -77,6 +80,7 @@
 
 ;;Movement
 (use-package avy
+  :chords (("jj" . avy-goto-char))
   :bind (("C-:" . avy-goto-char)
 	 ("C-;" . avy-goto-char-2)))
 
@@ -86,6 +90,9 @@
 ;;Helm
 (use-package helm
   :diminish helm-mode
+  :chords (("hf" . helm-find-files)
+	   ("hb" . helm-buffers-list)
+	   ("hs" . save-buffer))
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
 	  ("C-o" . helm-find-files)
@@ -123,7 +130,7 @@
 ;;   Aggressive-indent mode
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
-  :init (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
+  :init (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
 ;;   Magit
 (use-package magit
@@ -141,6 +148,7 @@
 ;;   Company
 (use-package company
   :diminish company-mode
+  :defer 5
   :init (progn
 	  (add-hook 'after-init-hook 'global-company-mode)
 	  (setq company-idle-delay 0.5)
@@ -155,6 +163,7 @@
 
 ;;   Flycheck
 (use-package flycheck
+  :defer 5
   :init (add-hook 'after-init-hook 'global-flycheck-mode)
   :config (use-package flycheck-pos-tip
 	    :config (progn
@@ -214,4 +223,9 @@
   :config (cljr-add-keybindings-with-prefix "C-c j"))
 
 (use-package flycheck-clojure
+  :defer 5
   :config (flycheck-clojure-setup))
+
+(provide 'init.el)
+
+;;; init.el ends here
