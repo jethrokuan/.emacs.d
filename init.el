@@ -25,7 +25,6 @@
   (require 'use-package))
 
 (use-package use-package-chords
-  :init (require 'key-chord)
   :config (key-chord-mode 1))
 
 (require 'bind-key)
@@ -80,9 +79,8 @@
 
 ;;Movement
 (use-package avy
-  :chords (("jj" . avy-goto-char))
-  :bind (("C-:" . avy-goto-char)
-	 ("C-;" . avy-goto-char-2)))
+  :chords (("jj" . avy-goto-char)
+	   ("kk" . avy-goto-char-2)))
 
 (use-package ace-window
   :bind (("M-'" . ace-window)))
