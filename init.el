@@ -60,6 +60,11 @@
   :config (load-theme 'material t)
   (setq org-fontify-whole-heading-line t))
 
+(use-package gruvbox-theme
+  :config (progn
+	    (load-theme 'gruvbox t)
+	    (setq org-fontify-whole-heading-line t)))
+
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
@@ -82,8 +87,8 @@
   :chords (("jj" . avy-goto-char)
 	   ("kk" . avy-goto-char-2)))
 
-(use-package ace-window
-  :bind (("M-'" . ace-window)))
+  (use-package ace-window
+    :bind (("M-'" . ace-window)))
 
 ;;Helm
 (use-package helm
@@ -223,6 +228,9 @@
 (use-package flycheck-clojure
   :defer 5
   :config (flycheck-clojure-setup))
+
+(use-package json-mode
+  :mode "\\.json\\'")
 
 (provide 'init.el)
 
