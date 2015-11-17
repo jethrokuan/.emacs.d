@@ -27,6 +27,9 @@
 (use-package use-package-chords
   :config (key-chord-mode 1))
 
+;;Improved keybindings
+(bind-key* "C-x m" 'eshell)
+
 (require 'bind-key)
 (require 'diminish nil t)
 
@@ -135,6 +138,11 @@
   :diminish aggressive-indent-mode
   :init (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
+;;   Paredit
+(use-package paredit
+  :commands paredit-mode
+  :diminish paredit-mode)
+
 ;;   Magit
 (use-package magit
   :init (add-hook 'magit-mode-hook 'hl-line-mode)
@@ -210,7 +218,10 @@
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
 	 ("\\.edn\\'" . clojure-mode))
-  :init (add-hook 'clojure-mode-hook #'eldoc-mode))
+  :init (progn
+	  (add-hook 'clojure-mode-hook #'eldoc-mode)
+	  (add-hook 'clojure-mode-hook #'paredit-mode)
+	  ))
 
 ;;   Cider
 (use-package cider
