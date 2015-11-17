@@ -205,9 +205,7 @@
 		   "* TO-READ %(org-set-tags) %? %i\n")
 		  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
 		   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
-		  ("i" "Idea" entry (file+datatree "~/.org/ideas.org")
-		   "* %? %i\n")))
-	  ))
+		  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))))
 
 ;;   Markdown mode
 (use-package markdown-mode
