@@ -63,13 +63,16 @@
   :config (load-theme 'material t)
   (setq org-fontify-whole-heading-line t))
 
-(use-package gruvbox-theme
-  :config (progn
-	    (load-theme 'gruvbox t)
-	    (setq org-fontify-whole-heading-line t)))
-
 (show-paren-mode 1)
 (setq show-paren-delay 0)
+
+(use-package anzu
+  :diminish anzu-mode
+  :config (global-anzu-mode +1))
+
+(use-package volatile-highlights
+  :diminish volatile-highlights-mode
+  :config (volatile-highlights-mode t))
 
 ;; Display line nums in prog-mode
 (defun linum-mode-hook () 
@@ -98,7 +101,8 @@
   :diminish helm-mode
   :chords (("hf" . helm-find-files)
 	   ("hb" . helm-buffers-list)
-	   ("hs" . save-buffer))
+	   ("hs" . save-buffer)
+	   ("rf" . helm-recentf))
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
 	  ("C-o" . helm-find-files)
@@ -119,15 +123,26 @@
 	          helm-quick-update t
 		  helm-M-x-requires-pattern nil
 		  helm-ff-skip-boring-files t)
-	    (helm-mode 1)
-	    (use-package helm-swoop
-	      :bind ("C-c s" . helm-swoop))
-	    (use-package helm-ag
-	      :bind ("C-c g" . helm-ag))
-	    (use-package helm-descbinds
-	      :bind ("C-c d" . helm-descbinds))))
+	    (helm-mode 1)))
+
+(use-package helm-swoop
+  :bind ("C-c s" . helm-swoop))
+
+(use-package helm-ag
+  :bind ("C-c g" . helm-ag))
+
+(use-package helm-descbinds
+  :bind ("C-c d" . helm-descbinds))
 
 ;;;; Modules
+;;   Expand Region
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)))
+
+(use-package change-inner
+  :bind (("M-i" . change-inner)
+	 ("M-o" . change-outer)))
+
 ;;   Which-key
 (use-package which-key
   :diminish which-key-mode
@@ -243,4 +258,19 @@
 
 (provide 'init.el)
 
-;;; init.el ends here
+;;init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" default)))
+ '(flycheck-display-errors-function (function flycheck-pos-tip-error-messages)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
