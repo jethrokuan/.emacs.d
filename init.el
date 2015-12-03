@@ -1,5 +1,4 @@
 ;; For debugging purposes
-(defconst emacs-start-time (current-time))
 (unless noninteractive
   (message "Loading %s..." load-file-name))
 
@@ -12,9 +11,6 @@
 
 (setq message-log-max 16384)
 
-;;Ensure that all packages are installed
-(setq use-package-always-ensure t)
-
 ;;Enable use-package
 (eval-and-compile
   (defvar use-package-verbose t)
@@ -23,6 +19,9 @@
     `(setq ad-redefinition-action 'accept))
   (require 'cl)
   (require 'use-package))
+
+;;Ensure that all packages are installed
+(setq use-package-always-ensure t)
 
 (use-package use-package-chords
   :config (key-chord-mode 1))
@@ -54,22 +53,26 @@
 
 ;;;; Theming
 ;;   Color Schemes
-(use-package monokai-theme
-  :config (load-theme 'monokai t)
-  (setq org-fontify-whole-heading-line t))
+(use-package base16-theme
+  :init (load-theme 'base16-chalk-dark t))
 
-(use-package material-theme
+(use-package monokai-theme
   :disabled t
-  :config (load-theme 'material t)
+  :config (load-theme 'monokai t)
   (setq org-fontify-whole-heading-line t))
 
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
+;; Emacs profiling tool
+(use-package esup)
+
+;; Shows x/y for isearch
 (use-package anzu
   :diminish anzu-mode
   :config (global-anzu-mode +1))
 
+;; Highlights copy/paste changes
 (use-package volatile-highlights
   :diminish volatile-highlights-mode
   :config (volatile-highlights-mode t))
@@ -156,7 +159,8 @@
 ;;   Paredit
 (use-package paredit
   :commands paredit-mode
-  :diminish paredit-mode)
+  :diminish paredit-mode
+  :config (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
 
 ;;   Magit
 (use-package magit
