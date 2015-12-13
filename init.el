@@ -64,6 +64,10 @@
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
+;; Writegood mode
+(use-package writegood-mode
+  :bind ("C-c m g" . writegood-mode))
+
 ;; Emacs profiling tool
 (use-package esup)
 
@@ -102,10 +106,10 @@
 ;;Helm
 (use-package helm
   :diminish helm-mode
-  :chords (("hf" . helm-find-files)
-	   ("hb" . helm-buffers-list)
-	   ("hs" . save-buffer)
-	   ("rf" . helm-recentf))
+  :chords (("wz" . helm-find-files)
+	   ("vz" . helm-buffers-list)
+	   ("vv" . save-buffer)
+	   ("mz" . helm-recentf))
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
 	  ("C-o" . helm-find-files)
@@ -224,7 +228,25 @@
 		   "* TO-READ %(org-set-tags) %? %i\n")
 		  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
 		   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
-		  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))))
+		  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
+	  (setq org-publish-project-alist
+		'(("org-books"
+		   ;; Path to your org files.
+		   :base-directory "~/.org/"
+		   :exclude ".*"
+		   :include ["books.org"]
+		   :with-emphasize t
+		   :with-todo-keywords t
+		   :with-toc nil
+		   :with-tags nil
+		   
+		   ;; Path to  project.
+		   :publishing-directory "~/Documents/blog/content/"
+		   :publishing-function org-html-publish-to-html
+		   :html-extension "md"
+		   :headline-levels 0
+		   :body-only t ;; Only export section between <body> </body>
+		   )))))
 
 ;;   Markdown mode
 (use-package markdown-mode

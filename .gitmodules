@@ -1,3 +1,3 @@
 [submodule "snippets"]
 	path = snippets
-	url = https://github.com/AndreaCrotti/yasnippet-snippets
+	url = https://github.com/jethrokuan/yasnippet-snippets
