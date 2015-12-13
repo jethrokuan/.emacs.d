@@ -11,6 +11,8 @@
 
 (setq message-log-max 16384)
 
+(set-face-attribute 'default nil :height 200)
+
 ;;Enable use-package
 (eval-and-compile
   (defvar use-package-verbose t)
