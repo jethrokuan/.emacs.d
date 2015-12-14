@@ -284,6 +284,10 @@
 (use-package json-mode
   :mode "\\.json\\'")
 
+(use-package emmet-mode
+  :init (progn (add-hook 'sgml-mode-hook 'emmet-mode)
+	       (add-hook 'css-mode-hook 'emmet-mode)))
+
 (provide 'init.el)
 
 ;;init.el ends here
