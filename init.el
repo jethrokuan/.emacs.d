@@ -66,6 +66,26 @@
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
+;; Some useful functions
+(defun split-window-right-and-move-there-dammit ()
+  (interactive)
+  (split-window-right)
+  (windmove-right))
+
+(defun nuke-all-buffers ()
+  "Kill all buffers, leaving *scratch* only."
+  (interactive)
+  (mapc
+   (lambda (buffer)
+     (kill-buffer buffer))
+   (buffer-list))
+  (delete-other-windows))
+
+(defun now-is ()
+  "Insert current time."
+  (interactive)
+  (insert (format-time-string "%l:%M%P(%z) %Y-%m-%d")))
+
 ;; Writegood mode
 (use-package writegood-mode
   :bind ("C-c m g" . writegood-mode))
