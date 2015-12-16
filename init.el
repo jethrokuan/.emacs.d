@@ -290,10 +290,47 @@
   :init (progn
 	  (add-hook 'clojure-mode-hook #'eldoc-mode)
 	  (add-hook 'clojure-mode-hook #'paredit-mode)
-	  ))
+	  (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
+	  (add-hook 'clojure-mode-hook
+		    '(lambda ()
+		       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
+		       (define-key clojure-mode-map "\M-." 'find-tag-without-ns)
+		       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
+		       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
+  :config (use-package align-cljlet
+	    :bind ("C-c C-a" . align-cljlet)))
+
+;; Inf-clojure
+(use-package inf-clojure
+  :init (progn
+	  (defun reload-current-clj-ns (next-p)
+	    (interactive "P")
+	    (let ((ns (clojure-find-ns)))
+	      (message (format "Loading %s ..." ns))
+	      (inf-clojure-eval-string (format "(require '%s :reload)" ns))
+	      (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
+
+	  (defun find-tag-without-ns (next-p)
+	    (interactive "P")
+	    (find-tag (first (last (split-string (symbol-name (symbol-at-point)) "/")))
+		      next-p))
+
+	  (defun erase-inf-buffer ()
+	    (interactive)
+	    (with-current-buffer (get-buffer "*inf-clojure*")
+	      (erase-buffer))
+	    (inf-clojure-eval-string ""))
+	  (setq inf-clojure-prompt-read-only nil)
+	  (add-hook 'inf-clojure-minor-mode-hook
+		    (lambda () (setq completion-at-point-functions nil)))
+	  (add-hook 'inf/clojure-mode-hook #'eldoc-mode-hook)
+	  (add-hook 'inf-clojure-mode-hook
+		    '(lambda ()
+		       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
 
 ;;   Cider
 (use-package cider
+  :disabled t
   :defer t
   :init (progn
 	  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
