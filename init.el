@@ -205,7 +205,9 @@
   :diminish company-mode
   :defer 5
   :init (progn
+	  (require 'company-etags)
 	  (add-hook 'after-init-hook 'global-company-mode)
+	  (add-to-list 'company-etags-modes 'clojure-mode)
 	  (setq company-idle-delay 0.5)
 	  (setq company-transformers '(company-sort-by-occurrence)))
   :config (progn
