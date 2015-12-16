@@ -134,10 +134,6 @@
 ;;Helm
 (use-package helm
   :diminish helm-mode
-  :chords (("wz" . helm-find-files)
-	   ("vz" . helm-buffers-list)
-	   ("vv" . save-buffer)
-	   ("mz" . helm-recentf))
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
 	  ("C-o" . helm-find-files)
@@ -159,9 +155,6 @@
 		  helm-M-x-requires-pattern nil
 		  helm-ff-skip-boring-files t)
 	    (helm-mode 1)))
-
-(use-package helm-swoop
-  :bind ("C-c s" . helm-swoop))
 
 (use-package helm-ag
   :bind ("C-c g" . helm-ag))
@@ -315,6 +308,14 @@
 	    (find-tag (first (last (split-string (symbol-name (symbol-at-point)) "/")))
 		      next-p))
 
+	  (defun run-scripted-repl ()
+	    (interactive)
+	    (run-clojure "lein trampoline run -m clojure.main script/repl.clj"))
+
+	  (defun run-figwheel-repl ()
+	    (interactive)
+	    (run-clojure "lein figwheel"))
+
 	  (defun erase-inf-buffer ()
 	    (interactive)
 	    (with-current-buffer (get-buffer "*inf-clojure*")
@@ -338,11 +339,13 @@
 	  (add-to-list 'same-window-buffer-names "<em>nrepl</em>")))
 
 (use-package clj-refactor
+  :disabled t
   :defer t
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
 
 (use-package flycheck-clojure
+  :disabled t
   :defer 5
   :config (flycheck-clojure-setup))
 
@@ -354,20 +357,4 @@
 	       (add-hook 'css-mode-hook 'emmet-mode)))
 
 (provide 'init.el)
-
 ;;init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" default)))
- '(flycheck-display-errors-function (function flycheck-pos-tip-error-messages)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
