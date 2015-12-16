@@ -284,7 +284,9 @@
 ;;   Clojure-mode
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
-	 ("\\.edn\\'" . clojure-mode))
+	 ("\\.edn\\'" . clojure-mode)
+	 ("\\.cljs\\'" . clojure-mode)
+	 ("\\.cljs\\.hl\\'" . clojure-mode))
   :init (progn
 	  (add-hook 'clojure-mode-hook #'eldoc-mode)
 	  (add-hook 'clojure-mode-hook #'paredit-mode)
