@@ -25,6 +25,9 @@
 ;;Ensure that all packages are installed
 (setq use-package-always-ensure t)
 
+;; Change backup directory to prevent littering of working dir
+(setq backup-directory-alist `(("." . "~/.saves")))
+
 (use-package use-package-chords
   :config (key-chord-mode 1))
 
@@ -89,6 +92,11 @@
 ;; Writegood mode
 (use-package writegood-mode
   :bind ("C-c m g" . writegood-mode))
+
+(use-package draft-mode)
+(use-package focus)
+(use-package 
+
 
 ;; Emacs profiling tool
 (use-package esup)
