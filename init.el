@@ -28,9 +28,6 @@
 ;; Change backup directory to prevent littering of working dir
 (setq backup-directory-alist `(("." . "~/.saves")))
 
-(use-package use-package-chords
-  :config (key-chord-mode 1))
-
 ;;Improved keybindings
 (bind-key* "C-x m" 'eshell)
 
@@ -125,11 +122,11 @@
 
 ;;Movement
 (use-package avy
-  :chords (("jj" . avy-goto-char)
-	   ("kk" . avy-goto-char-2)))
+  :bind (("C-'" . avy-goto-char)
+	 ("C-," . avy-goto-char-2)))
 
-  (use-package ace-window
-    :bind (("M-'" . ace-window)))
+(use-package ace-window
+  :bind (("M-'" . ace-window)))
 
 ;;Helm
 (use-package helm
