@@ -295,6 +295,7 @@
 ;; Inf-clojure
 (use-package inf-clojure
   :init (progn
+	  (setq inf-clojure-program "boot-repl")	 
 	  (defun reload-current-clj-ns (next-p)
 	    (interactive "P")
 	    (let ((ns (clojure-find-ns)))
@@ -315,6 +316,10 @@
 	    (interactive)
 	    (run-clojure "lein figwheel"))
 
+	  (defun run-boot-repl (x)
+	    (interactive "sEnter Port Number:")
+	    (run-clojure (format  "boot repl -cp %s" x)))
+	  
 	  (defun erase-inf-buffer ()
 	    (interactive)
 	    (with-current-buffer (get-buffer "*inf-clojure*")
