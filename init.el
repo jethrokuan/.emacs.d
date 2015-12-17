@@ -276,6 +276,7 @@
 ;;   Clojure-mode
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
+	 ("\\.boot\\'" . clojure-mode)
 	 ("\\.edn\\'" . clojure-mode)
 	 ("\\.cljs\\'" . clojure-mode)
 	 ("\\.cljs\\.hl\\'" . clojure-mode))
@@ -295,7 +296,7 @@
 ;; Inf-clojure
 (use-package inf-clojure
   :init (progn
-	  (setq inf-clojure-program "boot-repl")	 
+	  (setq inf-clojure-program "boot repl")	 
 	  (defun reload-current-clj-ns (next-p)
 	    (interactive "P")
 	    (let ((ns (clojure-find-ns)))
