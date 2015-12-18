@@ -317,6 +317,10 @@
 	    (interactive)
 	    (run-clojure "lein figwheel"))
 
+	  (defun run-lein-repl ()
+	    (interactive)
+	    (run-clojure "lein repl"))
+
 	  (defun run-boot-repl (x)
 	    (interactive "sEnter Port Number:")
 	    (run-clojure (format  "boot repl -cp %s" x)))
