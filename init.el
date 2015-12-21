@@ -13,6 +13,11 @@
 
 (set-face-attribute 'default nil :height 140)
 
+;; Bootstrap `use-package'
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 ;;Enable use-package
 (eval-and-compile
   (defvar use-package-verbose t)
