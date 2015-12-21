@@ -334,6 +334,7 @@
   :mode "\\.json\\'")
 
 (use-package emmet-mode
+  :defer t
   :init (progn (add-hook 'sgml-mode-hook 'emmet-mode)
 	       (add-hook 'css-mode-hook 'emmet-mode)))
 
