@@ -160,6 +160,9 @@
 (use-package helm-descbinds
   :bind ("C-c d" . helm-descbinds))
 
+(use-package helm-rhythmbox
+  :bind ("C-S-o" . helm-rhythmbox))
+
 ;;;; Modules
 ;;   Expand Region
 (use-package expand-region
