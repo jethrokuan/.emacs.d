@@ -63,11 +63,6 @@
 (use-package base16-theme
   :init (load-theme 'base16-chalk-dark t))
 
-(use-package monokai-theme
-  :disabled t
-  :config (load-theme 'monokai t)
-  (setq org-fontify-whole-heading-line t))
-
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
@@ -115,7 +110,8 @@
 (defun linum-mode-hook () 
   (linum-mode 1))
 
-(add-hook 'prog-mode-hook 'linum-mode-hook) 
+(add-hook 'prog-mode-hook 'linum-mode-hook)
+(add-hook 'emacs-lisp-mode-hook #'paredit-mode)
 
 ;; Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
@@ -210,7 +206,7 @@
 	  (require 'company-etags)
 	  (add-hook 'after-init-hook 'global-company-mode)
 	  (add-to-list 'company-etags-modes 'clojure-mode)
-	  (setq company-idle-delay 0.5)
+	  (setq company-idle-delay 0.1)
 	  (setq company-transformers '(company-sort-by-occurrence)))
   :config (progn
 	    (use-package company-quickhelp
@@ -220,13 +216,6 @@
 (use-package projectile
   :init (add-hook 'after-init-hook 'projectile-global-mode))
 
-;;   Flycheck
-(use-package flycheck
-  :defer 5
-  :init (add-hook 'after-init-hook 'global-flycheck-mode)
-  :config (use-package flycheck-pos-tip
-	    :config (progn
-		      (custom-set-variables '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages)))))
 ;;   Org Mode
 (use-package org-plus-contrib
   :bind* (("C-c c" . org-capture)
@@ -288,6 +277,7 @@
   :init (progn
 	  (add-hook 'clojure-mode-hook #'eldoc-mode)
 	  (add-hook 'clojure-mode-hook #'paredit-mode)
+	  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
 	  (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
 	  (add-hook 'clojure-mode-hook
 		    '(lambda ()
@@ -301,7 +291,6 @@
 ;; Inf-clojure
 (use-package inf-clojure
   :init (progn
-	  (setq inf-clojure-program "boot repl")	 
 	  (defun reload-current-clj-ns (next-p)
 	    (interactive "P")
 	    (let ((ns (clojure-find-ns)))
@@ -313,18 +302,6 @@
 	    (interactive "P")
 	    (find-tag (first (last (split-string (symbol-name (symbol-at-point)) "/")))
 		      next-p))
-
-	  (defun run-scripted-repl ()
-	    (interactive)
-	    (run-clojure "lein trampoline run -m clojure.main script/repl.clj"))
-
-	  (defun run-figwheel-repl ()
-	    (interactive)
-	    (run-clojure "lein figwheel"))
-
-	  (defun run-lein-repl ()
-	    (interactive)
-	    (run-clojure "lein repl"))
 
 	  (defun run-boot-repl (x)
 	    (interactive "sEnter Port Number:")
@@ -338,22 +315,12 @@
 	  (setq inf-clojure-prompt-read-only nil)
 	  (add-hook 'inf-clojure-minor-mode-hook
 		    (lambda () (setq completion-at-point-functions nil)))
-	  (add-hook 'inf/clojure-mode-hook #'eldoc-mode-hook)
+	  (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
 	  (add-hook 'inf-clojure-mode-hook
 		    '(lambda ()
 		       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
 
-;;   Cider
-(use-package cider
-  :disabled t
-  :defer t
-  :init (progn
-	  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-	  (setq nrepl-popup-stacktraces nil)
-	  (add-to-list 'same-window-buffer-names "<em>nrepl</em>")))
-
 (use-package clj-refactor
-  :disabled t
   :defer t
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
