@@ -1,8 +1,8 @@
-;; For debugging purposes
-(unless noninteractive
-  (message "Loading %s..." load-file-name))
+
+;;;; Use narrow-to-page to manipulate document
+(put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
 
-;;Add MELPA
+;;;;Add MELPA
 (when (>= emacs-major-version 24)
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -10,15 +10,13 @@
   (package-initialize))
 
 (setq message-log-max 16384)
-
 (set-face-attribute 'default nil :height 140)
 
-;; Bootstrap `use-package'
+
+;;;; `use-package'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
-;;Enable use-package
 (eval-and-compile
   (defvar use-package-verbose t)
   ;; (defvar use-package-expand-minimally t)
@@ -27,17 +25,17 @@
   (require 'cl)
   (require 'use-package))
 
-;;Ensure that all packages are installed
+(require 'bind-key)
+(require 'diminish nil t)
 (setq use-package-always-ensure t)
 
+
+;;;; Changes for sanity
 ;; Change backup directory to prevent littering of working dir
 (setq backup-directory-alist `(("." . "~/.saves")))
 
-;;Improved keybindings
+;;Keybindings
 (bind-key* "C-x m" 'eshell)
-
-(require 'bind-key)
-(require 'diminish nil t)
 
 ;;Disable Toolbars
 (when window-system
@@ -58,15 +56,22 @@
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
+;; Emacs profiling tool
+(use-package esup
+  :defer t)
+
+
 ;;;; Theming
 ;;   Color Schemes
 (use-package base16-theme
   :init (load-theme 'base16-chalk-dark t))
 
+;;   Show parens
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
-;; Some useful functions
+
+;;   Useful functions
 (defun split-window-right-and-move-there-dammit ()
   (interactive)
   (split-window-right)
@@ -86,42 +91,57 @@
   (interactive)
   (insert (format-time-string "%l:%M%P(%z) %Y-%m-%d")))
 
+
+;;;; Modes for general writing
 ;; Writegood mode
 (use-package writegood-mode
   :bind ("C-c m g" . writegood-mode))
 
-(use-package draft-mode)
-(use-package focus)
+(use-package draft-mode
+  :bind ("C-c m d" . draft-mode))
 
-;; Emacs profiling tool
-(use-package esup)
+(use-package focus
+  :bind ("C-c m f" . focus-mode))
 
-;; Shows x/y for isearch
+
+;;;; Minor Modes
+;;; Visual Upgrades
+;;   Shows x/y for isearch
 (use-package anzu
   :diminish anzu-mode
   :config (global-anzu-mode +1))
 
-;; Highlights copy/paste changes
+;;   Highlights copy/paste changes
 (use-package volatile-highlights
   :diminish volatile-highlights-mode
   :config (volatile-highlights-mode t))
 
-;; Display line nums in prog-mode
+;;   Aggressive-indent mode
+(use-package aggressive-indent
+  :diminish aggressive-indent-mode
+  :init (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+
+;;   Which-key
+(use-package which-key
+  :diminish which-key-mode
+  :init (add-hook 'after-init-hook 'which-key-mode))
+
+;;   Display line nums in prog-mode
 (defun linum-mode-hook () 
   (linum-mode 1))
 
 (add-hook 'prog-mode-hook 'linum-mode-hook)
 
-
-;; Rainbow-delimiters for pretty brackets
+;;   Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
   :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
-;; Rainbow-mode for displaying colors for RGB and hex values
+;;   Rainbow-mode for displaying colors for RGB and hex values
 (use-package rainbow-mode
   :init (add-hook 'css-mode-hook 'rainbow-mode))
 
-;;Movement
+
+;;;; Movement
 (use-package avy
   :bind (("C-'" . avy-goto-char)
 	 ("C-," . avy-goto-char-2)))
@@ -129,7 +149,16 @@
 (use-package ace-window
   :bind (("M-'" . ace-window)))
 
-;;Helm
+;;   Expand Region
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)))
+
+(use-package change-inner
+  :bind (("M-i" . change-inner)
+	 ("M-o" . change-outer)))
+
+
+;;;; Helm
 (use-package helm
   :diminish helm-mode
   :bind* (("C-c h" . helm-mini)
@@ -146,49 +175,31 @@
   :config (progn
 	    (require 'helm-config)
 	    (setq helm-candidate-number-limit 100)
-            (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
-	          helm-input-idle-delay 0.01  ; this actually updates things
-					; reeeelatively quickly.
+            (setq helm-idle-delay 0.0
+	          helm-input-idle-delay 0.01 
 	          helm-quick-update t
 		  helm-M-x-requires-pattern nil
 		  helm-ff-skip-boring-files t)
 	    (helm-mode 1)))
 
+;; Search
 (use-package helm-ag
   :bind ("C-c g" . helm-ag))
 
+;; Descbinds
 (use-package helm-descbinds
   :bind ("C-c d" . helm-descbinds))
 
+;; Rhythmbox (linux only)
 (use-package helm-rhythmbox
   :bind ("C-S-o" . helm-rhythmbox))
-
-;;;; Modules
-;;   Expand Region
-(use-package expand-region
-  :bind (("C-=" . er/expand-region)))
-
-(use-package change-inner
-  :bind (("M-i" . change-inner)
-	 ("M-o" . change-outer)))
-
-;;   Which-key
-(use-package which-key
-  :diminish which-key-mode
-  :init (add-hook 'after-init-hook 'which-key-mode))
-
-;;   Aggressive-indent mode
-(use-package aggressive-indent
-  :diminish aggressive-indent-mode
-  :init (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
 ;;   Paredit
 (use-package paredit
   :commands paredit-mode
   :diminish paredit-mode
-  :config (progn
-	    (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-	    (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
+  :init (progn
+	  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
 
 ;;   Magit
 (use-package magit
@@ -329,11 +340,6 @@
   :defer t
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
-
-(use-package flycheck-clojure
-  :disabled t
-  :defer 5
-  :config (flycheck-clojure-setup))
 
 (use-package json-mode
   :mode "\\.json\\'")
