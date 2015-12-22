@@ -66,12 +66,38 @@
 (use-package base16-theme
   :init (load-theme 'base16-chalk-dark t))
 
+(set-frame-font "Fira Code")
+(let ((alist '((33 . ".\\(?:\\(?:==\\)\\|[!=]\\)")
+               (35 . ".\\(?:[(?[_{]\\)")
+               (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
+               (42 . ".\\(?:\\(?:\\*\\*\\)\\|[*/]\\)")
+               (43 . ".\\(?:\\(?:\\+\\+\\)\\|\\+\\)")
+               (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
+               (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=]\\)")
+               (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
+               (58 . ".\\(?:[:=]\\)")
+               (59 . ".\\(?:;\\)")
+               (60 . ".\\(?:\\(?:!--\\)\\|\\(?:\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[/<=>|-]\\)")
+               (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
+               (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
+               (63 . ".\\(?:[:=?]\\)")
+               (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
+               (94 . ".\\(?:=\\)")
+               (123 . ".\\(?:-\\)")
+               (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
+               (126 . ".\\(?:[=@~-]\\)")
+	       )
+	     ))
+  (dolist (char-regexp alist)
+    (set-char-table-range composition-function-table (car char-regexp)
+			  `([,(cdr char-regexp) 0 font-shape-gstring]))))
+
 ;;   Show parens
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
 
-;;   Useful functions
+;;;;   Useful functions
 (defun split-window-right-and-move-there-dammit ()
   (interactive)
   (split-window-right)
@@ -126,12 +152,6 @@
   :diminish which-key-mode
   :init (add-hook 'after-init-hook 'which-key-mode))
 
-;;   Display line nums in prog-mode
-(defun linum-mode-hook () 
-  (linum-mode 1))
-
-(add-hook 'prog-mode-hook 'linum-mode-hook)
-
 ;;   Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
   :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
@@ -139,6 +159,12 @@
 ;;   Rainbow-mode for displaying colors for RGB and hex values
 (use-package rainbow-mode
   :init (add-hook 'css-mode-hook 'rainbow-mode))
+
+;;   Display line nums in prog-mode
+(defun linum-mode-hook () 
+  (linum-mode 1))
+
+(add-hook 'prog-mode-hook 'linum-mode-hook)
 
 
 ;;;; Movement
@@ -194,6 +220,7 @@
 (use-package helm-rhythmbox
   :bind ("C-S-o" . helm-rhythmbox))
 
+
 ;;   Paredit
 (use-package paredit
   :commands paredit-mode
@@ -201,20 +228,23 @@
   :init (progn
 	  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
 
+
 ;;   Magit
 (use-package magit
   :init (add-hook 'magit-mode-hook 'hl-line-mode)
   :bind (("C-x g" . magit-status)
 	 ("C-x M-g" . magit-dispatch-popup)))
 
-;;   Yasnippet
+
+;;;; Code/Text Completion
+;;   Yasnippet - snippets
 (use-package yasnippet
   :commands (yas-global-mode yas-minor-mode)
   :init (add-hook 'after-init-hook 'yas-global-mode)
   :config (progn
 	    (setq yas-snippet-dirs '("~/.emacs.d/snippets/"))))
 
-;;   Company
+;;   Company - code completions
 (use-package company
   :diminish company-mode
   :defer 5
@@ -228,11 +258,14 @@
 	    (use-package company-quickhelp
 	      :init (add-hook 'global-company-mode 'company-quickhelp-mode))))
 
+
+;;;; Project Management
 ;;   Projectile
 (use-package projectile
   :init (add-hook 'after-init-hook 'projectile-global-mode))
 
-;;   Org Mode
+
+;;;; Org Mode
 (use-package org-plus-contrib
   :bind* (("C-c c" . org-capture)
 	  ("C-c a" . org-agenda)
@@ -278,11 +311,15 @@
 		   :body-only t ;; Only export section between <body> </body>
 		   )))))
 
-;;   Markdown mode
+
+;;;; Language Specific Modes
+
+;;;; Markdown mode
 (use-package markdown-mode
   :mode "\\.md\\'")
 
-;;   Clojure
+
+;;;; Clojure
 ;;   Clojure-mode
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
@@ -292,6 +329,7 @@
 	 ("\\.cljs\\.hl\\'" . clojure-mode))
   :init (progn
 	  (add-hook 'clojure-mode-hook #'eldoc-mode)
+	  (add-hook 'clojure-mode-hook #'subword-mode)
 	  (add-hook 'clojure-mode-hook #'paredit-mode)
 	  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
 	  (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
@@ -301,8 +339,10 @@
 		       (define-key clojure-mode-map "\M-." 'find-tag-without-ns)
 		       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
 		       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
-  :config (use-package align-cljlet
-	    :bind ("C-c C-a" . align-cljlet)))
+  :config (progn
+	    (use-package clojure-mode-extra-font-locking)
+	    (use-package align-cljlet
+	      :bind ("C-c C-a" . align-cljlet))))
 
 ;; Inf-clojure
 (use-package inf-clojure
@@ -341,8 +381,17 @@
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
 
+
+;;;; JSON
 (use-package json-mode
   :mode "\\.json\\'")
+
+
+;;;; Web
+(use-package web-mode
+  :mode (("\\.html\\'" . web-mode)
+	 ("\\.erb\\'" . web-mode)
+	 ("\\.mustache'" . web-mode)))
 
 (use-package emmet-mode
   :defer t
