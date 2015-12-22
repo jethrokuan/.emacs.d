@@ -66,31 +66,7 @@
 (use-package base16-theme
   :init (load-theme 'base16-chalk-dark t))
 
-(set-frame-font "Fira Code")
-(let ((alist '((33 . ".\\(?:\\(?:==\\)\\|[!=]\\)")
-               (35 . ".\\(?:[(?[_{]\\)")
-               (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
-               (42 . ".\\(?:\\(?:\\*\\*\\)\\|[*/]\\)")
-               (43 . ".\\(?:\\(?:\\+\\+\\)\\|\\+\\)")
-               (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
-               (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=]\\)")
-               (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
-               (58 . ".\\(?:[:=]\\)")
-               (59 . ".\\(?:;\\)")
-               (60 . ".\\(?:\\(?:!--\\)\\|\\(?:\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[/<=>|-]\\)")
-               (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
-               (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
-               (63 . ".\\(?:[:=?]\\)")
-               (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
-               (94 . ".\\(?:=\\)")
-               (123 . ".\\(?:-\\)")
-               (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
-               (126 . ".\\(?:[=@~-]\\)")
-	       )
-	     ))
-  (dolist (char-regexp alist)
-    (set-char-table-range composition-function-table (car char-regexp)
-			  `([,(cdr char-regexp) 0 font-shape-gstring]))))
+(set-frame-font "Inconsolata-g for Powerline")
 
 ;;   Show parens
 (show-paren-mode 1)
@@ -134,11 +110,15 @@
 ;;; Visual Upgrades
 ;;   Shows x/y for isearch
 (use-package anzu
+  :functions anzu-mode
+  :defer 5
   :diminish anzu-mode
   :config (global-anzu-mode +1))
 
 ;;   Highlights copy/paste changes
 (use-package volatile-highlights
+  :functions volatile-highlights-mode
+  :defer 5
   :diminish volatile-highlights-mode
   :config (volatile-highlights-mode t))
 
@@ -239,6 +219,7 @@
 ;;;; Code/Text Completion
 ;;   Yasnippet - snippets
 (use-package yasnippet
+  :defer 5
   :commands (yas-global-mode yas-minor-mode)
   :init (add-hook 'after-init-hook 'yas-global-mode)
   :config (progn
@@ -262,7 +243,14 @@
 ;;;; Project Management
 ;;   Projectile
 (use-package projectile
-  :init (add-hook 'after-init-hook 'projectile-global-mode))
+  :defer 5
+  :commands projectile-global-mode
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :config (use-package helm-projectile
+	    :config (progn
+		      (setq projectile-completion-system 'helm)
+		      (helm-projectile-on)))
+  (projectile-global-mode))
 
 
 ;;;; Org Mode
@@ -346,6 +334,8 @@
 
 ;; Inf-clojure
 (use-package inf-clojure
+  :functions (run-clojure clojure-find-ns inf-clojure-eval-string)
+  :commands inf-clojure-switch-to-repl
   :init (progn
 	  (defun reload-current-clj-ns (next-p)
 	    (interactive "P")
