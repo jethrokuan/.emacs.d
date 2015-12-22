@@ -111,7 +111,7 @@
   (linum-mode 1))
 
 (add-hook 'prog-mode-hook 'linum-mode-hook)
-(add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+
 
 ;; Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
@@ -186,7 +186,9 @@
 (use-package paredit
   :commands paredit-mode
   :diminish paredit-mode
-  :config (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
+  :config (progn
+	    (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+	    (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
 
 ;;   Magit
 (use-package magit
