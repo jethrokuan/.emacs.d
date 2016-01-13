@@ -37,6 +37,12 @@
 ;;Keybindings
 (bind-key* "C-x m" 'eshell)
 
+;; Shortcut for compile
+(global-set-key (kbd "<f5>") (lambda ()
+                               (interactive)
+                               (setq-local compilation-read-command nil)
+                               (call-interactively 'compile)))
+
 ;;Disable Toolbars
 (when window-system
   (tooltip-mode -1)
@@ -62,11 +68,19 @@
 
 
 ;;;; Theming
-;;   Color Schemes
+;;   Color Schemes 
 (use-package base16-theme
   :init (load-theme 'base16-chalk-dark t))
 
-(set-frame-font "Inconsolata-g for Powerline")
+(use-package solarized-theme
+  :disabled t
+  :init (progn
+	  (setq solarized-distinct-fringe-background t)
+	  (setq solarized-high-contrast-mode-line t)
+	  (load-theme 'solarized-dark t)
+	  ))
+
+(set-frame-font "Hack")
 
 ;;   Show parens
 (show-paren-mode 1)
@@ -231,6 +245,7 @@
   :defer 5
   :init (progn
 	  (require 'company-etags)
+	  (require 'company-gtags)
 	  (add-hook 'after-init-hook 'global-company-mode)
 	  (add-to-list 'company-etags-modes 'clojure-mode)
 	  (setq company-idle-delay 0.1)
@@ -382,6 +397,11 @@
   :mode (("\\.html\\'" . web-mode)
 	 ("\\.erb\\'" . web-mode)
 	 ("\\.mustache'" . web-mode)))
+
+(use-package scss-mode
+  :mode (("\\.scss\\'" . scss-mode)
+	 ("\\.sass\\'" . sass-mode))
+  :init (add-hook 'rainbow-mode-hook 'scss-mode))
 
 (use-package emmet-mode
   :defer t
