@@ -37,6 +37,16 @@
 ;;Keybindings
 (bind-key* "C-x m" 'eshell)
 
+(require 'compile)
+(add-hook 'c++-mode-hook
+	  (lambda ()
+	    (unless (file-exists-p "Makefile")
+	      (set (make-local-variable 'compile-command)
+		   (let ((file (file-name-nondirectory buffer-file-name)))
+		     (format "g++ -Wall -s -pedantic-errors %s -o %s"
+			     file
+			     (file-name-sans-extension file)))))))
+
 ;; Shortcut for compile
 (global-set-key (kbd "<f5>") (lambda ()
                                (interactive)
@@ -85,6 +95,8 @@
 ;;   Show parens
 (show-paren-mode 1)
 (setq show-paren-delay 0)
+
+(use-package ggtags)
 
 
 ;;;;   Useful functions
