@@ -96,8 +96,6 @@
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
-(use-package ggtags)
-
 
 ;;;;   Useful functions
 (defun split-window-right-and-move-there-dammit ()
@@ -256,13 +254,13 @@
   :diminish company-mode
   :defer 5
   :init (progn
-	  (require 'company-etags)
-	  (require 'company-gtags)
 	  (add-hook 'after-init-hook 'global-company-mode)
-	  (add-to-list 'company-etags-modes 'clojure-mode)
 	  (setq company-idle-delay 0.1)
 	  (setq company-transformers '(company-sort-by-occurrence)))
   :config (progn
+	    (use-package company-irony
+	      :disabled t
+	      :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))
 	    (use-package company-quickhelp
 	      :init (add-hook 'global-company-mode 'company-quickhelp-mode))))
 
@@ -351,7 +349,6 @@
 	  (add-hook 'clojure-mode-hook
 		    '(lambda ()
 		       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-		       (define-key clojure-mode-map "\M-." 'find-tag-without-ns)
 		       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
 		       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
   :config (progn
@@ -364,17 +361,13 @@
   :functions (run-clojure clojure-find-ns inf-clojure-eval-string)
   :commands inf-clojure-switch-to-repl
   :init (progn
+	  (setq inf-clojure-program "boot -C repl -c")
 	  (defun reload-current-clj-ns (next-p)
 	    (interactive "P")
 	    (let ((ns (clojure-find-ns)))
 	      (message (format "Loading %s ..." ns))
 	      (inf-clojure-eval-string (format "(require '%s :reload)" ns))
 	      (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
-
-	  (defun find-tag-without-ns (next-p)
-	    (interactive "P")
-	    (find-tag (first (last (split-string (symbol-name (symbol-at-point)) "/")))
-		      next-p))
 
 	  (defun run-boot-repl (x)
 	    (interactive "sEnter Port Number:")
@@ -386,8 +379,6 @@
 	      (erase-buffer))
 	    (inf-clojure-eval-string ""))
 	  (setq inf-clojure-prompt-read-only nil)
-	  (add-hook 'inf-clojure-minor-mode-hook
-		    (lambda () (setq completion-at-point-functions nil)))
 	  (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
 	  (add-hook 'inf-clojure-mode-hook
 		    '(lambda ()
@@ -420,5 +411,20 @@
   :init (progn (add-hook 'sgml-mode-hook 'emmet-mode)
 	       (add-hook 'css-mode-hook 'emmet-mode)))
 
+(use-package irony
+  :disabled t
+  :mode (("\\.cpp\\'" . irony-mode)
+	 ("\\.c\\'" . irony-mode))
+  :diminish irony-mode
+  :init (progn (defun my-irony-mode-hook ()
+		 (define-key irony-mode-map [remap completion-at-point]
+		   'irony-completion-at-point-async)
+		 (define-key irony-mode-map [remap complete-symbol]
+		   'irony-completion-at-point-async))
+	       (add-hook 'c++-mode-hook 'irony-mode)
+	       (add-hook 'c-mode-hook 'irony-mode)
+	       (add-hook 'objc-mode-hook 'irony-mode)
+	       (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+	       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-optionss)))
 (provide 'init.el)
 ;;init.el ends here
