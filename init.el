@@ -43,7 +43,7 @@
 	    (unless (file-exists-p "Makefile")
 	      (set (make-local-variable 'compile-command)
 		   (let ((file (file-name-nondirectory buffer-file-name)))
-		     (format "g++ -Wall -s -pedantic-errors %s -o %s"
+		     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++11"
 			     file
 			     (file-name-sans-extension file)))))))
 
