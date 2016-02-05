@@ -285,6 +285,11 @@
 	  ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
   :init (progn
+	  (use-package org-trello
+	    :init (progn
+		    (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
+		    (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
+			  org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))
 	  (setq org-modules '(org-drill))
 	  (setq org-directory "~/.org")
 	  (setq org-default-notes-directory (concat org-directory "/notes.org"))
@@ -323,13 +328,6 @@
 		   :headline-levels 0
 		   :body-only t ;; Only export section between <body> </body>
 		   )))))
-
-(use-package org-trello
-  :init (progn
-	  (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
-	  (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
-		org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))
-
 
 ;;;; Language Specific Modes
 
@@ -364,7 +362,7 @@
 
 ;; Inf-clojure
 (use-package inf-clojure
-  :functions (run-clojure clojure-find-ns inf-clojure-eval-string)
+  :functions (run-clojure clojure-find-ns inf-clojure-eval-string inf-clojure-switch-to-repl)
   :commands inf-clojure-switch-to-repl
   :init (progn
 	  (setq inf-clojure-program "boot -C repl -c")
