@@ -12,6 +12,13 @@
 (setq message-log-max 16384)
 (set-face-attribute 'default nil :height 140)
 
+;;;; Setting Emacs registers
+(bind-key* "C-o" 'jump-to-register)
+(set-register ?i (cons 'file "~/.emacs.d/init.el"))
+(set-register ?s (cons 'file "~/.org/someday.org"))
+(set-register ?t (cons 'file "~/.org/today.org"))
+
+
 
 ;;;; `use-package'
 (unless (package-installed-p 'use-package)
@@ -193,7 +200,6 @@
   :diminish helm-mode
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
-	  ("C-o" . helm-find-files)
 	  ("C-c f" . helm-recentf)
 	  ("C-h a" . helm-apropos)
 	  ("C-x C-b" . helm-buffers-list)
@@ -403,6 +409,8 @@
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
 	 ("\\.erb\\'" . web-mode)
+	 ("\\.jsx\\'" . web-mode)
+	 ("\\.js\\'" . web-mode)
 	 ("\\.mustache'" . web-mode)))
 
 (use-package scss-mode
