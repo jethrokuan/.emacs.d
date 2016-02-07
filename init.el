@@ -75,6 +75,11 @@
 (use-package exec-path-from-shell
   :config (exec-path-from-shell-initialize))
 
+;;Firestarter
+(use-package firestarter
+  :bind ("C-c m s" . firestarter-mode)
+  :init (put 'firestarter 'safe-local-variable 'identity))
+
 ;;User-details
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
@@ -410,8 +415,12 @@
   :mode (("\\.html\\'" . web-mode)
 	 ("\\.erb\\'" . web-mode)
 	 ("\\.jsx\\'" . web-mode)
-	 ("\\.js\\'" . web-mode)
 	 ("\\.mustache'" . web-mode)))
+
+(use-package js2-mode
+  :diminish js2-mode
+  :mode (("\\.js\\'" . js2-mode))
+  :config (require 'js2-imenu-extras))
 
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
