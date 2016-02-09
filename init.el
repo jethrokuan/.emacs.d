@@ -31,9 +31,11 @@
 
 ;;;; Setting Emacs registers
 (bind-key* "C-o" 'jump-to-register)
+(set-register ?b (cons 'file "~/.org/books.org"))
 (set-register ?i (cons 'file "~/.emacs.d/init.el"))
 (set-register ?s (cons 'file "~/.org/someday.org"))
 (set-register ?t (cons 'file "~/.org/today.org"))
+
 
 
 ;;;; Changes for sanity
@@ -98,6 +100,12 @@
 
 ;; don't save message to Sent Messages, Gmail/IMAP takes care of this
 (setq mu4e-sent-messages-behavior 'delete)
+
+(setq
+ mu4e-view-show-images t
+ mu4e-view-image-max-width 800)
+
+(setq mu4e-update-interval 300)
 
 ;; (See the documentation for `mu4e-sent-messages-behavior' if you have
 ;; additional non-Gmail addresses and want assign them different
