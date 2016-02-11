@@ -29,6 +29,14 @@
 (require 'diminish nil t)
 (setq use-package-always-ensure t)
 
+;;;; Setting Emacs registers
+(bind-key* "C-o" 'jump-to-register)
+(set-register ?b (cons 'file "~/.org/books.org"))
+(set-register ?i (cons 'file "~/.emacs.d/init.el"))
+(set-register ?s (cons 'file "~/.org/someday.org"))
+(set-register ?t (cons 'file "~/.org/today.org"))
+
+
 
 ;;;; Changes for sanity
 ;; Change backup directory to prevent littering of working dir
@@ -68,9 +76,94 @@
 (use-package exec-path-from-shell
   :config (exec-path-from-shell-initialize))
 
+;;Firestarter
+(use-package firestarter
+  :bind ("C-c m s" . firestarter-mode)
+  :init (put 'firestarter 'safe-local-variable 'identity))
+
 ;;User-details
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
+
+;; Email
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+(require 'mu4e)
+(require 'org-mu4e)
+(bind-key* "C-c e" #'mu4e)
+
+;; default
+;; (setq mu4e-maildir "~/Maildir")
+
+(setq mu4e-drafts-folder "/[Gmail].Drafts")
+(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+(setq mu4e-trash-folder  "/[Gmail].Trash")
+
+;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+(setq mu4e-sent-messages-behavior 'delete)
+
+(setq
+ mu4e-view-show-images t
+ mu4e-view-image-max-width 800)
+
+(setq mu4e-update-interval 300)
+
+;; (See the documentation for `mu4e-sent-messages-behavior' if you have
+;; additional non-Gmail addresses and want assign them different
+;; behavior.)
+
+;; setup some handy shortcuts
+;; you can quickly switch to your Inbox -- press ``ji''
+;; then, when you want archive some messages, move them to
+;; the 'All Mail' folder by pressing ``ma''.
+
+(setq mu4e-maildir-shortcuts
+      '( ("/INBOX"               . ?i)
+	 ("/[Gmail].Sent Mail"   . ?s)
+	 ("/[Gmail].Trash"       . ?t)
+	 ("/[Gmail].All Mail"    . ?a)))
+
+;; allow for updating mail using 'U' in the main view:
+(setq mu4e-get-mail-command "offlineimap")
+(setq mu4e-attachment-dir  "~/Downloads")
+
+;;store link to message if in header view, not to header query
+(setq org-mu4e-link-query-in-headers-mode nil)
+
+(setq mu4e-view-show-images t)
+;; use imagemagick, if available
+(when (fboundp 'imagemagick-register-types)
+  (imagemagick-register-types))
+
+;; something about ourselves
+(setq
+ mu4e-compose-signature
+ (concat
+  "Warmest Regards,\n"
+  "Jethro Kuan\n"))
+
+;; sending mail -- replace USERNAME with your gmail username
+;; also, make sure the gnutls command line utils are installed
+;; package 'gnutls-bin' in Debian/Ubuntu
+
+(require 'smtpmail)
+(setq message-send-mail-function 'smtpmail-send-it
+      starttls-use-gnutls t
+      smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+      smtpmail-auth-credentials
+      '(("smtp.gmail.com" 587 "jethrokuan95@gmail.com" nil))
+      smtpmail-default-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587)
+
+;; alternatively, for emacs-24 you can use:
+;;(setq message-send-mail-function 'smtpmail-send-it
+;;     smtpmail-stream-type 'starttls
+;;     smtpmail-default-smtp-server "smtp.gmail.com"
+;;     smtpmail-smtp-server "smtp.gmail.com"
+;;     smtpmail-smtp-service 587)
+
+;; don't keep message buffers around
+(setq message-kill-buffer-on-exit t)
 
 ;; Emacs profiling tool
 (use-package esup
@@ -193,7 +286,6 @@
   :diminish helm-mode
   :bind* (("C-c h" . helm-mini)
 	  ("C-x C-f" . helm-find-files)
-	  ("C-o" . helm-find-files)
 	  ("C-c f" . helm-recentf)
 	  ("C-h a" . helm-apropos)
 	  ("C-x C-b" . helm-buffers-list)
@@ -285,6 +377,11 @@
 	  ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
   :init (progn
+	  (use-package org-trello
+	    :init (progn
+		    (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
+		    (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
+			  org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))
 	  (setq org-modules '(org-drill))
 	  (setq org-directory "~/.org")
 	  (setq org-default-notes-directory (concat org-directory "/notes.org"))
@@ -298,6 +395,8 @@
 	  (setq org-capture-templates
 		'(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
 		   "* TODO %? %i\n")
+		  ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
+		   "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
 		  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
 		   "* TODO %? %i\n")
 		  ("b" "Book" entry (file "~/.org/books.org")
@@ -323,7 +422,6 @@
 		   :headline-levels 0
 		   :body-only t ;; Only export section between <body> </body>
 		   )))))
-
 
 ;;;; Language Specific Modes
 
@@ -358,7 +456,7 @@
 
 ;; Inf-clojure
 (use-package inf-clojure
-  :functions (run-clojure clojure-find-ns inf-clojure-eval-string)
+  :functions (run-clojure clojure-find-ns inf-clojure-eval-string inf-clojure-switch-to-repl)
   :commands inf-clojure-switch-to-repl
   :init (progn
 	  (setq inf-clojure-program "boot -C repl -c")
@@ -399,7 +497,16 @@
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
 	 ("\\.erb\\'" . web-mode)
-	 ("\\.mustache'" . web-mode)))
+	 ("\\.jsx\\'" . web-mode)
+	 ("\\.mustache'" . web-mode))
+  :config (progn
+	    (setq web-mode-content-types-alist
+		  '(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
+
+(use-package js2-mode
+  :diminish js2-mode
+  :mode (("\\.js\\'" . js2-mode))
+  :config (require 'js2-imenu-extras))
 
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)

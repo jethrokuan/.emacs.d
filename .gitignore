@@ -12,3 +12,6 @@ eshell/
 *.#
 /TAGS
 init.elc
+/#*
+/.trello
+/request
