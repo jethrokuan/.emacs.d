@@ -493,7 +493,7 @@
 
 	  (defun run-boot-repl (x)
 	    (interactive "sEnter Port Number:")
-	    (run-clojure (format  "boot repl -cp %s" x)))
+	    (run-clojure (format  "boot -C repl -cp %s" x)))
 	  
 	  (defun erase-inf-buffer ()
 	    (interactive)
