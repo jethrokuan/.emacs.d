@@ -1,6 +1,7 @@
 
 ;;;; Use narrow-to-page to manipulate document
 (put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
+(setq-default indent-tabs-mode nil)
 
 ;;;;Add MELPA
 (when (>= emacs-major-version 24)
@@ -11,6 +12,7 @@
 
 (setq message-log-max 16384)
 (set-face-attribute 'default nil :height 140)
+(setq-default tab-width 2)
 
 
 ;;;; `use-package'
@@ -90,9 +92,6 @@
 (require 'mu4e)
 (require 'org-mu4e)
 (bind-key* "C-c e" #'mu4e)
-
-;; default
-;; (setq mu4e-maildir "~/Maildir")
 
 (setq mu4e-drafts-folder "/[Gmail].Drafts")
 (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
@@ -178,12 +177,36 @@
 (use-package solarized-theme
   :disabled t
   :init (progn
-	  (setq solarized-distinct-fringe-background t)
-	  (setq solarized-high-contrast-mode-line t)
-	  (load-theme 'solarized-dark t)
-	  ))
-
-(set-frame-font "Hack")
+          (setq solarized-distinct-fringe-background t)
+          (setq solarized-high-contrast-mode-line t)
+          (load-theme 'solarized-dark t)
+          ))
+(when (window-system)
+  (set-default-font "Fira Code"))
+(let ((alist '((33 . ".\\(?:\\(?:==\\)\\|[!=]\\)")
+               (35 . ".\\(?:[(?[_{]\\)")
+               (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
+               (42 . ".\\(?:\\(?:\\*\\*\\)\\|[*/]\\)")
+               (43 . ".\\(?:\\(?:\\+\\+\\)\\|\\+\\)")
+               (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
+               (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=]\\)")
+               (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
+               (58 . ".\\(?:[:=]\\)")
+               (59 . ".\\(?:;\\)")
+               (60 . ".\\(?:\\(?:!--\\)\\|\\(?:\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[/<=>|-]\\)")
+               (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
+               (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
+               (63 . ".\\(?:[:=?]\\)")
+               (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
+               (94 . ".\\(?:=\\)")
+               (123 . ".\\(?:-\\)")
+               (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
+               (126 . ".\\(?:[=@~-]\\)")
+               )
+             ))
+  (dolist (char-regexp alist)
+    (set-char-table-range composition-function-table (car char-regexp)
+                          `([,(cdr char-regexp) 0 font-shape-gstring]))))
 
 ;;   Show parens
 (show-paren-mode 1)
@@ -434,25 +457,26 @@
 ;;   Clojure-mode
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
-	 ("\\.boot\\'" . clojure-mode)
-	 ("\\.edn\\'" . clojure-mode)
-	 ("\\.cljs\\'" . clojure-mode)
-	 ("\\.cljs\\.hl\\'" . clojure-mode))
+         ("\\.boot\\'" . clojure-mode)
+         ("\\.edn\\'" . clojure-mode)
+         ("\\.cljs\\'" . clojure-mode)
+         ("\\.cljs\\.hl\\'" . clojure-mode))
   :init (progn
-	  (add-hook 'clojure-mode-hook #'eldoc-mode)
-	  (add-hook 'clojure-mode-hook #'subword-mode)
-	  (add-hook 'clojure-mode-hook #'paredit-mode)
-	  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-	  (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
-	  (add-hook 'clojure-mode-hook
-		    '(lambda ()
-		       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-		       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-		       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
+          (require 'clojure-mode-extra-font-locking)
+          (add-hook 'clojure-mode-hook #'eldoc-mode)
+          (add-hook 'clojure-mode-hook #'subword-mode)
+          (add-hook 'clojure-mode-hook #'paredit-mode)
+          (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+          (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
+          (add-hook 'clojure-mode-hook
+                    '(lambda ()
+                       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
+                       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
+                       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
   :config (progn
-	    (use-package clojure-mode-extra-font-locking)
-	    (use-package align-cljlet
-	      :bind ("C-c C-a" . align-cljlet))))
+            (use-package clojure-mode-extra-font-locking)
+            (use-package align-cljlet
+              :bind ("C-c C-a" . align-cljlet))))
 
 ;; Inf-clojure
 (use-package inf-clojure
@@ -495,16 +519,20 @@
 
 ;;;; Web
 (use-package web-mode
+	:init (progn
+					(setq web-mode-code-indent-offset 2)
+					(setq web-mode-markup-indent-offset 2))
   :mode (("\\.html\\'" . web-mode)
-	 ("\\.erb\\'" . web-mode)
-	 ("\\.jsx\\'" . web-mode)
-	 ("\\.mustache'" . web-mode))
+				 ("\\.erb\\'" . web-mode)
+				 ("\\.jsx\\'" . web-mode)
+				 ("\\.mustache'" . web-mode))
   :config (progn
-	    (setq web-mode-content-types-alist
-		  '(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
+						(setq web-mode-content-types-alist
+									'(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
 
 (use-package js2-mode
   :diminish js2-mode
+	:init (setq js2-basic-offset 2)
   :mode (("\\.js\\'" . js2-mode))
   :config (require 'js2-imenu-extras))
 
