@@ -1,4 +1,3 @@
-
 ;;;; Use narrow-to-page to manipulate document
 (put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
 (setq-default indent-tabs-mode nil)
@@ -192,6 +191,22 @@
 
 (when (window-system)
   (set-default-font "Fira Code"))
+
+;;;; Prettify Symbols
+(global-prettify-symbols-mode 1)
+(defvar endless/clojure-prettify-alist '())
+(add-to-list 'endless/clojure-prettify-alist
+             '("<=" . (?· (Br . Bl) ?≤)))
+(add-to-list 'endless/clojure-prettify-alist
+             '(">=" . (?· (Br . Bl) ?≥)))
+(add-to-list 'endless/clojure-prettify-alist
+             '("->" . (?- (Br . Bc) ?- (Br . Bc) ?>)))
+(add-to-list 'endless/clojure-prettify-alist
+             '("->>" .  (?\s (Br . Bl) ?\s (Br . Bl) ?\s
+                             (Bl . Bl) ?- (Bc . Br) ?- (Bc . Bc) ?>
+                             (Bc . Bl) ?- (Br . Br) ?>)))
+(setq prettify-symbols-unprettify-at-point 'right-edge)
+
 
 ;;   Show parens
 (show-paren-mode 1)
@@ -434,7 +449,6 @@
                    ))))
   :config (progn
             (use-package org-trello
-              :mode org-trello-mode
               :init (progn
                       (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
                       (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
@@ -467,8 +481,10 @@
                        (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
                        (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
   :config (progn
+            (setq clojure--prettify-symbols-alist
+                  (append endless/clojure-prettify-alist
+                          clojure--prettify-symbols-alist))
             (require 'clojure-mode-extra-font-locking)
-            (use-package clojure-mode-extra-font-locking)
             (use-package align-cljlet
               :bind ("C-c C-a" . align-cljlet))))
 
