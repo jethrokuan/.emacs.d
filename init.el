@@ -1,6 +1,7 @@
 ;;;; Use narrow-to-page to manipulate document
 (put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
 (setq-default indent-tabs-mode nil)
+(setq-default truncate-lines t)
 
 ;;;;Add MELPA
 (when (>= emacs-major-version 24)
@@ -244,14 +245,16 @@
 ;;;; Modes for general writing
 (use-package flycheck
   :config (progn
+            (use-package flycheck-pos-tip
+              :config (flycheck-pos-tip-mode))
             (flycheck-define-checker proselint
-                                     "A linter for prose."
-                                     :command ("proselint" source-inplace)
-                                     :error-patterns
-                                     ((warning line-start (file-name) ":" line ":" column ": "
-                                               (id (one-or-more (not (any " "))))
-                                               (message) line-end))
-                                     :modes (text-mode markdown-mode gfm-mode))
+              "A linter for prose."
+              :command ("proselint" source-inplace)
+              :error-patterns
+              ((warning line-start (file-name) ":" line ":" column ": "
+                        (id (one-or-more (not (any " "))))
+                        (message) line-end))
+              :modes (text-mode markdown-mode gfm-mode))
             (add-to-list 'flycheck-checkers 'proselint)
             (add-hook 'after-init-hook 'global-flycheck-mode)))
 
@@ -461,12 +464,14 @@
                       (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
                       (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
                             org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))))
-
-;;;; Language Specific Modes
+
 
 ;;;; Markdown mode
 (use-package markdown-mode
-  :mode "\\.md\\'")
+  :mode ("\\.md\\'" . markdown-mode)
+  :init (progn
+          (add-hook 'markdown-mode-hook
+                    (lambda () (setq truncate-lines nil)))))
 
 
 ;;;; Clojure
@@ -542,21 +547,16 @@
 					(setq web-mode-markup-indent-offset 2))
   :mode (("\\.html\\'" . web-mode)
 				 ("\\.erb\\'" . web-mode)
+         ("\\.js\\'" . web-mode)
 				 ("\\.jsx\\'" . web-mode)
 				 ("\\.mustache'" . web-mode))
   :config (progn
 						(setq web-mode-content-types-alist
 									'(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
 
-(use-package js2-mode
-  :diminish js2-mode
-	:init (setq js2-basic-offset 2)
-  :mode (("\\.js\\'" . js2-mode))
-  :config (require 'js2-imenu-extras))
-
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
-	 ("\\.sass\\'" . sass-mode))
+         ("\\.sass\\'" . sass-mode))
   :init (add-hook 'rainbow-mode-hook 'scss-mode))
 
 (use-package emmet-mode
