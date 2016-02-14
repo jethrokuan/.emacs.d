@@ -47,6 +47,14 @@
 ;;Keybindings
 (bind-key* "C-x m" 'eshell)
 
+;;Zap-up-to-char
+(autoload 'zap-up-to-char "misc"
+  "Kill up to, but not including ARGth occurrence of CHAR.
+  
+  \(fn arg char)"
+  'interactive)
+(bind-key* "M-z" 'zap-up-to-char)
+
 (require 'compile)
 (add-hook 'c++-mode-hook
 	  (lambda ()
@@ -181,32 +189,9 @@
           (setq solarized-high-contrast-mode-line t)
           (load-theme 'solarized-dark t)
           ))
+
 (when (window-system)
   (set-default-font "Fira Code"))
-(let ((alist '((33 . ".\\(?:\\(?:==\\)\\|[!=]\\)")
-               (35 . ".\\(?:[(?[_{]\\)")
-               (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
-               (42 . ".\\(?:\\(?:\\*\\*\\)\\|[*/]\\)")
-               (43 . ".\\(?:\\(?:\\+\\+\\)\\|\\+\\)")
-               (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
-               (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=]\\)")
-               (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
-               (58 . ".\\(?:[:=]\\)")
-               (59 . ".\\(?:;\\)")
-               (60 . ".\\(?:\\(?:!--\\)\\|\\(?:\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[/<=>|-]\\)")
-               (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
-               (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
-               (63 . ".\\(?:[:=?]\\)")
-               (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
-               (94 . ".\\(?:=\\)")
-               (123 . ".\\(?:-\\)")
-               (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
-               (126 . ".\\(?:[=@~-]\\)")
-               )
-             ))
-  (dolist (char-regexp alist)
-    (set-char-table-range composition-function-table (car char-regexp)
-                          `([,(cdr char-regexp) 0 font-shape-gstring]))))
 
 ;;   Show parens
 (show-paren-mode 1)
