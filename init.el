@@ -220,14 +220,21 @@
 
 
 ;;;; Modes for general writing
-;; Writegood mode
-(use-package writegood-mode
-  :bind ("C-c m g" . writegood-mode))
-
-(use-package draft-mode
-  :bind ("C-c m d" . draft-mode))
+(use-package flycheck
+  :config (progn
+            (flycheck-define-checker proselint
+                                     "A linter for prose."
+                                     :command ("proselint" source-inplace)
+                                     :error-patterns
+                                     ((warning line-start (file-name) ":" line ":" column ": "
+                                               (id (one-or-more (not (any " "))))
+                                               (message) line-end))
+                                     :modes (text-mode markdown-mode gfm-mode))
+            (add-to-list 'flycheck-checkers 'proselint)
+            (add-hook 'after-init-hook 'global-flycheck-mode)))
 
 (use-package focus
+  :diminish focus-mode
   :bind ("C-c m f" . focus-mode))
 
 
@@ -381,55 +388,57 @@
 ;;;; Org Mode
 (use-package org-plus-contrib
   :bind* (("C-c c" . org-capture)
-	  ("C-c a" . org-agenda)
-	  ("C-c l" . org-store-link))
+          ("C-c a" . org-agenda)
+          ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :init (progn
-	  (use-package org-trello
-	    :init (progn
-		    (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
-		    (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
-			  org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))
-	  (setq org-modules '(org-drill))
-	  (setq org-directory "~/.org")
-	  (setq org-default-notes-directory (concat org-directory "/notes.org"))
-	  (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
-	  (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
-	  (setq org-refile-targets
-		'((nil :maxlevel . 3)
-		  (org-agenda-files :maxlevel . 3)))
-	  (setq org-use-fast-todo-selection t)
-	  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
-	  (setq org-capture-templates
-		'(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
-		   "* TODO %? %i\n")
-		  ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
-		   "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-		  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
-		   "* TODO %? %i\n")
-		  ("b" "Book" entry (file "~/.org/books.org")
-		   "* TO-READ %(org-set-tags) %? %i\n")
-		  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
-		   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
-		  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
-	  (setq org-publish-project-alist
-		'(("org-books"
-		   ;; Path to your org files.
-		   :base-directory "~/.org/"
-		   :exclude ".*"
-		   :include ["books.org"]
-		   :with-emphasize t
-		   :with-todo-keywords t
-		   :with-toc nil
-		   :with-tags nil
-		   
-		   ;; Path to  project.
-		   :publishing-directory "~/Documents/blog/content/"
-		   :publishing-function org-html-publish-to-html
-		   :html-extension "md"
-		   :headline-levels 0
-		   :body-only t ;; Only export section between <body> </body>
-		   )))))
+  :init (progn	  
+          (setq org-modules '(org-drill))
+          (setq org-directory "~/.org")
+          (setq org-default-notes-directory (concat org-directory "/notes.org"))
+          (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
+          (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
+          (setq org-refile-targets
+                '((nil :maxlevel . 3)
+                  (org-agenda-files :maxlevel . 3)))
+          (setq org-use-fast-todo-selection t)
+          (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+          (setq org-capture-templates
+                '(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
+                   "* TODO %? %i\n")
+                  ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
+                   "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+                  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
+                   "* TODO %? %i\n")
+                  ("b" "Book" entry (file "~/.org/books.org")
+                   "* TO-READ %(org-set-tags) %? %i\n")
+                  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
+                   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
+                  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
+          (setq org-publish-project-alist
+                '(("org-books"
+                   ;; Path to your org files.
+                   :base-directory "~/.org/"
+                   :exclude ".*"
+                   :include ["books.org"]
+                   :with-emphasize t
+                   :with-todo-keywords t
+                   :with-toc nil
+                   :with-tags nil
+                   
+                   ;; Path to  project.
+                   :publishing-directory "~/Documents/blog/content/"
+                   :publishing-function org-html-publish-to-html
+                   :html-extension "md"
+                   :headline-levels 0
+                   :body-only t ;; Only export section between <body> </body>
+                   ))))
+  :config (progn
+            (use-package org-trello
+              :mode org-trello-mode
+              :init (progn
+                      (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
+                      (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
+                            org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))))
 
 ;;;; Language Specific Modes
 

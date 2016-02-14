@@ -1,18 +1,12 @@
 #Jethro's .emacs.d config
+For your reference only. A lot of the things here won't work without installing the software below.
+
+![Screenshot (Feb 2016)](https://raw.githubusercontent.com/jethrokuan/.emacs.d/master/screenshot/image.png)
+
 ##Things to install:
-### Font:
-Go over [here](https://github.com/powerline/fonts/blob/master/Inconsolata-g/Inconsolata-g%20for%20Powerline.otf) and grab yourself a copy of _Inconsolata-g_. Install it as your operating system requires it.
-
-### the_silver_seacher
-Go and grab _Ag_:
-
-#### Homebrew/Mac OSX
-```
-brew install the_silver_searcher
-```
-
-#### Fedora
-```
-sudo dnf install -y the_silver_seacher
-```
+1. Font - [Fira Code](https://github.com/tonsky/FiraCode/) 
+2. Ag - [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) 
+3. Email - [Mu4e](http://www.djcbsoftware.nl/code/mu/mu4e.html ) 
+4. Email (CLI) - [offlineimap](http://offlineimap.org/ ) 
+5. Linter - [proselint](https://github.com/amperser/proselint ) 
 
