@@ -406,7 +406,8 @@
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :init (progn	  
+  :init (progn
+          (setq org-ellipsis "⤵")
           (setq org-modules '(org-drill))
           (setq org-directory "~/.org")
           (setq org-default-notes-directory (concat org-directory "/notes.org"))
