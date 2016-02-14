@@ -446,8 +446,7 @@
          ("\\.edn\\'" . clojure-mode)
          ("\\.cljs\\'" . clojure-mode)
          ("\\.cljs\\.hl\\'" . clojure-mode))
-  :init (progn
-          (require 'clojure-mode-extra-font-locking)
+  :init (progn         
           (add-hook 'clojure-mode-hook #'eldoc-mode)
           (add-hook 'clojure-mode-hook #'subword-mode)
           (add-hook 'clojure-mode-hook #'paredit-mode)
@@ -459,6 +458,7 @@
                        (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
                        (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
   :config (progn
+            (require 'clojure-mode-extra-font-locking)
             (use-package clojure-mode-extra-font-locking)
             (use-package align-cljlet
               :bind ("C-c C-a" . align-cljlet))))
