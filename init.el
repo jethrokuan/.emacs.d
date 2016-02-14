@@ -189,6 +189,13 @@
           (load-theme 'solarized-dark t)
           ))
 
+(use-package beacon
+  :diminish beacon-mode
+  :config (progn
+            (beacon-mode 1)
+            (setq beacon-push-mark 35)
+            (setq beacon-color "#666600")))
+
 (when (window-system)
   (set-default-font "Fira Code"))
 
