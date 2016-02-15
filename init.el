@@ -100,6 +100,7 @@
 (require 'mu4e)
 (require 'org-mu4e)
 (bind-key* "C-c e" #'mu4e)
+(add-hook 'mu4e-view-mode-hook (lambda () (setq truncate-lines nil)))
 
 (setq mu4e-drafts-folder "/[Gmail].Drafts")
 (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
@@ -125,9 +126,9 @@
 
 (setq mu4e-maildir-shortcuts
       '( ("/INBOX"               . ?i)
-	 ("/[Gmail].Sent Mail"   . ?s)
-	 ("/[Gmail].Trash"       . ?t)
-	 ("/[Gmail].All Mail"    . ?a)))
+         ("/[Gmail].Sent Mail"   . ?s)
+         ("/[Gmail].Trash"       . ?t)
+         ("/[Gmail].All Mail"    . ?a)))
 
 ;; allow for updating mail using 'U' in the main view:
 (setq mu4e-get-mail-command "offlineimap")
@@ -196,6 +197,10 @@
             (beacon-mode 1)
             (setq beacon-push-mark 35)
             (setq beacon-color "#FFF")))
+
+(use-package golden-ratio
+  :diminish golden-ratio-mode
+  :config (golden-ratio-mode 1))
 
 (when (window-system)
   (set-default-font "Fira Code"))
@@ -386,16 +391,15 @@
   :diminish company-mode
   :defer 5
   :init (progn
-	  (add-hook 'after-init-hook 'global-company-mode)
-	  (setq company-idle-delay 0.1)
-	  (setq company-transformers '(company-sort-by-occurrence)))
+          (add-hook 'after-init-hook 'global-company-mode)
+          (setq company-idle-delay 0.1)
+          (setq company-transformers '(company-sort-by-occurrence)))
   :config (progn
-	    (use-package company-irony
-	      :disabled t
-	      :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))
-	    (use-package company-quickhelp
-	      :init (add-hook 'global-company-mode 'company-quickhelp-mode))))
-
+            (use-package company-irony
+              :disabled t
+              :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))
+            (use-package company-quickhelp
+              :config (company-quickhelp-mode 1))))
 
 ;;;; Project Management
 ;;   Projectile
@@ -404,9 +408,9 @@
   :commands projectile-global-mode
   :bind-keymap ("C-c p" . projectile-command-map)
   :config (use-package helm-projectile
-	    :config (progn
-		      (setq projectile-completion-system 'helm)
-		      (helm-projectile-on)))
+            :config (progn
+                      (setq projectile-completion-system 'helm)
+                      (helm-projectile-on)))
   (projectile-global-mode))
 
 
@@ -416,7 +420,7 @@
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :init (progn
+  :init (progn        
           (setq org-ellipsis "⤵")
           (setq org-modules '(org-drill))
           (setq org-directory "~/.org")
