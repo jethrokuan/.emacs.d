@@ -200,7 +200,9 @@
 
 (use-package golden-ratio
   :diminish golden-ratio-mode
-  :config (golden-ratio-mode 1))
+  :config (progn
+            (add-to-list 'golden-ratio-extra-commands 'ace-window)
+            (golden-ratio-mode 1)))
 
 (when (window-system)
   (set-default-font "Fira Code"))
@@ -463,6 +465,10 @@
                    :body-only t ;; Only export section between <body> </body>
                    ))))
   :config (progn
+            (use-package ox-reveal
+              :init (progn
+                      (require 'ox-reveal)
+                      (setq org-reveal-root "/home/jethro/Libraries/reveal.js/js/reveal.js")))
             (use-package org-trello
               :init (progn
                       (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
@@ -587,3 +593,17 @@
 	       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-optionss)))
 (provide 'init.el)
 ;;init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   (quote
+    ("~/.org/books.org" "~/.org/concurrency-with-core-async.org" "~/.org/ideas.org" "~/.org/links.org" "~/.org/personal.org" "~/.org/someday.org" "~/.org/temp vocab.org" "~/.org/today.org" "~/.org/vocab.org"))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
