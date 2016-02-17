@@ -467,8 +467,7 @@
   :config (progn
             (use-package ox-reveal
               :init (progn
-                      (require 'ox-reveal)
-                      (setq org-reveal-root "/home/jethro/Libraries/reveal.js/js/reveal.js")))
+                      (require 'ox-reveal)))
             (use-package org-trello
               :init (progn
                       (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
@@ -566,8 +565,8 @@
 
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
-         ("\\.sass\\'" . sass-mode))
-  :init (add-hook 'rainbow-mode-hook 'scss-mode))
+         ("\\.sass\\'" . scss-mode))
+  :init (add-hook 'scss-mode 'rainbow-mode))
 
 (use-package emmet-mode
   :defer t
