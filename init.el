@@ -205,7 +205,7 @@
             (golden-ratio-mode 1)))
 
 (when (window-system)
-  (set-default-font "Fira Code"))
+  (set-default-font "Input Mono"))
 
 ;;;; Prettify Symbols
 (global-prettify-symbols-mode 1)
