@@ -530,7 +530,6 @@
             (setq clojure--prettify-symbols-alist
                   (append endless/clojure-prettify-alist
                           clojure--prettify-symbols-alist))
-            (require 'clojure-mode-extra-font-locking)
             (use-package align-cljlet
               :bind ("C-c C-a" . align-cljlet))))
 
