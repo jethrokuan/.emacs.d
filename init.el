@@ -332,24 +332,48 @@
 (use-package helm
   :diminish helm-mode
   :bind* (("C-c h" . helm-mini)
-	  ("C-x C-f" . helm-find-files)
-	  ("C-c f" . helm-recentf)
-	  ("C-h a" . helm-apropos)
-	  ("C-x C-b" . helm-buffers-list)
-	  ("C-x b" . helm-buffers-list)
-	  ("M-y" . helm-show-kill-ring)
-	  ("M-a" . helm-M-x)
-	  ("C-x c o" . helm-occur)
-	  ("C-x c SPC" . helm-all-mark-rings))
+          ("C-x C-f" . helm-find-files)
+          ("C-c f" . helm-recentf)
+          ("C-h a" . helm-apropos)
+          ("C-x C-b" . helm-buffers-list)
+          ("C-x b" . helm-buffers-list)
+          ("M-y" . helm-show-kill-ring)
+          ("M-a" . helm-M-x)
+          ("C-x f" . helm-fzf)
+          ("C-x c o" . helm-occur)
+          ("C-x c SPC" . helm-all-mark-rings))
   :config (progn
-	    (require 'helm-config)
-	    (setq helm-candidate-number-limit 100)
+            (require 'helm-config)
+            (setq helm-candidate-number-limit 100)
             (setq helm-idle-delay 0.0
-	          helm-input-idle-delay 0.01 
-	          helm-quick-update t
-		  helm-M-x-requires-pattern nil
-		  helm-ff-skip-boring-files t)
-	    (helm-mode 1)))
+                  helm-input-idle-delay 0.01 
+                  helm-quick-update t
+                  helm-M-x-requires-pattern nil
+                  helm-ff-skip-boring-files t)
+            (defvar helm-fzf-source
+              (helm-build-async-source "fzf"
+                :candidates-process 'helm-fzf--do-candidate-process
+                :nohighlight t
+                :requires-pattern 2
+                :candidate-number-limit 9999))
+
+            (defun helm-fzf--do-candidate-process ()
+              (let* ((cmd-args `("fzf" "-x" "-f" ,helm-pattern))
+                     (proc (apply #'start-file-process "helm-fzf" nil cmd-args)))
+                (prog1 proc
+                  (set-process-sentinel
+                   proc
+                   (lambda (process event)
+                     (helm-process-deferred-sentinel-hook
+                      process event (helm-default-directory)))))))
+
+            (defun helm-fzf ()
+              (interactive)
+              (let ((default-directory "~/"))
+                (find-file
+                 (concat "~/" (helm :sources '(helm-fzf-source)
+                                    :buffer "*helm-fzf*")))))
+            (helm-mode 1)))
 
 ;; Search
 (use-package helm-ag
