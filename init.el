@@ -33,7 +33,11 @@
 (setq use-package-always-ensure t)
 
 (when (window-system)
-  (set-default-font "Input Mono"))
+  (set-frame-font "Input Mono")
+  (tooltip-mode -1)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1))
 
 ;;;; Setting Emacs registers
 (bind-key* "C-o" 'jump-to-register)
@@ -75,13 +79,6 @@
                                (setq-local compilation-read-command nil)
                                (call-interactively 'compile)))
 
-;;Disable Toolbars
-(when window-system
-  (tooltip-mode -1)
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1))
-
 ;;No startup screen
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
@@ -93,13 +90,16 @@
   (set-fill-column 80)
   (setq truncate-lines nil))
 
+
 ;;Setting up shell path
 (use-package exec-path-from-shell
   :config (exec-path-from-shell-initialize))
 
+;; Fish-mode
 (use-package fish-mode
   :mode ("\\.fish\\'" . fish-mode))
 
+
 ;;Firestarter
 (use-package firestarter
   :bind ("C-c m s" . firestarter-mode)
@@ -108,84 +108,6 @@
 ;;User-details
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
-
-;; Email
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
-(require 'mu4e)
-(require 'org-mu4e)
-(bind-key* "C-c e" #'mu4e)
-(add-hook 'mu4e-view-mode-hook #'trunc-line-hook)
-
-(setq mu4e-drafts-folder "/[Gmail].Drafts")
-(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
-(setq mu4e-trash-folder  "/[Gmail].Trash")
-
-;; don't save message to Sent Messages, Gmail/IMAP takes care of this
-(setq mu4e-sent-messages-behavior 'delete)
-
-(setq
- mu4e-view-show-images t
- mu4e-view-image-max-width 800)
-
-(setq mu4e-update-interval 300)
-
-;; (See the documentation for `mu4e-sent-messages-behavior' if you have
-;; additional non-Gmail addresses and want assign them different
-;; behavior.)
-
-;; setup some handy shortcuts
-;; you can quickly switch to your Inbox -- press ``ji''
-;; then, when you want archive some messages, move them to
-;; the 'All Mail' folder by pressing ``ma''.
-
-(setq mu4e-maildir-shortcuts
-      '( ("/INBOX"               . ?i)
-         ("/[Gmail].Sent Mail"   . ?s)
-         ("/[Gmail].Trash"       . ?t)
-         ("/[Gmail].All Mail"    . ?a)))
-
-;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "offlineimap")
-(setq mu4e-attachment-dir  "~/Downloads")
-
-;;store link to message if in header view, not to header query
-(setq org-mu4e-link-query-in-headers-mode nil)
-
-(setq mu4e-view-show-images t)
-;; use imagemagick, if available
-(when (fboundp 'imagemagick-register-types)
-  (imagemagick-register-types))
-
-;; something about ourselves
-(setq
- mu4e-compose-signature
- (concat
-  "Warmest Regards,\n"
-  "Jethro Kuan\n"))
-
-;; sending mail -- replace USERNAME with your gmail username
-;; also, make sure the gnutls command line utils are installed
-;; package 'gnutls-bin' in Debian/Ubuntu
-
-(require 'smtpmail)
-(setq message-send-mail-function 'smtpmail-send-it
-      starttls-use-gnutls t
-      smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-      smtpmail-auth-credentials
-      '(("smtp.gmail.com" 587 "jethrokuan95@gmail.com" nil))
-      smtpmail-default-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587)
-
-;; alternatively, for emacs-24 you can use:
-;;(setq message-send-mail-function 'smtpmail-send-it
-;;     smtpmail-stream-type 'starttls
-;;     smtpmail-default-smtp-server "smtp.gmail.com"
-;;     smtpmail-smtp-server "smtp.gmail.com"
-;;     smtpmail-smtp-service 587)
-
-;; don't keep message buffers around
-(setq message-kill-buffer-on-exit t)
 
 ;; Emacs profiling tool
 (use-package esup
@@ -209,22 +131,6 @@
   :config (progn
             (add-to-list 'golden-ratio-extra-commands 'ace-window)
             (golden-ratio-mode 1)))
-
-;;;; Prettify Symbols
-(global-prettify-symbols-mode 1)
-(defvar endless/clojure-prettify-alist '())
-(add-to-list 'endless/clojure-prettify-alist
-             '("<=" . (?· (Br . Bl) ?≤)))
-(add-to-list 'endless/clojure-prettify-alist
-             '(">=" . (?· (Br . Bl) ?≥)))
-(add-to-list 'endless/clojure-prettify-alist
-             '("->" . (?- (Br . Bc) ?- (Br . Bc) ?>)))
-(add-to-list 'endless/clojure-prettify-alist
-             '("->>" .  (?\s (Br . Bl) ?\s (Br . Bl) ?\s
-                             (Bl . Bl) ?- (Bc . Br) ?- (Bc . Bc) ?>
-                             (Bc . Bl) ?- (Br . Br) ?>)))
-(setq prettify-symbols-unprettify-at-point 'right-edge)
-
 
 ;;   Show parens
 (show-paren-mode 1)
@@ -349,7 +255,7 @@
             (require 'helm-config)
             (setq helm-candidate-number-limit 100)
             (setq helm-idle-delay 0.0
-                  helm-input-idle-delay 0.01 
+                  helm-input-idle-delay 0.01
                   helm-quick-update t
                   helm-M-x-requires-pattern nil
                   helm-ff-skip-boring-files t)
@@ -495,7 +401,7 @@
 ;;;; Markdown mode
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
-  :config (add-hook 'markdown-mode-hook #'truc-line-hook))
+  :config (add-hook 'markdown-mode-hook #'truc-lines-hook))
 
 
 ;;;; Clojure
@@ -516,10 +422,7 @@
                       '(lambda ()
                          (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
                          (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-                         (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))
-            (setq clojure--prettify-symbols-alist
-                  (append endless/clojure-prettify-alist
-                          clojure--prettify-symbols-alist))
+                         (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))            
             (use-package align-cljlet
               :bind ("C-c C-a" . align-cljlet))))
 
