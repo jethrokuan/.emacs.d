@@ -1,5 +1,6 @@
 ;;;; Use narrow-to-page to manipulate document
 (put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
+
 (setq-default indent-tabs-mode nil)
 (setq-default truncate-lines t)
 
@@ -85,6 +86,13 @@
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
 
+;; Truncate lines
+(use-package visual-fill-column)
+(defun trunc-lines-hook ()
+  (visual-fill-column-mode 1)
+  (set-fill-column 80)
+  (setq truncate-lines nil))
+
 ;;Setting up shell path
 (use-package exec-path-from-shell
   :config (exec-path-from-shell-initialize))
@@ -106,7 +114,7 @@
 (require 'mu4e)
 (require 'org-mu4e)
 (bind-key* "C-c e" #'mu4e)
-(add-hook 'mu4e-view-mode-hook (lambda () (setq truncate-lines nil)))
+(add-hook 'mu4e-view-mode-hook #'trunc-line-hook)
 
 (setq mu4e-drafts-folder "/[Gmail].Drafts")
 (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
@@ -186,16 +194,8 @@
 
 ;;;; Theming
 ;;   Color Schemes 
-(use-package base16-theme
-  :init (load-theme 'base16-chalk-dark t))
-
-(use-package solarized-theme
-  :disabled t
-  :config (progn
-            (setq solarized-distinct-fringe-background t)
-            (setq solarized-high-contrast-mode-line t)
-            (load-theme 'solarized-dark t)
-            ))
+(use-package darktooth-theme
+  :init (load-theme 'darktooth t))
 
 (use-package beacon
   :diminish beacon-mode
@@ -444,12 +444,12 @@
 
 ;;;; Org Mode
 (use-package org-plus-contrib
-  :init (add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
+  :init  (add-hook 'org-mode-hook #'trunc-lines-hook)
   :bind* (("C-c c" . org-capture)
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :config (progn            
+  :config (progn
             (setq org-ellipsis "⤵")
             (setq org-modules '(org-drill))
             (setq org-directory "~/.org")
@@ -495,8 +495,7 @@
 ;;;; Markdown mode
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
-  :config (add-hook 'markdown-mode-hook
-                    (lambda () (setq truncate-lines nil))))
+  :config (add-hook 'markdown-mode-hook #'truc-line-hook))
 
 
 ;;;; Clojure
