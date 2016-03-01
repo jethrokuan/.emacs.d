@@ -416,8 +416,8 @@
 (use-package company
   :diminish company-mode
   :defer 5
-  :config (progn
-            (add-hook 'after-init-hook 'global-company-mode)
+  :init (add-hook 'after-init-hook 'global-company-mode)
+  :config (progn            
             (setq company-idle-delay .3)
             (setq company-idle-delay 0)
             (setq company-begin-commands '(self-insert-command)) 
@@ -444,11 +444,12 @@
 
 ;;;; Org Mode
 (use-package org-plus-contrib
+  :init (add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
   :bind* (("C-c c" . org-capture)
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :config (progn
+  :config (progn            
             (setq org-ellipsis "⤵")
             (setq org-modules '(org-drill))
             (setq org-directory "~/.org")
