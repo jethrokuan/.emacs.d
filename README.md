@@ -1,7 +1,7 @@
 #Jethro's .emacs.d config
 For your reference only. A lot of the things here won't work without installing the software below.
 
-![Screenshot (Feb 2016)](https://raw.githubusercontent.com/jethrokuan/.emacs.d/master/screenshot/image.png)
+![Screenshot (Mar 2016)](/screenshot/image-mar.png)
 
 ##Things to install:
 1. Font - [Input Mono](input.fontbureau.com)
