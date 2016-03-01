@@ -292,20 +292,20 @@
 ;;   Aggressive-indent mode
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
-  :init (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+  :config (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
 ;;   Which-key
 (use-package which-key
   :diminish which-key-mode
-  :init (add-hook 'after-init-hook 'which-key-mode))
+  :config (add-hook 'after-init-hook 'which-key-mode))
 
 ;;   Rainbow-delimiters for pretty brackets
 (use-package rainbow-delimiters
-  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  :config (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 ;;   Rainbow-mode for displaying colors for RGB and hex values
 (use-package rainbow-mode
-  :init (add-hook 'css-mode-hook 'rainbow-mode))
+  :config (add-hook 'css-mode-hook 'rainbow-mode))
 
 ;;   Display line nums in prog-mode
 (defun linum-mode-hook () 
@@ -394,14 +394,14 @@
 ;;   Paredit
 (use-package paredit
   :diminish paredit-mode
-  :init (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
+  :config  (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
 
 
 ;;   Magit
-(use-package magit
-  :init (add-hook 'magit-mode-hook 'hl-line-mode)
+(use-package magit  
   :bind (("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch-popup)))
+         ("C-x M-g" . magit-dispatch-popup))
+  :config (add-hook 'magit-mode-hook 'hl-line-mode))
 
 
 ;;;; Code/Text Completion
@@ -483,13 +483,12 @@
                      :with-toc nil
                      :with-tags nil)))
             (use-package ox-reveal
-              :init (progn
-                      (require 'ox-reveal)))
+              :config (require 'ox-reveal))
             (use-package org-trello
-              :init (progn
-                      (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
-                      (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
-                            org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))))
+              :config (progn
+                        (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
+                        (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
+                              org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))))
 
 
 ;;;; Markdown mode
@@ -528,31 +527,32 @@
 (use-package inf-clojure
   :functions (run-clojure clojure-find-ns inf-clojure-eval-string inf-clojure-switch-to-repl)
   :commands inf-clojure-switch-to-repl
-  :init (progn
-          (setq inf-clojure-program "boot -C repl -c")
-          (defun reload-current-clj-ns (next-p)
-            (interactive "P")
-            (let ((ns (clojure-find-ns)))
-              (message (format "Loading %s ..." ns))
-              (inf-clojure-eval-string (format "(require '%s :reload)" ns))
-              (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
+  :config (progn
+            (setq inf-clojure-program "boot -C repl -c")
+            (defun reload-current-clj-ns (next-p)
+              (interactive "P")
+              (let ((ns (clojure-find-ns)))
+                (message (format "Loading %s ..." ns))
+                (inf-clojure-eval-string (format "(require '%s :reload)" ns))
+                (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
 
-          (defun run-boot-repl (x)
-            (interactive "sEnter Port Number:")
-            (run-clojure (format  "boot -C repl -cp %s" x)))
-          
-          (defun erase-inf-buffer ()
-            (interactive)
-            (with-current-buffer (get-buffer "*inf-clojure*")
-              (erase-buffer))
-            (inf-clojure-eval-string ""))
-          (setq inf-clojure-prompt-read-only nil)
-          (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
-          (add-hook 'inf-clojure-mode-hook
-                    '(lambda ()
-                       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
+            (defun run-boot-repl (x)
+              (interactive "sEnter Port Number:")
+              (run-clojure (format  "boot -C repl -cp %s" x)))
+            
+            (defun erase-inf-buffer ()
+              (interactive)
+              (with-current-buffer (get-buffer "*inf-clojure*")
+                (erase-buffer))
+              (inf-clojure-eval-string ""))
+            (setq inf-clojure-prompt-read-only nil)
+            (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
+            (add-hook 'inf-clojure-mode-hook
+                      '(lambda ()
+                         (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
 
 (use-package clj-refactor
+  :defines cljr-add-keybindings-with-prefix
   :defer t
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
@@ -564,46 +564,47 @@
 
 
 ;;;; Web
-(use-package web-mode
-	:init (progn
-					(setq web-mode-code-indent-offset 2)
-					(setq web-mode-markup-indent-offset 2))
+(use-package web-mode 
   :mode (("\\.html\\'" . web-mode)
 				 ("\\.erb\\'" . web-mode)
          ("\\.js\\'" . web-mode)
 				 ("\\.jsx\\'" . web-mode)
 				 ("\\.mustache'" . web-mode))
   :config (progn
-						(setq web-mode-content-types-alist
-									'(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
+            (setq web-mode-code-indent-offset 2)
+            (setq web-mode-markup-indent-offset 2)
+            (setq web-mode-content-types-alist
+                  '(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
 
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
          ("\\.sass\\'" . scss-mode))
-  :init (add-hook 'scss-mode 'rainbow-mode))
+  :config (add-hook 'scss-mode-hook 'rainbow-mode))
 
 (use-package emmet-mode
-  :defer t
-  :init (progn (add-hook 'sgml-mode-hook 'emmet-mode)
-               (add-hook 'web-mode-hook 'emmet-mode)
-               (add-hook 'js2-mode-hook 'emmet-mode)
-               (add-hook 'css-mode-hook 'emmet-mode)))
+  :diminish emmet-mode
+  :config (progn
+            (add-hook 'sgml-mode-hook 'emmet-mode)
+            (add-hook 'web-mode-hook 'emmet-mode)
+            (add-hook 'js2-mode-hook 'emmet-mode)
+            (add-hook 'css-mode-hook 'emmet-mode)))
 
 (use-package irony
   :disabled t
   :mode (("\\.cpp\\'" . irony-mode)
          ("\\.c\\'" . irony-mode))
   :diminish irony-mode
-  :init (progn (defun my-irony-mode-hook ()
-                 (define-key irony-mode-map [remap completion-at-point]
-                   'irony-completion-at-point-async)
-                 (define-key irony-mode-map [remap complete-symbol]
-                   'irony-completion-at-point-async))
-               (add-hook 'c++-mode-hook 'irony-mode)
-               (add-hook 'c-mode-hook 'irony-mode)
-               (add-hook 'objc-mode-hook 'irony-mode)
-               (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-               (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-optionss)))
+  :config (progn
+            (defun my-irony-mode-hook ()
+              (define-key irony-mode-map [remap completion-at-point]
+                'irony-completion-at-point-async)
+              (define-key irony-mode-map [remap complete-symbol]
+                'irony-completion-at-point-async))
+            (add-hook 'c++-mode-hook 'irony-mode)
+            (add-hook 'c-mode-hook 'irony-mode)
+            (add-hook 'objc-mode-hook 'irony-mode)
+            (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+            (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)))
 
 
 (use-package go-mode
