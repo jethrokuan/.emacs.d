@@ -31,6 +31,9 @@
 (require 'diminish nil t)
 (setq use-package-always-ensure t)
 
+(when (window-system)
+  (set-default-font "Input Mono"))
+
 ;;;; Setting Emacs registers
 (bind-key* "C-o" 'jump-to-register)
 (set-register ?b (cons 'file "~/.org/books.org"))
@@ -57,13 +60,13 @@
 
 (require 'compile)
 (add-hook 'c++-mode-hook
-	  (lambda ()
-	    (unless (file-exists-p "Makefile")
-	      (set (make-local-variable 'compile-command)
-		   (let ((file (file-name-nondirectory buffer-file-name)))
-		     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++11"
-			     file
-			     (file-name-sans-extension file)))))))
+          (lambda ()
+            (unless (file-exists-p "Makefile")
+              (set (make-local-variable 'compile-command)
+                   (let ((file (file-name-nondirectory buffer-file-name)))
+                     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++11"
+                             file
+                             (file-name-sans-extension file)))))))
 
 ;; Shortcut for compile
 (global-set-key (kbd "<f5>") (lambda ()
@@ -86,10 +89,13 @@
 (use-package exec-path-from-shell
   :config (exec-path-from-shell-initialize))
 
+(use-package fish-mode
+  :mode ("\\.fish\\'" . fish-mode))
+
 ;;Firestarter
 (use-package firestarter
   :bind ("C-c m s" . firestarter-mode)
-  :init (put 'firestarter 'safe-local-variable 'identity))
+  :config (put 'firestarter 'safe-local-variable 'identity))
 
 ;;User-details
 (setq user-full-name "Jethro Kuan"
@@ -185,11 +191,11 @@
 
 (use-package solarized-theme
   :disabled t
-  :init (progn
-          (setq solarized-distinct-fringe-background t)
-          (setq solarized-high-contrast-mode-line t)
-          (load-theme 'solarized-dark t)
-          ))
+  :config (progn
+            (setq solarized-distinct-fringe-background t)
+            (setq solarized-high-contrast-mode-line t)
+            (load-theme 'solarized-dark t)
+            ))
 
 (use-package beacon
   :diminish beacon-mode
@@ -203,9 +209,6 @@
   :config (progn
             (add-to-list 'golden-ratio-extra-commands 'ace-window)
             (golden-ratio-mode 1)))
-
-(when (window-system)
-  (set-default-font "Input Mono"))
 
 ;;;; Prettify Symbols
 (global-prettify-symbols-mode 1)
@@ -390,17 +393,15 @@
 
 ;;   Paredit
 (use-package paredit
-  :commands paredit-mode
   :diminish paredit-mode
-  :init (progn
-	  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
+  :init (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
 
 
 ;;   Magit
 (use-package magit
   :init (add-hook 'magit-mode-hook 'hl-line-mode)
   :bind (("C-x g" . magit-status)
-	 ("C-x M-g" . magit-dispatch-popup)))
+         ("C-x M-g" . magit-dispatch-popup)))
 
 
 ;;;; Code/Text Completion
@@ -409,18 +410,18 @@
   :defer 5
   :commands (yas-global-mode yas-minor-mode)
   :init (add-hook 'after-init-hook 'yas-global-mode)
-  :config (progn
-	    (setq yas-snippet-dirs '("~/.emacs.d/snippets/"))))
+  :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
 
 ;;   Company - code completions
 (use-package company
   :diminish company-mode
   :defer 5
-  :init (progn
-          (add-hook 'after-init-hook 'global-company-mode)
-          (setq company-idle-delay 0.1)
-          (setq company-transformers '(company-sort-by-occurrence)))
   :config (progn
+            (add-hook 'after-init-hook 'global-company-mode)
+            (setq company-idle-delay .3)
+            (setq company-idle-delay 0)
+            (setq company-begin-commands '(self-insert-command)) 
+            (setq company-transformers '(company-sort-by-occurrence))
             (use-package company-irony
               :disabled t
               :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))
@@ -433,11 +434,12 @@
   :defer 5
   :commands projectile-global-mode
   :bind-keymap ("C-c p" . projectile-command-map)
-  :config (use-package helm-projectile
-            :config (progn
-                      (setq projectile-completion-system 'helm)
-                      (helm-projectile-on)))
-  (projectile-global-mode))
+  :config (progn
+            (use-package helm-projectile
+              :config (progn
+                        (setq projectile-completion-system 'helm)
+                        (helm-projectile-on)))
+            (projectile-global-mode)))
 
 
 ;;;; Org Mode
@@ -446,49 +448,40 @@
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :init (progn        
-          (setq org-ellipsis "⤵")
-          (setq org-modules '(org-drill))
-          (setq org-directory "~/.org")
-          (setq org-default-notes-directory (concat org-directory "/notes.org"))
-          (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
-          (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
-          (setq org-refile-targets
-                '((nil :maxlevel . 3)
-                  (org-agenda-files :maxlevel . 3)))
-          (setq org-use-fast-todo-selection t)
-          (setq org-treat-S-cursor-todo-selection-as-state-change nil)
-          (setq org-capture-templates
-                '(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
-                   "* TODO %? %i\n")
-                  ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
-                   "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-                  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
-                   "* TODO %? %i\n")
-                  ("b" "Book" entry (file "~/.org/books.org")
-                   "* TO-READ %(org-set-tags) %? %i\n")
-                  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
-                   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
-                  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
-          (setq org-publish-project-alist
-                '(("org-books"
-                   ;; Path to your org files.
-                   :base-directory "~/.org/"
-                   :exclude ".*"
-                   :include ["books.org"]
-                   :with-emphasize t
-                   :with-todo-keywords t
-                   :with-toc nil
-                   :with-tags nil
-                   
-                   ;; Path to  project.
-                   :publishing-directory "~/Documents/blog/content/"
-                   :publishing-function org-html-publish-to-html
-                   :html-extension "md"
-                   :headline-levels 0
-                   :body-only t ;; Only export section between <body> </body>
-                   ))))
   :config (progn
+            (setq org-ellipsis "⤵")
+            (setq org-modules '(org-drill))
+            (setq org-directory "~/.org")
+            (setq org-default-notes-directory (concat org-directory "/notes.org"))
+            (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
+            (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
+            (setq org-refile-targets
+                  '((nil :maxlevel . 3)
+                    (org-agenda-files :maxlevel . 3)))
+            (setq org-use-fast-todo-selection t)
+            (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+            (setq org-capture-templates
+                  '(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
+                     "* TODO %? %i\n")
+                    ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
+                     "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+                    ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
+                     "* TODO %? %i\n")
+                    ("b" "Book" entry (file "~/.org/books.org")
+                     "* TO-READ %(org-set-tags) %? %i\n")
+                    ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
+                     "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
+                    ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
+            (setq org-publish-project-alist
+                  '(("org-books"
+                     ;; Path to your org files.
+                     :base-directory "~/.org/"
+                     :exclude ".*"
+                     :include ["books.org"]
+                     :with-emphasize t
+                     :with-todo-keywords t
+                     :with-toc nil
+                     :with-tags nil)))
             (use-package ox-reveal
               :init (progn
                       (require 'ox-reveal)))
@@ -502,9 +495,8 @@
 ;;;; Markdown mode
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
-  :init (progn
-          (add-hook 'markdown-mode-hook
-                    (lambda () (setq truncate-lines nil)))))
+  :config (add-hook 'markdown-mode-hook
+                    (lambda () (setq truncate-lines nil))))
 
 
 ;;;; Clojure
@@ -515,18 +507,17 @@
          ("\\.edn\\'" . clojure-mode)
          ("\\.cljs\\'" . clojure-mode)
          ("\\.cljs\\.hl\\'" . clojure-mode))
-  :init (progn         
-          (add-hook 'clojure-mode-hook #'eldoc-mode)
-          (add-hook 'clojure-mode-hook #'subword-mode)
-          (add-hook 'clojure-mode-hook #'paredit-mode)
-          (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-          (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
-          (add-hook 'clojure-mode-hook
-                    '(lambda ()
-                       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-                       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-                       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string))))
   :config (progn
+            (add-hook 'clojure-mode-hook #'eldoc-mode)
+            (add-hook 'clojure-mode-hook #'subword-mode)
+            (add-hook 'clojure-mode-hook #'paredit-mode)
+            (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+            (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
+            (add-hook 'clojure-mode-hook
+                      '(lambda ()
+                         (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
+                         (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
+                         (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))
             (setq clojure--prettify-symbols-alist
                   (append endless/clojure-prettify-alist
                           clojure--prettify-symbols-alist))
@@ -538,28 +529,28 @@
   :functions (run-clojure clojure-find-ns inf-clojure-eval-string inf-clojure-switch-to-repl)
   :commands inf-clojure-switch-to-repl
   :init (progn
-	  (setq inf-clojure-program "boot -C repl -c")
-	  (defun reload-current-clj-ns (next-p)
-	    (interactive "P")
-	    (let ((ns (clojure-find-ns)))
-	      (message (format "Loading %s ..." ns))
-	      (inf-clojure-eval-string (format "(require '%s :reload)" ns))
-	      (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
+          (setq inf-clojure-program "boot -C repl -c")
+          (defun reload-current-clj-ns (next-p)
+            (interactive "P")
+            (let ((ns (clojure-find-ns)))
+              (message (format "Loading %s ..." ns))
+              (inf-clojure-eval-string (format "(require '%s :reload)" ns))
+              (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
 
-	  (defun run-boot-repl (x)
-	    (interactive "sEnter Port Number:")
-	    (run-clojure (format  "boot -C repl -cp %s" x)))
-	  
-	  (defun erase-inf-buffer ()
-	    (interactive)
-	    (with-current-buffer (get-buffer "*inf-clojure*")
-	      (erase-buffer))
-	    (inf-clojure-eval-string ""))
-	  (setq inf-clojure-prompt-read-only nil)
-	  (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
-	  (add-hook 'inf-clojure-mode-hook
-		    '(lambda ()
-		       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
+          (defun run-boot-repl (x)
+            (interactive "sEnter Port Number:")
+            (run-clojure (format  "boot -C repl -cp %s" x)))
+          
+          (defun erase-inf-buffer ()
+            (interactive)
+            (with-current-buffer (get-buffer "*inf-clojure*")
+              (erase-buffer))
+            (inf-clojure-eval-string ""))
+          (setq inf-clojure-prompt-read-only nil)
+          (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
+          (add-hook 'inf-clojure-mode-hook
+                    '(lambda ()
+                       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
 
 (use-package clj-refactor
   :defer t
@@ -601,17 +592,38 @@
 (use-package irony
   :disabled t
   :mode (("\\.cpp\\'" . irony-mode)
-	 ("\\.c\\'" . irony-mode))
+         ("\\.c\\'" . irony-mode))
   :diminish irony-mode
   :init (progn (defun my-irony-mode-hook ()
-		 (define-key irony-mode-map [remap completion-at-point]
-		   'irony-completion-at-point-async)
-		 (define-key irony-mode-map [remap complete-symbol]
-		   'irony-completion-at-point-async))
-	       (add-hook 'c++-mode-hook 'irony-mode)
-	       (add-hook 'c-mode-hook 'irony-mode)
-	       (add-hook 'objc-mode-hook 'irony-mode)
-	       (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-	       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-optionss)))
+                 (define-key irony-mode-map [remap completion-at-point]
+                   'irony-completion-at-point-async)
+                 (define-key irony-mode-map [remap complete-symbol]
+                   'irony-completion-at-point-async))
+               (add-hook 'c++-mode-hook 'irony-mode)
+               (add-hook 'c-mode-hook 'irony-mode)
+               (add-hook 'objc-mode-hook 'irony-mode)
+               (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+               (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-optionss)))
+
+
+(use-package go-mode
+  :mode ("\\.go\\'" . go-mode)
+  :config (progn
+            (add-hook 'go-mode-hook (lambda ()
+                                      (set (make-local-variable 'company-backends) '(company-go))
+                                      (company-mode)))
+            (add-hook 'go-mode-hook (lambda ()
+                                      (add-hook 'before-save-hook 'gofmt-before-save)
+                                      (local-set-key (kbd "M-.") 'godef-jump)))
+            (add-hook 'go-mode-hook
+                      (lambda ()
+                        (unless (file-exists-p "Makefile")
+                          (set (make-local-variable 'compile-command)
+                               (let ((file (file-name-nondirectory buffer-file-name)))
+                                 (format "go build %s"
+                                         file))))))
+            (use-package company-go
+              :config (require 'company-go))))
+
 (provide 'init.el)
 ;;init.el ends here
