@@ -116,8 +116,11 @@
 
 ;;;; Theming
 ;;   Color Schemes 
-(use-package darktooth-theme
-  :init (load-theme 'darktooth t))
+(use-package gruvbox-theme
+  :init (load-theme 'gruvbox t))
+
+(use-package smart-mode-line
+  :config (sml/setup))
 
 (use-package beacon
   :diminish beacon-mode
@@ -313,8 +316,8 @@
 ;;;; Code/Text Completion
 ;;   Yasnippet - snippets
 (use-package yasnippet
+  :diminish yas-global-mode
   :defer 5
-  :commands (yas-global-mode yas-minor-mode)
   :init (add-hook 'after-init-hook 'yas-global-mode)
   :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
 
