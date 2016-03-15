@@ -115,8 +115,12 @@
 
 
 ;;;; Theming
-;;   Color Schemes 
+;;   Color Schemes
+(use-package tao-theme
+  :init (load-theme 'tao-yang t))
+
 (use-package gruvbox-theme
+  :disabled t
   :init (load-theme 'gruvbox t))
 
 (use-package smart-mode-line
