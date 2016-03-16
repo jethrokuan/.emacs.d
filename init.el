@@ -167,6 +167,33 @@
   (interactive)
   (insert (format-time-string "%l:%M%P(%z) %Y-%m-%d")))
 
+(defun toggle-window-split ()
+  (interactive)
+  (if (= (count-windows) 2)
+      (let* ((this-win-buffer (window-buffer))
+             (next-win-buffer (window-buffer (next-window)))
+             (this-win-edges (window-edges (selected-window)))
+             (next-win-edges (window-edges (next-window)))
+             (this-win-2nd (not (and (<= (car this-win-edges)
+                                         (car next-win-edges))
+                                     (<= (cadr this-win-edges)
+                                         (cadr next-win-edges)))))
+             (splitter
+              (if (= (car this-win-edges)
+                     (car (window-edges (next-window))))
+                  'split-window-horizontally
+                'split-window-vertically)))
+        (delete-other-windows)
+        (let ((first-win (selected-window)))
+          (funcall splitter)
+          (if this-win-2nd (other-window 1))
+          (set-window-buffer (selected-window) this-win-buffer)
+          (set-window-buffer (next-window) next-win-buffer)
+          (select-window first-win)
+          (if this-win-2nd (other-window 1))))))
+
+(global-set-key (kbd "C-x |") 'toggle-window-split)
+
 
 ;;;; Modes for general writing
 (use-package flycheck
@@ -234,7 +261,7 @@
 ;;;; Movement
 (use-package avy
   :bind (("C-'" . avy-goto-char)
-	 ("C-," . avy-goto-char-2)))
+         ("C-," . avy-goto-char-2)))
 
 (use-package ace-window
   :bind (("M-'" . ace-window)))
@@ -245,7 +272,7 @@
 
 (use-package change-inner
   :bind (("M-i" . change-inner)
-	 ("M-o" . change-outer)))
+         ("M-o" . change-outer)))
 
 
 ;;;; Helm
@@ -413,30 +440,32 @@
 ;;;; Markdown mode
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
-  :config (add-hook 'markdown-mode-hook #'truc-lines-hook))
-
-
-;;;; Clojure
-;;   Clojure-mode
-(use-package clojure-mode
-  :mode (("\\.clj\\'" . clojure-mode)
-         ("\\.boot\\'" . clojure-mode)
-         ("\\.edn\\'" . clojure-mode)
-         ("\\.cljs\\'" . clojure-mode)
-         ("\\.cljs\\.hl\\'" . clojure-mode))
   :config (progn
-            (add-hook 'clojure-mode-hook #'eldoc-mode)
-            (add-hook 'clojure-mode-hook #'subword-mode)
-            (add-hook 'clojure-mode-hook #'paredit-mode)
-            (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-            (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
-            (add-hook 'clojure-mode-hook
-                      '(lambda ()
-                         (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-                         (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-                         (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))            
-            (use-package align-cljlet
-              :bind ("C-c C-a" . align-cljlet))))
+            (setq markdown-command "multimarkdown")
+            (add-hook 'markdown-mode-hook #'trunc-lines-hook))
+
+  
+;;;; Clojure
+  ;;   Clojure-mode
+  (use-package clojure-mode
+    :mode (("\\.clj\\'" . clojure-mode)
+           ("\\.boot\\'" . clojure-mode)
+           ("\\.edn\\'" . clojure-mode)
+           ("\\.cljs\\'" . clojure-mode)
+           ("\\.cljs\\.hl\\'" . clojure-mode))
+    :config (progn
+              (add-hook 'clojure-mode-hook #'eldoc-mode)
+              (add-hook 'clojure-mode-hook #'subword-mode)
+              (add-hook 'clojure-mode-hook #'paredit-mode)
+              (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+              (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
+              (add-hook 'clojure-mode-hook
+                        '(lambda ()
+                           (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
+                           (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
+                           (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))            
+              (use-package align-cljlet
+                :bind ("C-c C-a" . align-cljlet)))))
 
 ;; Inf-clojure
 (use-package inf-clojure
