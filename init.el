@@ -264,6 +264,9 @@
 
 
 ;;;; Movement
+(use-package multiple-cursors
+  :bind ("C-M-c" . mc/mark-all-dwim))
+
 (use-package avy
   :bind (("C-'" . avy-goto-char)
          ("C-," . avy-goto-char-2)))
