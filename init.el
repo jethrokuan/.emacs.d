@@ -79,22 +79,10 @@
                                (setq-local compilation-read-command nil)
                                (call-interactively 'compile)))
 
-(defun bury-compile-buffer-if-successful (buffer string)
-  "Bury a compilation buffer if succeeded without warnings "
-  (if (and
-       (string-match "compilation" (buffer-name buffer))
-       (string-match "finished" string)
-       (not
-        (with-current-buffer buffer
-          (goto-char (point-min))
-          (search-forward "warning" nil t))))
-      (run-with-timer 1 nil
-                      (lambda (buf)
-                        (bury-buffer buf)
-                        (switch-to-prev-buffer (get-buffer-window buf) 'kill))
-                      buffer)))
-
-(add-hook 'compilation-finish-functions 'bury-compile-buffer-if-successful)
+(add-hook 'compilation-finish-functions
+          (lambda (buf strg)
+            (let ((win  (get-buffer-window buf 'visible)))
+              (when win (delete-window win)))))
 
 ;;No startup screen
 (setq inhibit-splash-screen t)
@@ -347,10 +335,6 @@
 (use-package helm-descbinds
   :bind ("C-c d" . helm-descbinds))
 
-;; Rhythmbox (linux only)
-(use-package helm-rhythmbox
-  :bind ("C-S-o" . helm-rhythmbox))
-
 
 ;;   Paredit
 (use-package paredit
@@ -382,10 +366,7 @@
             (setq company-idle-delay .3)
             (setq company-idle-delay 0)
             (setq company-begin-commands '(self-insert-command)) 
-            (setq company-transformers '(company-sort-by-occurrence))
-            (use-package company-irony
-              :disabled t
-              :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))
+            (setq company-transformers '(company-sort-by-occurrence)) 
             (use-package company-quickhelp
               :config (company-quickhelp-mode 1))))
 
@@ -540,7 +521,9 @@
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
          ("\\.sass\\'" . scss-mode))
-  :config (add-hook 'scss-mode-hook 'rainbow-mode))
+  :config (progn
+            (setq scss-compile-at-save nil)
+            (add-hook 'scss-mode-hook 'rainbow-mode)))
 
 (use-package emmet-mode
   :diminish emmet-mode
@@ -565,12 +548,16 @@
             (add-hook 'c-mode-hook 'irony-mode)
             (add-hook 'objc-mode-hook 'irony-mode)
             (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-            (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)))
+            (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+            (use-package company-irony
+              :disabled t
+              :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))))
 
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
   :config (progn
+            (add-hook 'go-mode-hook 'compilation-auto-quit-window)
             (add-hook 'go-mode-hook (lambda ()
                                       (set (make-local-variable 'company-backends) '(company-go))
                                       (company-mode)))
@@ -584,8 +571,12 @@
                                (let ((file (file-name-nondirectory buffer-file-name)))
                                  (format "go build %s"
                                          file))))))
+            (use-package gorepl-mode
+              :config (add-hook 'go-mode-hook #'gorepl-mode))
             (use-package company-go
-              :config (require 'company-go))))
+              :config (add-hook 'go-mode-hook (lambda ()
+                                                (set (make-local-variable 'company-backends) '(company-go))
+                                                (company-mode))))))
 
 (provide 'init.el)
 ;;init.el ends here
