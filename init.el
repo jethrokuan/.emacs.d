@@ -3,6 +3,7 @@
 
 (setq-default indent-tabs-mode nil)
 (setq-default truncate-lines t)
+(setq create-lockfiles nil) ;; Clashes with hugo
 
 ;;;;Add MELPA
 (when (>= emacs-major-version 24)
