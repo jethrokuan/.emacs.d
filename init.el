@@ -215,21 +215,11 @@
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
 
-;;;; Modes for general writing
 (use-package flycheck
   :config (progn
             (use-package flycheck-pos-tip
               :config (flycheck-pos-tip-mode))
-            (flycheck-define-checker proselint
-              "A linter for prose."
-              :command ("proselint" source-inplace)
-              :error-patterns
-              ((warning line-start (file-name) ":" line ":" column ": "
-                        (id (one-or-more (not (any " "))))
-                        (message) line-end))
-              :modes (text-mode markdown-mode gfm-mode))
-            (add-to-list 'flycheck-checkers 'proselint)
-            (add-hook 'after-init-hook 'global-flycheck-mode)))
+            (add-hook 'prog-mode-hook 'global-flycheck-mode)))
 
 (use-package focus
   :diminish focus-mode
@@ -297,6 +287,11 @@
   :bind (("M-i" . change-inner)
          ("M-o" . change-outer)))
 
+(use-package undo-tree
+  :diminish undo-tree-mode
+  :config (global-undo-tree-mode)
+  :bind ("s-/" . undo-tree-visualize))
+
 
 ;;;; Helm
 (use-package helm
@@ -317,8 +312,7 @@
             (setq helm-candidate-number-limit 100)
             (setq helm-idle-delay 0.0
                   helm-input-idle-delay 0.01
-                  helm-quick-update t
-                  helm-M-x-requires-pattern nil
+                  helm-quick-update t 
                   helm-ff-skip-boring-files t)
             (defvar helm-fzf-source
               (helm-build-async-source "fzf"
@@ -354,16 +348,32 @@
   :bind ("C-c d" . helm-descbinds))
 
 
+;;   Smartparens
+(use-package smartparens
+  :disabled t
+  :diminish smartparens-mode
+  :commands smartparens-strict-mode smartparens-mode sp-restrict-to-pairs-interactive sp-local-pair
+  :init  (setq sp-interactive-dwim t)
+  :config (progn
+            (require 'smartparens-config)
+            (sp-use-smartparens-bindings)
+            (sp-pair "(" ")" :wrap "C-(")
+            (sp-pair "[" "]" :wrap "C-[")
+            (sp-pair "{" "}" :wrap "C-{")))
+
 ;;   Paredit
 (use-package paredit
   :diminish paredit-mode
-  :config  (add-hook 'emacs-lisp-mode-hook #'paredit-mode))
+  :config  (progn
+             (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+             (add-hook 'clojure-mode-hook #'paredit-mode)))
 
 
 ;;   Magit
 (use-package magit  
   :bind (("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch-popup))
+         ("C-x M-g" . magit-blame))
+  :init (setq magit-auto-revert-mode nil)
   :config (add-hook 'magit-mode-hook 'hl-line-mode))
 
 
@@ -380,26 +390,30 @@
   :diminish company-mode
   :defer 5
   :init (add-hook 'after-init-hook 'global-company-mode)
-  :config (progn            
-            (setq company-idle-delay .3)
-            (setq company-idle-delay 0)
-            (setq company-begin-commands '(self-insert-command)) 
-            (setq company-transformers '(company-sort-by-occurrence)) 
-            (use-package company-quickhelp
-              :config (company-quickhelp-mode 1))))
+  :init (progn            
+          (setq company-dabbrev-ignore-case nil
+                company-dabbrev-code-ignore-case nil
+                company-dabbrev-downcase nil
+                company-idle-delay 0
+                company-begin-commands '(self-insert-command)
+                company-transformers '(company-sort-by-occurrence))
+          (use-package company-quickhelp
+            :config (company-quickhelp-mode 1))))
 
 ;;;; Project Management
 ;;   Projectile
 (use-package projectile
-  :defer 5
-  :commands projectile-global-mode
+  :demand
+  :init (setq projectile-use-git-grep t)
+  :bind (("s-f" . projectile-find-file)
+         ("s-F" . projectile-grep))
   :bind-keymap ("C-c p" . projectile-command-map)
   :config (progn
             (use-package helm-projectile
               :config (progn
                         (setq projectile-completion-system 'helm)
                         (helm-projectile-on)))
-            (projectile-global-mode)))
+            (projectile-global-mode t)))
 
 
 ;;;; Org Mode
@@ -472,7 +486,6 @@
     :config (progn
               (add-hook 'clojure-mode-hook #'eldoc-mode)
               (add-hook 'clojure-mode-hook #'subword-mode)
-              (add-hook 'clojure-mode-hook #'paredit-mode)
               (add-hook 'clojure-mode-hook #'clj-refactor-mode)
               (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
               (add-hook 'clojure-mode-hook
