@@ -18,3 +18,4 @@ init.elc
 /.org-id-locations
 /init.html
 /.mc-lists.el
+/async-bytecomp.log
