@@ -33,12 +33,11 @@
 (require 'diminish nil t)
 (setq use-package-always-ensure t)
 
-(when (window-system)
-  (set-frame-font "Input Mono")
-  (tooltip-mode -1)
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1))
+(set-frame-font "Input Mono")
+(tooltip-mode -1)
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
 
 ;;;; Setting Emacs registers
 (bind-key* "C-o" 'jump-to-register)
