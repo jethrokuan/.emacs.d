@@ -33,7 +33,7 @@
 (require 'diminish nil t)
 (setq use-package-always-ensure t)
 
-(set-frame-font "Input Mono")
+(add-to-list 'default-frame-alist '(font . "Input Mono"))
 (tooltip-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -112,6 +112,7 @@
 
 ;;Setting up shell path
 (use-package exec-path-from-shell
+  :demand t
   :config (exec-path-from-shell-initialize))
 
 ;; Fish-mode
