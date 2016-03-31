@@ -93,10 +93,19 @@
                                (setq-local compilation-read-command nil)
                                (call-interactively 'compile)))
 
-(add-hook 'compilation-finish-functions
-          (lambda (buf strg)
-            (let ((win  (get-buffer-window buf 'visible)))
-              (when win (delete-window win)))))
+;; Helper for compilation. Close the compilation window if
+;; there was no error at all.
+(defun compilation-exit-autoclose (status code msg)
+  ;; If M-x compile exists with a 0
+  (when (and (eq status 'exit) (zerop code))
+    ;; then bury the *compilation* buffer, so that C-x b doesn't go there
+    (bury-buffer)
+    ;; and delete the *compilation* window
+    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
+  ;; Always return the anticipated result of compilation-exit-message-function
+  (cons msg code))
+;; Specify my function (maybe I should have done a lambda function)
+(setq compilation-exit-message-function 'compilation-exit-autoclose)
 
 ;;No startup screen
 (setq inhibit-splash-screen t)
@@ -113,7 +122,7 @@
 ;;Setting up shell path
 (use-package exec-path-from-shell
   :demand t
-  :config (exec-path-from-shell-initialize))
+  :init (exec-path-from-shell-initialize))
 
 ;; Fish-mode
 (use-package fish-mode
@@ -509,9 +518,13 @@
                 (inf-clojure-eval-string (format "(require '%s :reload)" ns))
                 (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
 
-            (defun run-boot-repl (x)
-              (interactive "sEnter Port Number:")
-              (run-clojure (format  "boot -C repl -cp %s" x)))
+            (defun run-lein-repl ()
+              (interactive)
+              (run-clojure "lein repl"))
+
+            (defun run-boot-repl ()
+              (interactive)
+              (run-clojure "boot repl"))
             
             (defun erase-inf-buffer ()
               (interactive)
