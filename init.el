@@ -459,13 +459,17 @@
           (setq org-publish-project-alist
                 '(("org-books"
                    ;; Path to your org files.
+                   :publishing-function org-html-publish-to-html
+                   :publishing-directory "~/Documents/Code/jethrokuan.github.io/"
                    :base-directory "~/.org/"
                    :exclude ".*"
                    :include ["books.org"]
                    :with-emphasize t
                    :with-todo-keywords t
                    :with-toc nil
-                   :with-tags nil))))
+                   :with-tags nil
+                   :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
+                   :html-preamble t))))
   :config (progn
             (use-package ox-reveal
               :config (require 'ox-reveal))
