@@ -496,50 +496,66 @@
            ("\\.edn\\'" . clojure-mode)
            ("\\.cljs\\'" . clojure-mode)
            ("\\.cljs\\.hl\\'" . clojure-mode))
-    :config (progn
-              (add-hook 'clojure-mode-hook #'eldoc-mode)
-              (add-hook 'clojure-mode-hook #'subword-mode)
-              (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-              (add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)	  
-              (add-hook 'clojure-mode-hook
-                        '(lambda ()
-                           (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-                           (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-                           (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))            
-              (use-package align-cljlet
-                :bind ("C-c C-a" . align-cljlet)))))
+    :init
+    (add-hook 'clojure-mode-hook #'eldoc-mode)
+    (add-hook 'clojure-mode-hook #'subword-mode)
+    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+    :config (progn              
+              )))
+;; Cider
+(use-package cider
+  :ensure t
+  :defer t
+  :init (add-hook 'cider-mode-hook #'clj-refactor-mode)
+  :diminish subword-mode
+  :config
+  (setq nrepl-log-messages t                  
+        cider-repl-display-in-current-window t
+        cider-repl-use-clojure-font-lock t    
+        cider-prompt-save-file-on-load 'always-save
+        cider-font-lock-dynamically '(macro core function var)
+        nrepl-hide-special-buffers t            
+        cider-overlays-use-font-lock t)         
+  (cider-repl-toggle-pretty-printing))
 
 ;; Inf-clojure
 (use-package inf-clojure
-  :functions (run-clojure clojure-find-ns inf-clojure-eval-string inf-clojure-switch-to-repl)
+  :disabled t
+  :load-path "./inf-clojure"  
   :commands inf-clojure-switch-to-repl
-  :config (progn
-            (setq inf-clojure-program "boot -C repl -c")
-            (defun reload-current-clj-ns (next-p)
-              (interactive "P")
-              (let ((ns (clojure-find-ns)))
-                (message (format "Loading %s ..." ns))
-                (inf-clojure-eval-string (format "(require '%s :reload)" ns))
-                (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
+  :init (progn
+          (setq inf-clojure-program "boot -C repl -c")
+          (defun reload-current-clj-ns (next-p)
+            (interactive "P")
+            (let ((ns (clojure-find-ns)))
+              (message (format "Loading %s ..." ns))
+              (inf-clojure-eval-string (format "(require '%s :reload)" ns))
+              (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
 
-            (defun run-lein-repl ()
-              (interactive)
-              (run-clojure "lein repl"))
+          (defun run-lein-repl ()
+            (interactive)
+            (run-clojure "lein repl"))
 
-            (defun run-boot-repl ()
-              (interactive)
-              (run-clojure "boot repl"))
-            
-            (defun erase-inf-buffer ()
-              (interactive)
-              (with-current-buffer (get-buffer "*inf-clojure*")
-                (erase-buffer))
-              (inf-clojure-eval-string ""))
-            (setq inf-clojure-prompt-read-only nil)
-            (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
-            (add-hook 'inf-clojure-mode-hook
-                      '(lambda ()
-                         (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
+          (defun run-boot-repl ()
+            (interactive)
+            (run-clojure "boot repl"))
+          
+          (defun erase-inf-buffer ()
+            (interactive)
+            (with-current-buffer (get-buffer "*inf-clojure*")
+              (erase-buffer))
+            (inf-clojure-eval-string ""))
+          (setq inf-clojure-prompt-read-only nil)
+          (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
+          (add-hook 'clojure-mode-hook
+                    '(lambda ()
+                       (define-key clojure-mode-map "\C-c\C-z" 'inf-clojure-switch-to-repl)
+                       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
+                       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
+                       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))
+          (add-hook 'inf-clojure-mode-hook
+                    '(lambda ()
+                       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
 
 (use-package clj-refactor
   :defines cljr-add-keybindings-with-prefix
@@ -567,7 +583,7 @@
             (setq web-mode-code-indent-offset 2)
             (setq web-mode-markup-indent-offset 2)
             (setq web-mode-content-types-alist
-                  '(("jsx"  . "/home/jethro/Code/tooople/frontend/.*\\.js[x]?\\'")))))
+                  '(("jsx"  . "/home/jethro/Code/.*\\.js[x]?\\'")))))
 
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
@@ -633,3 +649,15 @@
 
 (provide 'init.el)
 ;;init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values (quote ((firestarter-type . t)))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
