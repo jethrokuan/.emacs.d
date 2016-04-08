@@ -622,6 +622,8 @@
                                (let ((file (file-name-nondirectory buffer-file-name)))
                                  (format "go build %s"
                                          file))))))
+            (use-package go-dlv
+              :config (require 'go-dlv))
             (use-package gorepl-mode
               :config (add-hook 'go-mode-hook #'gorepl-mode))
             (use-package company-go
