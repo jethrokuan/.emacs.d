@@ -3,7 +3,6 @@
 
 (setq-default indent-tabs-mode nil)
 (setq-default truncate-lines t)
-(setq create-lockfiles nil) ;; Clashes with hugo
 
 ;;;;Add MELPA
 (when (>= emacs-major-version 24)
@@ -33,7 +32,7 @@
 (require 'diminish nil t)
 (setq use-package-always-ensure t)
 
-(add-to-list 'default-frame-alist '(font . "Input Mono"))
+(add-to-list 'default-frame-alist '(font . "Source Code Pro for Powerline"))
 (tooltip-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
