@@ -347,6 +347,7 @@
   :defer 5
   :init
   (custom-set-variables
+   '(git-gutter:update-interval 2)
    '(git-gutter:modified-sign "==") 
    '(git-gutter:added-sign "++")
    '(git-gutter:deleted-sign "--")) 
