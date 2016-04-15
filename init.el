@@ -107,6 +107,11 @@
                   week))
       (message "%s" file)
       (delete-file file))))
+
+;;Setting up shell path
+(use-package exec-path-from-shell
+  :demand t
+  :init (exec-path-from-shell-initialize))
 
 ;;; Setting Emacs registers
 ;;; Eg. C-o i to jump to init.el
@@ -116,16 +121,19 @@
 (set-register ?s (cons 'file "~/.org/someday.org"))
 (set-register ?t (cons 'file "~/.org/today.org"))
 
+;;; Break lines
+;;; Small utility to change page breaks to look like <hr>s
 (use-package page-break-lines
   :init (global-page-break-lines-mode)
   :diminish page-break-lines-mode)
 
 ;;; Keybindings
-;;; Eshell         C-m
-;;; Zap-up-to-char M-z
-;;; Compile files  F5
-;;; Nuke all buffers C-c n
-
+;;; Eshell                 C-m
+;;; Zap-up-to-char         M-z
+;;; Compile files          F5
+;;; Nuke all buffers       C-c n
+;;; Split and move right   C-x 3
+;;; Toggle split           C-x |
 (require 'compile)
 (autoload 'zap-up-to-char "misc"
   "Kill up to, but not including ARGth occurrence of CHAR."
@@ -145,11 +153,6 @@
      (kill-buffer buffer))
    (buffer-list))
   (delete-other-windows))
-
-(defun now-is ()
-  "Insert current time."
-  (interactive)
-  (insert (format-time-string "%l:%M%P(%z) %Y-%m-%d")))
 
 (defun toggle-window-split ()
   (interactive)
@@ -185,30 +188,6 @@
                     (interactive)
                     (setq-local compilation-read-command nil)
                     (call-interactively 'compile)))
-
-;;Setting up shell path
-(use-package exec-path-from-shell
-  :demand t
-  :init (exec-path-from-shell-initialize))
-
-;; Fish-mode
-(use-package fish-mode
-  :mode ("\\.fish\\'" . fish-mode))
-
-;;;; Compilation:
-;; Helper for compilation. Close the compilation window if
-;; there was no error at all.
-(defun compilation-exit-autoclose (status code msg)
-  ;; If M-x compile exists with a 0
-  (when (and (eq status 'exit) (zerop code))
-    ;; then bury the *compilation* buffer, so that C-x b doesn't go there
-    (bury-buffer)
-    ;; and delete the *compilation* window
-    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
-  ;; Always return the anticipated result of compilation-exit-message-function
-  (cons msg code))
-;; Specify my function (maybe I should have done a lambda function)
-(setq compilation-exit-message-function 'compilation-exit-autoclose)
 
 ;; Emacs profiling tool
 (use-package esup
@@ -282,18 +261,16 @@
   :diminish aggressive-indent-mode
   :config (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
-;;   Which-key
+;;;   Which-key
 (use-package which-key
   :diminish which-key-mode
   :config (add-hook 'after-init-hook 'which-key-mode))
-
-;;   Rainbow-mode for displaying colors for RGB and hex values
-(use-package rainbow-mode
-  :config (add-hook 'css-mode-hook 'rainbow-mode))
 
 ;;;; Movement
 (use-package multiple-cursors
-  :bind ("C-M-c" . mc/mark-all-dwim))
+  :bind (("C-M-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)))
 
 (use-package avy
   :bind (("C-'" . avy-goto-char)
@@ -319,17 +296,16 @@
           ("C-h a" . helm-apropos)
           ("C-x C-b" . helm-buffers-list)
           ("C-x b" . helm-buffers-list)
-          ("M-y" . helm-show-kill-ring)
+          ("M-y" . helm-all-mark-rings)
           ("M-a" . helm-M-x)
-          ("C-c o" . helm-occur)
-          ("C-c SPC" . helm-all-mark-rings))
+          ("C-c o" . helm-occur))
   :config (progn
             (require 'helm-config)
-            (setq helm-candidate-number-limit 100)
+            (setq helm-candidate-number-limit 20)
             (setq helm-idle-delay 0.0
                   helm-input-idle-delay 0.01
                   helm-quick-update t 
-                  helm-ff-skip-boring-files t) 
+                  helm-ff-skip-boring-files t)
             (helm-mode 1)))
 
 ;; Search
@@ -344,8 +320,7 @@
 (use-package paredit
   :diminish paredit-mode
   :config  (progn
-             (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-             (add-hook 'clojure-mode-hook #'paredit-mode)))
+             (add-hook 'emacs-lisp-mode-hook #'paredit-mode)))
 
 ;;; Git
 ;;; Magit
@@ -358,6 +333,7 @@
 ;;; Git Gutter
 (use-package git-gutter
   :diminish git-gutter-mode
+  :defer 5
   :init
   (custom-set-variables
    '(git-gutter:modified-sign "==") 
@@ -380,9 +356,8 @@
 ;;   Company - code completions
 (use-package company
   :diminish company-mode
-  :defer 5
-  :init (add-hook 'after-init-hook 'global-company-mode)
-  :init (progn            
+  :init (progn
+          (add-hook 'after-init-hook 'global-company-mode)
           (setq company-dabbrev-ignore-case nil
                 company-dabbrev-code-ignore-case nil
                 company-dabbrev-downcase nil
@@ -392,8 +367,8 @@
           (use-package company-quickhelp
             :config (company-quickhelp-mode 1))))
 
-;;;; Project Management
-;;   Projectile
+;;; Project Management
+;;;   Projectile
 (use-package projectile
   :demand t
   :init (setq projectile-use-git-grep t)
@@ -469,7 +444,7 @@
   :bind ("C-c m f" . focus-mode))
 
 ;;;; Clojure
-;;   Clojure-mode
+;;;   Clojure-mode
 (use-package clojure-mode
   :mode (("\\.clj\\'" . clojure-mode)
          ("\\.boot\\'" . clojure-mode)
@@ -479,9 +454,10 @@
   :init
   (add-hook 'clojure-mode-hook #'eldoc-mode)
   (add-hook 'clojure-mode-hook #'subword-mode)
-  (add-hook 'clojure-mode-hook #'clj-refactor-mode))
+  (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+  (add-hook 'clojure-mode-hook #'paredit-mode))
 
-;; Cider
+;;; Cider
 (use-package cider
   :ensure t
   :defer t
@@ -497,61 +473,17 @@
         cider-overlays-use-font-lock t)         
   (cider-repl-toggle-pretty-printing))
 
-;; Inf-clojure
-(use-package inf-clojure
-  :disabled t
-  :load-path "./inf-clojure"  
-  :commands inf-clojure-switch-to-repl
-  :init (progn
-          (setq inf-clojure-program "boot -C repl -c")
-          (defun reload-current-clj-ns (next-p)
-            (interactive "P")
-            (let ((ns (clojure-find-ns)))
-              (message (format "Loading %s ..." ns))
-              (inf-clojure-eval-string (format "(require '%s :reload)" ns))
-              (when (not next-p) (inf-clojure-eval-string (format "(in-ns '%s)" ns)))))
-
-          (defun run-lein-repl ()
-            (interactive)
-            (run-clojure "lein repl"))
-
-          (defun run-boot-repl ()
-            (interactive)
-            (run-clojure "boot repl"))
-          
-          (defun erase-inf-buffer ()
-            (interactive)
-            (with-current-buffer (get-buffer "*inf-clojure*")
-              (erase-buffer))
-            (inf-clojure-eval-string ""))
-          (setq inf-clojure-prompt-read-only nil)
-          (add-hook 'inf-clojure-mode-hook #'eldoc-mode)
-          (add-hook 'clojure-mode-hook
-                    '(lambda ()
-                       (define-key clojure-mode-map "\C-c\C-z" 'inf-clojure-switch-to-repl)
-                       (define-key clojure-mode-map "\C-c\C-k" 'reload-current-clj-ns)
-                       (define-key clojure-mode-map "\C-cl" 'erase-inf-buffer)
-                       (define-key clojure-mode-map "\C-c\C-t" 'clojure-toggle-keyword-string)))
-          (add-hook 'inf-clojure-mode-hook
-                    '(lambda ()
-                       (define-key inf-clojure-mode-map "\C-cl" 'erase-inf-buffer)))))
-
+;;; Clj-refactor
 (use-package clj-refactor
   :defines cljr-add-keybindings-with-prefix
   :defer t
   :diminish clj-refactor-mode
   :config (cljr-add-keybindings-with-prefix "C-c j"))
-
 
-;;;; JSON
-(use-package json-mode
-  :mode "\\.json\\'"
-  :config (add-hook 'json-mode-hook (lambda ()
-                                      (make-local-variable 'js-indent-level)
-                                      (setq js-indent-level 2))))
+;;; Web
+;;; Included Packages
+;;; Web-mode, SCSS-mode, Emmet-mode, JSON-mode
 
-
-;;;; Web
 (use-package web-mode 
   :mode (("\\.html\\'" . web-mode)
 				 ("\\.erb\\'" . web-mode)
@@ -560,10 +492,13 @@
 				 ("\\.mustache'" . web-mode))
   :config (progn
             (setq web-mode-code-indent-offset 2)
-            (setq web-mode-markup-indent-offset 2)
-            (setq web-mode-content-types-alist
-                  '(("jsx"  . "/home/jethro/Code/.*\\.js[x]?\\'")))))
+            (setq web-mode-markup-indent-offset 2)))
 
+(use-package rainbow-mode
+  :config (add-hook 'css-mode-hook 'rainbow-mode))
+
+;;; SCSS-mode
+;;; Turn on rainbow-mode when scss-mode is active
 (use-package scss-mode
   :mode (("\\.scss\\'" . scss-mode)
          ("\\.sass\\'" . scss-mode))
@@ -571,6 +506,8 @@
             (setq scss-compile-at-save nil)
             (add-hook 'scss-mode-hook 'rainbow-mode)))
 
+;;; Emmet-mode
+;;; C-j to apply emmet expansions
 (use-package emmet-mode
   :diminish emmet-mode
   :config (progn
@@ -579,34 +516,28 @@
             (add-hook 'js2-mode-hook 'emmet-mode)
             (add-hook 'css-mode-hook 'emmet-mode)))
 
-(use-package irony
-  :disabled t
-  :mode (("\\.cpp\\'" . c++-mode)
-         ("\\.c\\'" . c-mode))
-  :diminish irony-mode
-  :init (progn
-          (add-hook 'c++-mode-hook 'irony-mode)
-          (add-hook 'c-mode-hook 'irony-mode)
-          (add-hook 'objc-mode-hook 'irony-mode)
-          (defun my-irony-mode-hook ()
-            (define-key irony-mode-map [remap completion-at-point]
-              'irony-completion-at-point-async)
-            (define-key irony-mode-map [remap complete-symbol]
-              'irony-completion-at-point-async))
-          (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-          (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-          (add-hook 'irony-mode-hook
-                    (lambda ()
-                      (unless (file-exists-p "Makefile")
-                        (set (make-local-variable 'compile-command)
-                             (let ((file (file-name-nondirectory buffer-file-name)))
-                               (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
-                                       file
-                                       (file-name-sans-extension file)))))))
-          (use-package company-irony
-            :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))))
-
+;;; JSON
+;;; Set JSON indent level to 2 spaces
+(use-package json-mode
+  :mode "\\.json\\'"
+  :config (add-hook 'json-mode-hook (lambda ()
+                                      (make-local-variable 'js-indent-level)
+                                      (setq js-indent-level 2))))
 
+;;; Systems progamming
+;;; Included languages: Go
+
+
+;;; Helper that closes compilation buffer if no error is made
+(defun compilation-exit-autoclose (status code msg)
+  (when (and (eq status 'exit) (zerop code))
+    (bury-buffer)
+    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
+  (cons msg code))
+
+(setq compilation-exit-message-function 'compilation-exit-autoclose)
+
+;;; Go
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
   :config (progn
@@ -634,4 +565,9 @@
                                                 (company-mode))))))
 
 (provide 'init.el)
+
+;;; Fish
+(use-package fish-mode
+  :mode ("\\.fish\\'" . fish-mode))
+
 ;;; init.el ends here
