@@ -536,7 +536,7 @@
                                       (setq js-indent-level 2))))
 
 ;;; Systems progamming
-;;; Included languages: Go
+;;; Included languages: Go, C++
 
 
 ;;; Helper that closes compilation buffer if no error is made
@@ -547,6 +547,15 @@
   (cons msg code))
 
 (setq compilation-exit-message-function 'compilation-exit-autoclose)
+
+(add-hook 'c++-mode-hook
+          (lambda ()
+            (unless (file-exists-p "Makefile")
+              (set (make-local-variable 'compile-command)
+                   (let ((file (file-name-nondirectory buffer-file-name)))
+                     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
+                             file
+                             (file-name-sans-extension file)))))))
 
 ;;; Go
 (use-package go-mode
