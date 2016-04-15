@@ -33,22 +33,6 @@
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   (package-initialize))
-
-;;; Debugging
-(setq message-log-max 10000)
-
-;;; Use Source Code Pro as base font
-(add-to-list 'default-frame-alist '(font . "Source Code Pro for Powerline"))
-
-;;; Use 2 spaces instead of tabs at all times
-(setq-default tab-width 2)
-(setq-default indent-tabs-mode nil)
-
-;;; Don't wrap
-(setq-default truncate-lines t)
-
-;;; Don't load old byte code
-(setq load-prefer-newer t)
 
 ;;; `use-package'
 (unless (package-installed-p 'use-package)
@@ -69,6 +53,25 @@
 (setq use-package-always-ensure t)
 
 ;;; Sensible Emacs Defaults:
+
+;;; y/n
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;;; Debugging
+(setq message-log-max 10000)
+
+;;; Base font
+(add-to-list 'default-frame-alist '(font . "Inconsolata-g for Powerline"))
+
+;;; Use 2 spaces instead of tabs at all times
+(setq-default tab-width 2)
+(setq-default indent-tabs-mode nil)
+
+;;; Don't wrap lines
+(setq-default truncate-lines t)
+
+;;; Don't load old byte code
+(setq load-prefer-newer t)
 
 ;;; User-details
 (setq user-full-name "Jethro Kuan"
@@ -198,13 +201,6 @@
 (use-package tao-theme
   :init (load-theme 'tao-yang t))
 
-;;; Improved modeline
-(use-package smart-mode-line
-  :config (progn
-            (setq sml/no-confirm-load-theme t)
-            (setq sml/theme 'light)
-            (sml/setup)))
-
 ;;; Shows cursor location when jumping around
 (use-package beacon
   :diminish beacon-mode
@@ -240,21 +236,36 @@
               :config (flycheck-pos-tip-mode))
             (add-hook 'prog-mode-hook 'global-flycheck-mode)))
 
-;;;; Minor Modes
-;;; Visual Upgrades
-;;   Shows x/y for isearch
-(use-package anzu
-  :functions anzu-mode
-  :defer 5
-  :diminish anzu-mode
-  :config (global-anzu-mode +1))
+;;; Minor Modes
 
-;;   Highlights copy/paste changes
-(use-package volatile-highlights
-  :functions volatile-highlights-mode
-  :defer 5
-  :diminish volatile-highlights-mode
-  :config (volatile-highlights-mode t))
+;;; Visual Upgrades
+;;; Anzu
+(use-package anzu
+  :diminish anzu-mode
+  :init (progn 
+          (custom-set-variables
+           '(anzu-mode-lighter "")
+           '(anzu-deactivate-region t)
+           '(anzu-search-threshold 1000)
+           '(anzu-replace-threshold 50)
+           '(anzu-replace-to-string-separator " => ")))
+  :bind
+  (([remap query-replace] . anzu-query-replace)
+   ([remap query-replace-regexp] . anzu-query-replace-regexp)
+   :map isearch-mode-map
+   ([remap isearch-query-replace] . anzu-isearch-query-replace)
+   ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+  :config (progn
+            (setq anzu-cons-mode-line-p t)            
+            (set-face-attribute 'anzu-mode-line nil
+                                :foreground "#FFF" :weight 'bold)
+            (global-anzu-mode +1))
+
+;;; Highlights copy/paste changes
+  (use-package volatile-highlights
+    :defer 5
+    :diminish volatile-highlights-mode
+    :config (volatile-highlights-mode t)))
 
 ;;   Aggressive-indent mode
 (use-package aggressive-indent
@@ -348,7 +359,7 @@
 ;;;; Code/Text Completion
 ;;   Yasnippet - snippets
 (use-package yasnippet
-  :diminish yas-global-mode
+  :diminish yas-global-mode yas-minor-mode
   :defer 5
   :init (add-hook 'after-init-hook 'yas-global-mode)
   :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))

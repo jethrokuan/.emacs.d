@@ -1,10 +1,11 @@
-#Jethro's .emacs.d config
-For your reference only. A lot of the things here won't work without installing the software below.
+# My Personal Emacs Config
+![Screenshot (April 2016)](/screenshot/image-april.png)
 
-![Screenshot (Mar 2016)](/screenshot/image-april.png)
+# Philosophies
 
-##Things to install:
-1. Font - [Input Mono](input.fontbureau.com)
-2. Ag - [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) 
-5. Linter - [proselint](https://github.com/amperser/proselint ) 
+- Minimal; gets out of your way
+- Powerful; contains the best of the best
+
+## Things to install:
+1. Ag - [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) 
 
