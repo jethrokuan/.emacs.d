@@ -1,54 +1,97 @@
-;;;; Use narrow-to-page to manipulate document
-(put 'narrow-to-page 'disabled nil) ;; Bound to C-x n p, Widen with C-x n w
+;;; init.el --- Emacs configuration of Jethro Kuan -*- lexical-binding: t; -*-
+;;
+;; Copyright (c) 2016 Jethro Kuan <jethrokuan95@gmail.com>
+;;
+;; Author: Jethro Kuan <jethrokuan95@gmail.com>
+;; URL: https://gihub.com/jethrokuan/.emacs.d
+;; Keywords: emacs
 
-(setq-default indent-tabs-mode nil)
-(setq-default truncate-lines t)
+;; This file is not part of GNU Emacs.
 
-;;;;Add MELPA
+;; This program is free software; you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation; either version 3 of the License, or (at your option) any later
+;; version.
+
+;; This program is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+;; details.
+
+;; You should have received a copy of the GNU General Public License along with
+;; GNU Emacs; see the file COPYING.  If not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+;; USA.
+
+;;; Commentary:
+
+;; Emacs configuration of Jethro Kuan
+
+;;; Add MELPA and Org
 (when (>= emacs-major-version 24)
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   (package-initialize))
 
-(setq message-log-max 16384)
-(set-face-attribute 'default nil :height 140)
-(setq-default tab-width 2)
+;;; Debugging
+(setq message-log-max 10000)
 
+;;; Use Source Code Pro as base font
+(add-to-list 'default-frame-alist '(font . "Source Code Pro for Powerline"))
+
+;;; Use 2 spaces instead of tabs at all times
+(setq-default tab-width 2)
+(setq-default indent-tabs-mode nil)
+
+;;; Don't wrap
+(setq-default truncate-lines t)
+
+;;; Don't load old byte code
+(setq load-prefer-newer t)
 
-;;;; `use-package'
+;;; `use-package'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
 (eval-and-compile
-  (defvar use-package-verbose t)
-  ;; (defvar use-package-expand-minimally t)
+  (defvar use-package-verbose t) 
   (eval-after-load 'advice
     `(setq ad-redefinition-action 'accept))
   (require 'cl)
   (require 'use-package))
 
+;;; Load bind-key and diminish
 (require 'bind-key)
 (require 'diminish nil t)
-(setq use-package-always-ensure t)
 
-(add-to-list 'default-frame-alist '(font . "Source Code Pro for Powerline"))
+(setq use-package-always-ensure t)
+
+;;; Sensible Emacs Defaults:
+
+;;; User-details
+(setq user-full-name "Jethro Kuan"
+      user-mail-address "jethrokuan95@gmail.com")
+
+;;; Remove UI cruft
 (tooltip-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 
-;;;; Setting Emacs registers
-(bind-key* "C-o" 'jump-to-register)
-(set-register ?b (cons 'file "~/.org/books.org"))
-(set-register ?i (cons 'file "~/.emacs.d/init.el"))
-(set-register ?s (cons 'file "~/.org/someday.org"))
-(set-register ?t (cons 'file "~/.org/today.org"))
+;;No startup screen
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
 
+;; Truncate lines
+(use-package visual-fill-column)
+(defun trunc-lines-hook ()
+  (visual-fill-column-mode 1)
+  (set-fill-column 80)
+  (setq truncate-lines nil))
 
-
-;;;; Changes for sanity
-;; Change backup directory to prevent littering of working dir
+;;; Change backup directory to prevent littering of working dir
 (setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms
@@ -64,119 +107,32 @@
                   week))
       (message "%s" file)
       (delete-file file))))
-
-;;Keybindings
-(bind-key* "C-x m" 'eshell)
-
-;;Zap-up-to-char
-(autoload 'zap-up-to-char "misc"
-  "Kill up to, but not including ARGth occurrence of CHAR.
-  
-  \(fn arg char)"
-  'interactive)
-(bind-key* "M-z" 'zap-up-to-char)
+
+;;; Setting Emacs registers
+;;; Eg. C-o i to jump to init.el
+(bind-key* "C-o" 'jump-to-register)
+(set-register ?b (cons 'file "~/.org/books.org"))
+(set-register ?i (cons 'file "~/.emacs.d/init.el"))
+(set-register ?s (cons 'file "~/.org/someday.org"))
+(set-register ?t (cons 'file "~/.org/today.org"))
+
+(use-package page-break-lines
+  :init (global-page-break-lines-mode)
+  :diminish page-break-lines-mode)
+
+;;; Keybindings
+;;; Eshell         C-m
+;;; Zap-up-to-char M-z
+;;; Compile files  F5
+;;; Nuke all buffers C-c n
 
 (require 'compile)
-(add-hook 'c++-mode-hook
-          (lambda ()
-            (unless (file-exists-p "Makefile")
-              (set (make-local-variable 'compile-command)
-                   (let ((file (file-name-nondirectory buffer-file-name)))
-                     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
-                             file
-                             (file-name-sans-extension file)))))))
+(autoload 'zap-up-to-char "misc"
+  "Kill up to, but not including ARGth occurrence of CHAR."
+  'interactive)
 
-;; Shortcut for compile
-(global-set-key (kbd "<f5>") (lambda ()
-                               (interactive)
-                               (setq-local compilation-read-command nil)
-                               (call-interactively 'compile)))
-
-;; Helper for compilation. Close the compilation window if
-;; there was no error at all.
-(defun compilation-exit-autoclose (status code msg)
-  ;; If M-x compile exists with a 0
-  (when (and (eq status 'exit) (zerop code))
-    ;; then bury the *compilation* buffer, so that C-x b doesn't go there
-    (bury-buffer)
-    ;; and delete the *compilation* window
-    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
-  ;; Always return the anticipated result of compilation-exit-message-function
-  (cons msg code))
-;; Specify my function (maybe I should have done a lambda function)
-(setq compilation-exit-message-function 'compilation-exit-autoclose)
-
-;;No startup screen
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
-
-;; Truncate lines
-(use-package visual-fill-column)
-(defun trunc-lines-hook ()
-  (visual-fill-column-mode 1)
-  (set-fill-column 80)
-  (setq truncate-lines nil))
-
-
-;;Setting up shell path
-(use-package exec-path-from-shell
-  :demand t
-  :init (exec-path-from-shell-initialize))
-
-;; Fish-mode
-(use-package fish-mode
-  :mode ("\\.fish\\'" . fish-mode))
-
-
-;;Firestarter
-(use-package firestarter
-  :bind ("C-c m s" . firestarter-mode)
-  :init (put 'firestarter 'safe-local-variable 'identity))
-
-;;User-details
-(setq user-full-name "Jethro Kuan"
-      user-mail-address "jethrokuan95@gmail.com")
-
-;; Emacs profiling tool
-(use-package esup
-  :defer t)
-
-
-;;;; Theming
-;;   Color Schemes
-(use-package tao-theme
-  :init (load-theme 'tao-yang t))
-
-(use-package gruvbox-theme
-  :disabled t
-  :init (load-theme 'gruvbox t))
-
-(use-package smart-mode-line
-  :config (progn
-            (setq sml/no-confirm-load-theme t)
-            (setq sml/theme 'light)
-            (sml/setup)))
-
-(use-package beacon
-  :diminish beacon-mode
-  :config (progn
-            (beacon-mode 1)
-            (setq beacon-push-mark 35)
-            (setq beacon-color "#FFF")))
-
-(use-package golden-ratio
-  :diminish golden-ratio-mode
-  :config (progn
-            (add-to-list 'golden-ratio-extra-commands 'ace-window)
-            (golden-ratio-mode 1)))
-
-;;   Show parens
-(show-paren-mode 1)
-(setq show-paren-delay 0)
-
-
 ;;;;   Useful functions
-(defun split-window-right-and-move-there-dammit ()
+(defun split-and-move-right ()
   (interactive)
   (split-window-right)
   (windmove-right))
@@ -220,19 +176,90 @@
           (select-window first-win)
           (if this-win-2nd (other-window 1))))))
 
-(global-set-key (kbd "C-x |") 'toggle-window-split)
-
+(bind-key* "C-x |" 'toggle-window-split)
+(bind-key* "C-x m" 'eshell)
+(bind-key* "M-z" 'zap-up-to-char)
+(bind-key* "C-c !" 'nuke-all-buffers)
+(bind-key* "C-x 3" 'split-and-move-right)
+(bind-key* "<f5>" (lambda ()
+                    (interactive)
+                    (setq-local compilation-read-command nil)
+                    (call-interactively 'compile)))
 
+;;Setting up shell path
+(use-package exec-path-from-shell
+  :demand t
+  :init (exec-path-from-shell-initialize))
+
+;; Fish-mode
+(use-package fish-mode
+  :mode ("\\.fish\\'" . fish-mode))
+
+;;;; Compilation:
+;; Helper for compilation. Close the compilation window if
+;; there was no error at all.
+(defun compilation-exit-autoclose (status code msg)
+  ;; If M-x compile exists with a 0
+  (when (and (eq status 'exit) (zerop code))
+    ;; then bury the *compilation* buffer, so that C-x b doesn't go there
+    (bury-buffer)
+    ;; and delete the *compilation* window
+    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
+  ;; Always return the anticipated result of compilation-exit-message-function
+  (cons msg code))
+;; Specify my function (maybe I should have done a lambda function)
+(setq compilation-exit-message-function 'compilation-exit-autoclose)
+
+;; Emacs profiling tool
+(use-package esup
+  :defer t)
+
+;;; Theming
+;;; Tao theme: Black and White
+(use-package tao-theme
+  :init (load-theme 'tao-yang t))
+
+;;; Improved modeline
+(use-package smart-mode-line
+  :config (progn
+            (setq sml/no-confirm-load-theme t)
+            (setq sml/theme 'light)
+            (sml/setup)))
+
+;;; Shows cursor location when jumping around
+(use-package beacon
+  :diminish beacon-mode
+  :config (progn
+            (beacon-mode 1)
+            (setq beacon-push-mark 10)
+            (setq beacon-color "#ccc")))
+
+;;; Uses more screen estate when editing current file
+(use-package golden-ratio
+  :diminish golden-ratio-mode
+  :config (progn
+            (add-to-list 'golden-ratio-extra-commands 'ace-window)
+            (golden-ratio-mode 1)))
+
+;;;   Show parens
+(show-paren-mode 1)
+(setq show-paren-delay 0)
+
+;;; Firestarter
+;;; Runs commands like shell commands on save
+(use-package firestarter
+  :bind ("C-c m s" . firestarter-mode)
+  :init (put 'firestarter 'safe-local-variable 'identity))
+
+;;; Flycheck
+;;; Syntax checker for Emacs
+;;; Flycheck-pos-tip pops up the warnings and errors below
+;;; warning text
 (use-package flycheck
   :config (progn
             (use-package flycheck-pos-tip
               :config (flycheck-pos-tip-mode))
             (add-hook 'prog-mode-hook 'global-flycheck-mode)))
-
-(use-package focus
-  :diminish focus-mode
-  :bind ("C-c m f" . focus-mode))
-
 
 ;;;; Minor Modes
 ;;; Visual Upgrades
@@ -260,21 +287,9 @@
   :diminish which-key-mode
   :config (add-hook 'after-init-hook 'which-key-mode))
 
-;;   Rainbow-delimiters for pretty brackets
-(use-package rainbow-delimiters
-  :disabled t
-  :config (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-
 ;;   Rainbow-mode for displaying colors for RGB and hex values
 (use-package rainbow-mode
   :config (add-hook 'css-mode-hook 'rainbow-mode))
-
-;;   Display line nums in prog-mode
-(defun linum-mode-hook () 
-  (linum-mode 1))
-
-(add-hook 'prog-mode-hook 'linum-mode-hook)
-
 
 ;;;; Movement
 (use-package multiple-cursors
@@ -294,12 +309,6 @@
 (use-package change-inner
   :bind (("M-i" . change-inner)
          ("M-o" . change-outer)))
-
-(use-package undo-tree
-  :diminish undo-tree-mode
-  :config (global-undo-tree-mode)
-  :bind ("s-/" . undo-tree-visualize))
-
 
 ;;;; Helm
 (use-package helm
@@ -312,39 +321,15 @@
           ("C-x b" . helm-buffers-list)
           ("M-y" . helm-show-kill-ring)
           ("M-a" . helm-M-x)
-          ("C-x f" . helm-fzf)
-          ("C-x c o" . helm-occur)
-          ("C-x c SPC" . helm-all-mark-rings))
+          ("C-c o" . helm-occur)
+          ("C-c SPC" . helm-all-mark-rings))
   :config (progn
             (require 'helm-config)
             (setq helm-candidate-number-limit 100)
             (setq helm-idle-delay 0.0
                   helm-input-idle-delay 0.01
                   helm-quick-update t 
-                  helm-ff-skip-boring-files t)
-            (defvar helm-fzf-source
-              (helm-build-async-source "fzf"
-                :candidates-process 'helm-fzf--do-candidate-process
-                :nohighlight t
-                :requires-pattern 2
-                :candidate-number-limit 9999))
-
-            (defun helm-fzf--do-candidate-process ()
-              (let* ((cmd-args `("fzf" "-x" "-f" ,helm-pattern))
-                     (proc (apply #'start-file-process "helm-fzf" nil cmd-args)))
-                (prog1 proc
-                  (set-process-sentinel
-                   proc
-                   (lambda (process event)
-                     (helm-process-deferred-sentinel-hook
-                      process event (helm-default-directory)))))))
-
-            (defun helm-fzf ()
-              (interactive)
-              (let ((default-directory "~/"))
-                (find-file
-                 (concat "~/" (helm :sources '(helm-fzf-source)
-                                    :buffer "*helm-fzf*")))))
+                  helm-ff-skip-boring-files t) 
             (helm-mode 1)))
 
 ;; Search
@@ -354,36 +339,35 @@
 ;; Descbinds
 (use-package helm-descbinds
   :bind ("C-c d" . helm-descbinds))
-
 
-;;   Smartparens
-(use-package smartparens
-  :disabled t
-  :diminish smartparens-mode
-  :commands smartparens-strict-mode smartparens-mode sp-restrict-to-pairs-interactive sp-local-pair
-  :init  (setq sp-interactive-dwim t)
-  :config (progn
-            (require 'smartparens-config)
-            (sp-use-smartparens-bindings)
-            (sp-pair "(" ")" :wrap "C-(")
-            (sp-pair "[" "]" :wrap "C-[")
-            (sp-pair "{" "}" :wrap "C-{")))
-
-;;   Paredit
+;;; Paredit
 (use-package paredit
   :diminish paredit-mode
   :config  (progn
              (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
              (add-hook 'clojure-mode-hook #'paredit-mode)))
-
 
-;;   Magit
+;;; Git
+;;; Magit
 (use-package magit  
   :bind (("C-x g" . magit-status)
          ("C-x M-g" . magit-blame))
   :init (setq magit-auto-revert-mode nil)
   :config (add-hook 'magit-mode-hook 'hl-line-mode))
 
+;;; Git Gutter
+(use-package git-gutter
+  :diminish git-gutter-mode
+  :init
+  (custom-set-variables
+   '(git-gutter:modified-sign "==") 
+   '(git-gutter:added-sign "++")
+   '(git-gutter:deleted-sign "--")) 
+  :config (progn
+            (set-face-foreground 'git-gutter:modified "#222")
+            (set-face-foreground 'git-gutter:added "#222")
+            (set-face-foreground 'git-gutter:deleted "#222")
+            (global-git-gutter-mode +1)))
 
 ;;;; Code/Text Completion
 ;;   Yasnippet - snippets
@@ -411,20 +395,20 @@
 ;;;; Project Management
 ;;   Projectile
 (use-package projectile
-  :demand
+  :demand t
   :init (setq projectile-use-git-grep t)
   :bind (("s-f" . projectile-find-file)
          ("s-F" . projectile-grep))
-  :bind-keymap ("C-c p" . projectile-command-map)
+  :bind-keymap ("C-x p" . projectile-command-map)
   :config (progn
             (use-package helm-projectile
               :config (progn
                         (setq projectile-completion-system 'helm)
                         (helm-projectile-on)))
+            (setq projectile-create-missing-test-files t)
             (projectile-global-mode t)))
-
 
-;;;; Org Mode
+;;; Org Mode
 (use-package org-plus-contrib
   :init  (add-hook 'org-mode-hook #'trunc-lines-hook)
   :bind* (("C-c c" . org-capture)
@@ -471,36 +455,32 @@
                    :html-preamble t))))
   :config (progn
             (use-package ox-reveal
-              :config (require 'ox-reveal))
-            (use-package org-trello
-              :config (progn
-                        (custom-set-variables '(org-trello-files '("/home/jethro/.org/Trello/fridge.org")))
-                        (setq org-trello-consumer-key "f8bcf0f535a7cd6be5c2533bc1c9c809"
-                              org-trello-access-token "548bee5e0e1a40385e087ea544ebdd19bfe6ea6034d812ca99e0948149c4353c")))))
-
+              :config (require 'ox-reveal))))
 
-;;;; Markdown mode
+;;;; Writing
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
   :config (progn
             (setq markdown-command "multimarkdown")
-            (add-hook 'markdown-mode-hook #'trunc-lines-hook))
+            (add-hook 'markdown-mode-hook #'trunc-lines-hook)))
 
-  
+(use-package focus
+  :diminish focus-mode
+  :bind ("C-c m f" . focus-mode))
+
 ;;;; Clojure
-  ;;   Clojure-mode
-  (use-package clojure-mode
-    :mode (("\\.clj\\'" . clojure-mode)
-           ("\\.boot\\'" . clojure-mode)
-           ("\\.edn\\'" . clojure-mode)
-           ("\\.cljs\\'" . clojure-mode)
-           ("\\.cljs\\.hl\\'" . clojure-mode))
-    :init
-    (add-hook 'clojure-mode-hook #'eldoc-mode)
-    (add-hook 'clojure-mode-hook #'subword-mode)
-    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-    :config (progn              
-              )))
+;;   Clojure-mode
+(use-package clojure-mode
+  :mode (("\\.clj\\'" . clojure-mode)
+         ("\\.boot\\'" . clojure-mode)
+         ("\\.edn\\'" . clojure-mode)
+         ("\\.cljs\\'" . clojure-mode)
+         ("\\.cljs\\.hl\\'" . clojure-mode))
+  :init
+  (add-hook 'clojure-mode-hook #'eldoc-mode)
+  (add-hook 'clojure-mode-hook #'subword-mode)
+  (add-hook 'clojure-mode-hook #'clj-refactor-mode))
+
 ;; Cider
 (use-package cider
   :ensure t
@@ -601,23 +581,30 @@
 
 (use-package irony
   :disabled t
-  :mode (("\\.cpp\\'" . irony-mode)
-         ("\\.c\\'" . irony-mode))
+  :mode (("\\.cpp\\'" . c++-mode)
+         ("\\.c\\'" . c-mode))
   :diminish irony-mode
-  :config (progn
-            (defun my-irony-mode-hook ()
-              (define-key irony-mode-map [remap completion-at-point]
-                'irony-completion-at-point-async)
-              (define-key irony-mode-map [remap complete-symbol]
-                'irony-completion-at-point-async))
-            (add-hook 'c++-mode-hook 'irony-mode)
-            (add-hook 'c-mode-hook 'irony-mode)
-            (add-hook 'objc-mode-hook 'irony-mode)
-            (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-            (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-            (use-package company-irony
-              :disabled t
-              :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))))
+  :init (progn
+          (add-hook 'c++-mode-hook 'irony-mode)
+          (add-hook 'c-mode-hook 'irony-mode)
+          (add-hook 'objc-mode-hook 'irony-mode)
+          (defun my-irony-mode-hook ()
+            (define-key irony-mode-map [remap completion-at-point]
+              'irony-completion-at-point-async)
+            (define-key irony-mode-map [remap complete-symbol]
+              'irony-completion-at-point-async))
+          (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+          (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+          (add-hook 'irony-mode-hook
+                    (lambda ()
+                      (unless (file-exists-p "Makefile")
+                        (set (make-local-variable 'compile-command)
+                             (let ((file (file-name-nondirectory buffer-file-name)))
+                               (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
+                                       file
+                                       (file-name-sans-extension file)))))))
+          (use-package company-irony
+            :init (eval-after-load 'company '(add-to-list 'company-backends 'company-irony)))))
 
 
 (use-package go-mode
@@ -647,16 +634,4 @@
                                                 (company-mode))))))
 
 (provide 'init.el)
-;;init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(safe-local-variable-values (quote ((firestarter-type . t)))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;;; init.el ends here

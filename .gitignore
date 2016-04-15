@@ -19,3 +19,4 @@ init.elc
 /init.html
 /.mc-lists.el
 /async-bytecomp.log
+irony/
