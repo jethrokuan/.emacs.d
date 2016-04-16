@@ -61,7 +61,24 @@
 (setq message-log-max 10000)
 
 ;;; Base font
-(add-to-list 'default-frame-alist '(font . "Inconsolata-g for Powerline"))
+(defvar emacs-english-font "Source Code Pro for Powerline"
+  "the font name of English.")
+
+(defun font-exist-p (fontname)
+  "Test if this font is exist or not.
+  This function only work on GUI mode, on terminal it just
+  return nil since you can't set font for emacs on it."
+  (if (or (not fontname) (string= fontname "") (not (display-graphic-p)))
+      nil
+    (if (not (x-list-fonts fontname))
+        nil t)))
+
+(defun set-font (font)
+  "Setup emacs English and Chinese font on x window-system."
+  (if (font-exist-p font)
+      (set-default-font "Droid Sans Mono for Powerline 12")))
+
+(set-font emacs-english-font)
 
 ;;; Use 2 spaces instead of tabs at all times
 (setq-default tab-width 2)
