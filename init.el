@@ -57,6 +57,9 @@
 ;;; y/n
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;;; replace highlighted text when typed over
+(delete-selection-mode 1)
+
 ;;; Debugging
 (setq message-log-max 10000)
 
