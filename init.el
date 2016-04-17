@@ -345,7 +345,11 @@
 
 ;; Descbinds
 (use-package helm-descbinds
-  :bind ("C-c d" . helm-descbinds))
+  :bind ("C-c b" . helm-descbinds))
+
+(use-package helm-dash
+  :bind (("C-c d" . helm-dash)
+         ("C-c C-d" . helm-dash-at-point)))
 
 ;;; Paredit
 (use-package paredit
