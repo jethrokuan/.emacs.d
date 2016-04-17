@@ -387,6 +387,7 @@
 
 ;;   Company - code completions
 (use-package company
+  :defer 5
   :diminish company-mode
   :init (progn
           (add-hook 'after-init-hook 'global-company-mode)
@@ -403,17 +404,53 @@
 ;;;   Projectile
 (use-package projectile
   :demand t
-  :init (setq projectile-use-git-grep t)
+  :init (projectile-global-mode 1)
   :bind (("s-f" . projectile-find-file)
          ("s-F" . projectile-grep))
   :bind-keymap ("C-x p" . projectile-command-map)
-  :config (progn
-            (use-package helm-projectile
-              :config (progn
-                        (setq projectile-completion-system 'helm)
-                        (helm-projectile-on)))
-            (setq projectile-create-missing-test-files t)
-            (projectile-global-mode t)))
+  :config
+  (require 'projectile)
+  (setq projectile-use-git-grep t)
+  (setq projectile-switch-project-action
+        #'projectile-commander)
+  (setq projectile-create-missing-test-files t)
+  (def-projectile-commander-method ?s
+    "Open a *eshell* buffer for the project."
+    (projectile-run-eshell))
+  (def-projectile-commander-method ?c
+    "Run `compile' in the project."
+    (projectile-compile-project nil))
+  (def-projectile-commander-method ?\C-?
+    "Go back to project selection."
+    (projectile-switch-project))
+  (def-projectile-commander-method ?d
+    "Open project root in dired."
+    (projectile-dired))
+  (def-projectile-commander-method ?F
+    "Git fetch."
+    (magit-status)
+    (call-interactively #'magit-fetch-current))
+  (def-projectile-commander-method ?j
+    "Jack-in."
+    (let* ((opts (projectile-current-project-files))
+           (file (ido-completing-read
+                  "Find file: "
+                  opts
+                  nil nil nil nil
+                  (car (cl-member-if
+                        (lambda (f)
+                          (string-match "core\\.clj\\'" f))
+                        opts)))))
+      (find-file (expand-file-name
+                  file (projectile-project-root)))
+      (run-hooks 'projectile-find-file-hook)
+      (cider-jack-in)))
+  (use-package helm-projectile
+    :config
+    (require 'helm-projectile)
+    (helm-projectile-on)
+    (setq projectile-switch-project-action
+          #'projectile-commander)))
 
 ;;; Org Mode
 (use-package org-plus-contrib
