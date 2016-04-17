@@ -64,7 +64,7 @@
 (setq message-log-max 10000)
 
 ;;; Base font
-(defvar emacs-english-font "Source Code Pro for Powerline"
+(defvar emacs-english-font "Source Code Pro for Powerline 14"
   "the font name of English.")
 
 (defun font-exist-p (fontname)
@@ -76,12 +76,8 @@
     (if (not (x-list-fonts fontname))
         nil t)))
 
-(defun set-font (font)
-  "Setup emacs English and Chinese font on x window-system."
-  (if (font-exist-p font)
-      (set-default-font "Droid Sans Mono for Powerline 12")))
-
-(set-font emacs-english-font)
+(if (font-exist-p emacs-english-font)
+    (setq default-frame-alist '((emacs-english-font))))
 
 ;;; Use 2 spaces instead of tabs at all times
 (setq-default tab-width 2)
