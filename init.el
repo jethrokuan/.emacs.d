@@ -463,6 +463,16 @@
           (setq org-default-notes-directory (concat org-directory "/notes.org"))
           (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
           (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
+          (setq org-hide-emphasis-markers t)
+          (font-lock-add-keywords 'org-mode
+                                  '(("^ +\\([-*]\\) "
+                                     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+          (use-package org-bullets
+            :diminish org-bullets-mode
+            :init
+            (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+          (custom-set-faces
+           '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
           (setq org-refile-targets
                 '((nil :maxlevel . 3)
                   (org-agenda-files :maxlevel . 3)))
