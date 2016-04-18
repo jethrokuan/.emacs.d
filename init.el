@@ -492,7 +492,7 @@
                    :with-todo-keywords t
                    :with-toc nil
                    :with-tags nil
-                   :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
+                   :html-head "<title> Jethro | Books </title><link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
                    :html-preamble t))))
   :config (progn
             (use-package ox-reveal
