@@ -104,10 +104,7 @@
 (setq inhibit-startup-message t)
 
 ;; Truncate lines
-(use-package visual-fill-column)
 (defun trunc-lines-hook ()
-  (visual-fill-column-mode 1)
-  (set-fill-column 80)
   (setq truncate-lines nil))
 
 ;;; Change backup directory to prevent littering of working dir
