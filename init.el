@@ -461,7 +461,7 @@
           (setq org-modules '(org-drill))
           (setq org-directory "~/.org")
           (setq org-default-notes-directory (concat org-directory "/notes.org"))
-          (setq org-agenda-files (file-expand-wildcards "~/.org/*.org"))
+          (setq org-agenda-files (append (file-expand-wildcards "~/.org/calendars/*.org") (file-expand-wildcards "~/.org/*.org")))
           (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
           (setq org-hide-emphasis-markers t)
           (font-lock-add-keywords 'org-mode
@@ -503,10 +503,23 @@
                    :with-toc nil
                    :with-tags nil
                    :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
-                   :html-preamble t))))
-  :config (progn
-            (use-package ox-reveal
-              :config (require 'ox-reveal))))
+                   :html-preamble t)))))
+
+(use-package ox-reveal
+  :config (require 'ox-reveal))
+
+(use-package calfw
+  :config
+  (require 'calfw)
+  (require 'calfw-org)
+  (use-package org-gcal
+    :config
+    (require 'org-gcal)
+    (setq org-gcal-client-id "1025518578318-89os2t4n2ghd8105038u8b84hr90tqee.apps.googleusercontent.com"
+          org-gcal-client-secret "govgKiWUCZmNSMHEm76YyNSB"
+          org-gcal-file-alist '(("jethro@tinkertanker.com" . "~/.org/calendars/jethro_tinkertanker.org")
+                                ("jethrokuan95@gmail.com" .  "~/.org/calendars/jethro_gmail.org")                                
+                                ("tinkertanker.com_63qqihhcdv12ves1po72cjcqdk@group.calendar.google.com" . "~/.org/calendars/tinkercademy.org")))))
 
 ;;;; Writing
 (use-package markdown-mode
@@ -656,3 +669,26 @@
   :mode ("\\.fish\\'" . fish-mode))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(anzu-deactivate-region t)
+ '(anzu-mode-lighter "")
+ '(anzu-replace-threshold 50)
+ '(anzu-replace-to-string-separator " => ")
+ '(anzu-search-threshold 1000)
+ '(git-gutter:added-sign "++")
+ '(git-gutter:deleted-sign "--")
+ '(git-gutter:modified-sign "==")
+ '(git-gutter:update-interval 2)
+ '(org-agenda-files
+   (quote
+    ("~/.org/Links.org" "~/.org/books.org" "~/.org/expenses.org" "~/.org/ideas.org" "~/.org/personal.org" "~/.org/someday.org" "~/.org/temp vocab.org" "~/.org/today.org" "~/.org/vocab.org"))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
