@@ -58,7 +58,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;;; replace highlighted text when typed over
-(delete-selection-mode 1)
+(delete-selection-mode +1)
 
 ;;; Debugging
 (setq message-log-max 10000)
@@ -450,76 +450,72 @@
           #'projectile-commander)))
 
 ;;; Org Mode
+(defvar jk/org-agenda-files
+  (append (file-expand-wildcards "~/.org/*.org") (file-expand-wildcards "~/.org/calendars/*.org"))
+  "Files to include in org-agenda-files")
+
 (use-package org-plus-contrib
-  :init  (add-hook 'org-mode-hook #'trunc-lines-hook)
   :bind* (("C-c c" . org-capture)
           ("C-c a" . org-agenda)
           ("C-c l" . org-store-link))
   :mode ("\\.org\\'" . org-mode)
-  :init (progn
-          (setq org-ellipsis "⤵")
-          (setq org-modules '(org-drill))
-          (setq org-directory "~/.org")
-          (setq org-default-notes-directory (concat org-directory "/notes.org"))
-          (setq org-agenda-files (append (file-expand-wildcards "~/.org/calendars/*.org") (file-expand-wildcards "~/.org/*.org")))
-          (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
-          (setq org-hide-emphasis-markers t)
-          (font-lock-add-keywords 'org-mode
-                                  '(("^ +\\([-*]\\) "
-                                     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-          (use-package org-bullets
-            :diminish org-bullets-mode
-            :init
-            (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-          (custom-set-faces
-           '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
-          (setq org-refile-targets
-                '((nil :maxlevel . 3)
-                  (org-agenda-files :maxlevel . 3)))
-          (setq org-use-fast-todo-selection t)
-          (setq org-treat-S-cursor-todo-selection-as-state-change nil)
-          (setq org-capture-templates
-                '(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
-                   "* TODO %? %i\n")
-                  ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
-                   "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-                  ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
-                   "* TODO %? %i\n")
-                  ("b" "Book" entry (file "~/.org/books.org")
-                   "* TO-READ %(org-set-tags) %? %i\n")
-                  ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
-                   "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
-                  ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
-          (setq org-publish-project-alist
-                '(("org-books"
-                   ;; Path to your org files.
-                   :publishing-function org-html-publish-to-html
-                   :publishing-directory "~/Documents/Code/jethrokuan.github.io/"
-                   :base-directory "~/.org/"
-                   :exclude ".*"
-                   :include ["books.org"]
-                   :with-emphasize t
-                   :with-todo-keywords t
-                   :with-toc nil
-                   :with-tags nil
-                   :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
-                   :html-preamble t)))))
+  :init
+  (add-hook 'org-mode-hook #'trunc-lines-hook) 
+  (setq org-ellipsis "⤵")
+  (setq org-modules '(org-drill))
+  (setq org-directory "~/.org")
+  (setq org-default-notes-directory (concat org-directory "/notes.org"))          
+  (setq org-agenda-dim-blocked-tasks t) ;;clearer agenda
+  (setq org-agenda-files jk/org-agenda-files)
+  (setq org-hide-emphasis-markers t)
+  (font-lock-add-keywords 'org-mode
+                          '(("^ +\\([-*]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) 
+  (custom-set-faces
+   '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
+  (setq org-refile-targets
+        '((nil :maxlevel . 3)
+          (org-agenda-files :maxlevel . 3)))
+  (setq org-use-fast-todo-selection t)
+  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/.org/someday.org" "Tasks")
+           "* TODO %? %i\n")
+          ("e" "Email" entry (file+headline "~/.org/today.org" "Emails")
+           "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+          ("p" "Project" entry (file+headline "~/.org/someday.org" "Projects")
+           "* TODO %? %i\n")
+          ("b" "Book" entry (file "~/.org/books.org")
+           "* TO-READ %(org-set-tags) %? %i\n")
+          ("v" "Vocab" entry (file+headline "~/.org/vocab.org" "Vocabulary")
+           "* %^{The word} :drill:\n %\\1 \n** Answer \n%^{The definition}")
+          ("i" "Idea" entry (file+datetree "~/.org/ideas.org") "* %?\nEntered on %U\n %i\n")))
+  (setq org-publish-project-alist
+        '(("org-books"
+           ;; Path to your org files.
+           :publishing-function org-html-publish-to-html
+           :publishing-directory "~/Documents/Code/jethrokuan.github.io/"
+           :base-directory "~/.org/"
+           :exclude ".*"
+           :include ["books.org"]
+           :with-emphasize t
+           :with-todo-keywords t
+           :with-toc nil
+           :with-tags nil
+           :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
+           :html-preamble t))))
 
 (use-package ox-reveal
   :config (require 'ox-reveal))
 
-(use-package calfw
+(use-package org-gcal
   :config
-  (require 'calfw)
-  (require 'calfw-org)
-  (use-package org-gcal
-    :config
-    (require 'org-gcal)
-    (setq org-gcal-client-id "1025518578318-89os2t4n2ghd8105038u8b84hr90tqee.apps.googleusercontent.com"
-          org-gcal-client-secret "govgKiWUCZmNSMHEm76YyNSB"
-          org-gcal-file-alist '(("jethro@tinkertanker.com" . "~/.org/calendars/jethro_tinkertanker.org")
-                                ("jethrokuan95@gmail.com" .  "~/.org/calendars/jethro_gmail.org")                                
-                                ("tinkertanker.com_63qqihhcdv12ves1po72cjcqdk@group.calendar.google.com" . "~/.org/calendars/tinkercademy.org")))))
+  (require 'org-gcal)
+  (setq org-gcal-client-id "1025518578318-89os2t4n2ghd8105038u8b84hr90tqee.apps.googleusercontent.com"
+        org-gcal-client-secret "govgKiWUCZmNSMHEm76YyNSB"
+        org-gcal-file-alist '(("jethro@tinkertanker.com" . "~/.org/calendars/jethro_tinkertanker.org")
+                              ("jethrokuan95@gmail.com" .  "~/.org/calendars/jethro_gmail.org")
+                              ("tinkertanker.com_63qqihhcdv12ves1po72cjcqdk@group.calendar.google.com" . "~/.org/calendars/tinkercademy.org"))))
 
 ;;;; Writing
 (use-package markdown-mode
@@ -682,10 +678,7 @@
  '(git-gutter:added-sign "++")
  '(git-gutter:deleted-sign "--")
  '(git-gutter:modified-sign "==")
- '(git-gutter:update-interval 2)
- '(org-agenda-files
-   (quote
-    ("~/.org/Links.org" "~/.org/books.org" "~/.org/expenses.org" "~/.org/ideas.org" "~/.org/personal.org" "~/.org/someday.org" "~/.org/temp vocab.org" "~/.org/today.org" "~/.org/vocab.org"))))
+ '(git-gutter:update-interval 2))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
