@@ -300,6 +300,12 @@
   :bind (("C-'" . avy-goto-char)
          ("C-," . avy-goto-char-2)))
 
+(use-package dumb-jump
+  :diminish dumb-jump-mode
+  :bind (("C-M-g" . dumb-jump-go)
+         ("C-M-p" . dumb-jump-back)
+         ("C-M-q" . dumb-jump-quick-look)))
+
 (use-package ace-window
   :bind (("M-'" . ace-window)))
 
