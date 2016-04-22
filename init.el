@@ -212,7 +212,12 @@
 ;;; Theming
 ;;; Tao theme: Black and White
 (use-package tao-theme
+  :disabled t
   :init (load-theme 'tao-yang t))
+
+(use-package leuven-theme
+  :init (load-theme 'leuven t)
+  :config (setq org-fontify-whole-heading-line t))
 
 ;;; Shows cursor location when jumping around
 (use-package beacon
@@ -348,7 +353,8 @@
 
 (use-package helm-dash
   :bind (("C-c d" . helm-dash)
-         ("C-c C-d" . helm-dash-at-point)))
+         ("C-c C-d" . helm-dash-at-point))
+  :config (setq helm-dash-browser-func 'eww))
 
 ;;; Paredit
 (use-package paredit
@@ -477,8 +483,6 @@
   (font-lock-add-keywords 'org-mode
                           '(("^ +\\([-*]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) 
-  (custom-set-faces
-   '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
   (setq org-refile-targets
         '((nil :maxlevel . 3)
           (org-agenda-files :maxlevel . 3)))
