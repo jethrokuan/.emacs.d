@@ -57,6 +57,10 @@
 ;;; y/n
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; custom file
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
 ;;; replace highlighted text when typed over
 (delete-selection-mode +1)
 
@@ -212,12 +216,7 @@
 ;;; Theming
 ;;; Tao theme: Black and White
 (use-package tao-theme
-  :disabled t
   :init (load-theme 'tao-yang t))
-
-(use-package leuven-theme
-  :init (load-theme 'leuven t)
-  :config (setq org-fontify-whole-heading-line t))
 
 ;;; Shows cursor location when jumping around
 (use-package beacon
@@ -260,13 +259,6 @@
 ;;; Anzu
 (use-package anzu
   :diminish anzu-mode
-  :init (progn 
-          (custom-set-variables
-           '(anzu-mode-lighter "")
-           '(anzu-deactivate-region t)
-           '(anzu-search-threshold 1000)
-           '(anzu-replace-threshold 50)
-           '(anzu-replace-to-string-separator " => ")))
   :bind
   (([remap query-replace] . anzu-query-replace)
    ([remap query-replace-regexp] . anzu-query-replace-regexp)
@@ -710,21 +702,3 @@
 ;;; Fish
 (use-package fish-mode
   :mode ("\\.fish\\'" . fish-mode))
-
-;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(anzu-deactivate-region t)
- '(anzu-mode-lighter "")
- '(anzu-replace-threshold 50)
- '(anzu-replace-to-string-separator " => ")
- '(anzu-search-threshold 1000))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-meta-line ((t (:inherit font-lock-comment-face :height 1.0)))))
