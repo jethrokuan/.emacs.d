@@ -299,11 +299,12 @@
 (use-package multiple-cursors
   :bind (("C-M-c" . mc/edit-lines)
          ("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-previous-like-this)))
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-N" . mc/mark-next-lines)))
 
 (use-package avy
-  :bind (("C-'" . avy-goto-char)
-         ("C-," . avy-goto-char-2)))
+  :bind* (("C-'" . avy-goto-char)
+          ("C-," . avy-goto-char-2)))
 
 (use-package dumb-jump
   :diminish dumb-jump-mode
@@ -371,20 +372,24 @@
   :config (add-hook 'magit-mode-hook 'hl-line-mode))
 
 ;;; Git Gutter
-(use-package git-gutter
-  :diminish git-gutter-mode
+(use-package git-gutter+
+  :init (global-git-gutter+-mode)
+  :diminish git-gutter+-mode
   :defer 5
-  :init
-  (custom-set-variables
-   '(git-gutter:update-interval 2)
-   '(git-gutter:modified-sign "==") 
-   '(git-gutter:added-sign "++")
-   '(git-gutter:deleted-sign "--")) 
   :config (progn
-            (set-face-foreground 'git-gutter:modified "#222")
-            (set-face-foreground 'git-gutter:added "#222")
-            (set-face-foreground 'git-gutter:deleted "#222")
-            (global-git-gutter-mode +1)))
+            (define-key git-gutter+-mode-map (kbd "C-x n") 'git-gutter+-next-hunk)
+            (define-key git-gutter+-mode-map (kbd "C-x p") 'git-gutter+-previous-hunk)
+            (define-key git-gutter+-mode-map (kbd "C-x v =") 'git-gutter+-show-hunk)
+            (define-key git-gutter+-mode-map (kbd "C-x r") 'git-gutter+-revert-hunks)
+            (define-key git-gutter+-mode-map (kbd "C-x t") 'git-gutter+-stage-hunks)
+            (define-key git-gutter+-mode-map (kbd "C-x c") 'git-gutter+-commit)
+            (define-key git-gutter+-mode-map (kbd "C-x C") 'git-gutter+-stage-and-commit)
+            (define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
+            (define-key git-gutter+-mode-map (kbd "C-x U") 'git-gutter+-unstage-whole-buffer)
+            (setq git-gutter+-modified-sign "==")
+            (setq git-gutter+-added-sign "++")
+            (setq git-gutter+-deleted-sign "--")))
+
 
 ;;;; Code/Text Completion
 ;;   Yasnippet - snippets
@@ -512,7 +517,40 @@
            :with-todo-keywords t
            :with-toc nil
            :html-head "<link rel=\"stylesheet\" href=\"/css/org.css\" type=\"text/css\">"
-           :html-preamble t))))
+           :html-preamble t)))
+  (setq org-latex-pdf-process
+        '("xelatex -interaction nonstopmode %f"
+          "xelatex -interaction nonstopmode %f"))
+  :config
+  (require 'org-latex)
+  (add-to-list 'org-latex-classes
+               '("org-article"
+                 "\\documentclass[11pt,a4paper]{article}
+                  \\usepackage[T1]{fontenc}
+                  \\usepackage{fontspec}
+                  \\usepackage{graphicx} 
+                  \\usepackage{parskip}
+                  \\defaultfontfeatures{Mapping=tex-text}
+                  \\let\\oldsection\\section
+                  \\renewcommand\\section{\\clearpage\\oldsection}
+                  \\setlength{\\parskip}{1em}
+                  \\setromanfont{Gentium}
+                  \\setromanfont [BoldFont={Gentium Basic Bold},
+                                  ItalicFont={Gentium Basic Italic}]{Gentium Basic}                 
+                  \\setmonofont[Scale=0.8]{DejaVu Sans Mono}
+                  \\usepackage{geometry}
+                  \\usepackage{hyperref}
+                  \\geometry{a4paper, textwidth=6.5in, textheight=10in,
+                              marginparsep=7pt, marginparwidth=.6in}
+                  \\pagestyle{empty}
+                  \\title{}                  
+                  [NO-DEFAULT-PACKAGES]
+                  [NO-PACKAGES]"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 (use-package ox-reveal
   :config (require 'ox-reveal))
@@ -683,11 +721,7 @@
  '(anzu-mode-lighter "")
  '(anzu-replace-threshold 50)
  '(anzu-replace-to-string-separator " => ")
- '(anzu-search-threshold 1000)
- '(git-gutter:added-sign "++")
- '(git-gutter:deleted-sign "--")
- '(git-gutter:modified-sign "==")
- '(git-gutter:update-interval 2))
+ '(anzu-search-threshold 1000))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
