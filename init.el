@@ -132,6 +132,11 @@
 (use-package exec-path-from-shell
   :demand t
   :init (exec-path-from-shell-initialize))
+
+;; Paradox
+;; Better package listings
+(use-package paradox
+  :commands (paradox-list-packages))
 
 ;;; Setting Emacs registers
 ;;; Eg. C-o i to jump to init.el
