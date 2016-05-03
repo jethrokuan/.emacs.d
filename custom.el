@@ -7,7 +7,8 @@
  '(anzu-mode-lighter "")
  '(anzu-replace-threshold 50)
  '(anzu-replace-to-string-separator " => ")
- '(anzu-search-threshold 1000))
+ '(anzu-search-threshold 1000)
+ '(paradox-github-token "e0f4a9cba91185c65b8170f45ee7941c61b88552"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
