@@ -8,6 +8,7 @@
  '(anzu-replace-threshold 50)
  '(anzu-replace-to-string-separator " => ")
  '(anzu-search-threshold 1000)
+ '(paradox-automatically-star t)
  '(paradox-github-token "e0f4a9cba91185c65b8170f45ee7941c61b88552"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
