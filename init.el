@@ -690,6 +690,10 @@
                                          file))))))
             (use-package go-dlv
               :config (require 'go-dlv))
+            (use-package golint
+              :config
+              (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
+              (require 'golint))
             (use-package gorepl-mode
               :config (add-hook 'go-mode-hook #'gorepl-mode))
             (use-package company-go
