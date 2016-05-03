@@ -542,12 +542,12 @@
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
-
-(use-package ox-reveal
-  :config (require 'ox-reveal))
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+  (use-package ox-reveal
+    :config (require 'ox-reveal)))
 
 (use-package org-gcal
+  :defer 30
   :config
   (require 'org-gcal)
   (setq org-gcal-client-id "1025518578318-89os2t4n2ghd8105038u8b84hr90tqee.apps.googleusercontent.com"
@@ -606,7 +606,7 @@
 
 ;;; Web
 ;;; Included Packages
-;;; Web-mode, SCSS-mode, Emmet-mode, JSON-mode
+;;; Web-mode, SCSS-mode, Rainbow mode, Emmet-mode, JSON-mode
 
 (use-package web-mode 
   :mode (("\\.html\\'" . web-mode)
@@ -614,12 +614,22 @@
          ("\\.js\\'" . web-mode)
 				 ("\\.jsx\\'" . web-mode)
 				 ("\\.mustache'" . web-mode))
-  :config (progn
-            (setq web-mode-code-indent-offset 2)
-            (setq web-mode-markup-indent-offset 2)))
+  :config
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-markup-indent-offset 2)
+  (use-package emmet-mode
+    :diminish emmet-modea
+    :config (progn
+              (add-hook 'sgml-mode-hook 'emmet-mode)
+              (add-hook 'js2-mode-hook 'emmet-mode)
+              (add-hook 'css-mode-hook 'emmet-mode))))
 
+;; Rainbow-mode
+;; Colours hex and rgb values
 (use-package rainbow-mode
-  :config (add-hook 'css-mode-hook 'rainbow-mode))
+  :diminish rainbow-mode
+  :mode (("\\.css\\'" . rainbow-mode)
+         ("\\.scss\\'" . rainbow-mode)))
 
 ;;; SCSS-mode
 ;;; Turn on rainbow-mode when scss-mode is active
@@ -629,16 +639,6 @@
   :config (progn
             (setq scss-compile-at-save nil)
             (add-hook 'scss-mode-hook 'rainbow-mode)))
-
-;;; Emmet-mode
-;;; C-j to apply emmet expansions
-(use-package emmet-mode
-  :diminish emmet-mode
-  :config (progn
-            (add-hook 'sgml-mode-hook 'emmet-mode)
-            (add-hook 'web-mode-hook 'emmet-mode)
-            (add-hook 'js2-mode-hook 'emmet-mode)
-            (add-hook 'css-mode-hook 'emmet-mode)))
 
 ;;; JSON
 ;;; Set JSON indent level to 2 spaces
@@ -650,7 +650,6 @@
 
 ;;; Systems progamming
 ;;; Included languages: Go, C++
-
 
 ;;; Helper that closes compilation buffer if no error is made
 (defun compilation-exit-autoclose (status code msg)
