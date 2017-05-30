@@ -1,0 +1,2412 @@
+: #+TITLE: Jethro's Emacs.d Configuration
+* Introduction
+This document is a constant work-in-progress, and will contain the
+latest updates to my Emacs configuration. I have gone through several
+cycles of Emacs config bankruptcy, and time and time again have come
+back to a configuration similar to this.
+
+Notes:
+1. I use a Dvorak 60% keyboard, so some of the keybindings may not
+   apply for you.
+2. I use Stumpwm, so some of my configurations are created around that
+   as well.
+
+* Basic Setup
+** Add [[https://github.com/jwiegley/use-package/issues/70][use-package]]
+Use-package allows for isolation of package configuration, while
+maintaining tidiness and performance.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-and-compile
+  (defvar use-package-verbose t) 
+  (require 'cl)
+  (require 'use-package)
+  (require 'bind-key)
+  (require 'diminish)
+  (setq use-package-always-ensure t))
+#+END_SRC
+** Emacs Server
+Load the emacs server, if it is not running. This allows for
+almost-instant emacs "startup".
+
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (load "server")
+   (unless (server-running-p) (server-start))
+ #+END_SRC
+** Reloading the init file
+I want an easy way to reload my configuration when I change it. I bind
+it to =<f11>=.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun reload-init ()
+    (interactive)
+    (load-file "~/.emacs.d/init.el"))
+
+  (global-set-key (kbd "<f11>") 'reload-init)
+#+END_SRC
+
+** Add validate
+Validate is a package that checks for and reports Emacs config errors.
+#+begin_src emacs-lisp :tangle yes
+  (use-package validate)
+#+end_src
+** User configuration
+   #+begin_src emacs-lisp :tangle yes
+(validate-setq user-full-name "Jethro Kuan"
+      user-mail-address "jethrokuan95@gmail.com")
+   #+end_src
+** Auto Revert
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (global-auto-revert-mode 1)
+#+END_SRC
+** Custom file
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (validate-setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+   #+END_SRC
+** Custom font
+   I use Hack, patched with Powerline. Other good alternatives include Source Code Pro.
+*** Source Code Pro
+    #+BEGIN_SRC emacs-lisp :tangle yes
+      (add-to-list 'initial-frame-alist
+                   '(font . "Iosevka-12"))
+      (add-to-list 'default-frame-alist
+                   '(font . "Iosevka-12"))
+    #+END_SRC
+
+** UI Cruft
+   Remove useless toolbars and splash screens.
+
+   #+begin_src emacs-lisp :tangle yes
+(tooltip-mode -1)
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(validate-setq inhibit-splash-screen t)
+(validate-setq inhibit-startup-message t)
+   #+end_src
+
+** Use y/n over yes/no
+   Always prefer the shorter y/n over yes/no.
+
+   #+BEGIN_SRC emacs-lisp :tangle yes
+(defalias 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
+
+** Replace region when typing
+   Type over a selected region, instead of deleting before typing.
+
+   #+BEGIN_SRC emacs-lisp :tangle yes
+(delete-selection-mode +1)
+   #+end_src
+
+** Sentences
+   Emacs uses double-spaces by default. Use single spaces by default:
+
+   #+BEGIN_QUOTE
+   NOTE: This will cause an indistinction between sentences and name abbrieviations (eg. E. B. White)
+   #+END_QUOTE
+
+   #+begin_src emacs-lisp :tangle yes
+(validate-setq sentence-end-double-space nil)
+   #+end_src
+
+** Tab with 2 spaces
+   #+begin_src emacs-lisp :tangle yes
+     (setq-default tab-width 2)
+     (setq-default js-indent-level 2)
+     (setq-default indent-tabs-mode nil)
+   #+end_src
+
+** Don't wrap lines
+   Don't wrap lines for coding. Create a hook that enables wrapping, for modes like org-mode and markdown-mode.
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq-default truncate-lines t)
+     (defun trunc-lines-hook ()
+       (validate-setq truncate-lines nil))
+   #+end_src
+
+** Backup directory
+   #+begin_src emacs-lisp :tangle yes
+  (validate-setq backup-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (validate-setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
+   #+end_src
+
+   The following code will delete all backup files that are older than a certain date:
+
+   #+begin_src emacs-lisp :tangle no
+(message "Deleting old backup files...")
+(let ((week (* 60 60 24 7))
+      (current (float-time (current-time))))
+  (dolist (file (directory-files temporary-file-directory t))
+    (when (and (backup-file-name-p file)
+               (> (- current (float-time (fifth (file-attributes file))))
+                  week))
+      (message "%s" file)
+      (delete-file file))))
+   #+end_src
+** Load secrets
+   #+begin_src emacs-lisp :tangle yes
+(load "~/.emacs.d/secrets.el" t)
+   #+end_src
+** Add PATH to eshell
+   #+begin_src emacs-lisp :tangle yes
+  (use-package exec-path-from-shell 
+    :config
+    (exec-path-from-shell-initialize))
+   #+end_src
+
+** Default shell
+   #+begin_src emacs-lisp :tangle yes
+     (setq-default explicit-shell-file-name "/bin/bash")
+     (setq-default shell-file-name "/bin/bash")
+   #+end_src
+** Theme
+*** Adwaita
+    #+BEGIN_SRC emacs-lisp :tangle no
+  (load-theme 'adwaita t)
+    #+END_SRC
+*** Zenburn Theme
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package zenburn-theme
+    :init
+    (load-theme 'zenburn t))
+    #+END_SRC
+** Keybindings
+*** Opening Lines
+    #+begin_src emacs-lisp :tangle yes
+  (defun open-next-line (arg)
+    "Move to the next line and then opens a line.
+     See also `newline-and-indent'."
+    (interactive "p")
+    (end-of-line)
+    (open-line arg)
+    (next-line 1)
+    (when 'newline-and-indent
+      (indent-according-to-mode)))
+
+  (defun open-previous-line (arg)
+    "Open a new line before the current one. 
+       See also `newline-and-indent'."
+    (interactive "p")
+    (beginning-of-line)
+    (open-line arg)
+    (when 'newline-and-indent
+      (indent-according-to-mode)))
+
+  (bind-key "C-o" 'open-next-line)
+  (bind-key "M-o" 'open-previous-line)
+    #+end_src
+*** Nuke all buffers with =C-c !=
+    #+begin_src emacs-lisp :tangle yes
+  (defun jethro/nuke-all-buffers ()
+    (interactive)
+    (mapcar 'kill-buffer (buffer-list))
+    (delete-other-windows))
+
+  (bind-key* "C-c !" 'jethro/nuke-all-buffers)
+    #+end_src
+*** eshell with =C-x m=
+    #+begin_src emacs-lisp :tangle yes
+  (bind-key* "C-x m" 'eshell)
+    #+end_src
+*** mark-paragraph with =M-p=
+    #+begin_src emacs-lisp :tangle yes
+  (bind-key* "M-p" 'mark-paragraph)
+    #+end_src
+*** compile with =<f9>=
+    #+begin_src emacs-lisp :tangle yes
+  (bind-key* "<f9>" (lambda ()
+                      (interactive)
+                      (validate-setq-local compilation-read-command nil)
+                      (call-interactively 'compile)))
+    #+end_src
+**** 
+** Hydra
+   #+begin_src emacs-lisp :tangle yes
+  (use-package hydra)
+   #+end_src
+*** Ample Theme
+    #+BEGIN_SRC emacs-lisp :tangle no
+  (use-package ample-theme
+    :init
+    (load-theme 'ample t))
+    #+END_SRC
+* Mail (notmuch)
+** Basic Setup
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package notmuch
+    :bind (("<f10>" . notmuch))
+    :config
+    (define-key notmuch-search-mode-map "R"
+    (lambda ()
+      "mark message as read"
+      (interactive)
+      (notmuch-search-tag '("-unread")))))
+   #+END_SRC
+** Goobook
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'notmuch-address)
+  (validate-setq notmuch-address-command "~/.emacs.d/goobook")
+  (notmuch-address-message-insinuate)
+   #+END_SRC
+* Ivy
+  I've recently switched over from =helm= to =ivy=. Ivy is simpler, and easier to extend.
+** flx
+   Flx is required for fuzzy-matching.
+   #+begin_src emacs-lisp :tangle yes
+(use-package flx)
+   #+end_src
+** Counsel
+   Counsel contains ivy enhancements for commonly-used functions.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package counsel
+       :demand t
+       :diminish ivy-mode
+       :bind*
+       (("C-c C-r" . ivy-resume)
+        ("M-a" . counsel-M-x)
+        ("C-M-i" . counsel-imenu)
+        ("C-x C-f" . counsel-find-file)
+        ("C-x j" . counsel-dired-jump)
+        ("C-x l" . counsel-locate)
+        ("C-c g" . counsel-git)
+        ("C-c j" . counsel-git-grep)
+        ("C-c s" . counsel-projectile-rg)
+        ("C-c f" . counsel-recentf)
+        ("M-y" . counsel-yank-pop))
+       :bind ((:map help-map
+                    ("f" . counsel-describe-function)
+                    ("v" . counsel-describe-variable)
+                    ("l" . counsel-info-lookup-symbol)))
+       :config
+       (defun ivy-dired ()
+         (interactive)
+         (if ivy--directory
+             (ivy-quit-and-run
+              (dired ivy--directory)
+              (when (re-search-forward
+                     (regexp-quote
+                      (substring ivy--current 0 -1)) nil t)
+                (goto-char (match-beginning 0))))
+           (user-error
+            "Not completing files currently")))
+       (ivy-mode 1)
+       (validate-setq counsel-find-file-at-point t)
+       (validate-setq ivy-use-virtual-buffers t)
+       (validate-setq ivy-display-style 'fancy)
+       (validate-setq ivy-initial-inputs-alist nil)
+       (validate-setq ivy-re-builders-alist'
+             '((ivy-switch-buffer . ivy--regex-plus)
+               (swiper . ivy--regex-plus)
+               (t . ivy--regex-fuzzy)))
+       (define-key ivy-minibuffer-map (kbd "C-:") 'ivy-dired)
+       (define-key ivy-minibuffer-map (kbd "C-c o") 'ivy-occur)
+       (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+       (ivy-set-actions
+        t
+        '(("I" insert "insert")))
+       (define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done)
+       (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-immediate-done))
+   #+end_src
+** Swiper
+   Swiper is ivy-enhanced isearch.
+   #+begin_src emacs-lisp :tangle no
+  (use-package swiper
+    :bind*
+    (("C-s" . swiper)
+     ("C-r" . swiper)
+     ("C-M-s" . swiper-all))
+    :bind
+    (:map read-expression-map
+          ("C-r" . counsel-expression-history)))
+   #+end_src
+* Moving Around
+** Crux
+   #+begin_src emacs-lisp :tangle yes
+  (use-package crux 
+    :bind* (("C-c o" . crux-open-with)
+            ("C-c n" . crux-cleanup-buffer-or-region)
+            ("C-c D" . crux-delete-file-and-buffer)
+            ("C-a" . crux-move-beginning-of-line)
+            ("M-o" . crux-smart-open-line)
+            ("C-c r" . crux-rename-file-and-buffer)
+            ("M-d" . crux-duplicate-current-line-or-region)
+            ("M-D" . crux-duplicate-and-comment-current-line-or-region)
+            ("s-o" . crux-smart-open-line-above)))
+   #+end_src
+** Open file
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/open-in-external-app ()
+    "Open the current file or dired marked files in external app.
+  The app is chosen from your OS's preference."
+    (interactive)
+    (let* (
+           (-file-list
+            (if (string-equal major-mode "dired-mode")
+                (dired-get-marked-files)
+              (list (buffer-file-name))))
+           (-do-it-p (if (<= (length -file-list) 5)
+                         t
+                       (y-or-n-p "Open more than 5 files? "))))
+      (when -do-it-p
+        (cond
+         ((string-equal system-type "windows-nt")
+          (mapc
+           (lambda (-fpath)
+             (w32-shell-execute "open" (replace-regexp-in-string "/" "\\" -fpath t t))) -file-list))
+         ((string-equal system-type "darwin")
+          (mapc
+           (lambda (-fpath)
+             (shell-command
+              (concat "open " (shell-quote-argument -fpath))))  -file-list))
+         ((string-equal system-type "gnu/linux")
+          (mapc
+           (lambda (-fpath) (let ((process-connection-type nil))
+                              (start-process "" nil "xdg-open" -fpath))) -file-list))))))
+  (bind-key* "<f8>" 'jethro/open-in-external-app)
+   #+END_SRC
+** Anzu
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package anzu
+    :diminish anzu-mode 
+    :config
+    (global-anzu-mode +1)
+    (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
+    (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
+   #+END_SRC
+** avy
+   Use avy to move between visible text.
+   #+begin_src emacs-lisp :tangle yes
+
+  (use-package avy
+    :bind* (("C-'" . avy-goto-char)
+            ("C-," . avy-goto-char-2))
+    :config
+    (validate-setq avy-keys '(?h ?t ?n ?s)))
+   #+end_src
+** dumb-jump
+   Use it to jump to function definitions. Requires no external depedencies.
+   #+begin_src emacs-lisp :tangle no
+(use-package dumb-jump
+  :diminish dumb-jump-mode
+  :bind (("C-M-g" . dumb-jump-go)
+         ("C-M-p" . dumb-jump-back)
+         ("C-M-q" . dumb-jump-quick-look)))
+   #+end_src
+** Window switching
+#+begin_src emacs-lisp :tangle yes
+  (use-package windmove 
+    :config
+    ;; use command key on Mac
+    (windmove-default-keybindings 'super)
+    ;; wrap around at edges
+    (validate-setq windmove-wrap-around t))
+#+end_src
+** ace-window (disabled)
+   Ace-window makes it easier to move between windows.
+   #+begin_src emacs-lisp :tangle no
+  (use-package ace-window
+    :bind ("M-'" . ace-window)
+    :config
+    (validate-setq aw-keys '(?h ?t ?n ?s)))
+   #+end_src
+** dired
+*** Requiring =dired=
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'dired)
+#+END_SRC
+*** Dired for Mac OSX
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (let ((gls "/usr/local/bin/gls"))
+    (if (file-exists-p gls) (validate-setq insert-directory-program gls)))
+#+END_SRC
+*** trash files instead of deleting them
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (validate-setq delete-by-moving-to-trash t)
+    #+END_SRC
+*** find-dired
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'find-dired)
+  (validate-setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
+    #+END_SRC
+*** Hide details
+    Hide details and only show file and folder names.
+    #+begin_src emacs-lisp :tangle no
+  (defun jethro/dired-mode-setup-hook ()
+    "hook for dired-mode"
+    (dired-hide-details-mode 1))
+
+  (add-hook 'dired-mode-hook 'jethro/dired-mode-setup-hook)
+    #+end_src
+*** Sort directories first
+    #+begin_src emacs-lisp :tangle yes
+(validate-setq dired-listing-switches "-aBhl  --group-directories-first")
+    #+end_src
+*** Recursive Copying and Deleting
+    #+begin_src emacs-lisp :tangle yes
+  (validate-setq dired-recursive-copies (quote always))
+  (validate-setq dired-recursive-deletes (quote top))
+    #+end_src
+*** dired-jump from file
+    #+begin_src emacs-lisp :tangle yes
+  (require 'dired-x)
+    #+end_src
+*** allow editing of permissions
+    #+BEGIN_SRC emacs-lisp :tangle yes
+      (use-package wdired
+        :config
+        (validate-setq wdired-allow-to-change-permissions t))
+    #+END_SRC
+*** dired-k
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dired-k
+    :config
+    (define-key dired-mode-map (kbd "K") 'dired-k)
+    (validate-setq dired-k-style 'git))
+    #+END_SRC
+*** dired-narrow
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dired-narrow
+    :bind (:map dired-mode-map
+                ("N" . dired-narrow-fuzzy)))
+    #+END_SRC
+*** dired-ranger
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dired-ranger
+    :bind (:map dired-mode-map
+                ("C" . dired-ranger-copy)
+                ("P" . dired-ranger-paste)
+                ("M" . dired-ranger-move)))
+    #+END_SRC
+* Editing Text
+** visual-regexp
+   #+begin_src emacs-lisp :tangle yes
+  (use-package visual-regexp
+    :bind* (("C-M-%" . vr/query-replace)
+            ("C-c m" . vr/mc-mark)))
+   #+end_src
+** electric-align
+   Use multiple spaces to align code and text.
+   #+begin_src emacs-lisp :tangle yes
+(use-package electric-align
+  :ensure f
+  :load-path "elisp/"
+  :diminish electric-align-mode
+  :config (add-hook 'prog-mode-hook 'electric-align-mode))
+   #+end_src
+** aggressive-indent
+   Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
+   #+begin_src emacs-lisp :tangle yes
+(use-package aggressive-indent
+  :diminish aggressive-indent-mode
+  :config (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+   #+end_src
+** multiple-cursors
+   A port of Sublime Text's multiple-cursors functionality.
+   #+begin_src emacs-lisp :tangle yes
+(use-package multiple-cursors
+  :bind (("C-M-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
+   #+end_src
+** expand-region
+   Use this often, and in combination with multiple-cursors.
+   #+begin_src emacs-lisp :tangle yes
+  (use-package expand-region
+    :bind (("C-=" . er/expand-region)))
+   #+end_src
+** iedit
+   #+BEGIN_SRC emacs-lisp :tangle yes
+(use-package iedit)
+   #+END_SRC
+** smartparens
+   #+begin_src emacs-lisp :tangle yes
+     (use-package smartparens
+       :bind
+       (:map smartparens-mode-map
+             ("C-M-f" . sp-forward-sexp)
+             ("C-M-b" . sp-backward-sexp)
+             ("C-M-u" . sp-backward-up-sexp)
+             ("C-M-d" . sp-down-sexp)
+             ("C-M-p" . sp-backward-down-sexp)
+             ("C-M-n" . sp-up-sexp)
+             ("M-s" . sp-splice-sexp)
+             ("M-<up>" . sp-splice-sexp-killing-backward)
+             ("M-<down>" . sp-splice-sexp-killing-forward)
+             ("M-r" . sp-splice-sexp-killing-around)
+             ("C-)" . sp-forward-slurp-sexp)
+             ("C-<right>" . sp-forward-slurp-sexp)
+             ("C-}" . sp-forward-barf-sexp)
+             ("C-<left>" . sp-forward-barf-sexp)
+             ("C-(" . sp-backward-slurp-sexp)
+             ("C-M-<left>" . sp-backward-slurp-sexp)
+             ("C-{" . sp-backward-barf-sexp)
+             ("C-M-<right>" . sp-backward-barf-sexp)
+             ("M-S" . sp-split-sexp))
+       :init
+       (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
+       (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
+       (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
+       (add-hook 'js2-mode-hook 'turn-on-smartparens-strict-mode)
+       :config
+       (require 'smartparens-config)
+
+       ;; Org-mode config
+
+       (sp-with-modes 'org-mode
+         (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
+         (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
+         (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
+         (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+         (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+         (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+         (sp-local-pair "«" "»"))
+
+       (defun sp--org-skip-asterisk (ms mb me)
+         (or (and (= (line-beginning-position) mb)
+                  (eq 32 (char-after (1+ mb))))
+             (and (= (1+ (line-beginning-position)) me)
+                  (eq 32 (char-after me))))))
+   #+end_src
+** zap-up-to-char
+   #+begin_src emacs-lisp :tangle yes
+  (autoload 'zap-up-to-char "misc"
+    "Kill up to, but not including ARGth occurrence of CHAR.
+
+    \(fn arg char)"
+    'interactive)
+
+  (bind-key* "M-z" 'zap-up-to-char)
+   #+end_src
+** move-text
+   #+begin_src emacs-lisp :tangle yes
+  (use-package move-text
+    :bind (("M-<up>" . move-text-up)
+           ("M-<down>" . move-text-down)))
+   #+end_src
+** Linting with Flycheck
+   #+begin_src emacs-lisp :tangle yes
+     (use-package flycheck
+       :config
+       (global-set-key (kbd "C-c h f")
+                       (defhydra hydra-flycheck
+                         (:pre (progn (validate-setq hydra-lv t) (flycheck-list-errors))
+                               :post (progn (validate-setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+                               :hint nil)
+                         "Errors"
+                         ("f"  flycheck-error-list-set-filter                            "Filter")
+                         ("n"  flycheck-next-error                                       "Next")
+                         ("p"  flycheck-previous-error                                   "Previous")
+                         ("<" flycheck-first-error                                      "First")
+                         (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
+                         ("q"  nil)))
+       (use-package flycheck-pos-tip
+         :config (flycheck-pos-tip-mode))
+       (add-hook 'prog-mode-hook 'global-flycheck-mode))
+   #+end_src
+** Templating with Yasnippet
+   #+begin_src emacs-lisp :tangle yes
+  (use-package yasnippet
+    :diminish yas-global-mode yas-minor-mode
+    :init (add-hook 'after-init-hook 'yas-global-mode)
+    :config (validate-setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
+   #+end_src
+** Autocompletions with Company
+   #+begin_src emacs-lisp :tangle yes
+     (use-package company
+       :diminish company-mode
+       :init
+       (add-hook 'after-init-hook 'global-company-mode)
+       :config
+       (require 'company-dabbrev)
+       (validate-setq company-dabbrev-ignore-case nil
+                      company-dabbrev-code-ignore-case nil
+                      company-dabbrev-downcase nil
+                      company-idle-delay 0
+                      company-begin-commands '(self-insert-command)
+                      company-transformers '(company-sort-by-occurrence))
+       (use-package company-quickhelp
+         :config (company-quickhelp-mode 1)))
+   #+end_src
+** Spellcheck with Flyspell
+   #+begin_src emacs-lisp :tangle yes
+  (use-package flyspell 
+    :ensure f 
+    :diminish flyspell-mode
+    :init
+    (setenv "DICTIONARY" "en_GB")
+    :config   
+    (add-hook 'markdown-mode-hook 'flyspell-mode))
+   #+end_src
+* Language Support
+** Direnv
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package direnv
+    :config
+    (direnv-mode)
+    (validate-setq direnv-always-show-summary t))
+#+END_SRC
+** Common Lisp
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (use-package slime
+       :config
+       (validate-setq inferior-lisp-program "sbcl")
+       (validate-setq slime-contribs '(slime-fancy))
+       (use-package slime-company
+         :config
+         (slime-setup '(slime-company))))
+   #+END_SRC
+** Emacs Lisp
+   #+begin_src emacs-lisp :tangle yes
+  (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
+   #+end_src
+** Nix
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package nix-mode
+    :config
+    (add-hook 'nix-mode-hook (lambda ()
+                               (aggressive-indent-mode -1))))
+   #+END_SRC
+*** completion
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company-nixos-options
+    :config
+    (add-to-list 'company-backends 'company-nixos-options))
+    #+END_SRC
+** Go
+   #+begin_src emacs-lisp :tangle yes
+(use-package go-mode
+  :mode ("\\.go\\'" . go-mode)
+  :config (progn
+            (add-hook 'go-mode-hook 'compilation-auto-quit-window)
+            (add-hook 'go-mode-hook (lambda ()
+                                      (set (make-local-variable 'company-backends) '(company-go))
+                                      (company-mode)))
+            (add-hook 'go-mode-hook (lambda ()
+                                      (add-hook 'before-save-hook 'gofmt-before-save)
+                                      (local-set-key (kbd "M-.") 'godef-jump)))
+            (add-hook 'go-mode-hook
+                      (lambda ()
+                        (unless (file-exists-p "Makefile")
+                          (set (make-local-variable 'compile-command)
+                               (let ((file (file-name-nondirectory buffer-file-name)))
+                                 (format "go build %s"
+                                         file))))))
+            (use-package go-dlv
+              :config (require 'go-dlv))
+            (use-package golint
+              :config
+              (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
+              (require 'golint))
+            (use-package gorepl-mode
+              :config (add-hook 'go-mode-hook #'gorepl-mode))
+            (use-package company-go
+              :config (add-hook 'go-mode-hook (lambda ()
+                                                (set (make-local-variable 'company-backends) '(company-go))
+                                                (company-mode))))))
+   #+end_src
+** C
+   #+BEGIN_SRC emacs-lisp :tangle no
+  (add-hook 'c-mode-hook
+            (lambda ()
+              (unless (file-exists-p "Makefile")
+                (set (make-local-variable 'compile-command)
+                     (let ((file (file-name-nondirectory buffer-file-name)))
+                       (format "cc -Wall %s -o %s --std=c99"
+                               file
+                               (file-name-sans-extension file)))))))
+   #+END_SRC
+** C++
+*** C++ compile function
+    #+begin_src emacs-lisp :tangle yes
+(add-hook 'c++-mode-hook
+          (lambda ()
+            (unless (file-exists-p "Makefile")
+              (set (make-local-variable 'compile-command)
+                   (let ((file (file-name-nondirectory buffer-file-name)))
+                     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
+                             file
+                             (file-name-sans-extension file)))))))
+    #+end_src
+** Fish
+   #+begin_src emacs-lisp :tangle yes
+  (use-package fish-mode
+    :mode ("\\.fish\\'" . fish-mode)
+    :init (add-hook 'fish-mode-hook
+                    (lambda () (aggressive-indent-mode -1))))
+   #+end_src
+** Rust
+   #+begin_src emacs-lisp :tangle yes
+(use-package rust-mode
+  :mode ("\\.rs\\'" . rust-mode))
+   #+end_src
+** Python
+*** Disabling aggressive-indent-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'python-mode-hook (lambda () (aggressive-indent-mode -1)))
+#+END_SRC
+*** Python path
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (eval-after-load "python-mode"
+    (lambda ()
+      (validate-setq python-remove-cwd-from-path t)))
+#+END_SRC
+*** Sphinx Docs
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sphinx-doc
+    :init
+    (add-hook 'python-mode-hook (lambda ()
+                                  (sphinx-doc-mode 1))))
+#+END_SRC
+*** Anaconda
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package anaconda-mode
+    :init
+    (add-hook 'python-mode-hook 'anaconda-mode)
+    (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
+#+END_SRC
+**** Company
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company-anaconda
+    :config
+    (eval-after-load "company"
+      '(add-to-list 'company-backends '(company-anaconda))))
+#+END_SRC
+*** isort
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package py-isort
+    :defer t
+    :init
+    (add-hook 'before-save-hook 'py-isort-before-save))
+#+END_SRC
+*** yapfify
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package yapfify 
+    :init
+    (add-hook 'python-mode-hook 'yapf-mode))
+#+END_SRC
+*** Autopep8
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package py-autopep8
+    :init
+    (add-hook 'python-mode-hook 'py-autopep8-enable-on-save))
+    #+END_SRC
+*** Pyvenv
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package pyvenv)
+#+END_SRC
+*** Pytest
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package pytest
+    :bind (:map python-mode-map
+                ("C-c a" . pytest-all)
+                ("C-c m" . pytest-module)
+                ("C-c ." . pytest-one)
+                ("C-c d" . pytest-directory)
+                ("C-c p a" . pytest-pdb-all)
+                ("C-c p m" . pytest-pdb-module)
+                ("C-c p ." . pytest-pdb-one)))
+#+END_SRC
+*** Elpy (Disabled)
+    #+begin_src emacs-lisp :tangle no
+  (use-package elpy
+    :init
+    (add-hook 'python-mode-hook (lambda () (aggressive-indent-mode -1)))
+    (add-hook 'python-mode-hook 'elpy-mode)
+    :config
+    (when (require 'flycheck nil t)
+      (remove-hook 'elpy-modules 'elpy-module-flymake)
+      (remove-hook 'elpy-modules 'elpy-module-yasnippet)
+      (remove-hook 'elpy-mode-hook 'elpy-module-highlight-indentation)
+      (add-hook 'elpy-mode-hook 'flycheck-mode))
+    (elpy-enable))
+#+end_src
+
+** HTML
+*** Web-mode
+    #+begin_src emacs-lisp :tangle yes
+   (use-package web-mode
+     :mode (("\\.html\\'" . web-mode)
+            ("\\.html\\.erb\\'" . web-mode)
+            ("\\.mustache\\'" . web-mode)
+            ("\\.jinja\\'" . web-mode)
+            ("\\.njk\\'" . web-mode)
+            ("\\.php\\'" . web-mode))
+     :config
+     (validate-setq web-mode-enable-css-colorization t)
+     (validate-setq web-mode-code-indent-offset 2)
+     (validate-setq web-mode-markup-indent-offset 2))
+    #+end_src
+*** Emmet-mode
+    #+begin_src emacs-lisp :tangle yes
+(use-package emmet-mode
+  :diminish emmet-mode
+  :config
+  (add-hook 'web-mode-hook 'emmet-mode)
+  (add-hook 'vue-mode-hook 'emmet-mode))
+    #+end_src
+** CSS
+*** Rainbow-mode
+    #+begin_src emacs-lisp :tangle no
+   (use-package rainbow-mode
+     :diminish rainbow-mode
+     :config
+     (add-hook 'css-mode-hook 'rainbow-mode)
+     (add-hook 'scss-mode-hook 'rainbow-mode))
+    #+end_src
+*** SCSS-mode
+    #+begin_src emacs-lisp :tangle yes
+ (use-package scss-mode
+   :mode "\\.scss\\'" 
+   :config (progn
+             (validate-setq scss-compile-at-save nil)))
+    #+end_src
+** JS
+*** Flycheck
+    #+begin_src emacs-lisp :tangle yes
+      (setq-default flycheck-disabled-checkers
+		    (append flycheck-disabled-checkers
+			    '(javascript-jshint)))
+      (flycheck-add-mode 'javascript-eslint 'js2-mode)
+      (flycheck-add-mode 'javascript-eslint 'web-mode)
+    #+end_src
+*** Skewer
+    #+begin_src emacs-lisp :tangle yes
+  (use-package skewer-mode  
+    :bind (:map skewer-mode-map
+                ("C-c C-k" . skewer-load-buffer))
+    :config
+    (add-hook 'js2-mode-hook 'skewer-mode))
+    #+end_src
+*** js-comint
+    #+begin_src emacs-lisp :tangle no
+  (use-package js-comint
+    :config
+    (add-hook 'js2-mode-hook
+              (lambda ()
+                (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
+                (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
+                (local-set-key (kbd "C-c b") 'js-send-buffer)
+                (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
+                (local-set-key (kbd "C-c l") 'js-load-file-and-go))))
+    #+end_src
+*** JS2-mode
+
+    Here I also added =tern-mode=. This requires the tern executable:
+    #+begin_src bash :tangle no
+npm install -g tern
+    #+end_src
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package js2-mode
+        :mode ("\\.js\\'" . js2-mode)
+        :config
+        (use-package tern
+          :diminish tern-mode
+          :config
+          (validate-setq js-switch-indent-offset 2)
+          (add-hook 'js2-mode-hook 'tern-mode) 
+          (use-package company-tern
+            :config
+            (add-to-list 'company-backends 'company-tern))))
+    #+end_src
+*** js-doc
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package js-doc
+    :config
+    (validate-setq js-doc-mail-address "jethrokuan95@gmail.com"
+          js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address)
+          js-doc-url "http://www.jethrokuan.com/"
+          js-doc-license "MIT")
+    (add-hook 'js2-mode-hook
+              #'(lambda ()
+                  (define-key js2-mode-map "\C-ci" 'js-doc-insert-function-doc)
+                  (define-key js2-mode-map "@" 'js-doc-insert-tag))))
+#+END_SRC
+*** JS2-refactor
+    #+begin_src emacs-lisp :tangle yes
+  (use-package js2-refactor
+    :config
+    (add-hook 'js2-mode-hook #'js2-refactor-mode)
+    (js2r-add-keybindings-with-prefix "C-c C-j"))
+    #+end_src
+*** Vue-mode
+    Additional support for Vue.js projects.
+
+    #+begin_src emacs-lisp :tangle yes
+ (use-package vue-mode
+   :mode "\\.vue\\'")
+    #+end_src
+** JSON
+   #+begin_src emacs-lisp :tangle yes
+ (use-package json-mode
+   :mode "\\.json\\'"
+   :config (add-hook 'json-mode-hook (lambda ()
+                                       (make-local-variable 'js-indent-level)
+                                       (validate-setq js-indent-level 2))))
+   #+end_src
+** Markdown
+   #+begin_src emacs-lisp :tangle yes
+(use-package markdown-mode
+  :mode ("\\.md\\'" . markdown-mode)
+  :config (progn
+            (validate-setq markdown-command "multimarkdown")
+            (add-hook 'markdown-mode-hook #'trunc-lines-hook)))
+   #+end_src
+** Clojure
+*** Clojure-mode
+    #+begin_src emacs-lisp :tangle yes
+  (use-package clojure-mode
+    :mode (("\\.clj\\'" . clojure-mode)
+           ("\\.boot\\'" . clojure-mode)
+           ("\\.edn\\'" . clojure-mode)
+           ("\\.cljs\\'" . clojurescript-mode)
+           ("\\.cljs\\.hl\\'" . clojurescript-mode))
+    :init
+    (add-hook 'clojure-mode-hook #'eldoc-mode)
+    (add-hook 'clojure-mode-hook #'subword-mode)
+    (add-hook 'clojure-mode-hook #'cider-mode)
+    (add-hook 'clojure-mode-hook #'clj-refactor-mode))
+    #+end_src
+*** Cider
+    #+begin_src emacs-lisp :tangle yes
+      (use-package cider
+        :init
+        (add-hook 'cider-mode-hook #'clj-refactor-mode)
+        (add-hook 'cider-repl-mode-hook #'company-mode)
+        (add-hook 'cider-mode-hook #'company-mode)
+        :diminish subword-mode
+        :config
+        (validate-setq nrepl-log-messages t                  
+              cider-repl-display-in-current-window t
+              cider-repl-use-clojure-font-lock t    
+              cider-prompt-save-file-on-load 'always-save
+              cider-font-lock-dynamically '(macro core function var)
+              nrepl-hide-special-buffers t
+              cider-show-error-buffer nil
+              cider-overlays-use-font-lock t
+              cider-repl-result-prefix ";; => ")
+        (validate-setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+        (cider-repl-toggle-pretty-printing))
+    #+end_src
+*** clj-refactor
+    #+begin_src emacs-lisp :tangle yes
+(use-package clj-refactor
+  :defines cljr-add-keybindings-with-prefix
+  :diminish clj-refactor-mode
+  :config (cljr-add-keybindings-with-prefix "C-c C-j"))
+    #+end_src
+*** Squiggly-clojure
+    #+begin_src emacs-lisp :tangle yes
+  (use-package flycheck-clojure
+    :config
+    (flycheck-clojure-setup))
+    #+end_src
+** Latex
+*** AucTeX
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package auctex
+    :defer t
+    :config
+    (validate-setq TeX-auto-save t
+          TeX-parse-self t
+          TeX-syntactic-comment t
+          ;; Synctex support
+          TeX-source-correlate-start-server nil
+          ;; Don't insert line-break at inline math
+          LaTeX-fill-break-at-separators nil)
+    (validate-setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
+                                  ("qpdfview" "qpdfview %o#%(outpage)")))
+    (validate-setq TeX-view-program-selection '((output-pdf "qpdfview")
+                                       (output-pdf "Evince")))
+    (when latex-enable-auto-fill
+      (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
+    (when latex-enable-folding
+      (add-hook 'LaTeX-mode-hook 'TeX-fold-mode))
+    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+    (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
+    (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
+    #+END_SRC
+*** Autocomplete support
+    #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company-auctex
+    :defer t)
+    #+END_SRC
+* Visual Enhancements
+** linum-mode (Disabled)
+   #+begin_src emacs-lisp :tangle no
+(add-hook 'prog-mode-hook 
+  (lambda ()
+    (linum-mode 1)))
+   #+end_src
+** hl-line-mode
+   #+begin_src emacs-lisp :tangle yes
+(global-hl-line-mode 1)
+   #+end_src
+** whitespace-mode
+   Show fill-column.
+   #+begin_src emacs-lisp :tangle yes
+(require 'whitespace)
+(validate-setq whitespace-line-column 80) ;; limit line length
+(validate-setq whitespace-style '(face lines-tail))
+
+(add-hook 'prog-mode-hook 'whitespace-mode)
+   #+end_src
+** Page-break-lines
+   #+begin_src emacs-lisp :tangle yes
+(use-package page-break-lines)
+   #+end_src
+** Smart-mode-line
+   #+begin_src emacs-lisp :tangle no
+  (use-package smart-mode-line
+    :config
+    (add-hook 'after-init-hook 'sml/setup)
+    (validate-setq sml/name-width 30)
+    (validate-setq sml/shorten-directory t)
+    (validate-setq sml/shorten-modes t)
+    (validate-setq sml/mode-width 'full)
+    (validate-setq sml/replacer-regexp-list
+          '(("^~/.org/" ":O:")
+            ("^~/\\.emacs\\.d/" ":ED")))
+    (validate-setq rm-blacklist
+          (format "^ \\(%s\\)$"
+                  (mapconcat #'identity
+                             '("FlyC.*"
+                               "Projectile.*"
+                               "GitGutter"
+                               "ivy"
+                               "company"
+                               ""
+                               "doom"
+                               ","
+                               "ElDoc")
+                             "\\|"))))
+   #+end_src
+*** Showing time
+#+begin_src emacs-lisp :tangle yes
+  (display-time-mode 1)
+  (eval-after-load "display-time-mode"
+    (validate-setq display-time-24hr-format t))
+#+end_src
+** nyan-mode
+   #+begin_src emacs-lisp :tangle no
+  (use-package nyan-mode
+    :config
+    (nyan-mode 1))
+   #+end_src
+** Zooming
+   #+begin_src emacs-lisp :tangle yes
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("i" text-scale-increase "in")
+  ("o" text-scale-decrease "out"))
+   #+end_src
+** beacon
+   Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
+   #+begin_src emacs-lisp :tangle yes
+  (use-package beacon
+    :diminish beacon-mode
+    :config
+    (beacon-mode 1)
+    (validate-setq beacon-push-mark 10))
+   #+end_src
+** show-paren
+   Always show matching parenthesis.
+   #+begin_src emacs-lisp :tangle yes
+(show-paren-mode 1)
+(validate-setq show-paren-delay 0)
+   #+end_src
+** golden-ratio
+   Give the working window more screen estate.
+   #+begin_src emacs-lisp :tangle yes
+(use-package golden-ratio
+  :diminish golden-ratio-mode
+  :config (progn
+            (add-to-list 'golden-ratio-extra-commands 'ace-window)
+            (golden-ratio-mode 1)))
+   #+end_src
+** volatile-highlights
+   Highlights recently copied/pasted text.
+   #+begin_src emacs-lisp :tangle yes
+(use-package volatile-highlights
+  :diminish volatile-highlights-mode
+  :config (volatile-highlights-mode t))
+   #+end_src
+** git-gutter-fringe+
+   Displays added/modified/deleted on the left.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package git-gutter-fringe+
+       :diminish git-gutter+-mode
+       :config
+       (global-git-gutter+-mode)
+       (set-face-foreground 'git-gutter+-modified "gold1")
+       (set-face-foreground 'git-gutter+-added    "SeaGreen")
+       (set-face-foreground 'git-gutter+-deleted  "IndianRed")
+       (validate-setq git-gutter-fr+-side 'left-fringe))
+   #+end_src
+* Org-mode :noexport:
+** Getting Started
+   :PROPERTIES:
+   :CUSTOM_ID: GettingStarted
+   :END:
+*** Org-Mode Setup
+    :PROPERTIES:
+    :CUSTOM_ID: Setup
+    :END:
+ #+begin_src emacs-lisp :tangle yes
+   (use-package org-plus-contrib
+     :bind (("C-c l" . org-store-link)
+            ("C-c a" . org-agenda) 
+            ("C-c c" . org-capture))
+     :config
+     (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)))
+ #+end_src
+*** Enabling auto-fill-mode
+This enables `auto-fill-mode` for org-mode files
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'org-mode-hook (lambda ()
+                             (auto-fill-mode 1)))
+#+END_SRC
+*** Agenda Setup
+ #+begin_src emacs-lisp :tangle yes
+   (validate-setq org-agenda-files (file-expand-wildcards "~/.org/gtd/[a-zA-z]*.org"))
+ #+end_src
+
+    :CUSTOM_ID: OrgFileStructure
+    :END:
+** org-capture shortcut
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar jethro/delete-frame-after-capture nil
+    "Whether to delete the last frame after the current capture")
+
+  (defun jethro/delete-frame-if-neccessary (&rest r)
+    (if (or (equal "capture" (frame-parameter nil 'name))
+            jethro/delete-frame-after-capture)
+        (progn
+          (validate-setq jethro/delete-frame-after-capture nil)
+          (delete-frame))
+      (validate-setq jethro/delete-frame-after-capture nil)))
+
+  (defadvice org-switch-to-buffer-other-window
+      (after supress-window-splitting activate)
+    "Delete the extra window if we're in a capture frame"
+    (if (equal "capture" (frame-parameter nil 'name))
+        (delete-other-windows)))
+
+  (defun make-capture-frame ()
+    "Create a new frame and run org-capture."
+    (interactive)
+    (select-frame
+     (make-frame '((window-system . x)
+                   (name . "capture")
+                   (width . 120)
+                   (height . 15)))) 
+    (validate-setq word-wrap 1)
+    (validate-setq truncate-lines nil)
+    (validate-setq jethro/delete-frame-after-capture t)
+    (org-capture nil "t"))
+
+  (advice-add 'org-capture-finalize :after 'jethro/delete-frame-if-neccessary)
+  (advice-add 'org-capture-kill :after 'jethro/delete-frame-if-neccessary)
+  (advice-add 'org-capture-refile :after 'jethro/delete-frame-if-neccessary)
+#+END_SRC
+** Refiling Tasks
+   :PROPERTIES:
+   :CUSTOM_ID: Refiling
+   :END:
+*** Refile Setup
+    :PROPERTIES:
+    :CUSTOM_ID: RefileSetup
+    :END:
+ Here is my refile configuration:
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+   (validate-setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                    (org-agenda-files :maxlevel . 9))))
+
+   ; Use full outline paths for refile targets - we file directly with IDO
+   (validate-setq org-refile-use-outline-path t)
+
+   ; Targets complete directly with IDO
+   (validate-setq org-outline-path-complete-in-steps nil)
+
+   ; Allow refile to create parent tasks with confirmation
+   (validate-setq org-refile-allow-creating-parent-nodes 'confirm)
+
+   (validate-setq org-completion-use-ido t)
+
+   ;;;; Refile settings
+   (defun jethro/verify-refile-target ()
+     "Exclude todo keywords with a done state from refile targets"
+     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+   (validate-setq org-refile-target-verify-function 'jethro/verify-refile-target)
+ #+end_src
+
+** Custom agenda views
+   :PROPERTIES:
+   :CUSTOM_ID: CustomAgendaViews
+   :END:
+*** Setup
+    :PROPERTIES:
+    :CUSTOM_ID: CustomAgendaViewSetup
+    :END:
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ;; Do not dim blocked tasks
+   (validate-setq org-agenda-dim-blocked-tasks nil)
+
+   ;; Compact the block agenda view
+   (validate-setq org-agenda-compact-blocks t)
+
+   ;; Custom agenda command definitions
+   (validate-setq org-agenda-custom-commands
+         '((" " "Agenda"
+            ((agenda "" nil)
+             (tags "REFILE"
+                   ((org-agenda-overriding-header "Tasks to Refile")
+                    (org-tags-match-list-sublevels nil)))
+             (todo "NEXT"
+                   ((org-agenda-overriding-header "School Next Tasks")
+                    (org-agenda-todo-ignore-scheduled t)
+                    (org-agenda-todo-ignore-deadlines t)
+                    (org-agenda-files '("~/.org/gtd/school.org"))))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "School Todos")
+                    (org-agenda-todo-ignore-scheduled t)
+                    (org-agenda-todo-ignore-deadlines t) 
+                    (org-agenda-files '("~/.org/gtd/school.org"))))
+             (tags-todo "-CANCELLED/!"
+                        ((org-agenda-overriding-header "Stuck Projects")
+                         (org-agenda-skip-function 'bh/skip-non-stuck-projects)
+                         (org-agenda-sorting-strategy '(category-keep)))) 
+             (tags-todo "-HOLD-CANCELLED/!"
+                        ((org-agenda-overriding-header "Projects")
+                         (org-agenda-skip-function 'bh/skip-non-projects)
+                         (org-tags-match-list-sublevels 'indented)
+                         (org-agenda-sorting-strategy '(category-keep))))
+             (tags-todo "-CANCELLED/!NEXT"
+                        ((org-agenda-overriding-header (concat "Project Next Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
+                         (org-tags-match-list-sublevels t)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-sorting-strategy
+                          '(todo-state-down effort-up category-keep))))
+             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
+                        ((org-agenda-overriding-header (concat "Project Subtasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-non-project-tasks)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-sorting-strategy
+                          '(category-keep))))
+             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
+                        ((org-agenda-overriding-header (concat "Standalone Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-files (remove "~/.org/gtd/school.org" org-agenda-files))
+                         (org-agenda-skip-function 'bh/skip-project-tasks)
+                         (org-agenda-todo-ignore-scheduled t)
+                         (org-agenda-todo-ignore-deadlines t)
+                         (org-agenda-todo-ignore-with-date t)
+                         (org-agenda-sorting-strategy
+                          '(category-keep))))
+             (tags-todo "-CANCELLED+WAITING|HOLD/!"
+                        ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-non-tasks)
+                         (org-tags-match-list-sublevels nil)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks))) 
+             (tags "-REFILE/"
+                   ((org-agenda-overriding-header "Tasks to Archive")
+                    (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
+                    (org-tags-match-list-sublevels nil))))
+            nil)))
+ #+end_src
+
+ My day goes generally like this:
+
+ - Punch in (this starts the clock on the default task)
+ - Look at the agenda and make a mental note of anything important to deal with today
+ - Read email and news
+   - create notes, and tasks for things that need responses with org-capture
+ - Check refile tasks and respond to emails
+ - Look at my agenda and work on important tasks for today
+   - Clock it in
+   - Work on it until it is =DONE= or it gets interrupted
+ - Work on tasks
+ - Make journal entries (=C-c c j=) for interruptions
+ - Punch out for lunch and punch back in after lunch
+ - work on more tasks
+ - Refile tasks to empty the list
+   - Tag tasks to be refiled with =m= collecting all tasks for the same target
+   - Bulk refile the tasks to the target location with =B r=
+   - Repeat (or refile individually with =C-c C-w=) until all refile tasks are gone
+ - Mark habits done today as DONE
+ - Punch out at the end of the work day
+*** What do I work on next?
+    :PROPERTIES:
+    :CUSTOM_ID: WhatDoIWorkOnNext
+    :END:
+
+ Start with deadlines and tasks scheduled today or earlier from the
+ daily agenda view.  Then move on to tasks in the =Next Tasks= list in
+ the block agenda view.  I tend to schedule current projects to 'today'
+ when I start work on them and they sit on my daily agenda reminding me
+ that they need to be completed.  I normally only schedule one or two
+ projects to the daily agenda and unschedule things that are no longer
+ important and don't deserve my attention today.
+
+ When I look for a new task to work on I generally hit =F12 SPC= to get
+ the block agenda and follow this order:
+
+ - Pick something off today's agenda
+   - deadline for today (do this first - it's not late yet)
+   - deadline in the past (it's already late)
+   - a scheduled task for today (it's supposed to be done today)
+   - a scheduled task that is still on the agenda
+   - deadline that is coming up soon
+ - pick a NEXT task
+ - If you run out of items to work on look for a NEXT task in the current context
+   pick a task from the Tasks list of the current project.
+**** Why keep it all on the =NEXT= list?
+     :PROPERTIES:
+     :CUSTOM_ID: CustomAgendaViewsNextList
+     :END:
+
+ I've moved to a more GTD way of doing things.  Now I just use a =NEXT=
+ list.  Only projects get tasks with =NEXT= keywords since stuck projects
+ initiate the need for marking or creating =NEXT= tasks.  A =NEXT= task
+ is something that is available to work on /now/, it is the next
+ logical step in some project.
+
+ To drop a task off the =NEXT= list simply move it back to the =TODO=
+ state.
+*** Filtering
+    :PROPERTIES:
+    :CUSTOM_ID: CustomAgendaViewFiltering
+    :END:
+
+ So many tasks, so little time.  I have hundreds of tasks at any given
+ time (373 right now).  There is so much stuff to look at it can be
+ daunting.  This is where agenda filtering saves the day.
+
+ It's 11:53AM and I'm in work mode just before lunch.  I don't want to
+ see tasks that are not work related right now.  I also don't want to
+ work on a big project just before lunch... so I need to find small
+ tasks that I can knock off the list.
+
+ How do we do this?  Get a list of NEXT tasks from the block agenda and
+ then narrow it down with filtering.  Tasks are ordered in the NEXT
+ agenda view by estimated effort so the short tasks are first -- just
+ start at the top and work your way down.  I can limit the displayed
+ agenda tasks to those estimates of 10 minutes or less with =/ + 1= and
+ I can pick something that fits the minutes I have left before I take
+ off for lunch.
+**** Automatically removing context based tasks with / RET
+     :PROPERTIES:
+     :CUSTOM_ID: CustomAgendaViewFilteringContext
+     :END:
+
+ =/ RET= in the agenda is really useful.  This awesome feature was
+ added to org-mode by John Wiegley.  It removes tasks automatically by
+ filtering based on a user-provided function.
+
+ At work I have projects I'm working on which are assigned by my
+ manager.  Sometimes priorities changes and projects are delayed to
+ sometime in the future.  This means I need to stop working on these
+ immediately.  I put the project task on =HOLD= and work on something
+ else.  The =/ RET= filter removes =HOLD= tasks and subtasks (because
+ of tag inheritance).
+
+ At home I have some tasks tagged with =farm= since these need to be
+ performed when I am physically at our family farm.  Since I am there
+ infrequently I have added =farm= to the list of auto-excluded tags on
+ my system.  I can always explicitly filter to just =farm= tasks with
+ =/ TAB farm RET= when I am physically there.
+
+ I have the following setup to allow =/ RET= to filter tasks based on
+ the description above.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (defun bh/org-auto-exclude-function (tag)
+   "Automatic task exclusion in the agenda with / RET"
+   (and (cond
+         ((string= tag "hold")
+          t)
+         ((string= tag "farm")
+          t))
+        (concat "-" tag)))
+
+ (validate-setq org-agenda-auto-exclude-function 'bh/org-auto-exclude-function)
+ #+end_src
+
+ This lets me filter tasks with just =/ RET= on the agenda which removes tasks I'm not
+ supposed to be working on now from the list of returned results.
+
+ This helps to keep my agenda clutter-free.
+** Tags
+   :PROPERTIES:
+   :CUSTOM_ID: Tags
+   :END:
+
+ Tasks can have any number of arbitrary tags.  Tags are used for:
+
+ - filtering todo lists and agenda views
+ - providing context for tasks
+ - tagging notes
+ - tagging phone calls
+ - tagging meetings
+ - tagging tasks to be refiled
+ - tagging tasks in a WAITING state because a parent task is WAITING
+ - tagging cancelled tasks because a parent task is CANCELLED
+ - preventing export of some subtrees when publishing
+
+ I use tags mostly for filtering in the agenda.  This means you can
+ find tasks with a specific tag easily across your large number of
+ org-mode files.
+
+*** Tags
+    :PROPERTIES:
+    :CUSTOM_ID: OrgTagAlist
+    :END:
+
+ Here are my tag definitions with associated keys for filtering in the
+ agenda views.
+
+ The startgroup - endgroup (=@XXX=) tags are mutually exclusive -
+ selecting one removes a similar tag already on the task.  These are
+ the context tags - you can't be in two places at once so if a task is
+ marked with @farm and you add @office then the @farm tag is removed
+ automagically.
+
+ The other tags =WAITING= .. =FLAGGED= are not mutually exclusive and
+ multiple tags can appear on a single task.  Some of those tags are
+ created by todo state change triggers.  The shortcut key is used to
+ add or remove the tag using =C-c C-q= or to apply the task for
+ filtering on the agenda.
+
+ I have both =FARM= and =@farm= tags.  =FARM= is set by a =FILETAGS=
+ entry and just gives me a way to filter anything farm related.  The
+ =@farm= tag signifies that the task as to be done /at the farm/.  If I
+ have to call someone about something that would have a =FARM= tag but
+ I can do that at home on my lunch break.  I don't physically have to
+ be at the farm to make the call.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ; Tags with fast selection keys
+   (validate-setq org-tag-alist (quote ((:startgroup)
+                               ("@errand" . ?e)
+                               ("@office" . ?o)
+                               ("@home" . ?H)
+                               ("@farm" . ?f)
+                               (:endgroup)
+                               ("WAITING" . ?w)
+                               ("HOLD" . ?h)
+                               ("PERSONAL" . ?P)
+                               ("WORK" . ?W)
+                               ("FARM" . ?F)
+                               ("ORG" . ?O)
+                               ("NORANG" . ?N)
+                               ("crypt" . ?E)
+                               ("NOTE" . ?n)
+                               ("CANCELLED" . ?c)
+                               ("FLAGGED" . ??))))
+
+   ; Allow setting single tags without the menu
+   (validate-setq org-fast-tag-selection-single-key (quote expert))
+
+   ; For tag searches ignore tasks with scheduled and deadline dates
+   (validate-setq org-agenda-tags-todo-honor-ignore-options t)
+ #+end_src
+*** Filetags
+    :PROPERTIES:
+    :CUSTOM_ID: FileTags
+    :END:
+
+ Filetags are a convenient way to apply one or more tags to all of the
+ headings in a file.
+
+ Filetags look like this:
+
+ #+begin_src org :exports src
+ ,#+FILETAGS: NORANG @office
+ #+end_src
+
+ I have the following =#+FILETAGS:= entries in my org-mode files:
+**** Non-work related org-mode files
+     :PROPERTIES:
+     :CUSTOM_ID: TaggingNonWorkFiles
+     :END:
+
+ | File         | Tags                  |
+ |--------------+-----------------------|
+ | todo.org     | PERSONAL              |
+ | gsoc2009.org | GSOC PERSONAL         |
+ | git.org      | GIT WORK              |
+ | org.org      | ORG WORK              |
+ | mark.org     | MARK PERSONAL         |
+ | farm.org     | FARM PERSONAL         |
+**** Work related org-mode files
+     :PROPERTIES:
+     :CUSTOM_ID: TaggingWorkFiles
+     :END:
+
+ | File        | Tags            |
+ |-------------+-----------------|
+ | norang.org  | NORANG @office  |
+ | ABC.org     | ABC @office     |
+ | XYZ.org     | XYZ @office     |
+ | ABC-DEF.org | ABC DEF @office |
+ | ABC-KKK.org | ABC KKK @office |
+ | YYY.org     | YYY @office     |
+**** Refile tasks
+     :PROPERTIES:
+     :CUSTOM_ID: RefileTasks
+     :END:
+
+ | File       | Tags         |
+ |------------+--------------|
+ | refile.org | REFILE       |
+ |------------+--------------|
+*** State Trigger Tags
+    :PROPERTIES:
+    :CUSTOM_ID: StateTriggerTags
+    :END:
+
+ The following tags are automatically added or removed by todo state
+ triggers described previously in [[#ToDoStateTriggers][ToDo state triggers]]
+
+ - =WAITING=
+   - =CANCELLED=
+** GTD stuff
+   :PROPERTIES:
+   :CUSTOM_ID: GTD
+   :
+ Most of my day is deadline/schedule driven.
+ I work off of the agenda first and then pick items from the todo lists as
+ outlined in [[#WhatDoIWorkOnNext][What do I work on next?]]
+*** Weekly Review Process
+    :PROPERTIES:
+    :CUSTOM_ID: GTDWeeklyReview
+    :END:
+
+ The first day of the week (usually Monday) I do my weekly review. 
+ I keep a list like this one to remind me what needs to be done.
+
+ To keep the agenda fast I set
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (validate-setq org-agenda-span 'day)
+ #+end_src
+ so only today's date is shown by default.  I only need the weekly
+ view during my weekly review and this keeps my agenda generation
+ fast.
+
+ I have a recurring task which keeps my weekly review checklist
+ handy.  This pops up as a reminder on Monday's.  This week I'm
+ doing my weekly review on Tuesday since Monday was a holiday.
+
+ #+begin_src org :exports src
+ ,* NEXT Weekly Review [0/6]
+   SCHEDULED: <2009-05-18 Mon ++1w> 
+   :LOGBOOK:...
+   :PROPERTIES:...
+
+   What to review:
+
+    - [ ] Check follow-up folder
+    - [ ] Review weekly agenda =F12 a w //=
+    - [ ] Check clocking data for past week =v c=
+    - [ ] Review clock report for past week =R=
+      - Check where we spent time (too much or too little) and rectify this week
+    - [ ] Look at entire agenda for today  =F12 SPC=
+    - [ ] Review projects =F12 SPC //= and =V= repeatedly to view each project
+
+    - start work
+      - daily agenda first - knock off items
+      - then work on NEXT tasks
+ #+end_src
+ The first item [ ] Check follow-up folder makes me pull out the paper
+ file I dump stuff into all week long - things I need to take care of
+ but are in no particular hurry to deal with.  Stuff I get in the mail
+ etc. that I don't want to deal with now.  I just toss it in my
+ =Follow-Up= folder in the filing cabinet and forget about it until the
+ weekly review.
+
+ I go through the folder and weed out anything that needs to be dealt
+ with.  After that everything else is in =org-mode=.  I tend to
+ schedule tasks onto the agenda for the coming week so that I don't
+ spend lots of time trying to find what needs to be worked on next.
+
+ This works for me.  Your mileage may vary ;)
+*** Project definition and finding stuck projects
+    :PROPERTIES:
+    :CUSTOM_ID: Projects
+    :END:
+
+ I'm using a new lazy project definition to mark tasks as projects.
+ This requires zero effort from me.  Any task with a subtask using a
+ todo keyword is a project.  Period.
+
+ Projects are 'stuck' if they have no subtask with a =NEXT= todo
+ keyword task defined.
+
+ The org-mode stuck projects agenda view lists projects that have no
+ =NEXT= task defined.  Stuck projects show up on my block agenda and I
+ tend to assign a =NEXT= task so the list remains empty.  This helps to
+ keep projects moving forward.
+
+ I disable the default org-mode stuck projects agenda view with the
+ following setting.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (validate-setq org-stuck-projects (quote ("" nil nil "")))
+ #+end_src
+
+ This prevents org-mode from trying to show incorrect data if I select
+ the default stuck project view with =F12 #= from the agenda menu.  My
+ customized stuck projects view is part of my block agenda displayed
+ with =F12 SPC=.
+
+ Projects can have subprojects - and these subprojects can also be stuck.
+ Any project that is stuck shows up on the stuck projects list so I can
+ indicate or create a =NEXT= task to move that project forward.
+
+ In the following example =Stuck Project A= is stuck because it has no
+ subtask which is =NEXT=.  =Project C= is not stuck because it has
+ =NEXT= tasks =SubTask G= and =Task I=.  =Stuck Sub Project D= is stuck
+ because =SubTask E= is not =NEXT= and there are no other tasks
+ available in this project.
+
+ #+begin_src org :exports src
+ ,* Category
+ ,** TODO Stuck Project A
+ ,*** TODO Task B
+ ,** TODO Project C
+ ,*** TODO Stuck Sub Project D
+ ,**** TODO SubTask E
+ ,*** TODO Sub Project F
+ ,**** NEXT SubTask G
+ ,**** TODO SubTask H
+ ,*** NEXT Task I
+ ,*** TODO Task J
+ #+end_src
+
+ All of the stuck projects and subprojects show up in the stuck
+ projects list and that is my indication to assign or create =NEXT=
+ tasks until the stuck projects list is empty.  Occasionally some
+ subtask is =WAITING= for something and the project is stuck until that
+ condition is satisfied.  In this case I leave it on the stuck project
+ list and just work on something else.  This stuck project 'bugs' me
+ regularly when I see it on the block agenda and this prompts me to
+ follow up on the thing that I'm waiting for.
+
+ I have the following helper functions defined for projects which are
+ used by agenda views.
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   (defun bh/is-project-p ()
+     "Any task with a todo keyword subtask"
+     (save-restriction
+       (widen)
+       (let ((has-subtask)
+             (subtree-end (save-excursion (org-end-of-subtree t)))
+             (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+         (save-excursion
+           (forward-line 1)
+           (while (and (not has-subtask)
+                       (< (point) subtree-end)
+                       (re-search-forward "^\*+ " subtree-end t))
+             (when (member (org-get-todo-state) org-todo-keywords-1)
+               (validate-setq has-subtask t))))
+         (and is-a-task has-subtask))))
+
+   (defun bh/is-project-subtree-p ()
+     "Any task with a todo keyword that is in a project subtree.
+   Callers of this function already widen the buffer view."
+     (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
+                                 (point))))
+       (save-excursion
+         (bh/find-project-task)
+         (if (equal (point) task)
+             nil
+           t))))
+
+   (defun bh/is-task-p ()
+     "Any task with a todo keyword and no subtask"
+     (save-restriction
+       (widen)
+       (let ((has-subtask)
+             (subtree-end (save-excursion (org-end-of-subtree t)))
+             (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+         (save-excursion
+           (forward-line 1)
+           (while (and (not has-subtask)
+                       (< (point) subtree-end)
+                       (re-search-forward "^\*+ " subtree-end t))
+             (when (member (org-get-todo-state) org-todo-keywords-1)
+               (validate-setq has-subtask t))))
+         (and is-a-task (not has-subtask)))))
+
+   (defun bh/is-subproject-p ()
+     "Any task which is a subtask of another project"
+     (let ((is-subproject)
+           (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+       (save-excursion
+         (while (and (not is-subproject) (org-up-heading-safe))
+           (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+             (validate-setq is-subproject t))))
+       (and is-a-task is-subproject)))
+
+   (defun bh/list-sublevels-for-projects-indented ()
+     "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+     This is normally used by skipping functions where this variable is already local to the agenda."
+     (if (marker-buffer org-agenda-restrict-begin)
+         (validate-setq org-tags-match-list-sublevels 'indented)
+       (validate-setq org-tags-match-list-sublevels nil))
+     nil)
+
+   (defun bh/list-sublevels-for-projects ()
+     "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+     This is normally used by skipping functions where this variable is already local to the agenda."
+     (if (marker-buffer org-agenda-restrict-begin)
+         (validate-setq org-tags-match-list-sublevels t)
+       (validate-setq org-tags-match-list-sublevels nil))
+     nil)
+
+   (defvar bh/hide-scheduled-and-waiting-next-tasks t)
+
+   (defun bh/toggle-next-task-display ()
+     (interactive)
+     (validate-setq bh/hide-scheduled-and-waiting-next-tasks (not bh/hide-scheduled-and-waiting-next-tasks))
+     (when  (equal major-mode 'org-agenda-mode)
+       (org-agenda-redo))
+     (message "%s WAITING and SCHEDULED NEXT Tasks" (if bh/hide-scheduled-and-waiting-next-tasks "Hide" "Show")))
+
+   (defun bh/skip-stuck-projects ()
+     "Skip trees that are not stuck projects"
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (if (bh/is-project-p)
+             (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                    (has-next ))
+               (save-excursion
+                 (forward-line 1)
+                 (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                   (unless (member "WAITING" (org-get-tags-at))
+                     (validate-setq has-next t))))
+               (if has-next
+                   nil
+                 next-headline)) ; a stuck project, has subtasks but no next task
+           nil))))
+
+   (defun bh/skip-non-stuck-projects ()
+     "Skip trees that are not stuck projects"
+     ;; (bh/list-sublevels-for-projects-indented)
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (if (bh/is-project-p)
+             (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                    (has-next ))
+               (save-excursion
+                 (forward-line 1)
+                 (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                   (unless (member "WAITING" (org-get-tags-at))
+                     (validate-setq has-next t))))
+               (if has-next
+                   next-headline
+                 nil)) ; a stuck project, has subtasks but no next task
+           next-headline))))
+
+   (defun bh/skip-non-projects ()
+     "Skip trees that are not projects"
+     ;; (bh/list-sublevels-for-projects-indented)
+     (if (save-excursion (bh/skip-non-stuck-projects))
+         (save-restriction
+           (widen)
+           (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+             (cond
+              ((bh/is-project-p)
+               nil)
+              ((and (bh/is-project-subtree-p) (not (bh/is-task-p)))
+               nil)
+              (t
+               subtree-end))))
+       (save-excursion (org-end-of-subtree t))))
+
+   (defun bh/skip-non-tasks ()
+     "Show non-project tasks.
+   Skip project and sub-project tasks, and project related tasks."
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond
+          ((bh/is-task-p)
+           nil)
+          (t
+           next-headline)))))
+
+   (defun bh/skip-project-trees-and-habits ()
+     "Skip trees that are projects"
+     (save-restriction
+       (widen)
+       (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          (t
+           nil)))))
+
+   (defun bh/skip-projects-and-habits-and-single-tasks ()
+     "Skip trees that are projects, tasks that are habits, single non-project tasks"
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond 
+          ((and bh/hide-scheduled-and-waiting-next-tasks
+                (member "WAITING" (org-get-tags-at)))
+           next-headline)
+          ((bh/is-project-p)
+           next-headline)
+          ((and (bh/is-task-p) (not (bh/is-project-subtree-p)))
+           next-headline)
+          (t
+           nil)))))
+
+   (defun bh/skip-project-tasks-maybe ()
+     "Show tasks related to the current restriction.
+   When restricted to a project, skip project and sub project tasks, habits, NEXT tasks, and loose tasks.
+   When not restricted, skip project and sub-project tasks, habits, and project related tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (next-headline (save-excursion (or (outline-next-heading) (point-max))))
+              (limit-to-project (marker-buffer org-agenda-restrict-begin)))
+         (cond
+          ((bh/is-project-p)
+           next-headline) 
+          ((and (not limit-to-project)
+                (bh/is-project-subtree-p))
+           subtree-end)
+          ((and limit-to-project
+                (bh/is-project-subtree-p)
+                (member (org-get-todo-state) (list "NEXT")))
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-project-tasks ()
+     "Show non-project tasks.
+   Skip project and sub-project tasks, and project related tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          ((bh/is-project-subtree-p)
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-non-project-tasks ()
+     "Show project tasks.
+   Skip project and sub-project tasks, habits, and loose non-project tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond
+          ((bh/is-project-p) next-headline) 
+          ((and (bh/is-project-subtree-p)
+                (member (org-get-todo-state) (list "NEXT")))
+           subtree-end)
+          ((not (bh/is-project-subtree-p))
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-projects-and-habits ()
+     "Skip trees that are projects and tasks that are habits"
+     (save-restriction
+       (widen)
+       (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          (t
+           nil)))))
+
+   (defun bh/skip-non-subprojects ()
+     "Skip trees that are not projects"
+     (let ((next-headline (save-excursion (outline-next-heading))))
+       (if (bh/is-subproject-p)
+           nil
+         next-headline)))
+
+   (defun bh/find-project-task ()
+     "Move point to the parent (project) task if any"
+     (save-restriction
+       (widen)
+       (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+         (while (org-up-heading-safe)
+           (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+             (validate-setq parent-task (point))))
+         (goto-char parent-task)
+         parent-task)))
+ #+end_src
+*** Effort Estimates
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (validate-setq org-global-properties (quote (("Effort_ALL" . "0 0:10 0:20 0:30 1:00 1:30 2:00 3:00 4:00 6:00 8:00 10:00 20:00"))))
+#+END_SRC
+** Archiving
+   :PROPERTIES:
+   :CUSTOM_ID: Archiving
+   :END:
+*** Archive Setup
+    :PROPERTIES:
+    :CUSTOM_ID: ArchiveSetup
+    :END:
+ #+begin_src emacs-lisp :tangle yes
+ (validate-setq org-archive-mark-done nil)
+ (validate-setq org-archive-location "%s_archive::* Archived Tasks")
+ #+end_src
+
+ #+begin_src emacs-lisp :tangle yes
+ (defun bh/skip-non-archivable-tasks ()
+   "Skip trees that are not available for archiving"
+   (save-restriction
+     (widen)
+     ;; Consider only tasks with done todo headings as archivable candidates
+     (let ((next-headline (save-excursion (or (outline-next-heading) (point-max))))
+           (subtree-end (save-excursion (org-end-of-subtree t))))
+       (if (member (org-get-todo-state) org-todo-keywords-1)
+           (if (member (org-get-todo-state) org-done-keywords)
+               (let* ((daynr (string-to-int (format-time-string "%d" (current-time))))
+                      (a-month-ago (* 60 60 24 (+ daynr 1)))
+                      (last-month (format-time-string "%Y-%m-" (time-subtract (current-time) (seconds-to-time a-month-ago))))
+                      (this-month (format-time-string "%Y-%m-" (current-time)))
+                      (subtree-is-current (save-excursion
+                                            (forward-line 1)
+                                            (and (< (point) subtree-end)
+                                                 (re-search-forward (concat last-month "\\|" this-month) subtree-end t)))))
+                 (if subtree-is-current
+                     subtree-end ; Has a date in this month or last month, skip it
+                   nil))  ; available to archive
+             (or subtree-end (point-max)))
+         next-headline))))
+ #+end_src
+** Reminders
+   :PROPERTIES:
+   :CUSTOM_ID: Reminders
+   :END:
+
+ I use appt for reminders.  It's simple and unobtrusive -- putting
+ pending appointments in the status bar and beeping as 12, 9, 6, 3,
+ and 0 minutes before the appointment is due.
+
+ Everytime the agenda is displayed (and that's lots for me) the
+ appointment list is erased and rebuilt from the current agenda
+ details for today.  This means everytime I reschedule something, add
+ or remove tasks that are time related the appointment list is
+ automatically updated the next time I look at the agenda.
+*** Reminder Setup
+    :PROPERTIES:
+    :CUSTOM_ID: ReminderSetup
+    :END:
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   (use-package org-alert
+     :config
+     (org-alert-enable)
+     (validate-setq alert-default-style 'libnotify))
+ #+end_src
+** Htmlize
+We need =htmlize= to add syntax highlighting to org-exports for HTML files.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package htmlize
+    :config
+    (require 'htmlize))
+#+end_src
+** Email integration with org-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'org-notmuch)
+#+END_SRC
+** org-publish
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/auto-git-commit-and-push (dir)
+    (shell-command (format "cd %s && git add -A && git commit -m \"%s\" && git push origin master" dir "New changes: $(date)")))
+
+  (validate-setq jethro/emacsd-site-dir "~/Documents/Code/emacsd_site/")
+
+  (validate-setq org-publish-project-alist
+        '(("emacs.d"
+           :publishing-function org-html-publish-to-html
+           :publishing-directory jethro/emacsd-site-dir
+           :base-directory "~/.emacs.d/"
+           :exclude ".*"
+           :include ["init.org"]
+           :completion-function (lambda () (let ((htmlfile (concat jethro/emacsd-site-dir
+                                                                   "init.html")))
+                                             (if (file-exists-p htmlfile)
+                                                 (progn
+                                                   (rename-file htmlfile
+                                                                (concat jethro/emacsd-site-dir
+                                                                        "index.html") t)
+                                                   (jethro/auto-git-commit-and-push jethro/emacsd-site-dir)))))
+           :with-emphasize t
+           :with-title nil
+           :with-toc t
+           :html-head "<link rel=\"stylesheet\" href=\"/css/emacsd.css\" type=\"text/css\">"
+           :html-preamble t)))
+#+end_src
+** org-reveal
+#+begin_src emacs-lisp :tangle yes
+  (use-package ox-reveal
+    :config
+    (require 'ox-reveal))
+#+end_src
+** org-latex
+I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
+#+begin_src emacs-lisp :tangle yes
+    (validate-setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode %f"
+            "pdflatex -shell-escape -interaction nonstopmode %f"))
+    (require 'ox-latex)
+    (validate-setq org-latex-default-table-environment "tabular")
+    (validate-setq org-latex-tables-booktabs t)
+    (validate-setq org-latex-listings 'minted)
+    (validate-setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    (validate-setq org-latex-classes
+          '(("article"
+             "\\documentclass[8pt]{article}
+  \\usepackage[margin={0.8in,1in}, a4paper]{geometry}
+  \\usepackage{booktabs}
+  \\usepackage{hyperref}
+  \\usepackage{minted}
+  \\usepackage{tabularx}
+  \\usepackage{parskip}
+  \\setlength\\columnsep{10pt}
+  \\setlength{\\columnseprule}{1pt}
+  \\usepackage[compact]{titlesec}
+  \\titlespacing{\\section}{0pt}{*2}{*0}
+  \\titlespacing{\\subsection}{0pt}{*2}{*0}
+  \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
+  \\titleformat*{\\section}{\\large\\bfseries}
+  \\titleformat*{\\subsection}{\\normalsize\\bfseries}
+  \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}"
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+            ("book"
+             "\\documentclass[10pt]{memoir}
+                          \\usepackage{charter}
+                          \\usepackage[T1]{fontenc}
+                          \\usepackage{booktabs}
+                          \\usepackage{amsmath}
+                          \\usepackage{minted}
+                          \\usemintedstyle{borland}
+                          \\usepackage{color}
+                          \\usepackage{epigraph}
+                          \\usepackage{enumitem}
+                          \\setlist{nosep}
+                          \\setlength\\epigraphwidth{13cm}
+                          \\setlength\\epigraphrule{0pt}
+                          \\usepackage{fontspec}
+                          \\usepackage{graphicx}
+                          \\usepackage{hyperref}
+                          \\hypersetup {colorlinks = true, allcolors = red}
+                          \\title{}
+                          [NO-DEFAULT-PACKAGES]
+                          [NO-PACKAGES]"
+             ("\\chapter{%s}" . "\\chapter*{%s}")
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+            ("latex-notes"
+             "\\documentclass[8pt]{article}
+    \\usepackage[margin={0.3in,0.3in}, a4paper,landscape]{geometry}
+    \\usepackage{hyperref}
+    \\usepackage{amsmath}
+    \\usepackage{multicol}
+    \\usepackage{booktabs}
+    \\usepackage{enumitem}
+    \\usepackage[compact]{titlesec}
+    \\titlespacing{\\section}{0pt}{*2}{*0}
+    \\titlespacing{\\subsection}{0pt}{*2}{*0}
+    \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
+    \\titleformat*{\\section}{\\large\\bfseries}
+    \\titleformat*{\\subsection}{\\normalsize\\bfseries}
+    \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}
+    \\setlist[itemize]{leftmargin=*}
+    \\setlist[enumerate]{leftmargin=*}
+    \\setlength\\columnsep{10pt}
+    \\setlength{\\columnseprule}{1pt}       
+    \\setlist{nosep}         
+    \\usepackage{minted}
+    \\usemintedstyle{bw}
+    \\usemintedstyle[java]{bw}
+    \\setminted[]{frame=none,fontsize=\\footnotesize,linenos=false}
+    "
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+    (defun jethro/org-multicol-to-latex (async subtreep visible-only body-only)
+      (let ((contents (buffer-string))
+            (buffer-name (file-name-sans-extension buffer-file-name)))
+        (with-temp-buffer
+          (insert "#+LATEX_CLASS: latex-notes\n")
+          (insert contents)
+          (goto-char (point-min))
+          (org-next-visible-heading 1)
+          (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+          (goto-char (point-max))
+          (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+          (org-export-to-file 'latex (format "%s.tex" buffer-name)
+            async subtreep visible-only body-only nil))))
+
+    (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
+      (let ((contents (buffer-string))
+            (buffer-name (file-name-sans-extension buffer-file-name)))
+        (with-temp-buffer
+          (insert "#+LATEX_CLASS: latex-notes\n")
+          (insert contents)
+          (goto-char (point-min))
+          (org-next-visible-heading 1)
+          (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+          (goto-char (point-max))
+          (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+          (org-export-to-file 'latex (format "%s.tex" buffer-name)
+            async subtreep visible-only body-only nil
+            (lambda (file) (org-latex-compile file))))))
+
+    (org-export-define-derived-backend 'latex-notes 'latex
+      :menu-entry
+      '(?L "Export to LaTeX notes"
+           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
+            (?p "Export to PDF" jethro/org-multicol-to-pdf))))
+#+end_src
+** org-download
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-download
+    :config
+    (setq-default org-download-image-dir "./pictures")
+    (setq-default org-download-heading-lvl nil))
+#+end_src
+** Handling my book collection (deprecated)
+*** jethro/org-sort-books
+I like to keep my books in sorted order, alphanumerically, and then by TODO keyword.
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/org-sort-books ()
+      (interactive)
+      (let ((old-point (point)))
+        (beginning-of-buffer)
+        (org-sort-entries t ?a)
+        (beginning-of-buffer)
+        (org-sort-entries t ?o)
+        (show-all)
+        (org-global-cycle)
+        (goto-char old-point)))
+#+end_src
+*** jethro/org-after-save-books
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/org-after-save-books ()
+    (org-publish "books"))
+#+end_src
+** deft
+Deft is similar in many ways to Notational Velocity. I use deft as a brain dump, to quickly collect things I learn or come across.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package deft
+    :bind* (("C-c d" . deft)
+            ("C-x C-g" . deft-find-file)) 
+    :bind (("C-c C-r" . deft-rename-file))
+    :config
+    (validate-setq deft-directory "~/.org/deft/"
+          deft-extensions '("org")
+          deft-use-filename-as-title t
+          deft-default-extension "org"
+          deft-use-filter-string-for-filename t
+          deft-file-naming-rules '((noslash . "_")
+                                   (nospace . "_")
+                                   (case-fn . downcase))))
+
+#+END_SRC
+** epresent
+#+begin_src emacs-lisp :tangle yes
+  (use-package epresent
+    :bind ("<f5>"))
+#+end_src
+* Project Management
+** Smerge-mode
+Useful when handling git merge conflicts.
+#+begin_src emacs-lisp :tangle yes
+  (use-package smerge-mode
+    :config
+    (global-set-key (kbd "C-c h s")
+                    (defhydra hydra-smerge (:pre (smerge-mode 1) :color red :post (smerge-mode -1))
+                      "Smerge mode"
+                      ("<down>" smerge-next        "Next conflict")
+                      ("<up>"   smerge-prev        "Previous conflict")
+                      ("M-a"    smerge-keep-all    "Keep all")
+                      ("M-m"    smerge-keep-mine   "Keep mine")
+                      ("M-o"    smerge-keep-other  "Keep other"))))
+#+end_src
+** Magit
+#+begin_src emacs-lisp :tangle yes
+  (use-package magit
+    :bind (("s-g" . magit-status)
+           ("s-G" . magit-blame))
+    :init
+    (add-hook 'magit-mode-hook 'hl-line-mode)
+    :config
+    (validate-setq magit-auto-revert-mode nil))
+#+end_src
+
+** Projectile
+#+begin_src emacs-lisp :tangle yes
+  (use-package projectile
+    :demand t
+    :init (projectile-global-mode 1)
+    :bind-keymap* ("C-x p" . projectile-command-map)
+    :config
+    (require 'projectile)
+    (use-package counsel-projectile 
+      :bind (("s-f" . counsel-projectile-find-file)
+             ("s-b" . counsel-projectile-switch-to-buffer))
+      :config
+      (counsel-projectile-on))
+    (validate-setq projectile-use-git-grep t)
+    (validate-setq projectile-create-missing-test-files t)
+    (validate-setq projectile-completion-system 'ivy))
+#+end_src
+
+*** Projectile Commander
+#+begin_src emacs-lisp :tangle yes
+  (validate-setq projectile-switch-project-action
+        #'projectile-commander)
+  (def-projectile-commander-method ?S
+    "Run a search in the project"
+    (counsel-projectile-rg))
+  (def-projectile-commander-method ?s
+    "Open a *eshell* buffer for the project."
+    (projectile-run-eshell))
+  (def-projectile-commander-method ?c
+    "Run `compile' in the project."
+    (projectile-compile-project nil))
+  (def-projectile-commander-method ?\C-?
+    "Go back to project selection."
+    (projectile-switch-project))
+  (def-projectile-commander-method ?d
+    "Open project root in dired."
+    (projectile-dired))
+  (def-projectile-commander-method ?F
+    "Git fetch."
+    (magit-status)
+    (call-interactively #'magit-fetch-all))
+  (def-projectile-commander-method ?j
+    "Jack-in."
+    (let* ((opts (projectile-current-project-files))
+           (file (ivy-read
+                  "Find file: " 
+                  opts)))
+      (find-file (expand-file-name
+                  file (projectile-project-root)))
+      (run-hooks 'projectile-find-file-hook)
+      (cider-jack-in)))
+#+end_src
+* Profiling
+** esup
+#+begin_src emacs-lisp :tangle yes
+(use-package esup
+  :defer t)
+#+end_src
+** keyfreq
+#+begin_src emacs-lisp :tangle yes
+(use-package keyfreq
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
+#+end_src
+* Miscellaneous
+** which-key
+#+begin_src emacs-lisp :tangle yes
+(use-package which-key
+  :diminish which-key-mode
+  :config (add-hook 'after-init-hook 'which-key-mode))
+#+end_src
+** nameless
+#+begin_src emacs-lisp :tangle yes
+(use-package nameless
+  :diminish nameless-mode
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'nameless-mode-from-hook)
+  (validate-setq nameless-global-aliases
+        '(("fl" . "font-lock")
+          ("s" . "seq")
+          ("me" . "macroexp")
+          ("c" . "cider")
+          ("q" . "queue"))))
+#+end_src
+** firestarter
+#+begin_src emacs-lisp :tangle yes
+(use-package firestarter
+  :bind ("C-c M s" . firestarter-mode)
+  :init (put 'firestarter 'safe-local-variable 'identity))
+#+end_src
+** Paradox
+Use Paradox instead of the default =package-list-packages=. =jethro/paradox-user-token= is defined in =secrets.el=, and contains a github API token which has =public_repo= permissions.
+#+begin_src emacs-lisp :tangle yes
+  (use-package paradox
+    :commands paradox-list-packages)
+#+end_src
+** darkroom
+#+begin_src emacs-lisp :tangle yes
+(use-package darkroom
+  :bind (("C-c M d" . darkroom-mode)
+         ("C-c M t" . darkroom-tentative-mode)))
+#+end_src
+** bury-successful-compilation
+Closes compile buffer if there are no errors.
+#+begin_src emacs-lisp :tangle yes
+(use-package bury-successful-compilation
+  :config
+  (bury-successful-compilation 1))
+#+end_src
