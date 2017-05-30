@@ -169,10 +169,6 @@ Validate is a package that checks for and reports Emacs config errors.
      (setq-default shell-file-name "/bin/bash")
    #+end_src
 ** Theme
-*** Adwaita
-    #+BEGIN_SRC emacs-lisp :tangle no
-  (load-theme 'adwaita t)
-    #+END_SRC
 *** Zenburn Theme
     #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package zenburn-theme

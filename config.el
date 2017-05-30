@@ -362,6 +362,8 @@ The app is chosen from your OS's preference."
          ("M-<down>" . move-text-down)))
 
 (use-package flycheck
+  :init
+  (add-hook 'prog-mode-hook 'global-flycheck-mode)
   :config
   (global-set-key (kbd "C-c h f")
                   (defhydra hydra-flycheck
@@ -376,8 +378,9 @@ The app is chosen from your OS's preference."
                     (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
                     ("q"  nil)))
   (use-package flycheck-pos-tip
-    :config (flycheck-pos-tip-mode))
-  (add-hook 'prog-mode-hook 'global-flycheck-mode))
+    :init
+    (add-hook 'flycheck-mode-hook (lambda ()
+                                    (flycheck-pos-tip-mode)))))
 
 (use-package yasnippet
   :diminish yas-global-mode yas-minor-mode
@@ -677,6 +680,32 @@ The app is chosen from your OS's preference."
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
 (use-package page-break-lines)
+
+(use-package smart-mode-line
+  :init
+  (add-hook 'after-init-hook 'sml/setup)
+  :config 
+  (validate-setq sml/theme 'respectful)
+  (validate-setq sml/name-width 30)
+  (validate-setq sml/shorten-directory t)
+  (validate-setq sml/shorten-modes t)
+  (validate-setq sml/mode-width 'full)
+  (validate-setq sml/replacer-regexp-list
+                 '(("^~/.org/" ":O:")
+                   ("^~/\\.emacs\\.d/" ":ED")))
+  (validate-setq rm-blacklist
+                 (format "^ \\(%s\\)$"
+                         (mapconcat #'identity
+                                    '("FlyC.*"
+                                      "Projectile.*"
+                                      "GitGutter"
+                                      "ivy"
+                                      "company"
+                                      ""
+                                      "doom"
+                                      ","
+                                      "ElDoc")
+                                    "\\|"))))
 
 (display-time-mode 1)
 (eval-after-load "display-time-mode"
