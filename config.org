@@ -1,4 +1,4 @@
-: #+TITLE: Jethro's Emacs.d Configuration
+#+TITLE: Jethro's Emacs.d Configuration
 * Introduction
 This document is a constant work-in-progress, and will contain the
 latest updates to my Emacs configuration. I have gone through several
@@ -37,6 +37,14 @@ almost-instant emacs "startup".
    (load "server")
    (unless (server-running-p) (server-start))
  #+END_SRC
+** Tweaking Emacs settings
+Reduce the frequency of garbage collection by making it happen on each
+50MB of allocated data (the default is on every 0.76MB). Also, warn
+when opening large files.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (validate-setq gc-cons-threshold 50000000)
+  (validate-setq large-file-warning-threshold 100000000)
+#+END_SRC
 ** Reloading the init file
 I want an easy way to reload my configuration when I change it. I bind
 it to =<f11>=.
@@ -70,7 +78,7 @@ Validate is a package that checks for and reports Emacs config errors.
    #+END_SRC
 ** Custom font
    I use Hack, patched with Powerline. Other good alternatives include Source Code Pro.
-*** Source Code Pro
+*** Iosevka
     #+BEGIN_SRC emacs-lisp :tangle yes
       (add-to-list 'initial-frame-alist
                    '(font . "Iosevka-12"))
@@ -79,57 +87,60 @@ Validate is a package that checks for and reports Emacs config errors.
     #+END_SRC
 
 ** UI Cruft
-   Remove useless toolbars and splash screens.
+Remove useless toolbars and splash screens.
 
-   #+begin_src emacs-lisp :tangle yes
-(tooltip-mode -1)
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(validate-setq inhibit-splash-screen t)
-(validate-setq inhibit-startup-message t)
-   #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (tooltip-mode -1)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (validate-setq inhibit-splash-screen t)
+  (validate-setq inhibit-startup-message t)
+#+end_src
 
 ** Use y/n over yes/no
-   Always prefer the shorter y/n over yes/no.
+Always prefer the shorter y/n over yes/no.
 
-   #+BEGIN_SRC emacs-lisp :tangle yes
-(defalias 'yes-or-no-p 'y-or-n-p)
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
 
 ** Replace region when typing
-   Type over a selected region, instead of deleting before typing.
+Type over a selected region, instead of deleting before typing.
 
-   #+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
 (delete-selection-mode +1)
-   #+end_src
+#+end_src
 
 ** Sentences
-   Emacs uses double-spaces by default. Use single spaces by default:
+Emacs uses double-spaces by default. Use single spaces by default:
 
-   #+BEGIN_QUOTE
-   NOTE: This will cause an indistinction between sentences and name abbrieviations (eg. E. B. White)
-   #+END_QUOTE
+#+BEGIN_QUOTE
+NOTE: This will cause an indistinction between sentences and name abbrieviations (eg. E. B. White)
+#+END_QUOTE
 
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (validate-setq sentence-end-double-space nil)
-   #+end_src
+#+end_src
 
 ** Tab with 2 spaces
-   #+begin_src emacs-lisp :tangle yes
-     (setq-default tab-width 2)
-     (setq-default js-indent-level 2)
-     (setq-default indent-tabs-mode nil)
-   #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (setq-default tab-width 2)
+  (setq-default js-indent-level 2)
+  (setq-default indent-tabs-mode nil)
+#+end_src
 
 ** Don't wrap lines
-   Don't wrap lines for coding. Create a hook that enables wrapping, for modes like org-mode and markdown-mode.
+Don't wrap lines for coding. Create a hook that enables wrapping, for modes like org-mode and markdown-mode.
 
-   #+begin_src emacs-lisp :tangle yes
-     (setq-default truncate-lines t)
-     (defun trunc-lines-hook ()
-       (validate-setq truncate-lines nil))
-   #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (setq-default truncate-lines t)
+
+  (defun truncate-lines-hook ()
+    (validate-setq truncate-lines nil))
+
+  (add-hook 'text-mode-hook 'truncate-lines-hook)
+#+end_src
 
 ** Backup directory
    #+begin_src emacs-lisp :tangle yes
@@ -156,85 +167,53 @@ Validate is a package that checks for and reports Emacs config errors.
    #+begin_src emacs-lisp :tangle yes
 (load "~/.emacs.d/secrets.el" t)
    #+end_src
-** Add PATH to eshell
-   #+begin_src emacs-lisp :tangle yes
-  (use-package exec-path-from-shell 
-    :config
-    (exec-path-from-shell-initialize))
-   #+end_src
-
-** Default shell
-   #+begin_src emacs-lisp :tangle yes
-     (setq-default explicit-shell-file-name "/bin/bash")
-     (setq-default shell-file-name "/bin/bash")
-   #+end_src
-** Theme
-*** Zenburn Theme
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package zenburn-theme
-    :init
-    (load-theme 'zenburn t))
-    #+END_SRC
-** Keybindings
-*** Opening Lines
+** Shell
+*** Default shell
+#+begin_src emacs-lisp :tangle yes
+  (setq-default explicit-shell-file-name "/bin/bash")
+  (setq-default shell-file-name "/bin/bash")
+#+end_src
+*** Add PATH to eshell
     #+begin_src emacs-lisp :tangle yes
-  (defun open-next-line (arg)
-    "Move to the next line and then opens a line.
-     See also `newline-and-indent'."
-    (interactive "p")
-    (end-of-line)
-    (open-line arg)
-    (next-line 1)
-    (when 'newline-and-indent
-      (indent-according-to-mode)))
-
-  (defun open-previous-line (arg)
-    "Open a new line before the current one. 
-       See also `newline-and-indent'."
-    (interactive "p")
-    (beginning-of-line)
-    (open-line arg)
-    (when 'newline-and-indent
-      (indent-according-to-mode)))
-
-  (bind-key "C-o" 'open-next-line)
-  (bind-key "M-o" 'open-previous-line)
+   (use-package exec-path-from-shell 
+     :config
+     (exec-path-from-shell-initialize))
     #+end_src
+** Theme (Zenburn)
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package zenburn-theme
+      :init
+      (load-theme 'zenburn t))
+#+END_SRC
+** Keybindings
 *** Nuke all buffers with =C-c !=
-    #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (defun jethro/nuke-all-buffers ()
     (interactive)
     (mapcar 'kill-buffer (buffer-list))
     (delete-other-windows))
 
   (bind-key* "C-c !" 'jethro/nuke-all-buffers)
-    #+end_src
+#+end_src
 *** eshell with =C-x m=
-    #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (bind-key* "C-x m" 'eshell)
-    #+end_src
+#+end_src
 *** mark-paragraph with =M-p=
-    #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (bind-key* "M-p" 'mark-paragraph)
-    #+end_src
+#+end_src
 *** compile with =<f9>=
-    #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (bind-key* "<f9>" (lambda ()
                       (interactive)
                       (validate-setq-local compilation-read-command nil)
                       (call-interactively 'compile)))
-    #+end_src
-**** 
+#+end_src
 ** Hydra
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (use-package hydra)
-   #+end_src
-*** Ample Theme
-    #+BEGIN_SRC emacs-lisp :tangle no
-  (use-package ample-theme
-    :init
-    (load-theme 'ample t))
-    #+END_SRC
+#+end_src
 * Mail (notmuch)
 ** Basic Setup
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -254,67 +233,66 @@ Validate is a package that checks for and reports Emacs config errors.
   (notmuch-address-message-insinuate)
    #+END_SRC
 * Ivy
-  I've recently switched over from =helm= to =ivy=. Ivy is simpler, and easier to extend.
+I've recently switched over from =helm= to =ivy=. Ivy is simpler, and easier to extend.
 ** flx
-   Flx is required for fuzzy-matching.
-   #+begin_src emacs-lisp :tangle yes
-(use-package flx)
-   #+end_src
+Flx is required for fuzzy-matching.
+#+begin_src emacs-lisp :tangle yes
+  (use-package flx)
+#+end_src
 ** Counsel
-   Counsel contains ivy enhancements for commonly-used functions.
-   #+begin_src emacs-lisp :tangle yes
-     (use-package counsel
-       :demand t
-       :diminish ivy-mode
-       :bind*
-       (("C-c C-r" . ivy-resume)
-        ("M-a" . counsel-M-x)
-        ("C-M-i" . counsel-imenu)
-        ("C-x C-f" . counsel-find-file)
-        ("C-x j" . counsel-dired-jump)
-        ("C-x l" . counsel-locate)
-        ("C-c g" . counsel-git)
-        ("C-c j" . counsel-git-grep)
-        ("C-c s" . counsel-projectile-rg)
-        ("C-c f" . counsel-recentf)
-        ("M-y" . counsel-yank-pop))
-       :bind ((:map help-map
-                    ("f" . counsel-describe-function)
-                    ("v" . counsel-describe-variable)
-                    ("l" . counsel-info-lookup-symbol))
-              (:map ivy-minibuffer-map
-                    ("C-d" . ivy-dired)
-                    ("C-o" . ivy-occur))
-              (:map read-expression-map
-                    ("C-r" . counsel-expression-history))
-              (:map ivy-minibuffer-map
-                    ("<return>" . ivy-alt-done)
-                    ("M-<return" . ivy-immediate-done)))
-       :init
-       (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
-       :config 
-       (defun ivy-dired ()
-         (interactive)
-         (if ivy--directory
-             (ivy-quit-and-run
-              (dired ivy--directory)
-              (when (re-search-forward
-                     (regexp-quote
-                      (substring ivy--current 0 -1)) nil t)
-                (goto-char (match-beginning 0))))
-           (user-error
-            "Not completing files currently"))) 
-       (setq counsel-find-file-at-point t)
-       (setq ivy-use-virtual-buffers t)
-       (setq ivy-display-style 'fancy)
-       (setq ivy-initial-inputs-alist nil)
-       (setq ivy-re-builders-alist
-             '((ivy-switch-buffer . ivy--regex-plus)
-               (swiper . ivy--regex-plus)
-               (t . ivy--regex-fuzzy))) 
-       (ivy-set-actions
-        t
-        '(("I" insert "insert"))))
+Counsel contains ivy enhancements for commonly-used functions.
+#+begin_src emacs-lisp :tangle yes
+  (use-package counsel
+    :diminish ivy-mode
+    :bind*
+    (("C-c C-r" . ivy-resume)
+     ("M-a" . counsel-M-x)
+     ("C-M-i" . counsel-imenu)
+     ("C-x C-f" . counsel-find-file)
+     ("C-x j" . counsel-dired-jump)
+     ("C-x l" . counsel-locate)
+     ("C-c g" . counsel-git)
+     ("C-c j" . counsel-git-grep)
+     ("C-c s" . counsel-projectile-rg)
+     ("C-c f" . counsel-recentf)
+     ("M-y" . counsel-yank-pop))
+    :bind ((:map help-map
+                 ("f" . counsel-describe-function)
+                 ("v" . counsel-describe-variable)
+                 ("l" . counsel-info-lookup-symbol))
+           (:map ivy-minibuffer-map
+                 ("C-d" . ivy-dired)
+                 ("C-o" . ivy-occur))
+           (:map read-expression-map
+                 ("C-r" . counsel-expression-history))
+           (:map ivy-minibuffer-map
+                 ("<return>" . ivy-alt-done)
+                 ("M-<return" . ivy-immediate-done)))
+    :init
+    (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
+    :config 
+    (defun ivy-dired ()
+      (interactive)
+      (if ivy--directory
+          (ivy-quit-and-run
+           (dired ivy--directory)
+           (when (re-search-forward
+                  (regexp-quote
+                   (substring ivy--current 0 -1)) nil t)
+             (goto-char (match-beginning 0))))
+        (user-error
+         "Not completing files currently"))) 
+    (setq counsel-find-file-at-point t)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-display-style 'fancy)
+    (setq ivy-initial-inputs-alist nil)
+    (setq ivy-re-builders-alist
+          '((ivy-switch-buffer . ivy--regex-plus)
+            (swiper . ivy--regex-plus)
+            (t . ivy--regex-fuzzy))) 
+    (ivy-set-actions
+     t
+     '(("I" insert "insert"))))
    #+end_src
 * Moving Around
 ** Crux
@@ -601,8 +579,10 @@ Validate is a package that checks for and reports Emacs config errors.
                          ("q"  nil)))
        (use-package flycheck-pos-tip
          :init
-         (add-hook 'flycheck-mode-hook (lambda ()
-                                         (flycheck-pos-tip-mode)))))
+         (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode))
+       (use-package flycheck-color-mode-line
+         :init
+         (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)))
    #+end_src
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
@@ -639,6 +619,10 @@ Validate is a package that checks for and reports Emacs config errors.
     :config   
     (add-hook 'markdown-mode-hook 'flyspell-mode))
    #+end_src
+** Auto-fill-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+#+END_SRC
 * Language Support
 ** Direnv
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -807,6 +791,14 @@ Validate is a package that checks for and reports Emacs config errors.
                 ("C-c p a" . pytest-pdb-all)
                 ("C-c p m" . pytest-pdb-module)
                 ("C-c p ." . pytest-pdb-one)))
+#+END_SRC
+*** Highlight Indent Guides
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package highlight-indent-guides
+    :init
+    (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
+    :config
+    (validate-setq highlight-indent-guides-method 'character))
 #+END_SRC
 ** HTML
 *** Web-mode
@@ -1026,12 +1018,12 @@ npm install -g tern
     (linum-mode 1)))
    #+end_src
 ** hl-line-mode
-   #+begin_src emacs-lisp :tangle yes
-(global-hl-line-mode 1)
-   #+end_src
+#+begin_src emacs-lisp :tangle no
+  (global-hl-line-mode 1)
+#+end_src
 ** whitespace-mode
-   Show fill-column.
-   #+begin_src emacs-lisp :tangle yes
+Show fill-column.
+#+begin_src emacs-lisp :tangle yes
 (require 'whitespace)
 (validate-setq whitespace-line-column 80) ;; limit line length
 (validate-setq whitespace-style '(face lines-tail))
@@ -1209,10 +1201,10 @@ Useful when handling git merge conflicts.
 #+end_src
 ** keyfreq
 #+begin_src emacs-lisp :tangle yes
-(use-package keyfreq
-  :config
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1))
+  (use-package keyfreq
+    :init
+    (add-hook 'after-init-hook 'keyfreq-mode)
+    (add-hook 'after-init-hook 'keyfreq-autosave-mode))
 #+end_src
 * Miscellaneous
 ** which-key
@@ -1221,27 +1213,8 @@ Useful when handling git merge conflicts.
   :diminish which-key-mode
   :config (add-hook 'after-init-hook 'which-key-mode))
 #+end_src
-** nameless
-#+begin_src emacs-lisp :tangle no
-  (use-package nameless
-    :diminish nameless-mode
-    :init (add-hook 'emacs-lisp-mode-hook 'nameless-mode-from-hook)
-    :config
-    (validate-setq nameless-global-aliases
-                   '(("fl" . "font-lock")
-                     ("s" . "seq")
-                     ("me" . "macroexp")
-                     ("c" . "cider")
-                     ("q" . "queue"))))
-#+end_src
-** firestarter
-#+begin_src emacs-lisp :tangle yes
-(use-package firestarter
-  :bind ("C-c M s" . firestarter-mode)
-  :init (put 'firestarter 'safe-local-variable 'identity))
-#+end_src
 ** Paradox
-Use Paradox instead of the default =package-list-packages=. =jethro/paradox-user-token= is defined in =secrets.el=, and contains a github API token which has =public_repo= permissions.
+Use Paradox instead of the default =package-list-packages=.
 #+begin_src emacs-lisp :tangle yes
   (use-package paradox
     :commands paradox-list-packages)
@@ -1255,7 +1228,7 @@ Use Paradox instead of the default =package-list-packages=. =jethro/paradox-user
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
 #+begin_src emacs-lisp :tangle yes
-(use-package bury-successful-compilation
-  :config
-  (bury-successful-compilation 1))
+  (use-package bury-successful-compilation
+    :init
+    (add-hook 'after-init-hook 'bury-successful-compilation))
 #+end_src

@@ -13,6 +13,9 @@
 (load "server")
 (unless (server-running-p) (server-start))
 
+(validate-setq gc-cons-threshold 50000000)
+(validate-setq large-file-warning-threshold 100000000)
+
 (defun reload-init ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
@@ -52,8 +55,11 @@
 (setq-default indent-tabs-mode nil)
 
 (setq-default truncate-lines t)
-(defun trunc-lines-hook ()
+
+(defun truncate-lines-hook ()
   (validate-setq truncate-lines nil))
+
+(add-hook 'text-mode-hook 'truncate-lines-hook)
 
 (validate-setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
@@ -62,38 +68,16 @@
 
 (load "~/.emacs.d/secrets.el" t)
 
+(setq-default explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/bin/bash")
+
 (use-package exec-path-from-shell 
   :config
   (exec-path-from-shell-initialize))
 
-(setq-default explicit-shell-file-name "/bin/bash")
-(setq-default shell-file-name "/bin/bash")
-
 (use-package zenburn-theme
-  :init
-  (load-theme 'zenburn t))
-
-(defun open-next-line (arg)
-  "Move to the next line and then opens a line.
-   See also `newline-and-indent'."
-  (interactive "p")
-  (end-of-line)
-  (open-line arg)
-  (next-line 1)
-  (when 'newline-and-indent
-    (indent-according-to-mode)))
-
-(defun open-previous-line (arg)
-  "Open a new line before the current one. 
-     See also `newline-and-indent'."
-  (interactive "p")
-  (beginning-of-line)
-  (open-line arg)
-  (when 'newline-and-indent
-    (indent-according-to-mode)))
-
-(bind-key "C-o" 'open-next-line)
-(bind-key "M-o" 'open-previous-line)
+    :init
+    (load-theme 'zenburn t))
 
 (defun jethro/nuke-all-buffers ()
   (interactive)
@@ -129,7 +113,6 @@
 (use-package flx)
 
 (use-package counsel
-  :demand t
   :diminish ivy-mode
   :bind*
   (("C-c C-r" . ivy-resume)
@@ -379,8 +362,10 @@ The app is chosen from your OS's preference."
                     ("q"  nil)))
   (use-package flycheck-pos-tip
     :init
-    (add-hook 'flycheck-mode-hook (lambda ()
-                                    (flycheck-pos-tip-mode)))))
+    (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode))
+  (use-package flycheck-color-mode-line
+    :init
+    (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)))
 
 (use-package yasnippet
   :diminish yas-global-mode yas-minor-mode
@@ -410,6 +395,8 @@ The app is chosen from your OS's preference."
   (setenv "DICTIONARY" "en_GB")
   :config   
   (add-hook 'markdown-mode-hook 'flyspell-mode))
+
+(add-hook 'text-mode-hook 'auto-fill-mode)
 
 (use-package direnv
   :config
@@ -527,6 +514,12 @@ The app is chosen from your OS's preference."
               ("C-c p a" . pytest-pdb-all)
               ("C-c p m" . pytest-pdb-module)
               ("C-c p ." . pytest-pdb-one)))
+
+(use-package highlight-indent-guides
+  :init
+  (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
+  :config
+  (validate-setq highlight-indent-guides-method 'character))
 
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
@@ -671,8 +664,6 @@ The app is chosen from your OS's preference."
 (use-package company-auctex
   :defer t)
 
-(global-hl-line-mode 1)
-
 (require 'whitespace)
 (validate-setq whitespace-line-column 80) ;; limit line length
 (validate-setq whitespace-style '(face lines-tail))
@@ -807,17 +798,13 @@ The app is chosen from your OS's preference."
   :defer t)
 
 (use-package keyfreq
-  :config
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1))
+  :init
+  (add-hook 'after-init-hook 'keyfreq-mode)
+  (add-hook 'after-init-hook 'keyfreq-autosave-mode))
 
 (use-package which-key
   :diminish which-key-mode
   :config (add-hook 'after-init-hook 'which-key-mode))
-
-(use-package firestarter
-  :bind ("C-c M s" . firestarter-mode)
-  :init (put 'firestarter 'safe-local-variable 'identity))
 
 (use-package paradox
   :commands paradox-list-packages)
@@ -827,5 +814,5 @@ The app is chosen from your OS's preference."
          ("C-c M t" . darkroom-tentative-mode)))
 
 (use-package bury-successful-compilation
-  :config
-  (bury-successful-compilation 1))
+  :init
+  (add-hook 'after-init-hook 'bury-successful-compilation))
