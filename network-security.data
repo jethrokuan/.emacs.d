@@ -1,0 +1,3 @@
+(
+ (:id "sha1:24c7a1e6369fef1e50de1deb1a9e5bbc68f80c8b" :fingerprint "sha1:2b:38:ce:27:5d:8f:4e:1e:89:c9:e8:18:e3:37:4e:23:94:0a:4f:4b" :host "orgmode.org:443" :conditions (:self-signed :insecure :unknown-ca :invalid))
+)
