@@ -416,11 +416,10 @@ The app is chosen from your OS's preference."
 (use-package nix-mode
   :config
   (add-hook 'nix-mode-hook (lambda ()
-                             (aggressive-indent-mode -1))))
-
-(use-package company-nixos-options
-  :config
-  (add-to-list 'company-backends 'company-nixos-options))
+                             (aggressive-indent-mode -1)))
+  (use-package company-nixos-options
+    :config
+    (add-to-list 'company-backends 'company-nixos-options)))
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
