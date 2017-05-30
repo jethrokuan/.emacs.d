@@ -588,6 +588,8 @@ Validate is a package that checks for and reports Emacs config errors.
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
+       :init
+       (add-hook 'prog-mode-hook 'global-flycheck-mode)
        :config
        (global-set-key (kbd "C-c h f")
                        (defhydra hydra-flycheck
@@ -602,8 +604,9 @@ Validate is a package that checks for and reports Emacs config errors.
                          (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
                          ("q"  nil)))
        (use-package flycheck-pos-tip
-         :config (flycheck-pos-tip-mode))
-       (add-hook 'prog-mode-hook 'global-flycheck-mode))
+         :init
+         (add-hook 'flycheck-mode-hook (lambda ()
+                                         (flycheck-pos-tip-mode)))))
    #+end_src
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
@@ -809,21 +812,6 @@ Validate is a package that checks for and reports Emacs config errors.
                 ("C-c p m" . pytest-pdb-module)
                 ("C-c p ." . pytest-pdb-one)))
 #+END_SRC
-*** Elpy (Disabled)
-    #+begin_src emacs-lisp :tangle no
-  (use-package elpy
-    :init
-    (add-hook 'python-mode-hook (lambda () (aggressive-indent-mode -1)))
-    (add-hook 'python-mode-hook 'elpy-mode)
-    :config
-    (when (require 'flycheck nil t)
-      (remove-hook 'elpy-modules 'elpy-module-flymake)
-      (remove-hook 'elpy-modules 'elpy-module-yasnippet)
-      (remove-hook 'elpy-mode-hook 'elpy-module-highlight-indentation)
-      (add-hook 'elpy-mode-hook 'flycheck-mode))
-    (elpy-enable))
-#+end_src
-
 ** HTML
 *** Web-mode
     #+begin_src emacs-lisp :tangle yes
@@ -1059,30 +1047,32 @@ npm install -g tern
 (use-package page-break-lines)
    #+end_src
 ** Smart-mode-line
-   #+begin_src emacs-lisp :tangle no
-  (use-package smart-mode-line
-    :config
-    (add-hook 'after-init-hook 'sml/setup)
-    (validate-setq sml/name-width 30)
-    (validate-setq sml/shorten-directory t)
-    (validate-setq sml/shorten-modes t)
-    (validate-setq sml/mode-width 'full)
-    (validate-setq sml/replacer-regexp-list
-          '(("^~/.org/" ":O:")
-            ("^~/\\.emacs\\.d/" ":ED")))
-    (validate-setq rm-blacklist
-          (format "^ \\(%s\\)$"
-                  (mapconcat #'identity
-                             '("FlyC.*"
-                               "Projectile.*"
-                               "GitGutter"
-                               "ivy"
-                               "company"
-                               ""
-                               "doom"
-                               ","
-                               "ElDoc")
-                             "\\|"))))
+   #+begin_src emacs-lisp :tangle yes
+     (use-package smart-mode-line
+       :init
+       (add-hook 'after-init-hook 'sml/setup)
+       :config 
+       (validate-setq sml/theme 'respectful)
+       (validate-setq sml/name-width 30)
+       (validate-setq sml/shorten-directory t)
+       (validate-setq sml/shorten-modes t)
+       (validate-setq sml/mode-width 'full)
+       (validate-setq sml/replacer-regexp-list
+                      '(("^~/.org/" ":O:")
+                        ("^~/\\.emacs\\.d/" ":ED")))
+       (validate-setq rm-blacklist
+                      (format "^ \\(%s\\)$"
+                              (mapconcat #'identity
+                                         '("FlyC.*"
+                                           "Projectile.*"
+                                           "GitGutter"
+                                           "ivy"
+                                           "company"
+                                           ""
+                                           "doom"
+                                           ","
+                                           "ElDoc")
+                                         "\\|"))))
    #+end_src
 *** Showing time
 #+begin_src emacs-lisp :tangle yes
