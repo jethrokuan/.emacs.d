@@ -57,8 +57,16 @@ it to =<f11>=.
   (global-set-key (kbd "<f11>") 'reload-init)
 #+END_SRC
 
-** Add validate
+** Validate
 Validate is a package that checks for and reports Emacs config errors.
+
+#+BEGIN_QUOTE
+As an end-user of a package, you can use validate-setq instead of setq
+for editing variables. This will ensure the configuration you provide
+matches the schema specified by the developer, and thus prevents you
+from misconfiguring stuff.
+#+END_QUOTE
+
 #+begin_src emacs-lisp :tangle yes
   (use-package validate)
 #+end_src
