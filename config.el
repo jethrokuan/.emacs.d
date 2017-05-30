@@ -146,8 +146,18 @@
   :bind ((:map help-map
                ("f" . counsel-describe-function)
                ("v" . counsel-describe-variable)
-               ("l" . counsel-info-lookup-symbol)))
-  :config
+               ("l" . counsel-info-lookup-symbol))
+         (:map ivy-minibuffer-map
+               ("C-d" . ivy-dired)
+               ("C-o" . ivy-occur))
+         (:map read-expression-map
+               ("C-r" . counsel-expression-history))
+         (:map ivy-minibuffer-map
+               ("<return>" . ivy-alt-done)
+               ("M-<return" . ivy-immediate-done)))
+  :init
+  (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
+  :config 
   (defun ivy-dired ()
     (interactive)
     (if ivy--directory
@@ -158,24 +168,18 @@
                  (substring ivy--current 0 -1)) nil t)
            (goto-char (match-beginning 0))))
       (user-error
-       "Not completing files currently")))
-  (ivy-mode 1)
-  (validate-setq counsel-find-file-at-point t)
-  (validate-setq ivy-use-virtual-buffers t)
-  (validate-setq ivy-display-style 'fancy)
-  (validate-setq ivy-initial-inputs-alist nil)
-  (validate-setq ivy-re-builders-alist'
+       "Not completing files currently"))) 
+  (setq counsel-find-file-at-point t)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-display-style 'fancy)
+  (setq ivy-initial-inputs-alist nil)
+  (setq ivy-re-builders-alist
         '((ivy-switch-buffer . ivy--regex-plus)
           (swiper . ivy--regex-plus)
-          (t . ivy--regex-fuzzy)))
-  (define-key ivy-minibuffer-map (kbd "C-:") 'ivy-dired)
-  (define-key ivy-minibuffer-map (kbd "C-c o") 'ivy-occur)
-  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+          (t . ivy--regex-fuzzy))) 
   (ivy-set-actions
    t
-   '(("I" insert "insert")))
-  (define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done)
-  (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-immediate-done))
+   '(("I" insert "insert"))))
 
 (use-package crux 
   :bind* (("C-c o" . crux-open-with)
@@ -386,6 +390,7 @@ The app is chosen from your OS's preference."
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (require 'company-dabbrev)
+  (require 'company-dabbrev-code)
   (validate-setq company-dabbrev-ignore-case nil
                  company-dabbrev-code-ignore-case nil
                  company-dabbrev-downcase nil
@@ -710,677 +715,6 @@ The app is chosen from your OS's preference."
   (set-face-foreground 'git-gutter+-deleted  "IndianRed")
   (validate-setq git-gutter-fr+-side 'left-fringe))
 
-(use-package org-plus-contrib
-  :bind (("C-c l" . org-store-link)
-         ("C-c a" . org-agenda) 
-         ("C-c c" . org-capture))
-  :config
-  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)))
-
-(add-hook 'org-mode-hook (lambda ()
-                           (auto-fill-mode 1)))
-
-(validate-setq org-agenda-files (file-expand-wildcards "~/.org/gtd/[a-zA-z]*.org"))
-
-(defvar jethro/delete-frame-after-capture nil
-  "Whether to delete the last frame after the current capture")
-
-(defun jethro/delete-frame-if-neccessary (&rest r)
-  (if (or (equal "capture" (frame-parameter nil 'name))
-          jethro/delete-frame-after-capture)
-      (progn
-        (validate-setq jethro/delete-frame-after-capture nil)
-        (delete-frame))
-    (validate-setq jethro/delete-frame-after-capture nil)))
-
-(defadvice org-switch-to-buffer-other-window
-    (after supress-window-splitting activate)
-  "Delete the extra window if we're in a capture frame"
-  (if (equal "capture" (frame-parameter nil 'name))
-      (delete-other-windows)))
-
-(defun make-capture-frame ()
-  "Create a new frame and run org-capture."
-  (interactive)
-  (select-frame
-   (make-frame '((window-system . x)
-                 (name . "capture")
-                 (width . 120)
-                 (height . 15)))) 
-  (validate-setq word-wrap 1)
-  (validate-setq truncate-lines nil)
-  (validate-setq jethro/delete-frame-after-capture t)
-  (org-capture nil "t"))
-
-(advice-add 'org-capture-finalize :after 'jethro/delete-frame-if-neccessary)
-(advice-add 'org-capture-kill :after 'jethro/delete-frame-if-neccessary)
-(advice-add 'org-capture-refile :after 'jethro/delete-frame-if-neccessary)
-
-; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(validate-setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                 (org-agenda-files :maxlevel . 9))))
-
-; Use full outline paths for refile targets - we file directly with IDO
-(validate-setq org-refile-use-outline-path t)
-
-; Targets complete directly with IDO
-(validate-setq org-outline-path-complete-in-steps nil)
-
-; Allow refile to create parent tasks with confirmation
-(validate-setq org-refile-allow-creating-parent-nodes 'confirm)
-
-(validate-setq org-completion-use-ido t)
-
-;;;; Refile settings
-(defun jethro/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets"
-  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-
-(validate-setq org-refile-target-verify-function 'jethro/verify-refile-target)
-
-;; Do not dim blocked tasks
-(validate-setq org-agenda-dim-blocked-tasks nil)
-
-;; Compact the block agenda view
-(validate-setq org-agenda-compact-blocks t)
-
-;; Custom agenda command definitions
-(validate-setq org-agenda-custom-commands
-      '((" " "Agenda"
-         ((agenda "" nil)
-          (tags "REFILE"
-                ((org-agenda-overriding-header "Tasks to Refile")
-                 (org-tags-match-list-sublevels nil)))
-          (todo "NEXT"
-                ((org-agenda-overriding-header "School Next Tasks")
-                 (org-agenda-todo-ignore-scheduled t)
-                 (org-agenda-todo-ignore-deadlines t)
-                 (org-agenda-files '("~/.org/gtd/school.org"))))
-          (todo "TODO"
-                ((org-agenda-overriding-header "School Todos")
-                 (org-agenda-todo-ignore-scheduled t)
-                 (org-agenda-todo-ignore-deadlines t) 
-                 (org-agenda-files '("~/.org/gtd/school.org"))))
-          (tags-todo "-CANCELLED/!"
-                     ((org-agenda-overriding-header "Stuck Projects")
-                      (org-agenda-skip-function 'bh/skip-non-stuck-projects)
-                      (org-agenda-sorting-strategy '(category-keep)))) 
-          (tags-todo "-HOLD-CANCELLED/!"
-                     ((org-agenda-overriding-header "Projects")
-                      (org-agenda-skip-function 'bh/skip-non-projects)
-                      (org-tags-match-list-sublevels 'indented)
-                      (org-agenda-sorting-strategy '(category-keep))))
-          (tags-todo "-CANCELLED/!NEXT"
-                     ((org-agenda-overriding-header (concat "Project Next Tasks"
-                                                            (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                ""
-                                                              " (including WAITING and SCHEDULED tasks)")))
-                      (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
-                      (org-tags-match-list-sublevels t)
-                      (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-sorting-strategy
-                       '(todo-state-down effort-up category-keep))))
-          (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
-                     ((org-agenda-overriding-header (concat "Project Subtasks"
-                                                            (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                ""
-                                                              " (including WAITING and SCHEDULED tasks)")))
-                      (org-agenda-skip-function 'bh/skip-non-project-tasks)
-                      (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-sorting-strategy
-                       '(category-keep))))
-          (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
-                     ((org-agenda-overriding-header (concat "Standalone Tasks"
-                                                            (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                ""
-                                                              " (including WAITING and SCHEDULED tasks)")))
-                      (org-agenda-files (remove "~/.org/gtd/school.org" org-agenda-files))
-                      (org-agenda-skip-function 'bh/skip-project-tasks)
-                      (org-agenda-todo-ignore-scheduled t)
-                      (org-agenda-todo-ignore-deadlines t)
-                      (org-agenda-todo-ignore-with-date t)
-                      (org-agenda-sorting-strategy
-                       '(category-keep))))
-          (tags-todo "-CANCELLED+WAITING|HOLD/!"
-                     ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
-                                                            (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                ""
-                                                              " (including WAITING and SCHEDULED tasks)")))
-                      (org-agenda-skip-function 'bh/skip-non-tasks)
-                      (org-tags-match-list-sublevels nil)
-                      (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                      (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks))) 
-          (tags "-REFILE/"
-                ((org-agenda-overriding-header "Tasks to Archive")
-                 (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
-                 (org-tags-match-list-sublevels nil))))
-         nil)))
-
-(defun bh/org-auto-exclude-function (tag)
-  "Automatic task exclusion in the agenda with / RET"
-  (and (cond
-        ((string= tag "hold")
-         t)
-        ((string= tag "farm")
-         t))
-       (concat "-" tag)))
-
-(validate-setq org-agenda-auto-exclude-function 'bh/org-auto-exclude-function)
-
-; Tags with fast selection keys
-(validate-setq org-tag-alist (quote ((:startgroup)
-                            ("@errand" . ?e)
-                            ("@office" . ?o)
-                            ("@home" . ?H)
-                            ("@farm" . ?f)
-                            (:endgroup)
-                            ("WAITING" . ?w)
-                            ("HOLD" . ?h)
-                            ("PERSONAL" . ?P)
-                            ("WORK" . ?W)
-                            ("FARM" . ?F)
-                            ("ORG" . ?O)
-                            ("NORANG" . ?N)
-                            ("crypt" . ?E)
-                            ("NOTE" . ?n)
-                            ("CANCELLED" . ?c)
-                            ("FLAGGED" . ??))))
-
-; Allow setting single tags without the menu
-(validate-setq org-fast-tag-selection-single-key (quote expert))
-
-; For tag searches ignore tasks with scheduled and deadline dates
-(validate-setq org-agenda-tags-todo-honor-ignore-options t)
-
-(validate-setq org-agenda-span 'day)
-
-(validate-setq org-stuck-projects (quote ("" nil nil "")))
-
-(defun bh/is-project-p ()
-  "Any task with a todo keyword subtask"
-  (save-restriction
-    (widen)
-    (let ((has-subtask)
-          (subtree-end (save-excursion (org-end-of-subtree t)))
-          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-      (save-excursion
-        (forward-line 1)
-        (while (and (not has-subtask)
-                    (< (point) subtree-end)
-                    (re-search-forward "^\*+ " subtree-end t))
-          (when (member (org-get-todo-state) org-todo-keywords-1)
-            (validate-setq has-subtask t))))
-      (and is-a-task has-subtask))))
-
-(defun bh/is-project-subtree-p ()
-  "Any task with a todo keyword that is in a project subtree.
-Callers of this function already widen the buffer view."
-  (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
-                              (point))))
-    (save-excursion
-      (bh/find-project-task)
-      (if (equal (point) task)
-          nil
-        t))))
-
-(defun bh/is-task-p ()
-  "Any task with a todo keyword and no subtask"
-  (save-restriction
-    (widen)
-    (let ((has-subtask)
-          (subtree-end (save-excursion (org-end-of-subtree t)))
-          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-      (save-excursion
-        (forward-line 1)
-        (while (and (not has-subtask)
-                    (< (point) subtree-end)
-                    (re-search-forward "^\*+ " subtree-end t))
-          (when (member (org-get-todo-state) org-todo-keywords-1)
-            (validate-setq has-subtask t))))
-      (and is-a-task (not has-subtask)))))
-
-(defun bh/is-subproject-p ()
-  "Any task which is a subtask of another project"
-  (let ((is-subproject)
-        (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-    (save-excursion
-      (while (and (not is-subproject) (org-up-heading-safe))
-        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-          (validate-setq is-subproject t))))
-    (and is-a-task is-subproject)))
-
-(defun bh/list-sublevels-for-projects-indented ()
-  "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
-  This is normally used by skipping functions where this variable is already local to the agenda."
-  (if (marker-buffer org-agenda-restrict-begin)
-      (validate-setq org-tags-match-list-sublevels 'indented)
-    (validate-setq org-tags-match-list-sublevels nil))
-  nil)
-
-(defun bh/list-sublevels-for-projects ()
-  "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
-  This is normally used by skipping functions where this variable is already local to the agenda."
-  (if (marker-buffer org-agenda-restrict-begin)
-      (validate-setq org-tags-match-list-sublevels t)
-    (validate-setq org-tags-match-list-sublevels nil))
-  nil)
-
-(defvar bh/hide-scheduled-and-waiting-next-tasks t)
-
-(defun bh/toggle-next-task-display ()
-  (interactive)
-  (validate-setq bh/hide-scheduled-and-waiting-next-tasks (not bh/hide-scheduled-and-waiting-next-tasks))
-  (when  (equal major-mode 'org-agenda-mode)
-    (org-agenda-redo))
-  (message "%s WAITING and SCHEDULED NEXT Tasks" (if bh/hide-scheduled-and-waiting-next-tasks "Hide" "Show")))
-
-(defun bh/skip-stuck-projects ()
-  "Skip trees that are not stuck projects"
-  (save-restriction
-    (widen)
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (if (bh/is-project-p)
-          (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
-                 (has-next ))
-            (save-excursion
-              (forward-line 1)
-              (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
-                (unless (member "WAITING" (org-get-tags-at))
-                  (validate-setq has-next t))))
-            (if has-next
-                nil
-              next-headline)) ; a stuck project, has subtasks but no next task
-        nil))))
-
-(defun bh/skip-non-stuck-projects ()
-  "Skip trees that are not stuck projects"
-  ;; (bh/list-sublevels-for-projects-indented)
-  (save-restriction
-    (widen)
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (if (bh/is-project-p)
-          (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
-                 (has-next ))
-            (save-excursion
-              (forward-line 1)
-              (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
-                (unless (member "WAITING" (org-get-tags-at))
-                  (validate-setq has-next t))))
-            (if has-next
-                next-headline
-              nil)) ; a stuck project, has subtasks but no next task
-        next-headline))))
-
-(defun bh/skip-non-projects ()
-  "Skip trees that are not projects"
-  ;; (bh/list-sublevels-for-projects-indented)
-  (if (save-excursion (bh/skip-non-stuck-projects))
-      (save-restriction
-        (widen)
-        (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-          (cond
-           ((bh/is-project-p)
-            nil)
-           ((and (bh/is-project-subtree-p) (not (bh/is-task-p)))
-            nil)
-           (t
-            subtree-end))))
-    (save-excursion (org-end-of-subtree t))))
-
-(defun bh/skip-non-tasks ()
-  "Show non-project tasks.
-Skip project and sub-project tasks, and project related tasks."
-  (save-restriction
-    (widen)
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (cond
-       ((bh/is-task-p)
-        nil)
-       (t
-        next-headline)))))
-
-(defun bh/skip-project-trees-and-habits ()
-  "Skip trees that are projects"
-  (save-restriction
-    (widen)
-    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-      (cond
-       ((bh/is-project-p)
-        subtree-end) 
-       (t
-        nil)))))
-
-(defun bh/skip-projects-and-habits-and-single-tasks ()
-  "Skip trees that are projects, tasks that are habits, single non-project tasks"
-  (save-restriction
-    (widen)
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (cond 
-       ((and bh/hide-scheduled-and-waiting-next-tasks
-             (member "WAITING" (org-get-tags-at)))
-        next-headline)
-       ((bh/is-project-p)
-        next-headline)
-       ((and (bh/is-task-p) (not (bh/is-project-subtree-p)))
-        next-headline)
-       (t
-        nil)))))
-
-(defun bh/skip-project-tasks-maybe ()
-  "Show tasks related to the current restriction.
-When restricted to a project, skip project and sub project tasks, habits, NEXT tasks, and loose tasks.
-When not restricted, skip project and sub-project tasks, habits, and project related tasks."
-  (save-restriction
-    (widen)
-    (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
-           (next-headline (save-excursion (or (outline-next-heading) (point-max))))
-           (limit-to-project (marker-buffer org-agenda-restrict-begin)))
-      (cond
-       ((bh/is-project-p)
-        next-headline) 
-       ((and (not limit-to-project)
-             (bh/is-project-subtree-p))
-        subtree-end)
-       ((and limit-to-project
-             (bh/is-project-subtree-p)
-             (member (org-get-todo-state) (list "NEXT")))
-        subtree-end)
-       (t
-        nil)))))
-
-(defun bh/skip-project-tasks ()
-  "Show non-project tasks.
-Skip project and sub-project tasks, and project related tasks."
-  (save-restriction
-    (widen)
-    (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
-      (cond
-       ((bh/is-project-p)
-        subtree-end) 
-       ((bh/is-project-subtree-p)
-        subtree-end)
-       (t
-        nil)))))
-
-(defun bh/skip-non-project-tasks ()
-  "Show project tasks.
-Skip project and sub-project tasks, habits, and loose non-project tasks."
-  (save-restriction
-    (widen)
-    (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
-           (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (cond
-       ((bh/is-project-p) next-headline) 
-       ((and (bh/is-project-subtree-p)
-             (member (org-get-todo-state) (list "NEXT")))
-        subtree-end)
-       ((not (bh/is-project-subtree-p))
-        subtree-end)
-       (t
-        nil)))))
-
-(defun bh/skip-projects-and-habits ()
-  "Skip trees that are projects and tasks that are habits"
-  (save-restriction
-    (widen)
-    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-      (cond
-       ((bh/is-project-p)
-        subtree-end) 
-       (t
-        nil)))))
-
-(defun bh/skip-non-subprojects ()
-  "Skip trees that are not projects"
-  (let ((next-headline (save-excursion (outline-next-heading))))
-    (if (bh/is-subproject-p)
-        nil
-      next-headline)))
-
-(defun bh/find-project-task ()
-  "Move point to the parent (project) task if any"
-  (save-restriction
-    (widen)
-    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
-      (while (org-up-heading-safe)
-        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-          (validate-setq parent-task (point))))
-      (goto-char parent-task)
-      parent-task)))
-
-(validate-setq org-global-properties (quote (("Effort_ALL" . "0 0:10 0:20 0:30 1:00 1:30 2:00 3:00 4:00 6:00 8:00 10:00 20:00"))))
-
-(validate-setq org-archive-mark-done nil)
-(validate-setq org-archive-location "%s_archive::* Archived Tasks")
-
-(defun bh/skip-non-archivable-tasks ()
-  "Skip trees that are not available for archiving"
-  (save-restriction
-    (widen)
-    ;; Consider only tasks with done todo headings as archivable candidates
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max))))
-          (subtree-end (save-excursion (org-end-of-subtree t))))
-      (if (member (org-get-todo-state) org-todo-keywords-1)
-          (if (member (org-get-todo-state) org-done-keywords)
-              (let* ((daynr (string-to-int (format-time-string "%d" (current-time))))
-                     (a-month-ago (* 60 60 24 (+ daynr 1)))
-                     (last-month (format-time-string "%Y-%m-" (time-subtract (current-time) (seconds-to-time a-month-ago))))
-                     (this-month (format-time-string "%Y-%m-" (current-time)))
-                     (subtree-is-current (save-excursion
-                                           (forward-line 1)
-                                           (and (< (point) subtree-end)
-                                                (re-search-forward (concat last-month "\\|" this-month) subtree-end t)))))
-                (if subtree-is-current
-                    subtree-end ; Has a date in this month or last month, skip it
-                  nil))  ; available to archive
-            (or subtree-end (point-max)))
-        next-headline))))
-
-(use-package org-alert
-  :config
-  (org-alert-enable)
-  (validate-setq alert-default-style 'libnotify))
-
-(use-package htmlize
-  :config
-  (require 'htmlize))
-
-(require 'org-notmuch)
-
-(defun jethro/auto-git-commit-and-push (dir)
-  (shell-command (format "cd %s && git add -A && git commit -m \"%s\" && git push origin master" dir "New changes: $(date)")))
-
-(validate-setq jethro/emacsd-site-dir "~/Documents/Code/emacsd_site/")
-
-(validate-setq org-publish-project-alist
-      '(("emacs.d"
-         :publishing-function org-html-publish-to-html
-         :publishing-directory jethro/emacsd-site-dir
-         :base-directory "~/.emacs.d/"
-         :exclude ".*"
-         :include ["init.org"]
-         :completion-function (lambda () (let ((htmlfile (concat jethro/emacsd-site-dir
-                                                                 "init.html")))
-                                           (if (file-exists-p htmlfile)
-                                               (progn
-                                                 (rename-file htmlfile
-                                                              (concat jethro/emacsd-site-dir
-                                                                      "index.html") t)
-                                                 (jethro/auto-git-commit-and-push jethro/emacsd-site-dir)))))
-         :with-emphasize t
-         :with-title nil
-         :with-toc t
-         :html-head "<link rel=\"stylesheet\" href=\"/css/emacsd.css\" type=\"text/css\">"
-         :html-preamble t)))
-
-(use-package ox-reveal
-  :config
-  (require 'ox-reveal))
-
-(validate-setq org-latex-pdf-process
-        '("pdflatex -shell-escape -interaction nonstopmode %f"
-          "pdflatex -shell-escape -interaction nonstopmode %f"))
-  (require 'ox-latex)
-  (validate-setq org-latex-default-table-environment "tabular")
-  (validate-setq org-latex-tables-booktabs t)
-  (validate-setq org-latex-listings 'minted)
-  (validate-setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-  (validate-setq org-latex-classes
-        '(("article"
-           "\\documentclass[8pt]{article}
-\\usepackage[margin={0.8in,1in}, a4paper]{geometry}
-\\usepackage{booktabs}
-\\usepackage{hyperref}
-\\usepackage{minted}
-\\usepackage{tabularx}
-\\usepackage{parskip}
-\\setlength\\columnsep{10pt}
-\\setlength{\\columnseprule}{1pt}
-\\usepackage[compact]{titlesec}
-\\titlespacing{\\section}{0pt}{*2}{*0}
-\\titlespacing{\\subsection}{0pt}{*2}{*0}
-\\titlespacing{\\subsubsection}{0pt}{*2}{*0}
-\\titleformat*{\\section}{\\large\\bfseries}
-\\titleformat*{\\subsection}{\\normalsize\\bfseries}
-\\titleformat*{\\subsubsection}{\\normalsize\\bfseries}"
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
-          ("book"
-           "\\documentclass[10pt]{memoir}
-                        \\usepackage{charter}
-                        \\usepackage[T1]{fontenc}
-                        \\usepackage{booktabs}
-                        \\usepackage{amsmath}
-                        \\usepackage{minted}
-                        \\usemintedstyle{borland}
-                        \\usepackage{color}
-                        \\usepackage{epigraph}
-                        \\usepackage{enumitem}
-                        \\setlist{nosep}
-                        \\setlength\\epigraphwidth{13cm}
-                        \\setlength\\epigraphrule{0pt}
-                        \\usepackage{fontspec}
-                        \\usepackage{graphicx}
-                        \\usepackage{hyperref}
-                        \\hypersetup {colorlinks = true, allcolors = red}
-                        \\title{}
-                        [NO-DEFAULT-PACKAGES]
-                        [NO-PACKAGES]"
-           ("\\chapter{%s}" . "\\chapter*{%s}")
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
-          ("latex-notes"
-           "\\documentclass[8pt]{article}
-  \\usepackage[margin={0.3in,0.3in}, a4paper,landscape]{geometry}
-  \\usepackage{hyperref}
-  \\usepackage{amsmath}
-  \\usepackage{multicol}
-  \\usepackage{booktabs}
-  \\usepackage{enumitem}
-  \\usepackage[compact]{titlesec}
-  \\titlespacing{\\section}{0pt}{*2}{*0}
-  \\titlespacing{\\subsection}{0pt}{*2}{*0}
-  \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
-  \\titleformat*{\\section}{\\large\\bfseries}
-  \\titleformat*{\\subsection}{\\normalsize\\bfseries}
-  \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}
-  \\setlist[itemize]{leftmargin=*}
-  \\setlist[enumerate]{leftmargin=*}
-  \\setlength\\columnsep{10pt}
-  \\setlength{\\columnseprule}{1pt}       
-  \\setlist{nosep}         
-  \\usepackage{minted}
-  \\usemintedstyle{bw}
-  \\usemintedstyle[java]{bw}
-  \\setminted[]{frame=none,fontsize=\\footnotesize,linenos=false}
-  "
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
-
-  (defun jethro/org-multicol-to-latex (async subtreep visible-only body-only)
-    (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name)))
-      (with-temp-buffer
-        (insert "#+LATEX_CLASS: latex-notes\n")
-        (insert contents)
-        (goto-char (point-min))
-        (org-next-visible-heading 1)
-        (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
-        (goto-char (point-max))
-        (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-        (org-export-to-file 'latex (format "%s.tex" buffer-name)
-          async subtreep visible-only body-only nil))))
-
-  (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
-    (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name)))
-      (with-temp-buffer
-        (insert "#+LATEX_CLASS: latex-notes\n")
-        (insert contents)
-        (goto-char (point-min))
-        (org-next-visible-heading 1)
-        (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
-        (goto-char (point-max))
-        (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-        (org-export-to-file 'latex (format "%s.tex" buffer-name)
-          async subtreep visible-only body-only nil
-          (lambda (file) (org-latex-compile file))))))
-
-  (org-export-define-derived-backend 'latex-notes 'latex
-    :menu-entry
-    '(?L "Export to LaTeX notes"
-         ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
-          (?p "Export to PDF" jethro/org-multicol-to-pdf))))
-
-(use-package org-download
-  :config
-  (setq-default org-download-image-dir "./pictures")
-  (setq-default org-download-heading-lvl nil))
-
-(defun jethro/org-sort-books ()
-    (interactive)
-    (let ((old-point (point)))
-      (beginning-of-buffer)
-      (org-sort-entries t ?a)
-      (beginning-of-buffer)
-      (org-sort-entries t ?o)
-      (show-all)
-      (org-global-cycle)
-      (goto-char old-point)))
-
-(defun jethro/org-after-save-books ()
-  (org-publish "books"))
-
-(use-package deft
-  :bind* (("C-c d" . deft)
-          ("C-x C-g" . deft-find-file)) 
-  :bind (("C-c C-r" . deft-rename-file))
-  :config
-  (validate-setq deft-directory "~/.org/deft/"
-        deft-extensions '("org")
-        deft-use-filename-as-title t
-        deft-default-extension "org"
-        deft-use-filter-string-for-filename t
-        deft-file-naming-rules '((noslash . "_")
-                                 (nospace . "_")
-                                 (case-fn . downcase))))
-
-(use-package epresent
-  :bind ("<f5>"))
-
 (use-package smerge-mode
   :config
   (global-set-key (kbd "C-c h s")
@@ -1392,13 +726,13 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
                     ("M-m"    smerge-keep-mine   "Keep mine")
                     ("M-o"    smerge-keep-other  "Keep other"))))
 
-(use-package magit  
+(use-package magit
   :bind (("s-g" . magit-status)
          ("s-G" . magit-blame))
-  :init (validate-setq magit-auto-revert-mode nil)
+  :init
+  (add-hook 'magit-mode-hook 'hl-line-mode)
   :config
-  ;; (use-package magithub)
-  (add-hook 'magit-mode-hook 'hl-line-mode))
+  (validate-setq magit-auto-revert-mode nil))
 
 (use-package projectile
   :demand t
@@ -1413,39 +747,32 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
     (counsel-projectile-on))
   (validate-setq projectile-use-git-grep t)
   (validate-setq projectile-create-missing-test-files t)
-  (validate-setq projectile-completion-system 'ivy))
+  (validate-setq projectile-completion-system 'ivy)
 
-(validate-setq projectile-switch-project-action
-      #'projectile-commander)
-(def-projectile-commander-method ?S
-  "Run a search in the project"
-  (counsel-projectile-rg))
-(def-projectile-commander-method ?s
-  "Open a *eshell* buffer for the project."
-  (projectile-run-eshell))
-(def-projectile-commander-method ?c
-  "Run `compile' in the project."
-  (projectile-compile-project nil))
-(def-projectile-commander-method ?\C-?
-  "Go back to project selection."
-  (projectile-switch-project))
-(def-projectile-commander-method ?d
-  "Open project root in dired."
-  (projectile-dired))
-(def-projectile-commander-method ?F
-  "Git fetch."
-  (magit-status)
-  (call-interactively #'magit-fetch-all))
-(def-projectile-commander-method ?j
-  "Jack-in."
-  (let* ((opts (projectile-current-project-files))
-         (file (ivy-read
-                "Find file: " 
-                opts)))
-    (find-file (expand-file-name
-                file (projectile-project-root)))
-    (run-hooks 'projectile-find-file-hook)
-    (cider-jack-in)))
+  (validate-setq projectile-switch-project-action
+                 #'projectile-commander)
+  (def-projectile-commander-method ?S
+    "Run a search in the project"
+    (counsel-projectile-rg))
+  (def-projectile-commander-method ?s
+    "Open a *eshell* buffer for the project."
+    (projectile-run-eshell))
+  (def-projectile-commander-method ?d
+    "Open project root in dired."
+    (projectile-dired))
+  (def-projectile-commander-method ?g
+    "Show magit status."
+    (magit-status))
+  (def-projectile-commander-method ?j
+    "Jack-in."
+    (let* ((opts (projectile-current-project-files))
+           (file (ivy-read
+                  "Find file: " 
+                  opts)))
+      (find-file (expand-file-name
+                  file (projectile-project-root)))
+      (run-hooks 'projectile-find-file-hook)
+      (cider-jack-in))))
 
 (use-package esup
   :defer t)
@@ -1458,17 +785,6 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 (use-package which-key
   :diminish which-key-mode
   :config (add-hook 'after-init-hook 'which-key-mode))
-
-(use-package nameless
-  :diminish nameless-mode
-  :config
-  (add-hook 'emacs-lisp-mode-hook 'nameless-mode-from-hook)
-  (validate-setq nameless-global-aliases
-        '(("fl" . "font-lock")
-          ("s" . "seq")
-          ("me" . "macroexp")
-          ("c" . "cider")
-          ("q" . "queue"))))
 
 (use-package firestarter
   :bind ("C-c M s" . firestarter-mode)

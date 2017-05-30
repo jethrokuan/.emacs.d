@@ -1,0 +1,1121 @@
+* Org-mode
+** Getting Started
+   :PROPERTIES:
+   :CUSTOM_ID: GettingStarted
+   :END:
+*** Org-Mode Setup
+    :PROPERTIES:
+    :CUSTOM_ID: Setup
+    :END:
+ #+begin_src emacs-lisp :tangle yes
+   (use-package org-plus-contrib
+     :bind (("C-c l" . org-store-link)
+            ("C-c a" . org-agenda) 
+            ("C-c c" . org-capture))
+     :config
+     (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)))
+ #+end_src
+*** Enabling auto-fill-mode
+This enables `auto-fill-mode` for org-mode files
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'org-mode-hook (lambda ()
+                             (auto-fill-mode 1)))
+#+END_SRC
+*** Agenda Setup
+ #+begin_src emacs-lisp :tangle yes
+   (validate-setq org-agenda-files (file-expand-wildcards "~/.org/gtd/[a-zA-z]*.org"))
+ #+end_src
+
+    :CUSTOM_ID: OrgFileStructure
+    :END:
+** org-capture shortcut
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar jethro/delete-frame-after-capture nil
+    "Whether to delete the last frame after the current capture")
+
+  (defun jethro/delete-frame-if-neccessary (&rest r)
+    (if (or (equal "capture" (frame-parameter nil 'name))
+            jethro/delete-frame-after-capture)
+        (progn
+          (validate-setq jethro/delete-frame-after-capture nil)
+          (delete-frame))
+      (validate-setq jethro/delete-frame-after-capture nil)))
+
+  (defadvice org-switch-to-buffer-other-window
+      (after supress-window-splitting activate)
+    "Delete the extra window if we're in a capture frame"
+    (if (equal "capture" (frame-parameter nil 'name))
+        (delete-other-windows)))
+
+  (defun make-capture-frame ()
+    "Create a new frame and run org-capture."
+    (interactive)
+    (select-frame
+     (make-frame '((window-system . x)
+                   (name . "capture")
+                   (width . 120)
+                   (height . 15)))) 
+    (validate-setq word-wrap 1)
+    (validate-setq truncate-lines nil)
+    (validate-setq jethro/delete-frame-after-capture t)
+    (org-capture nil "t"))
+
+  (advice-add 'org-capture-finalize :after 'jethro/delete-frame-if-neccessary)
+  (advice-add 'org-capture-kill :after 'jethro/delete-frame-if-neccessary)
+  (advice-add 'org-capture-refile :after 'jethro/delete-frame-if-neccessary)
+#+END_SRC
+** Refiling Tasks
+   :PROPERTIES:
+   :CUSTOM_ID: Refiling
+   :END:
+*** Refile Setup
+    :PROPERTIES:
+    :CUSTOM_ID: RefileSetup
+    :END:
+ Here is my refile configuration:
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+   (validate-setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                    (org-agenda-files :maxlevel . 9))))
+
+   ; Use full outline paths for refile targets - we file directly with IDO
+   (validate-setq org-refile-use-outline-path t)
+
+   ; Targets complete directly with IDO
+   (validate-setq org-outline-path-complete-in-steps nil)
+
+   ; Allow refile to create parent tasks with confirmation
+   (validate-setq org-refile-allow-creating-parent-nodes 'confirm)
+
+   (validate-setq org-completion-use-ido t)
+
+   ;;;; Refile settings
+   (defun jethro/verify-refile-target ()
+     "Exclude todo keywords with a done state from refile targets"
+     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+   (validate-setq org-refile-target-verify-function 'jethro/verify-refile-target)
+ #+end_src
+
+** Custom agenda views
+   :PROPERTIES:
+   :CUSTOM_ID: CustomAgendaViews
+   :END:
+*** Setup
+    :PROPERTIES:
+    :CUSTOM_ID: CustomAgendaViewSetup
+    :END:
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ;; Do not dim blocked tasks
+   (validate-setq org-agenda-dim-blocked-tasks nil)
+
+   ;; Compact the block agenda view
+   (validate-setq org-agenda-compact-blocks t)
+
+   ;; Custom agenda command definitions
+   (validate-setq org-agenda-custom-commands
+         '((" " "Agenda"
+            ((agenda "" nil)
+             (tags "REFILE"
+                   ((org-agenda-overriding-header "Tasks to Refile")
+                    (org-tags-match-list-sublevels nil)))
+             (todo "NEXT"
+                   ((org-agenda-overriding-header "School Next Tasks")
+                    (org-agenda-todo-ignore-scheduled t)
+                    (org-agenda-todo-ignore-deadlines t)
+                    (org-agenda-files '("~/.org/gtd/school.org"))))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "School Todos")
+                    (org-agenda-todo-ignore-scheduled t)
+                    (org-agenda-todo-ignore-deadlines t) 
+                    (org-agenda-files '("~/.org/gtd/school.org"))))
+             (tags-todo "-CANCELLED/!"
+                        ((org-agenda-overriding-header "Stuck Projects")
+                         (org-agenda-skip-function 'bh/skip-non-stuck-projects)
+                         (org-agenda-sorting-strategy '(category-keep)))) 
+             (tags-todo "-HOLD-CANCELLED/!"
+                        ((org-agenda-overriding-header "Projects")
+                         (org-agenda-skip-function 'bh/skip-non-projects)
+                         (org-tags-match-list-sublevels 'indented)
+                         (org-agenda-sorting-strategy '(category-keep))))
+             (tags-todo "-CANCELLED/!NEXT"
+                        ((org-agenda-overriding-header (concat "Project Next Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
+                         (org-tags-match-list-sublevels t)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-sorting-strategy
+                          '(todo-state-down effort-up category-keep))))
+             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
+                        ((org-agenda-overriding-header (concat "Project Subtasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-non-project-tasks)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-sorting-strategy
+                          '(category-keep))))
+             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
+                        ((org-agenda-overriding-header (concat "Standalone Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-files (remove "~/.org/gtd/school.org" org-agenda-files))
+                         (org-agenda-skip-function 'bh/skip-project-tasks)
+                         (org-agenda-todo-ignore-scheduled t)
+                         (org-agenda-todo-ignore-deadlines t)
+                         (org-agenda-todo-ignore-with-date t)
+                         (org-agenda-sorting-strategy
+                          '(category-keep))))
+             (tags-todo "-CANCELLED+WAITING|HOLD/!"
+                        ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
+                                                               (if bh/hide-scheduled-and-waiting-next-tasks
+                                                                   ""
+                                                                 " (including WAITING and SCHEDULED tasks)")))
+                         (org-agenda-skip-function 'bh/skip-non-tasks)
+                         (org-tags-match-list-sublevels nil)
+                         (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                         (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks))) 
+             (tags "-REFILE/"
+                   ((org-agenda-overriding-header "Tasks to Archive")
+                    (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
+                    (org-tags-match-list-sublevels nil))))
+            nil)))
+ #+end_src
+
+ My day goes generally like this:
+
+ - Punch in (this starts the clock on the default task)
+ - Look at the agenda and make a mental note of anything important to deal with today
+ - Read email and news
+   - create notes, and tasks for things that need responses with org-capture
+ - Check refile tasks and respond to emails
+ - Look at my agenda and work on important tasks for today
+   - Clock it in
+   - Work on it until it is =DONE= or it gets interrupted
+ - Work on tasks
+ - Make journal entries (=C-c c j=) for interruptions
+ - Punch out for lunch and punch back in after lunch
+ - work on more tasks
+ - Refile tasks to empty the list
+   - Tag tasks to be refiled with =m= collecting all tasks for the same target
+   - Bulk refile the tasks to the target location with =B r=
+   - Repeat (or refile individually with =C-c C-w=) until all refile tasks are gone
+ - Mark habits done today as DONE
+ - Punch out at the end of the work day
+*** What do I work on next?
+    :PROPERTIES:
+    :CUSTOM_ID: WhatDoIWorkOnNext
+    :END:
+
+ Start with deadlines and tasks scheduled today or earlier from the
+ daily agenda view.  Then move on to tasks in the =Next Tasks= list in
+ the block agenda view.  I tend to schedule current projects to 'today'
+ when I start work on them and they sit on my daily agenda reminding me
+ that they need to be completed.  I normally only schedule one or two
+ projects to the daily agenda and unschedule things that are no longer
+ important and don't deserve my attention today.
+
+ When I look for a new task to work on I generally hit =F12 SPC= to get
+ the block agenda and follow this order:
+
+ - Pick something off today's agenda
+   - deadline for today (do this first - it's not late yet)
+   - deadline in the past (it's already late)
+   - a scheduled task for today (it's supposed to be done today)
+   - a scheduled task that is still on the agenda
+   - deadline that is coming up soon
+ - pick a NEXT task
+ - If you run out of items to work on look for a NEXT task in the current context
+   pick a task from the Tasks list of the current project.
+**** Why keep it all on the =NEXT= list?
+     :PROPERTIES:
+     :CUSTOM_ID: CustomAgendaViewsNextList
+     :END:
+
+ I've moved to a more GTD way of doing things.  Now I just use a =NEXT=
+ list.  Only projects get tasks with =NEXT= keywords since stuck projects
+ initiate the need for marking or creating =NEXT= tasks.  A =NEXT= task
+ is something that is available to work on /now/, it is the next
+ logical step in some project.
+
+ To drop a task off the =NEXT= list simply move it back to the =TODO=
+ state.
+*** Filtering
+    :PROPERTIES:
+    :CUSTOM_ID: CustomAgendaViewFiltering
+    :END:
+
+ So many tasks, so little time.  I have hundreds of tasks at any given
+ time (373 right now).  There is so much stuff to look at it can be
+ daunting.  This is where agenda filtering saves the day.
+
+ It's 11:53AM and I'm in work mode just before lunch.  I don't want to
+ see tasks that are not work related right now.  I also don't want to
+ work on a big project just before lunch... so I need to find small
+ tasks that I can knock off the list.
+
+ How do we do this?  Get a list of NEXT tasks from the block agenda and
+ then narrow it down with filtering.  Tasks are ordered in the NEXT
+ agenda view by estimated effort so the short tasks are first -- just
+ start at the top and work your way down.  I can limit the displayed
+ agenda tasks to those estimates of 10 minutes or less with =/ + 1= and
+ I can pick something that fits the minutes I have left before I take
+ off for lunch.
+**** Automatically removing context based tasks with / RET
+     :PROPERTIES:
+     :CUSTOM_ID: CustomAgendaViewFilteringContext
+     :END:
+
+ =/ RET= in the agenda is really useful.  This awesome feature was
+ added to org-mode by John Wiegley.  It removes tasks automatically by
+ filtering based on a user-provided function.
+
+ At work I have projects I'm working on which are assigned by my
+ manager.  Sometimes priorities changes and projects are delayed to
+ sometime in the future.  This means I need to stop working on these
+ immediately.  I put the project task on =HOLD= and work on something
+ else.  The =/ RET= filter removes =HOLD= tasks and subtasks (because
+ of tag inheritance).
+
+ At home I have some tasks tagged with =farm= since these need to be
+ performed when I am physically at our family farm.  Since I am there
+ infrequently I have added =farm= to the list of auto-excluded tags on
+ my system.  I can always explicitly filter to just =farm= tasks with
+ =/ TAB farm RET= when I am physically there.
+
+ I have the following setup to allow =/ RET= to filter tasks based on
+ the description above.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (defun bh/org-auto-exclude-function (tag)
+   "Automatic task exclusion in the agenda with / RET"
+   (and (cond
+         ((string= tag "hold")
+          t)
+         ((string= tag "farm")
+          t))
+        (concat "-" tag)))
+
+ (validate-setq org-agenda-auto-exclude-function 'bh/org-auto-exclude-function)
+ #+end_src
+
+ This lets me filter tasks with just =/ RET= on the agenda which removes tasks I'm not
+ supposed to be working on now from the list of returned results.
+
+ This helps to keep my agenda clutter-free.
+** Tags
+   :PROPERTIES:
+   :CUSTOM_ID: Tags
+   :END:
+
+ Tasks can have any number of arbitrary tags.  Tags are used for:
+
+ - filtering todo lists and agenda views
+ - providing context for tasks
+ - tagging notes
+ - tagging phone calls
+ - tagging meetings
+ - tagging tasks to be refiled
+ - tagging tasks in a WAITING state because a parent task is WAITING
+ - tagging cancelled tasks because a parent task is CANCELLED
+ - preventing export of some subtrees when publishing
+
+ I use tags mostly for filtering in the agenda.  This means you can
+ find tasks with a specific tag easily across your large number of
+ org-mode files.
+
+*** Tags
+    :PROPERTIES:
+    :CUSTOM_ID: OrgTagAlist
+    :END:
+
+ Here are my tag definitions with associated keys for filtering in the
+ agenda views.
+
+ The startgroup - endgroup (=@XXX=) tags are mutually exclusive -
+ selecting one removes a similar tag already on the task.  These are
+ the context tags - you can't be in two places at once so if a task is
+ marked with @farm and you add @office then the @farm tag is removed
+ automagically.
+
+ The other tags =WAITING= .. =FLAGGED= are not mutually exclusive and
+ multiple tags can appear on a single task.  Some of those tags are
+ created by todo state change triggers.  The shortcut key is used to
+ add or remove the tag using =C-c C-q= or to apply the task for
+ filtering on the agenda.
+
+ I have both =FARM= and =@farm= tags.  =FARM= is set by a =FILETAGS=
+ entry and just gives me a way to filter anything farm related.  The
+ =@farm= tag signifies that the task as to be done /at the farm/.  If I
+ have to call someone about something that would have a =FARM= tag but
+ I can do that at home on my lunch break.  I don't physically have to
+ be at the farm to make the call.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   ; Tags with fast selection keys
+   (validate-setq org-tag-alist (quote ((:startgroup)
+                               ("@errand" . ?e)
+                               ("@office" . ?o)
+                               ("@home" . ?H)
+                               ("@farm" . ?f)
+                               (:endgroup)
+                               ("WAITING" . ?w)
+                               ("HOLD" . ?h)
+                               ("PERSONAL" . ?P)
+                               ("WORK" . ?W)
+                               ("FARM" . ?F)
+                               ("ORG" . ?O)
+                               ("NORANG" . ?N)
+                               ("crypt" . ?E)
+                               ("NOTE" . ?n)
+                               ("CANCELLED" . ?c)
+                               ("FLAGGED" . ??))))
+
+   ; Allow setting single tags without the menu
+   (validate-setq org-fast-tag-selection-single-key (quote expert))
+
+   ; For tag searches ignore tasks with scheduled and deadline dates
+   (validate-setq org-agenda-tags-todo-honor-ignore-options t)
+ #+end_src
+*** Filetags
+    :PROPERTIES:
+    :CUSTOM_ID: FileTags
+    :END:
+
+ Filetags are a convenient way to apply one or more tags to all of the
+ headings in a file.
+
+ Filetags look like this:
+
+ #+begin_src org :exports src
+ ,#+FILETAGS: NORANG @office
+ #+end_src
+
+ I have the following =#+FILETAGS:= entries in my org-mode files:
+**** Non-work related org-mode files
+     :PROPERTIES:
+     :CUSTOM_ID: TaggingNonWorkFiles
+     :END:
+
+ | File         | Tags                  |
+ |--------------+-----------------------|
+ | todo.org     | PERSONAL              |
+ | gsoc2009.org | GSOC PERSONAL         |
+ | git.org      | GIT WORK              |
+ | org.org      | ORG WORK              |
+ | mark.org     | MARK PERSONAL         |
+ | farm.org     | FARM PERSONAL         |
+**** Work related org-mode files
+     :PROPERTIES:
+     :CUSTOM_ID: TaggingWorkFiles
+     :END:
+
+ | File        | Tags            |
+ |-------------+-----------------|
+ | norang.org  | NORANG @office  |
+ | ABC.org     | ABC @office     |
+ | XYZ.org     | XYZ @office     |
+ | ABC-DEF.org | ABC DEF @office |
+ | ABC-KKK.org | ABC KKK @office |
+ | YYY.org     | YYY @office     |
+**** Refile tasks
+     :PROPERTIES:
+     :CUSTOM_ID: RefileTasks
+     :END:
+
+ | File       | Tags         |
+ |------------+--------------|
+ | refile.org | REFILE       |
+ |------------+--------------|
+*** State Trigger Tags
+    :PROPERTIES:
+    :CUSTOM_ID: StateTriggerTags
+    :END:
+
+ The following tags are automatically added or removed by todo state
+ triggers described previously in [[#ToDoStateTriggers][ToDo state triggers]]
+
+ - =WAITING=
+   - =CANCELLED=
+** GTD stuff
+   :PROPERTIES:
+   :CUSTOM_ID: GTD
+   :
+ Most of my day is deadline/schedule driven.
+ I work off of the agenda first and then pick items from the todo lists as
+ outlined in [[#WhatDoIWorkOnNext][What do I work on next?]]
+*** Weekly Review Process
+    :PROPERTIES:
+    :CUSTOM_ID: GTDWeeklyReview
+    :END:
+
+ The first day of the week (usually Monday) I do my weekly review. 
+ I keep a list like this one to remind me what needs to be done.
+
+ To keep the agenda fast I set
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (validate-setq org-agenda-span 'day)
+ #+end_src
+ so only today's date is shown by default.  I only need the weekly
+ view during my weekly review and this keeps my agenda generation
+ fast.
+
+ I have a recurring task which keeps my weekly review checklist
+ handy.  This pops up as a reminder on Monday's.  This week I'm
+ doing my weekly review on Tuesday since Monday was a holiday.
+
+ #+begin_src org :exports src
+ ,* NEXT Weekly Review [0/6]
+   SCHEDULED: <2009-05-18 Mon ++1w> 
+   :LOGBOOK:...
+   :PROPERTIES:...
+
+   What to review:
+
+    - [ ] Check follow-up folder
+    - [ ] Review weekly agenda =F12 a w //=
+    - [ ] Check clocking data for past week =v c=
+    - [ ] Review clock report for past week =R=
+      - Check where we spent time (too much or too little) and rectify this week
+    - [ ] Look at entire agenda for today  =F12 SPC=
+    - [ ] Review projects =F12 SPC //= and =V= repeatedly to view each project
+
+    - start work
+      - daily agenda first - knock off items
+      - then work on NEXT tasks
+ #+end_src
+ The first item [ ] Check follow-up folder makes me pull out the paper
+ file I dump stuff into all week long - things I need to take care of
+ but are in no particular hurry to deal with.  Stuff I get in the mail
+ etc. that I don't want to deal with now.  I just toss it in my
+ =Follow-Up= folder in the filing cabinet and forget about it until the
+ weekly review.
+
+ I go through the folder and weed out anything that needs to be dealt
+ with.  After that everything else is in =org-mode=.  I tend to
+ schedule tasks onto the agenda for the coming week so that I don't
+ spend lots of time trying to find what needs to be worked on next.
+
+ This works for me.  Your mileage may vary ;)
+*** Project definition and finding stuck projects
+    :PROPERTIES:
+    :CUSTOM_ID: Projects
+    :END:
+
+ I'm using a new lazy project definition to mark tasks as projects.
+ This requires zero effort from me.  Any task with a subtask using a
+ todo keyword is a project.  Period.
+
+ Projects are 'stuck' if they have no subtask with a =NEXT= todo
+ keyword task defined.
+
+ The org-mode stuck projects agenda view lists projects that have no
+ =NEXT= task defined.  Stuck projects show up on my block agenda and I
+ tend to assign a =NEXT= task so the list remains empty.  This helps to
+ keep projects moving forward.
+
+ I disable the default org-mode stuck projects agenda view with the
+ following setting.
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+ (validate-setq org-stuck-projects (quote ("" nil nil "")))
+ #+end_src
+
+ This prevents org-mode from trying to show incorrect data if I select
+ the default stuck project view with =F12 #= from the agenda menu.  My
+ customized stuck projects view is part of my block agenda displayed
+ with =F12 SPC=.
+
+ Projects can have subprojects - and these subprojects can also be stuck.
+ Any project that is stuck shows up on the stuck projects list so I can
+ indicate or create a =NEXT= task to move that project forward.
+
+ In the following example =Stuck Project A= is stuck because it has no
+ subtask which is =NEXT=.  =Project C= is not stuck because it has
+ =NEXT= tasks =SubTask G= and =Task I=.  =Stuck Sub Project D= is stuck
+ because =SubTask E= is not =NEXT= and there are no other tasks
+ available in this project.
+
+ #+begin_src org :exports src
+ ,* Category
+ ,** TODO Stuck Project A
+ ,*** TODO Task B
+ ,** TODO Project C
+ ,*** TODO Stuck Sub Project D
+ ,**** TODO SubTask E
+ ,*** TODO Sub Project F
+ ,**** NEXT SubTask G
+ ,**** TODO SubTask H
+ ,*** NEXT Task I
+ ,*** TODO Task J
+ #+end_src
+
+ All of the stuck projects and subprojects show up in the stuck
+ projects list and that is my indication to assign or create =NEXT=
+ tasks until the stuck projects list is empty.  Occasionally some
+ subtask is =WAITING= for something and the project is stuck until that
+ condition is satisfied.  In this case I leave it on the stuck project
+ list and just work on something else.  This stuck project 'bugs' me
+ regularly when I see it on the block agenda and this prompts me to
+ follow up on the thing that I'm waiting for.
+
+ I have the following helper functions defined for projects which are
+ used by agenda views.
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   (defun bh/is-project-p ()
+     "Any task with a todo keyword subtask"
+     (save-restriction
+       (widen)
+       (let ((has-subtask)
+             (subtree-end (save-excursion (org-end-of-subtree t)))
+             (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+         (save-excursion
+           (forward-line 1)
+           (while (and (not has-subtask)
+                       (< (point) subtree-end)
+                       (re-search-forward "^\*+ " subtree-end t))
+             (when (member (org-get-todo-state) org-todo-keywords-1)
+               (validate-setq has-subtask t))))
+         (and is-a-task has-subtask))))
+
+   (defun bh/is-project-subtree-p ()
+     "Any task with a todo keyword that is in a project subtree.
+   Callers of this function already widen the buffer view."
+     (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
+                                 (point))))
+       (save-excursion
+         (bh/find-project-task)
+         (if (equal (point) task)
+             nil
+           t))))
+
+   (defun bh/is-task-p ()
+     "Any task with a todo keyword and no subtask"
+     (save-restriction
+       (widen)
+       (let ((has-subtask)
+             (subtree-end (save-excursion (org-end-of-subtree t)))
+             (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+         (save-excursion
+           (forward-line 1)
+           (while (and (not has-subtask)
+                       (< (point) subtree-end)
+                       (re-search-forward "^\*+ " subtree-end t))
+             (when (member (org-get-todo-state) org-todo-keywords-1)
+               (validate-setq has-subtask t))))
+         (and is-a-task (not has-subtask)))))
+
+   (defun bh/is-subproject-p ()
+     "Any task which is a subtask of another project"
+     (let ((is-subproject)
+           (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+       (save-excursion
+         (while (and (not is-subproject) (org-up-heading-safe))
+           (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+             (validate-setq is-subproject t))))
+       (and is-a-task is-subproject)))
+
+   (defun bh/list-sublevels-for-projects-indented ()
+     "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+     This is normally used by skipping functions where this variable is already local to the agenda."
+     (if (marker-buffer org-agenda-restrict-begin)
+         (validate-setq org-tags-match-list-sublevels 'indented)
+       (validate-setq org-tags-match-list-sublevels nil))
+     nil)
+
+   (defun bh/list-sublevels-for-projects ()
+     "Set org-tags-match-list-sublevels so when restricted to a subtree we list all subtasks.
+     This is normally used by skipping functions where this variable is already local to the agenda."
+     (if (marker-buffer org-agenda-restrict-begin)
+         (validate-setq org-tags-match-list-sublevels t)
+       (validate-setq org-tags-match-list-sublevels nil))
+     nil)
+
+   (defvar bh/hide-scheduled-and-waiting-next-tasks t)
+
+   (defun bh/toggle-next-task-display ()
+     (interactive)
+     (validate-setq bh/hide-scheduled-and-waiting-next-tasks (not bh/hide-scheduled-and-waiting-next-tasks))
+     (when  (equal major-mode 'org-agenda-mode)
+       (org-agenda-redo))
+     (message "%s WAITING and SCHEDULED NEXT Tasks" (if bh/hide-scheduled-and-waiting-next-tasks "Hide" "Show")))
+
+   (defun bh/skip-stuck-projects ()
+     "Skip trees that are not stuck projects"
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (if (bh/is-project-p)
+             (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                    (has-next ))
+               (save-excursion
+                 (forward-line 1)
+                 (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                   (unless (member "WAITING" (org-get-tags-at))
+                     (validate-setq has-next t))))
+               (if has-next
+                   nil
+                 next-headline)) ; a stuck project, has subtasks but no next task
+           nil))))
+
+   (defun bh/skip-non-stuck-projects ()
+     "Skip trees that are not stuck projects"
+     ;; (bh/list-sublevels-for-projects-indented)
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (if (bh/is-project-p)
+             (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                    (has-next ))
+               (save-excursion
+                 (forward-line 1)
+                 (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                   (unless (member "WAITING" (org-get-tags-at))
+                     (validate-setq has-next t))))
+               (if has-next
+                   next-headline
+                 nil)) ; a stuck project, has subtasks but no next task
+           next-headline))))
+
+   (defun bh/skip-non-projects ()
+     "Skip trees that are not projects"
+     ;; (bh/list-sublevels-for-projects-indented)
+     (if (save-excursion (bh/skip-non-stuck-projects))
+         (save-restriction
+           (widen)
+           (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+             (cond
+              ((bh/is-project-p)
+               nil)
+              ((and (bh/is-project-subtree-p) (not (bh/is-task-p)))
+               nil)
+              (t
+               subtree-end))))
+       (save-excursion (org-end-of-subtree t))))
+
+   (defun bh/skip-non-tasks ()
+     "Show non-project tasks.
+   Skip project and sub-project tasks, and project related tasks."
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond
+          ((bh/is-task-p)
+           nil)
+          (t
+           next-headline)))))
+
+   (defun bh/skip-project-trees-and-habits ()
+     "Skip trees that are projects"
+     (save-restriction
+       (widen)
+       (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          (t
+           nil)))))
+
+   (defun bh/skip-projects-and-habits-and-single-tasks ()
+     "Skip trees that are projects, tasks that are habits, single non-project tasks"
+     (save-restriction
+       (widen)
+       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond 
+          ((and bh/hide-scheduled-and-waiting-next-tasks
+                (member "WAITING" (org-get-tags-at)))
+           next-headline)
+          ((bh/is-project-p)
+           next-headline)
+          ((and (bh/is-task-p) (not (bh/is-project-subtree-p)))
+           next-headline)
+          (t
+           nil)))))
+
+   (defun bh/skip-project-tasks-maybe ()
+     "Show tasks related to the current restriction.
+   When restricted to a project, skip project and sub project tasks, habits, NEXT tasks, and loose tasks.
+   When not restricted, skip project and sub-project tasks, habits, and project related tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (next-headline (save-excursion (or (outline-next-heading) (point-max))))
+              (limit-to-project (marker-buffer org-agenda-restrict-begin)))
+         (cond
+          ((bh/is-project-p)
+           next-headline) 
+          ((and (not limit-to-project)
+                (bh/is-project-subtree-p))
+           subtree-end)
+          ((and limit-to-project
+                (bh/is-project-subtree-p)
+                (member (org-get-todo-state) (list "NEXT")))
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-project-tasks ()
+     "Show non-project tasks.
+   Skip project and sub-project tasks, and project related tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          ((bh/is-project-subtree-p)
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-non-project-tasks ()
+     "Show project tasks.
+   Skip project and sub-project tasks, habits, and loose non-project tasks."
+     (save-restriction
+       (widen)
+       (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+         (cond
+          ((bh/is-project-p) next-headline) 
+          ((and (bh/is-project-subtree-p)
+                (member (org-get-todo-state) (list "NEXT")))
+           subtree-end)
+          ((not (bh/is-project-subtree-p))
+           subtree-end)
+          (t
+           nil)))))
+
+   (defun bh/skip-projects-and-habits ()
+     "Skip trees that are projects and tasks that are habits"
+     (save-restriction
+       (widen)
+       (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+         (cond
+          ((bh/is-project-p)
+           subtree-end) 
+          (t
+           nil)))))
+
+   (defun bh/skip-non-subprojects ()
+     "Skip trees that are not projects"
+     (let ((next-headline (save-excursion (outline-next-heading))))
+       (if (bh/is-subproject-p)
+           nil
+         next-headline)))
+
+   (defun bh/find-project-task ()
+     "Move point to the parent (project) task if any"
+     (save-restriction
+       (widen)
+       (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+         (while (org-up-heading-safe)
+           (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+             (validate-setq parent-task (point))))
+         (goto-char parent-task)
+         parent-task)))
+ #+end_src
+*** Effort Estimates
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (validate-setq org-global-properties (quote (("Effort_ALL" . "0 0:10 0:20 0:30 1:00 1:30 2:00 3:00 4:00 6:00 8:00 10:00 20:00"))))
+#+END_SRC
+** Archiving
+   :PROPERTIES:
+   :CUSTOM_ID: Archiving
+   :END:
+*** Archive Setup
+    :PROPERTIES:
+    :CUSTOM_ID: ArchiveSetup
+    :END:
+ #+begin_src emacs-lisp :tangle yes
+ (validate-setq org-archive-mark-done nil)
+ (validate-setq org-archive-location "%s_archive::* Archived Tasks")
+ #+end_src
+
+ #+begin_src emacs-lisp :tangle yes
+ (defun bh/skip-non-archivable-tasks ()
+   "Skip trees that are not available for archiving"
+   (save-restriction
+     (widen)
+     ;; Consider only tasks with done todo headings as archivable candidates
+     (let ((next-headline (save-excursion (or (outline-next-heading) (point-max))))
+           (subtree-end (save-excursion (org-end-of-subtree t))))
+       (if (member (org-get-todo-state) org-todo-keywords-1)
+           (if (member (org-get-todo-state) org-done-keywords)
+               (let* ((daynr (string-to-int (format-time-string "%d" (current-time))))
+                      (a-month-ago (* 60 60 24 (+ daynr 1)))
+                      (last-month (format-time-string "%Y-%m-" (time-subtract (current-time) (seconds-to-time a-month-ago))))
+                      (this-month (format-time-string "%Y-%m-" (current-time)))
+                      (subtree-is-current (save-excursion
+                                            (forward-line 1)
+                                            (and (< (point) subtree-end)
+                                                 (re-search-forward (concat last-month "\\|" this-month) subtree-end t)))))
+                 (if subtree-is-current
+                     subtree-end ; Has a date in this month or last month, skip it
+                   nil))  ; available to archive
+             (or subtree-end (point-max)))
+         next-headline))))
+ #+end_src
+** Reminders
+   :PROPERTIES:
+   :CUSTOM_ID: Reminders
+   :END:
+
+ I use appt for reminders.  It's simple and unobtrusive -- putting
+ pending appointments in the status bar and beeping as 12, 9, 6, 3,
+ and 0 minutes before the appointment is due.
+
+ Everytime the agenda is displayed (and that's lots for me) the
+ appointment list is erased and rebuilt from the current agenda
+ details for today.  This means everytime I reschedule something, add
+ or remove tasks that are time related the appointment list is
+ automatically updated the next time I look at the agenda.
+*** Reminder Setup
+    :PROPERTIES:
+    :CUSTOM_ID: ReminderSetup
+    :END:
+
+ #+header: :tangle yes
+ #+begin_src emacs-lisp
+   (use-package org-alert
+     :config
+     (org-alert-enable)
+     (validate-setq alert-default-style 'libnotify))
+ #+end_src
+** Htmlize
+We need =htmlize= to add syntax highlighting to org-exports for HTML files.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package htmlize
+    :config
+    (require 'htmlize))
+#+end_src
+** Email integration with org-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'org-notmuch)
+#+END_SRC
+** org-publish
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/auto-git-commit-and-push (dir)
+    (shell-command (format "cd %s && git add -A && git commit -m \"%s\" && git push origin master" dir "New changes: $(date)")))
+
+  (validate-setq jethro/emacsd-site-dir "~/Documents/Code/emacsd_site/")
+
+  (validate-setq org-publish-project-alist
+        '(("emacs.d"
+           :publishing-function org-html-publish-to-html
+           :publishing-directory jethro/emacsd-site-dir
+           :base-directory "~/.emacs.d/"
+           :exclude ".*"
+           :include ["init.org"]
+           :completion-function (lambda () (let ((htmlfile (concat jethro/emacsd-site-dir
+                                                                   "init.html")))
+                                             (if (file-exists-p htmlfile)
+                                                 (progn
+                                                   (rename-file htmlfile
+                                                                (concat jethro/emacsd-site-dir
+                                                                        "index.html") t)
+                                                   (jethro/auto-git-commit-and-push jethro/emacsd-site-dir)))))
+           :with-emphasize t
+           :with-title nil
+           :with-toc t
+           :html-head "<link rel=\"stylesheet\" href=\"/css/emacsd.css\" type=\"text/css\">"
+           :html-preamble t)))
+#+end_src
+** org-reveal
+#+begin_src emacs-lisp :tangle yes
+  (use-package ox-reveal
+    :config
+    (require 'ox-reveal))
+#+end_src
+** org-latex
+I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
+#+begin_src emacs-lisp :tangle yes
+    (validate-setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode %f"
+            "pdflatex -shell-escape -interaction nonstopmode %f"))
+    (require 'ox-latex)
+    (validate-setq org-latex-default-table-environment "tabular")
+    (validate-setq org-latex-tables-booktabs t)
+    (validate-setq org-latex-listings 'minted)
+    (validate-setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    (validate-setq org-latex-classes
+          '(("article"
+             "\\documentclass[8pt]{article}
+  \\usepackage[margin={0.8in,1in}, a4paper]{geometry}
+  \\usepackage{booktabs}
+  \\usepackage{hyperref}
+  \\usepackage{minted}
+  \\usepackage{tabularx}
+  \\usepackage{parskip}
+  \\setlength\\columnsep{10pt}
+  \\setlength{\\columnseprule}{1pt}
+  \\usepackage[compact]{titlesec}
+  \\titlespacing{\\section}{0pt}{*2}{*0}
+  \\titlespacing{\\subsection}{0pt}{*2}{*0}
+  \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
+  \\titleformat*{\\section}{\\large\\bfseries}
+  \\titleformat*{\\subsection}{\\normalsize\\bfseries}
+  \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}"
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+            ("book"
+             "\\documentclass[10pt]{memoir}
+                          \\usepackage{charter}
+                          \\usepackage[T1]{fontenc}
+                          \\usepackage{booktabs}
+                          \\usepackage{amsmath}
+                          \\usepackage{minted}
+                          \\usemintedstyle{borland}
+                          \\usepackage{color}
+                          \\usepackage{epigraph}
+                          \\usepackage{enumitem}
+                          \\setlist{nosep}
+                          \\setlength\\epigraphwidth{13cm}
+                          \\setlength\\epigraphrule{0pt}
+                          \\usepackage{fontspec}
+                          \\usepackage{graphicx}
+                          \\usepackage{hyperref}
+                          \\hypersetup {colorlinks = true, allcolors = red}
+                          \\title{}
+                          [NO-DEFAULT-PACKAGES]
+                          [NO-PACKAGES]"
+             ("\\chapter{%s}" . "\\chapter*{%s}")
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+            ("latex-notes"
+             "\\documentclass[8pt]{article}
+    \\usepackage[margin={0.3in,0.3in}, a4paper,landscape]{geometry}
+    \\usepackage{hyperref}
+    \\usepackage{amsmath}
+    \\usepackage{multicol}
+    \\usepackage{booktabs}
+    \\usepackage{enumitem}
+    \\usepackage[compact]{titlesec}
+    \\titlespacing{\\section}{0pt}{*2}{*0}
+    \\titlespacing{\\subsection}{0pt}{*2}{*0}
+    \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
+    \\titleformat*{\\section}{\\large\\bfseries}
+    \\titleformat*{\\subsection}{\\normalsize\\bfseries}
+    \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}
+    \\setlist[itemize]{leftmargin=*}
+    \\setlist[enumerate]{leftmargin=*}
+    \\setlength\\columnsep{10pt}
+    \\setlength{\\columnseprule}{1pt}       
+    \\setlist{nosep}         
+    \\usepackage{minted}
+    \\usemintedstyle{bw}
+    \\usemintedstyle[java]{bw}
+    \\setminted[]{frame=none,fontsize=\\footnotesize,linenos=false}
+    "
+             ("\\section{%s}" . "\\section*{%s}")
+             ("\\subsection{%s}" . "\\subsection*{%s}")
+             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+             ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+    (defun jethro/org-multicol-to-latex (async subtreep visible-only body-only)
+      (let ((contents (buffer-string))
+            (buffer-name (file-name-sans-extension buffer-file-name)))
+        (with-temp-buffer
+          (insert "#+LATEX_CLASS: latex-notes\n")
+          (insert contents)
+          (goto-char (point-min))
+          (org-next-visible-heading 1)
+          (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+          (goto-char (point-max))
+          (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+          (org-export-to-file 'latex (format "%s.tex" buffer-name)
+            async subtreep visible-only body-only nil))))
+
+    (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
+      (let ((contents (buffer-string))
+            (buffer-name (file-name-sans-extension buffer-file-name)))
+        (with-temp-buffer
+          (insert "#+LATEX_CLASS: latex-notes\n")
+          (insert contents)
+          (goto-char (point-min))
+          (org-next-visible-heading 1)
+          (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+          (goto-char (point-max))
+          (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+          (org-export-to-file 'latex (format "%s.tex" buffer-name)
+            async subtreep visible-only body-only nil
+            (lambda (file) (org-latex-compile file))))))
+
+    (org-export-define-derived-backend 'latex-notes 'latex
+      :menu-entry
+      '(?L "Export to LaTeX notes"
+           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
+            (?p "Export to PDF" jethro/org-multicol-to-pdf))))
+#+end_src
+** org-download
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-download
+    :config
+    (setq-default org-download-image-dir "./pictures")
+    (setq-default org-download-heading-lvl nil))
+#+end_src
+** Handling my book collection (deprecated)
+*** jethro/org-sort-books
+I like to keep my books in sorted order, alphanumerically, and then by TODO keyword.
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/org-sort-books ()
+      (interactive)
+      (let ((old-point (point)))
+        (beginning-of-buffer)
+        (org-sort-entries t ?a)
+        (beginning-of-buffer)
+        (org-sort-entries t ?o)
+        (show-all)
+        (org-global-cycle)
+        (goto-char old-point)))
+#+end_src
+*** jethro/org-after-save-books
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/org-after-save-books ()
+    (org-publish "books"))
+#+end_src
+** deft
+Deft is similar in many ways to Notational Velocity. I use deft as a brain dump, to quickly collect things I learn or come across.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package deft
+    :bind* (("C-c d" . deft)
+            ("C-x C-g" . deft-find-file)) 
+    :bind (("C-c C-r" . deft-rename-file))
+    :config
+    (validate-setq deft-directory "~/.org/deft/"
+          deft-extensions '("org")
+          deft-use-filename-as-title t
+          deft-default-extension "org"
+          deft-use-filter-string-for-filename t
+          deft-file-naming-rules '((noslash . "_")
+                                   (nospace . "_")
+                                   (case-fn . downcase))))
+
+#+END_SRC
+** epresent
+#+begin_src emacs-lisp :tangle yes
+  (use-package epresent
+    :bind ("<f5>"))
+#+end_src
