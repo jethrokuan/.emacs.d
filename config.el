@@ -13,9 +13,6 @@
 (load "server")
 (unless (server-running-p) (server-start))
 
-(validate-setq gc-cons-threshold 50000000)
-(validate-setq large-file-warning-threshold 100000000)
-
 (defun reload-init ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
@@ -23,6 +20,9 @@
 (global-set-key (kbd "<f11>") 'reload-init)
 
 (use-package validate)
+
+(validate-setq gc-cons-threshold 50000000)
+(validate-setq large-file-warning-threshold 100000000)
 
 (validate-setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
