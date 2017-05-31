@@ -34,9 +34,9 @@
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
-             '(font . "Monaco-12"))
+             '(font . "Iosevka-12"))
 (add-to-list 'default-frame-alist
-             '(font . "Monaco-12"))
+             '(font . "Iosevka-12"))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)

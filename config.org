@@ -95,14 +95,13 @@ Using the customize interface can be nice, but it tends to pollute
   (load custom-file)
 #+END_SRC
 ** Custom font
-I use Iosevka. 
-*** Iosevka
-    #+BEGIN_SRC emacs-lisp :tangle yes
-      (add-to-list 'initial-frame-alist
-                   '(font . "Monaco-12"))
-      (add-to-list 'default-frame-alist
-                   '(font . "Monaco-12"))
-    #+END_SRC
+Iosevka is nice.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-to-list 'initial-frame-alist
+               '(font . "Iosevka-12"))
+  (add-to-list 'default-frame-alist
+               '(font . "Iosevka-12"))
+#+END_SRC
 
 ** UI Cruft
 Remove useless toolbars and splash screens.
@@ -134,7 +133,8 @@ Type over a selected region, instead of deleting before typing.
 Emacs uses double-spaces by default. Use single spaces by default:
 
 #+BEGIN_QUOTE
-NOTE: This will cause an indistinction between sentences and name abbrieviations (eg. E. B. White)
+NOTE: This will cause an indistinction between sentences and name
+abbrieviations (eg. E. B. White)
 #+END_QUOTE
 
 #+begin_src emacs-lisp :tangle yes
@@ -161,16 +161,14 @@ Don't wrap lines for coding. Create a hook that enables wrapping, for modes like
 #+end_src
 
 ** Backup directory
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (validate-setq backup-directory-alist
         `((".*" . ,temporary-file-directory)))
   (validate-setq auto-save-file-name-transforms
         `((".*" ,temporary-file-directory t)))
-   #+end_src
+#+end_src
 
-   The following code will delete all backup files that are older than a certain date:
-
-   #+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (message "Deleting old backup files...")
 (let ((week (* 60 60 24 7))
       (current (float-time (current-time))))
@@ -180,11 +178,14 @@ Don't wrap lines for coding. Create a hook that enables wrapping, for modes like
                   week))
       (message "%s" file)
       (delete-file file))))
-   #+end_src
+#+end_src
 ** Load secrets
-   #+begin_src emacs-lisp :tangle yes
+Store secrets in a different file, not committed into the git
+repository.
+
+#+begin_src emacs-lisp :tangle yes
 (load "~/.emacs.d/secrets.el" t)
-   #+end_src
+#+end_src
 ** Shell
 *** Default shell
 #+begin_src emacs-lisp :tangle yes
@@ -192,11 +193,11 @@ Don't wrap lines for coding. Create a hook that enables wrapping, for modes like
   (setq-default shell-file-name "/bin/bash")
 #+end_src
 *** Add PATH to eshell
-    #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
    (use-package exec-path-from-shell 
      :config
      (exec-path-from-shell-initialize))
-    #+end_src
+#+end_src
 ** Theme (Zenburn)
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package zenburn-theme
