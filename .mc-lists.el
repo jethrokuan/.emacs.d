@@ -6,6 +6,7 @@
         delete-horizontal-space
         electric-align-SPC
         org-cycle
+        org-end-of-line
         org-metaright
         org-self-insert-command
         org-shiftmetaright
