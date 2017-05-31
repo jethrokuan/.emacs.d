@@ -76,22 +76,32 @@ when opening large files.
       user-mail-address "jethrokuan95@gmail.com")
    #+end_src
 ** Auto Revert
+Many times when switching git branches, files tend to change. By
+default, Emacs does not revert the buffers affected, which can lead to
+some confusion. Turn on =auto-revert-mode= globally, so that when the
+files change, the buffers reflect the latest editions as well.
+
+NOTE: This can be quite slow, when the changes are massive across branches.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (global-auto-revert-mode 1)
 #+END_SRC
+
 ** Custom file
-   #+BEGIN_SRC emacs-lisp :tangle yes
+Using the customize interface can be nice, but it tends to pollute
+=init.el=. Move all customizations to a separate file.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
   (validate-setq custom-file "~/.emacs.d/custom.el")
   (load custom-file)
-   #+END_SRC
+#+END_SRC
 ** Custom font
-   I use Hack, patched with Powerline. Other good alternatives include Source Code Pro.
+I use Iosevka. 
 *** Iosevka
     #+BEGIN_SRC emacs-lisp :tangle yes
       (add-to-list 'initial-frame-alist
-                   '(font . "Iosevka-12"))
+                   '(font . "Monaco-12"))
       (add-to-list 'default-frame-alist
-                   '(font . "Iosevka-12"))
+                   '(font . "Monaco-12"))
     #+END_SRC
 
 ** UI Cruft

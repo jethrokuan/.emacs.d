@@ -1,3 +1,4 @@
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -33,9 +34,9 @@
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Monaco-12"))
 (add-to-list 'default-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Monaco-12"))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
@@ -544,8 +545,8 @@ The app is chosen from your OS's preference."
             (validate-setq scss-compile-at-save nil)))
 
 (setq-default flycheck-disabled-checkers
-	(append flycheck-disabled-checkers
-		'(javascript-jshint)))
+  (append flycheck-disabled-checkers
+    '(javascript-jshint)))
 (flycheck-add-mode 'javascript-eslint 'js2-mode)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 
