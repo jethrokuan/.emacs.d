@@ -491,9 +491,8 @@ The app is chosen from your OS's preference."
     '(add-to-list 'company-backends '(company-anaconda))))
 
 (use-package py-isort
-  :defer t
-  :init
-  (add-hook 'before-save-hook 'py-isort-before-save))
+  :commands
+  (py-isort-buffer py-isort-region))
 
 (use-package yapfify 
   :init

@@ -776,9 +776,8 @@ Counsel contains ivy enhancements for commonly-used functions.
 *** isort
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package py-isort
-    :defer t
-    :init
-    (add-hook 'before-save-hook 'py-isort-before-save))
+    :commands
+    (py-isort-buffer py-isort-region))
 #+END_SRC
 *** yapfify
 #+BEGIN_SRC emacs-lisp :tangle yes
