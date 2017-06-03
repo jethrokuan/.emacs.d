@@ -215,15 +215,15 @@ repository.
 #+begin_src emacs-lisp :tangle yes
   (use-package hydra)
 #+end_src
-* Ivy
+** Ivy
 I've recently switched over from =helm= to =ivy=. Ivy is simpler, and
 easier to extend.
-** flx
+*** flx
 Flx is required for fuzzy-matching.
 #+begin_src emacs-lisp :tangle yes
   (use-package flx)
 #+end_src
-** Counsel
+*** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
@@ -231,12 +231,11 @@ Counsel contains ivy enhancements for commonly-used functions.
     :bind*
     (("C-c C-r" . ivy-resume)
      ("M-a" . counsel-M-x)
-     ("C-M-i" . counsel-imenu)
+     ("C-c i" . counsel-imenu)
      ("C-x C-f" . counsel-find-file)
      ("C-x j" . counsel-dired-jump)
      ("C-x l" . counsel-locate)
-     ("C-c g" . counsel-git)
-     ("C-c j" . counsel-git-grep)
+     ("C-c j" . counsel-git)
      ("C-c s" . counsel-projectile-rg)
      ("C-c f" . counsel-recentf)
      ("M-y" . counsel-yank-pop))
@@ -278,6 +277,106 @@ Counsel contains ivy enhancements for commonly-used functions.
      t
      '(("I" insert "insert"))))
    #+end_src
+* Visual Enhancements
+** Whitespace-mode
+#+begin_src emacs-lisp :tangle yes
+  (require 'whitespace)
+  (setq whitespace-line-column 80) ;; limit line length
+  (setq whitespace-style '(face lines-tail))
+
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+#+end_src
+** Page-break-lines
+#+begin_src emacs-lisp :tangle yes
+(use-package page-break-lines)
+#+end_src
+** Smart-mode-line
+#+begin_src emacs-lisp :tangle yes
+  (use-package smart-mode-line
+    :init
+    (add-hook 'after-init-hook 'sml/setup)
+    :config 
+    (setq sml/theme 'respectful)
+    (setq sml/name-width 30)
+    (setq sml/shorten-directory t)
+    (setq sml/shorten-modes t)
+    (setq sml/mode-width 'full)
+    (setq sml/replacer-regexp-list
+                   '(("^~/.org/" ":O:")
+                     ("^~/\\.emacs\\.d/" ":ED")))
+    (setq rm-blacklist
+                   (format "^ \\(%s\\)$"
+                           (mapconcat #'identity
+                                      '("FlyC.*"
+                                        "Projectile.*"
+                                        "GitGutter"
+                                        "ivy"
+                                        "company"
+                                        ""
+                                        "doom"
+                                        ","
+                                        "ElDoc")
+                                      "\\|"))))
+#+end_src
+*** Showing time
+#+begin_src emacs-lisp :tangle yes
+  (display-time-mode 1)
+  (eval-after-load "display-time-mode"
+    (setq display-time-24hr-format t))
+#+end_src
+** Zooming
+   #+begin_src emacs-lisp :tangle yes
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("i" text-scale-increase "in")
+  ("o" text-scale-decrease "out"))
+   #+end_src
+** beacon
+Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package beacon
+    :diminish beacon-mode
+    :init
+    (add-hook 'after-init-hook 'beacon-mode)
+    :config 
+    (setq beacon-push-mark 10))
+#+end_src
+** Show Matching parenthesis
+Always show matching parenthesis.
+#+begin_src emacs-lisp :tangle yes
+(show-paren-mode 1)
+(setq show-paren-delay 0)
+#+end_src
+** golden-ratio
+Give the working window more screen estate.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package golden-ratio
+    :diminish golden-ratio-mode
+    :init
+    (add-hook 'after-init-hook 'golden-ratio-mode))
+#+end_src
+** volatile-highlights
+Highlights recently copied/pasted text.
+#+begin_src emacs-lisp :tangle yes
+     (use-package volatile-highlights
+       :diminish volatile-highlights-mode
+       :init
+       (add-hook 'after-init-hook 'volatile-highlights-mode))
+#+end_src
+** git-gutter-fringe+
+Displays added/modified/deleted on the left.
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-gutter-fringe+
+    :diminish git-gutter+-mode
+    :config
+    (global-git-gutter+-mode)
+    (set-face-foreground 'git-gutter+-modified "gold1")
+    (set-face-foreground 'git-gutter+-added    "SeaGreen")
+    (set-face-foreground 'git-gutter+-deleted  "IndianRed")
+    (setq git-gutter-fr+-side 'left-fringe))
+#+end_src
 * Moving Around
 ** Crux
 #+begin_src emacs-lisp :tangle yes
@@ -594,7 +693,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   (global-set-key [remap fill-paragraph]
                   #'endless/fill-or-unfill)
 #+END_SRC
-* Language Support
+* Environment
 ** Direnv
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package direnv
@@ -602,20 +701,21 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     (direnv-mode)
     (setq direnv-always-show-summary t))
 #+END_SRC
+* Languages
 ** Common Lisp
-   #+BEGIN_SRC emacs-lisp :tangle yes
-     (use-package slime
-       :config
-       (setq inferior-lisp-program "sbcl")
-       (setq slime-contribs '(slime-fancy))
-       (use-package slime-company
-         :config
-         (slime-setup '(slime-company))))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package slime
+    :config
+    (setq inferior-lisp-program "sbcl")
+    (setq slime-contribs '(slime-fancy))
+    (use-package slime-company
+      :config
+      (slime-setup '(slime-company))))
+#+END_SRC
 ** Emacs Lisp
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
-   #+end_src
+#+end_src
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
@@ -967,106 +1067,6 @@ npm install -g tern
   (use-package company-auctex
     :defer t)
     #+END_SRC
-* Visual Enhancements
-** whitespace-mode
-#+begin_src emacs-lisp :tangle yes
-  (require 'whitespace)
-  (setq whitespace-line-column 100) ;; limit line length
-  (setq whitespace-style '(face lines-tail))
-
-  (add-hook 'prog-mode-hook 'whitespace-mode)
-#+end_src
-** Page-break-lines
-#+begin_src emacs-lisp :tangle yes
-(use-package page-break-lines)
-#+end_src
-** Smart-mode-line
-#+begin_src emacs-lisp :tangle yes
-  (use-package smart-mode-line
-    :init
-    (add-hook 'after-init-hook 'sml/setup)
-    :config 
-    (setq sml/theme 'respectful)
-    (setq sml/name-width 30)
-    (setq sml/shorten-directory t)
-    (setq sml/shorten-modes t)
-    (setq sml/mode-width 'full)
-    (setq sml/replacer-regexp-list
-                   '(("^~/.org/" ":O:")
-                     ("^~/\\.emacs\\.d/" ":ED")))
-    (setq rm-blacklist
-                   (format "^ \\(%s\\)$"
-                           (mapconcat #'identity
-                                      '("FlyC.*"
-                                        "Projectile.*"
-                                        "GitGutter"
-                                        "ivy"
-                                        "company"
-                                        ""
-                                        "doom"
-                                        ","
-                                        "ElDoc")
-                                      "\\|"))))
-#+end_src
-*** Showing time
-#+begin_src emacs-lisp :tangle yes
-  (display-time-mode 1)
-  (eval-after-load "display-time-mode"
-    (setq display-time-24hr-format t))
-#+end_src
-** Zooming
-   #+begin_src emacs-lisp :tangle yes
-(defhydra hydra-zoom (global-map "<f2>")
-  "zoom"
-  ("i" text-scale-increase "in")
-  ("o" text-scale-decrease "out"))
-   #+end_src
-** beacon
-Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package beacon
-    :diminish beacon-mode
-    :init
-    (add-hook 'after-init-hook 'beacon-mode)
-    :config 
-    (setq beacon-push-mark 10))
-#+end_src
-** Show Matching parenthesis
-Always show matching parenthesis.
-#+begin_src emacs-lisp :tangle yes
-(show-paren-mode 1)
-(setq show-paren-delay 0)
-#+end_src
-** golden-ratio
-Give the working window more screen estate.
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package golden-ratio
-    :diminish golden-ratio-mode
-    :init
-    (add-hook 'after-init-hook 'golden-ratio-mode))
-#+end_src
-** volatile-highlights
-Highlights recently copied/pasted text.
-#+begin_src emacs-lisp :tangle yes
-     (use-package volatile-highlights
-       :diminish volatile-highlights-mode
-       :init
-       (add-hook 'after-init-hook 'volatile-highlights-mode))
-#+end_src
-** git-gutter-fringe+
-Displays added/modified/deleted on the left.
-#+begin_src emacs-lisp :tangle yes
-  (use-package git-gutter-fringe+
-    :diminish git-gutter+-mode
-    :config
-    (global-git-gutter+-mode)
-    (set-face-foreground 'git-gutter+-modified "gold1")
-    (set-face-foreground 'git-gutter+-added    "SeaGreen")
-    (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-    (setq git-gutter-fr+-side 'left-fringe))
-#+end_src
 * Project Management
 ** Smerge-mode
 Useful when handling git merge conflicts.
