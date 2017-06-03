@@ -11,7 +11,7 @@ Notes:
 2. I use Stumpwm, so some of my configurations are created around that
    as well.
 
-* Basic Setup
+* Core Setup
 ** Add [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
@@ -112,7 +112,7 @@ Always prefer the shorter y/n over yes/no.
 Type over a selected region, instead of deleting before typing.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(delete-selection-mode +1)
+(delete-selection-mode 1)
 #+end_src
 
 ** Sentences
@@ -130,7 +130,8 @@ Emacs uses double-spaces by default. Use single spaces instead:
 #+end_src
 
 ** Don't wrap lines
-Don't wrap lines for coding. Create a hook that enables wrapping, for modes like org-mode and markdown-mode.
+Don't wrap lines for coding. Create a hook that enables wrapping, for
+text-modes like org-mode and markdown-mode.
 
 #+begin_src emacs-lisp :tangle yes
   (setq-default truncate-lines t)
@@ -169,7 +170,7 @@ repository.
 #+end_src
 ** Shell
 *** Default shell
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (setq-default explicit-shell-file-name "/bin/bash")
   (setq-default shell-file-name "/bin/bash")
 #+end_src

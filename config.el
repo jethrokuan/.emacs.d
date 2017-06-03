@@ -42,7 +42,7 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(delete-selection-mode +1)
+(delete-selection-mode 1)
 
 (setq sentence-end-double-space nil)
 
@@ -63,9 +63,6 @@
       `((".*" ,temporary-file-directory t)))
 
 (load "~/.emacs.d/secrets.el" t)
-
-(setq-default explicit-shell-file-name "/bin/bash")
-(setq-default shell-file-name "/bin/bash")
 
 (use-package exec-path-from-shell 
   :config
