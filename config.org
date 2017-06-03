@@ -33,7 +33,7 @@ maintaining tidiness and performance.
 Load the emacs server, if it is not running. This allows for
 almost-instant emacs "startup".
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp :tangle no
    (load "server")
    (unless (server-running-p) (server-start))
  #+END_SRC
@@ -49,30 +49,17 @@ it to =<f11>=.
   (global-set-key (kbd "<f11>") 'reload-init)
 #+END_SRC
 
-** Validate
-Validate is a package that checks for and reports Emacs config errors.
-
-#+BEGIN_QUOTE
-As an end-user of a package, you can use validate-setq instead of setq
-for editing variables. This will ensure the configuration you provide
-matches the schema specified by the developer, and thus prevents you
-from misconfiguring stuff.
-#+END_QUOTE
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package validate)
-#+end_src
 ** Tweaking Emacs settings
 Reduce the frequency of garbage collection by making it happen on each
 50MB of allocated data (the default is on every 0.76MB). Also, warn
 when opening large files.
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (validate-setq gc-cons-threshold 50000000)
-  (validate-setq large-file-warning-threshold 100000000)
+  (setq gc-cons-threshold 50000000)
+  (setq large-file-warning-threshold 100000000)
 #+END_SRC
 ** User configuration
    #+begin_src emacs-lisp :tangle yes
-(validate-setq user-full-name "Jethro Kuan"
+(setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
    #+end_src
 ** Auto Revert
@@ -91,11 +78,10 @@ Using the customize interface can be nice, but it tends to pollute
 =init.el=. Move all customizations to a separate file.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (validate-setq custom-file "~/.emacs.d/custom.el")
+  (setq custom-file "~/.emacs.d/custom.el")
   (load custom-file)
 #+END_SRC
-** Custom font
-Iosevka is nice.
+** Font
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'initial-frame-alist
                '(font . "Iosevka-12"))
@@ -111,8 +97,8 @@ Remove useless toolbars and splash screens.
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
-  (validate-setq inhibit-splash-screen t)
-  (validate-setq inhibit-startup-message t)
+  (setq inhibit-splash-screen t)
+  (setq inhibit-startup-message t)
 #+end_src
 
 ** Use y/n over yes/no
@@ -133,7 +119,7 @@ Type over a selected region, instead of deleting before typing.
 Emacs uses double-spaces by default. Use single spaces instead:
 
 #+begin_src emacs-lisp :tangle yes
-(validate-setq sentence-end-double-space nil)
+(setq sentence-end-double-space nil)
 #+end_src
 
 ** Tab with 2 spaces
@@ -150,16 +136,16 @@ Don't wrap lines for coding. Create a hook that enables wrapping, for modes like
   (setq-default truncate-lines t)
 
   (defun truncate-lines-hook ()
-    (validate-setq truncate-lines nil))
+    (setq truncate-lines nil))
 
   (add-hook 'text-mode-hook 'truncate-lines-hook)
 #+end_src
 
 ** Backup directory
 #+begin_src emacs-lisp :tangle yes
-  (validate-setq backup-directory-alist
+  (setq backup-directory-alist
         `((".*" . ,temporary-file-directory)))
-  (validate-setq auto-save-file-name-transforms
+  (setq auto-save-file-name-transforms
         `((".*" ,temporary-file-directory t)))
 #+end_src
 
@@ -221,7 +207,7 @@ repository.
 #+begin_src emacs-lisp :tangle yes
   (bind-key* "<f9>" (lambda ()
                       (interactive)
-                      (validate-setq-local compilation-read-command nil)
+                      (setq-local compilation-read-command nil)
                       (call-interactively 'compile)))
 #+end_src
 ** Hydra
@@ -229,7 +215,8 @@ repository.
   (use-package hydra)
 #+end_src
 * Ivy
-I've recently switched over from =helm= to =ivy=. Ivy is simpler, and easier to extend.
+I've recently switched over from =helm= to =ivy=. Ivy is simpler, and
+easier to extend.
 ** flx
 Flx is required for fuzzy-matching.
 #+begin_src emacs-lisp :tangle yes
@@ -304,45 +291,15 @@ Counsel contains ivy enhancements for commonly-used functions.
             ("M-D" . crux-duplicate-and-comment-current-line-or-region)
             ("s-o" . crux-smart-open-line-above)))
 #+end_src
-** Open file
-   #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/open-in-external-app ()
-    "Open the current file or dired marked files in external app.
-  The app is chosen from your OS's preference."
-    (interactive)
-    (let* (
-           (-file-list
-            (if (string-equal major-mode "dired-mode")
-                (dired-get-marked-files)
-              (list (buffer-file-name))))
-           (-do-it-p (if (<= (length -file-list) 5)
-                         t
-                       (y-or-n-p "Open more than 5 files? "))))
-      (when -do-it-p
-        (cond
-         ((string-equal system-type "windows-nt")
-          (mapc
-           (lambda (-fpath)
-             (w32-shell-execute "open" (replace-regexp-in-string "/" "\\" -fpath t t))) -file-list))
-         ((string-equal system-type "darwin")
-          (mapc
-           (lambda (-fpath)
-             (shell-command
-              (concat "open " (shell-quote-argument -fpath))))  -file-list))
-         ((string-equal system-type "gnu/linux")
-          (mapc
-           (lambda (-fpath) (let ((process-connection-type nil))
-                              (start-process "" nil "xdg-open" -fpath))) -file-list))))))
-  (bind-key* "<f8>" 'jethro/open-in-external-app)
-   #+END_SRC
 ** Anzu
    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package anzu
-    :diminish anzu-mode 
-    :config
-    (global-anzu-mode +1)
-    (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
-    (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
+     (use-package anzu
+       :diminish anzu-mode
+       :init
+       (add-hook 'after-init-hook 'global-anzu-mode)
+       :config
+       (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
+       (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
    #+END_SRC
 ** avy
    Use avy to move between visible text.
@@ -352,7 +309,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     :bind* (("C-'" . avy-goto-char)
             ("C-," . avy-goto-char-2))
     :config
-    (validate-setq avy-keys '(?h ?t ?n ?s)))
+    (setq avy-keys '(?h ?t ?n ?s)))
    #+end_src
 ** dumb-jump
    Use it to jump to function definitions. Requires no external depedencies.
@@ -370,7 +327,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     ;; use command key on Mac
     (windmove-default-keybindings 'super)
     ;; wrap around at edges
-    (validate-setq windmove-wrap-around t))
+    (setq windmove-wrap-around t))
 #+end_src
 ** ace-window (disabled)
    Ace-window makes it easier to move between windows.
@@ -378,7 +335,7 @@ Counsel contains ivy enhancements for commonly-used functions.
   (use-package ace-window
     :bind ("M-'" . ace-window)
     :config
-    (validate-setq aw-keys '(?h ?t ?n ?s)))
+    (setq aw-keys '(?h ?t ?n ?s)))
    #+end_src
 ** dired
 *** Requiring =dired=
@@ -388,16 +345,16 @@ Counsel contains ivy enhancements for commonly-used functions.
 *** Dired for Mac OSX
 #+BEGIN_SRC emacs-lisp :tangle yes
   (let ((gls "/usr/local/bin/gls"))
-    (if (file-exists-p gls) (validate-setq insert-directory-program gls)))
+    (if (file-exists-p gls) (setq insert-directory-program gls)))
 #+END_SRC
 *** trash files instead of deleting them
     #+BEGIN_SRC emacs-lisp :tangle yes
-  (validate-setq delete-by-moving-to-trash t)
+  (setq delete-by-moving-to-trash t)
     #+END_SRC
 *** find-dired
     #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'find-dired)
-  (validate-setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
+  (setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
     #+END_SRC
 *** Hide details
     Hide details and only show file and folder names.
@@ -410,12 +367,12 @@ Counsel contains ivy enhancements for commonly-used functions.
     #+end_src
 *** Sort directories first
     #+begin_src emacs-lisp :tangle yes
-(validate-setq dired-listing-switches "-aBhl  --group-directories-first")
+(setq dired-listing-switches "-aBhl  --group-directories-first")
     #+end_src
 *** Recursive Copying and Deleting
     #+begin_src emacs-lisp :tangle yes
-  (validate-setq dired-recursive-copies (quote always))
-  (validate-setq dired-recursive-deletes (quote top))
+  (setq dired-recursive-copies (quote always))
+  (setq dired-recursive-deletes (quote top))
     #+end_src
 *** dired-jump from file
     #+begin_src emacs-lisp :tangle yes
@@ -425,14 +382,14 @@ Counsel contains ivy enhancements for commonly-used functions.
     #+BEGIN_SRC emacs-lisp :tangle yes
       (use-package wdired
         :config
-        (validate-setq wdired-allow-to-change-permissions t))
+        (setq wdired-allow-to-change-permissions t))
     #+END_SRC
 *** dired-k
     #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package dired-k
     :config
     (define-key dired-mode-map (kbd "K") 'dired-k)
-    (validate-setq dired-k-style 'git))
+    (setq dired-k-style 'git))
     #+END_SRC
 *** dired-narrow
     #+BEGIN_SRC emacs-lisp :tangle yes
@@ -563,8 +520,8 @@ Counsel contains ivy enhancements for commonly-used functions.
        :config
        (global-set-key (kbd "C-c h f")
                        (defhydra hydra-flycheck
-                         (:pre (progn (validate-setq hydra-lv t) (flycheck-list-errors))
-                               :post (progn (validate-setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+                         (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
+                               :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
                                :hint nil)
                          "Errors"
                          ("f"  flycheck-error-list-set-filter                            "Filter")
@@ -585,7 +542,7 @@ Counsel contains ivy enhancements for commonly-used functions.
   (use-package yasnippet
     :diminish yas-global-mode yas-minor-mode
     :init (add-hook 'after-init-hook 'yas-global-mode)
-    :config (validate-setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
+    :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
    #+end_src
 ** Autocompletions with Company
    #+begin_src emacs-lisp :tangle yes
@@ -596,7 +553,7 @@ Counsel contains ivy enhancements for commonly-used functions.
        :config
        (require 'company-dabbrev)
        (require 'company-dabbrev-code)
-       (validate-setq company-dabbrev-ignore-case nil
+       (setq company-dabbrev-ignore-case nil
                       company-dabbrev-code-ignore-case nil
                       company-dabbrev-downcase nil
                       company-idle-delay 0
@@ -642,14 +599,14 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   (use-package direnv
     :config
     (direnv-mode)
-    (validate-setq direnv-always-show-summary t))
+    (setq direnv-always-show-summary t))
 #+END_SRC
 ** Common Lisp
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package slime
        :config
-       (validate-setq inferior-lisp-program "sbcl")
-       (validate-setq slime-contribs '(slime-fancy))
+       (setq inferior-lisp-program "sbcl")
+       (setq slime-contribs '(slime-fancy))
        (use-package slime-company
          :config
          (slime-setup '(slime-company))))
@@ -744,7 +701,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (eval-after-load "python-mode"
     (lambda ()
-      (validate-setq python-remove-cwd-from-path t)))
+      (setq python-remove-cwd-from-path t)))
 #+END_SRC
 *** Sphinx Docs
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -797,7 +754,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :init
     (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
     :config
-    (validate-setq highlight-indent-guides-method 'character))
+    (setq highlight-indent-guides-method 'character))
 #+END_SRC
 ** HTML
 *** Web-mode
@@ -810,9 +767,9 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
             ("\\.njk\\'" . web-mode)
             ("\\.php\\'" . web-mode))
      :config
-     (validate-setq web-mode-enable-css-colorization t)
-     (validate-setq web-mode-code-indent-offset 2)
-     (validate-setq web-mode-markup-indent-offset 2))
+     (setq web-mode-enable-css-colorization t)
+     (setq web-mode-code-indent-offset 2)
+     (setq web-mode-markup-indent-offset 2))
     #+end_src
 *** Emmet-mode
     #+begin_src emacs-lisp :tangle yes
@@ -836,7 +793,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
  (use-package scss-mode
    :mode "\\.scss\\'" 
    :config (progn
-             (validate-setq scss-compile-at-save nil)))
+             (setq scss-compile-at-save nil)))
     #+end_src
 ** JS
 *** Flycheck
@@ -881,7 +838,7 @@ npm install -g tern
         (use-package tern
           :diminish tern-mode
           :config
-          (validate-setq js-switch-indent-offset 2)
+          (setq js-switch-indent-offset 2)
           (add-hook 'js2-mode-hook 'tern-mode) 
           (use-package company-tern
             :config
@@ -891,7 +848,7 @@ npm install -g tern
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package js-doc
     :config
-    (validate-setq js-doc-mail-address "jethrokuan95@gmail.com"
+    (setq js-doc-mail-address "jethrokuan95@gmail.com"
           js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address)
           js-doc-url "http://www.jethrokuan.com/"
           js-doc-license "MIT")
@@ -920,14 +877,14 @@ npm install -g tern
    :mode "\\.json\\'"
    :config (add-hook 'json-mode-hook (lambda ()
                                        (make-local-variable 'js-indent-level)
-                                       (validate-setq js-indent-level 2))))
+                                       (setq js-indent-level 2))))
    #+end_src
 ** Markdown
    #+begin_src emacs-lisp :tangle yes
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
   :config (progn
-            (validate-setq markdown-command "multimarkdown")
+            (setq markdown-command "multimarkdown")
             (add-hook 'markdown-mode-hook #'trunc-lines-hook)))
    #+end_src
 ** Clojure
@@ -954,7 +911,7 @@ npm install -g tern
         (add-hook 'cider-mode-hook #'company-mode)
         :diminish subword-mode
         :config
-        (validate-setq nrepl-log-messages t                  
+        (setq nrepl-log-messages t                  
               cider-repl-display-in-current-window t
               cider-repl-use-clojure-font-lock t    
               cider-prompt-save-file-on-load 'always-save
@@ -963,7 +920,7 @@ npm install -g tern
               cider-show-error-buffer nil
               cider-overlays-use-font-lock t
               cider-repl-result-prefix ";; => ")
-        (validate-setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+        (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
         (cider-repl-toggle-pretty-printing))
     #+end_src
 *** clj-refactor
@@ -985,16 +942,16 @@ npm install -g tern
   (use-package auctex
     :defer t
     :config
-    (validate-setq TeX-auto-save t
+    (setq TeX-auto-save t
           TeX-parse-self t
           TeX-syntactic-comment t
           ;; Synctex support
           TeX-source-correlate-start-server nil
           ;; Don't insert line-break at inline math
           LaTeX-fill-break-at-separators nil)
-    (validate-setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
+    (setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
                                   ("qpdfview" "qpdfview %o#%(outpage)")))
-    (validate-setq TeX-view-program-selection '((output-pdf "qpdfview")
+    (setq TeX-view-program-selection '((output-pdf "qpdfview")
                                        (output-pdf "Evince")))
     (when latex-enable-auto-fill
       (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
@@ -1013,8 +970,8 @@ npm install -g tern
 ** whitespace-mode
 #+begin_src emacs-lisp :tangle yes
   (require 'whitespace)
-  (validate-setq whitespace-line-column 100) ;; limit line length
-  (validate-setq whitespace-style '(face lines-tail))
+  (setq whitespace-line-column 100) ;; limit line length
+  (setq whitespace-style '(face lines-tail))
 
   (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
@@ -1028,15 +985,15 @@ npm install -g tern
     :init
     (add-hook 'after-init-hook 'sml/setup)
     :config 
-    (validate-setq sml/theme 'respectful)
-    (validate-setq sml/name-width 30)
-    (validate-setq sml/shorten-directory t)
-    (validate-setq sml/shorten-modes t)
-    (validate-setq sml/mode-width 'full)
-    (validate-setq sml/replacer-regexp-list
+    (setq sml/theme 'respectful)
+    (setq sml/name-width 30)
+    (setq sml/shorten-directory t)
+    (setq sml/shorten-modes t)
+    (setq sml/mode-width 'full)
+    (setq sml/replacer-regexp-list
                    '(("^~/.org/" ":O:")
                      ("^~/\\.emacs\\.d/" ":ED")))
-    (validate-setq rm-blacklist
+    (setq rm-blacklist
                    (format "^ \\(%s\\)$"
                            (mapconcat #'identity
                                       '("FlyC.*"
@@ -1054,7 +1011,7 @@ npm install -g tern
 #+begin_src emacs-lisp :tangle yes
   (display-time-mode 1)
   (eval-after-load "display-time-mode"
-    (validate-setq display-time-24hr-format t))
+    (setq display-time-24hr-format t))
 #+end_src
 ** Zooming
    #+begin_src emacs-lisp :tangle yes
@@ -1072,13 +1029,13 @@ Beacon makes sure you don't lose track of your cursor when jumping around a buff
     :init
     (add-hook 'after-init-hook 'beacon-mode)
     :config 
-    (validate-setq beacon-push-mark 10))
+    (setq beacon-push-mark 10))
 #+end_src
 ** Show Matching parenthesis
 Always show matching parenthesis.
 #+begin_src emacs-lisp :tangle yes
 (show-paren-mode 1)
-(validate-setq show-paren-delay 0)
+(setq show-paren-delay 0)
 #+end_src
 ** golden-ratio
 Give the working window more screen estate.
@@ -1107,7 +1064,7 @@ Displays added/modified/deleted on the left.
     (set-face-foreground 'git-gutter+-modified "gold1")
     (set-face-foreground 'git-gutter+-added    "SeaGreen")
     (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-    (validate-setq git-gutter-fr+-side 'left-fringe))
+    (setq git-gutter-fr+-side 'left-fringe))
 #+end_src
 * Project Management
 ** Smerge-mode
@@ -1133,7 +1090,7 @@ Useful when handling git merge conflicts.
     :init
     (add-hook 'magit-mode-hook 'hl-line-mode)
     :config
-    (validate-setq magit-auto-revert-mode nil))
+    (setq magit-auto-revert-mode nil))
 #+end_src
 
 ** Projectile
@@ -1149,11 +1106,11 @@ Useful when handling git merge conflicts.
              ("s-b" . counsel-projectile-switch-to-buffer))
       :config
       (counsel-projectile-on))
-    (validate-setq projectile-use-git-grep t)
-    (validate-setq projectile-create-missing-test-files t)
-    (validate-setq projectile-completion-system 'ivy)
+    (setq projectile-use-git-grep t)
+    (setq projectile-create-missing-test-files t)
+    (setq projectile-completion-system 'ivy)
 
-    (validate-setq projectile-switch-project-action
+    (setq projectile-switch-project-action
                    #'projectile-commander)
     (def-projectile-commander-method ?S
       "Run a search in the project"

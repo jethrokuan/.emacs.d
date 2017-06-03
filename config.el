@@ -11,26 +11,21 @@
   (require 'diminish)
   (setq use-package-always-ensure t))
 
-(load "server")
-(unless (server-running-p) (server-start))
-
 (defun reload-init ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 
 (global-set-key (kbd "<f11>") 'reload-init)
 
-(use-package validate)
+(setq gc-cons-threshold 50000000)
+(setq large-file-warning-threshold 100000000)
 
-(validate-setq gc-cons-threshold 50000000)
-(validate-setq large-file-warning-threshold 100000000)
-
-(validate-setq user-full-name "Jethro Kuan"
+(setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
 (global-auto-revert-mode 1)
 
-(validate-setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
@@ -42,14 +37,14 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
-(validate-setq inhibit-splash-screen t)
-(validate-setq inhibit-startup-message t)
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (delete-selection-mode +1)
 
-(validate-setq sentence-end-double-space nil)
+(setq sentence-end-double-space nil)
 
 (setq-default tab-width 2)
 (setq-default js-indent-level 2)
@@ -58,13 +53,13 @@
 (setq-default truncate-lines t)
 
 (defun truncate-lines-hook ()
-  (validate-setq truncate-lines nil))
+  (setq truncate-lines nil))
 
 (add-hook 'text-mode-hook 'truncate-lines-hook)
 
-(validate-setq backup-directory-alist
+(setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
-(validate-setq auto-save-file-name-transforms
+(setq auto-save-file-name-transforms
       `((".*" ,temporary-file-directory t)))
 
 (load "~/.emacs.d/secrets.el" t)
@@ -93,7 +88,7 @@
 
 (bind-key* "<f9>" (lambda ()
                     (interactive)
-                    (validate-setq-local compilation-read-command nil)
+                    (setq-local compilation-read-command nil)
                     (call-interactively 'compile)))
 
 (use-package hydra)
@@ -163,39 +158,11 @@
           ("M-D" . crux-duplicate-and-comment-current-line-or-region)
           ("s-o" . crux-smart-open-line-above)))
 
-(defun jethro/open-in-external-app ()
-  "Open the current file or dired marked files in external app.
-The app is chosen from your OS's preference."
-  (interactive)
-  (let* (
-         (-file-list
-          (if (string-equal major-mode "dired-mode")
-              (dired-get-marked-files)
-            (list (buffer-file-name))))
-         (-do-it-p (if (<= (length -file-list) 5)
-                       t
-                     (y-or-n-p "Open more than 5 files? "))))
-    (when -do-it-p
-      (cond
-       ((string-equal system-type "windows-nt")
-        (mapc
-         (lambda (-fpath)
-           (w32-shell-execute "open" (replace-regexp-in-string "/" "\\" -fpath t t))) -file-list))
-       ((string-equal system-type "darwin")
-        (mapc
-         (lambda (-fpath)
-           (shell-command
-            (concat "open " (shell-quote-argument -fpath))))  -file-list))
-       ((string-equal system-type "gnu/linux")
-        (mapc
-         (lambda (-fpath) (let ((process-connection-type nil))
-                            (start-process "" nil "xdg-open" -fpath))) -file-list))))))
-(bind-key* "<f8>" 'jethro/open-in-external-app)
-
 (use-package anzu
-  :diminish anzu-mode 
+  :diminish anzu-mode
+  :init
+  (add-hook 'after-init-hook 'global-anzu-mode)
   :config
-  (global-anzu-mode +1)
   (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
   (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
 
@@ -203,40 +170,40 @@ The app is chosen from your OS's preference."
   :bind* (("C-'" . avy-goto-char)
           ("C-," . avy-goto-char-2))
   :config
-  (validate-setq avy-keys '(?h ?t ?n ?s)))
+  (setq avy-keys '(?h ?t ?n ?s)))
 
 (use-package windmove 
   :config
   ;; use command key on Mac
   (windmove-default-keybindings 'super)
   ;; wrap around at edges
-  (validate-setq windmove-wrap-around t))
+  (setq windmove-wrap-around t))
 
 (require 'dired)
 
 (let ((gls "/usr/local/bin/gls"))
-  (if (file-exists-p gls) (validate-setq insert-directory-program gls)))
+  (if (file-exists-p gls) (setq insert-directory-program gls)))
 
-(validate-setq delete-by-moving-to-trash t)
+(setq delete-by-moving-to-trash t)
 
 (require 'find-dired)
-(validate-setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
+(setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
 
-(validate-setq dired-listing-switches "-aBhl  --group-directories-first")
+(setq dired-listing-switches "-aBhl  --group-directories-first")
 
-(validate-setq dired-recursive-copies (quote always))
-(validate-setq dired-recursive-deletes (quote top))
+(setq dired-recursive-copies (quote always))
+(setq dired-recursive-deletes (quote top))
 
 (require 'dired-x)
 
 (use-package wdired
   :config
-  (validate-setq wdired-allow-to-change-permissions t))
+  (setq wdired-allow-to-change-permissions t))
 
 (use-package dired-k
   :config
   (define-key dired-mode-map (kbd "K") 'dired-k)
-  (validate-setq dired-k-style 'git))
+  (setq dired-k-style 'git))
 
 (use-package dired-narrow
   :bind (:map dired-mode-map
@@ -338,8 +305,8 @@ The app is chosen from your OS's preference."
   :config
   (global-set-key (kbd "C-c h f")
                   (defhydra hydra-flycheck
-                    (:pre (progn (validate-setq hydra-lv t) (flycheck-list-errors))
-                          :post (progn (validate-setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+                    (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
+                          :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
                           :hint nil)
                     "Errors"
                     ("f"  flycheck-error-list-set-filter                            "Filter")
@@ -358,7 +325,7 @@ The app is chosen from your OS's preference."
 (use-package yasnippet
   :diminish yas-global-mode yas-minor-mode
   :init (add-hook 'after-init-hook 'yas-global-mode)
-  :config (validate-setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
+  :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
 
 (use-package company
   :diminish company-mode
@@ -367,7 +334,7 @@ The app is chosen from your OS's preference."
   :config
   (require 'company-dabbrev)
   (require 'company-dabbrev-code)
-  (validate-setq company-dabbrev-ignore-case nil
+  (setq company-dabbrev-ignore-case nil
                  company-dabbrev-code-ignore-case nil
                  company-dabbrev-downcase nil
                  company-idle-delay 0
@@ -402,12 +369,12 @@ The app is chosen from your OS's preference."
 (use-package direnv
   :config
   (direnv-mode)
-  (validate-setq direnv-always-show-summary t))
+  (setq direnv-always-show-summary t))
 
 (use-package slime
   :config
-  (validate-setq inferior-lisp-program "sbcl")
-  (validate-setq slime-contribs '(slime-fancy))
+  (setq inferior-lisp-program "sbcl")
+  (setq slime-contribs '(slime-fancy))
   (use-package slime-company
     :config
     (slime-setup '(slime-company))))
@@ -473,7 +440,7 @@ The app is chosen from your OS's preference."
 
 (eval-after-load "python-mode"
   (lambda ()
-    (validate-setq python-remove-cwd-from-path t)))
+    (setq python-remove-cwd-from-path t)))
 
 (use-package sphinx-doc
   :init
@@ -512,7 +479,7 @@ The app is chosen from your OS's preference."
   :init
   (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
   :config
-  (validate-setq highlight-indent-guides-method 'character))
+  (setq highlight-indent-guides-method 'character))
 
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
@@ -522,9 +489,9 @@ The app is chosen from your OS's preference."
          ("\\.njk\\'" . web-mode)
          ("\\.php\\'" . web-mode))
   :config
-  (validate-setq web-mode-enable-css-colorization t)
-  (validate-setq web-mode-code-indent-offset 2)
-  (validate-setq web-mode-markup-indent-offset 2))
+  (setq web-mode-enable-css-colorization t)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-markup-indent-offset 2))
 
 (use-package emmet-mode
   :diminish emmet-mode
@@ -535,11 +502,11 @@ The app is chosen from your OS's preference."
 (use-package scss-mode
   :mode "\\.scss\\'" 
   :config (progn
-            (validate-setq scss-compile-at-save nil)))
+            (setq scss-compile-at-save nil)))
 
 (setq-default flycheck-disabled-checkers
-              (append flycheck-disabled-checkers
-                      '(javascript-jshint)))
+  (append flycheck-disabled-checkers
+    '(javascript-jshint)))
 (flycheck-add-mode 'javascript-eslint 'js2-mode)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 
@@ -555,7 +522,7 @@ The app is chosen from your OS's preference."
   (use-package tern
     :diminish tern-mode
     :config
-    (validate-setq js-switch-indent-offset 2)
+    (setq js-switch-indent-offset 2)
     (add-hook 'js2-mode-hook 'tern-mode) 
     (use-package company-tern
       :config
@@ -563,7 +530,7 @@ The app is chosen from your OS's preference."
 
 (use-package js-doc
   :config
-  (validate-setq js-doc-mail-address "jethrokuan95@gmail.com"
+  (setq js-doc-mail-address "jethrokuan95@gmail.com"
         js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address)
         js-doc-url "http://www.jethrokuan.com/"
         js-doc-license "MIT")
@@ -584,12 +551,12 @@ The app is chosen from your OS's preference."
   :mode "\\.json\\'"
   :config (add-hook 'json-mode-hook (lambda ()
                                       (make-local-variable 'js-indent-level)
-                                      (validate-setq js-indent-level 2))))
+                                      (setq js-indent-level 2))))
 
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
   :config (progn
-            (validate-setq markdown-command "multimarkdown")
+            (setq markdown-command "multimarkdown")
             (add-hook 'markdown-mode-hook #'trunc-lines-hook)))
 
 (use-package clojure-mode
@@ -611,7 +578,7 @@ The app is chosen from your OS's preference."
   (add-hook 'cider-mode-hook #'company-mode)
   :diminish subword-mode
   :config
-  (validate-setq nrepl-log-messages t                  
+  (setq nrepl-log-messages t                  
         cider-repl-display-in-current-window t
         cider-repl-use-clojure-font-lock t    
         cider-prompt-save-file-on-load 'always-save
@@ -620,7 +587,7 @@ The app is chosen from your OS's preference."
         cider-show-error-buffer nil
         cider-overlays-use-font-lock t
         cider-repl-result-prefix ";; => ")
-  (validate-setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+  (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
   (cider-repl-toggle-pretty-printing))
 
 (use-package clj-refactor
@@ -635,16 +602,16 @@ The app is chosen from your OS's preference."
 (use-package auctex
   :defer t
   :config
-  (validate-setq TeX-auto-save t
+  (setq TeX-auto-save t
         TeX-parse-self t
         TeX-syntactic-comment t
         ;; Synctex support
         TeX-source-correlate-start-server nil
         ;; Don't insert line-break at inline math
         LaTeX-fill-break-at-separators nil)
-  (validate-setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
+  (setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
                                 ("qpdfview" "qpdfview %o#%(outpage)")))
-  (validate-setq TeX-view-program-selection '((output-pdf "qpdfview")
+  (setq TeX-view-program-selection '((output-pdf "qpdfview")
                                      (output-pdf "Evince")))
   (when latex-enable-auto-fill
     (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
@@ -658,8 +625,8 @@ The app is chosen from your OS's preference."
   :defer t)
 
 (require 'whitespace)
-(validate-setq whitespace-line-column 100) ;; limit line length
-(validate-setq whitespace-style '(face lines-tail))
+(setq whitespace-line-column 100) ;; limit line length
+(setq whitespace-style '(face lines-tail))
 
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
@@ -669,15 +636,15 @@ The app is chosen from your OS's preference."
   :init
   (add-hook 'after-init-hook 'sml/setup)
   :config 
-  (validate-setq sml/theme 'respectful)
-  (validate-setq sml/name-width 30)
-  (validate-setq sml/shorten-directory t)
-  (validate-setq sml/shorten-modes t)
-  (validate-setq sml/mode-width 'full)
-  (validate-setq sml/replacer-regexp-list
+  (setq sml/theme 'respectful)
+  (setq sml/name-width 30)
+  (setq sml/shorten-directory t)
+  (setq sml/shorten-modes t)
+  (setq sml/mode-width 'full)
+  (setq sml/replacer-regexp-list
                  '(("^~/.org/" ":O:")
                    ("^~/\\.emacs\\.d/" ":ED")))
-  (validate-setq rm-blacklist
+  (setq rm-blacklist
                  (format "^ \\(%s\\)$"
                          (mapconcat #'identity
                                     '("FlyC.*"
@@ -693,7 +660,7 @@ The app is chosen from your OS's preference."
 
 (display-time-mode 1)
 (eval-after-load "display-time-mode"
-  (validate-setq display-time-24hr-format t))
+  (setq display-time-24hr-format t))
 
 (defhydra hydra-zoom (global-map "<f2>")
   "zoom"
@@ -705,10 +672,10 @@ The app is chosen from your OS's preference."
   :init
   (add-hook 'after-init-hook 'beacon-mode)
   :config 
-  (validate-setq beacon-push-mark 10))
+  (setq beacon-push-mark 10))
 
 (show-paren-mode 1)
-(validate-setq show-paren-delay 0)
+(setq show-paren-delay 0)
 
 (use-package golden-ratio
   :diminish golden-ratio-mode
@@ -727,7 +694,7 @@ The app is chosen from your OS's preference."
   (set-face-foreground 'git-gutter+-modified "gold1")
   (set-face-foreground 'git-gutter+-added    "SeaGreen")
   (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-  (validate-setq git-gutter-fr+-side 'left-fringe))
+  (setq git-gutter-fr+-side 'left-fringe))
 
 (use-package smerge-mode
   :config
@@ -746,7 +713,7 @@ The app is chosen from your OS's preference."
   :init
   (add-hook 'magit-mode-hook 'hl-line-mode)
   :config
-  (validate-setq magit-auto-revert-mode nil))
+  (setq magit-auto-revert-mode nil))
 
 (use-package projectile
   :demand t
@@ -759,11 +726,11 @@ The app is chosen from your OS's preference."
            ("s-b" . counsel-projectile-switch-to-buffer))
     :config
     (counsel-projectile-on))
-  (validate-setq projectile-use-git-grep t)
-  (validate-setq projectile-create-missing-test-files t)
-  (validate-setq projectile-completion-system 'ivy)
+  (setq projectile-use-git-grep t)
+  (setq projectile-create-missing-test-files t)
+  (setq projectile-completion-system 'ivy)
 
-  (validate-setq projectile-switch-project-action
+  (setq projectile-switch-project-action
                  #'projectile-commander)
   (def-projectile-commander-method ?S
     "Run a search in the project"
