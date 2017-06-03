@@ -130,12 +130,7 @@ Type over a selected region, instead of deleting before typing.
 #+end_src
 
 ** Sentences
-Emacs uses double-spaces by default. Use single spaces by default:
-
-#+BEGIN_QUOTE
-NOTE: This will cause an indistinction between sentences and name
-abbrieviations (eg. E. B. White)
-#+END_QUOTE
+Emacs uses double-spaces by default. Use single spaces instead:
 
 #+begin_src emacs-lisp :tangle yes
 (validate-setq sentence-end-double-space nil)
@@ -233,24 +228,6 @@ repository.
 #+begin_src emacs-lisp :tangle yes
   (use-package hydra)
 #+end_src
-* Mail (notmuch)
-** Basic Setup
-   #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package notmuch
-    :bind (("<f10>" . notmuch))
-    :config
-    (define-key notmuch-search-mode-map "R"
-    (lambda ()
-      "mark message as read"
-      (interactive)
-      (notmuch-search-tag '("-unread")))))
-   #+END_SRC
-** Goobook
-   #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'notmuch-address)
-  (validate-setq notmuch-address-command "~/.emacs.d/goobook")
-  (notmuch-address-message-insinuate)
-   #+END_SRC
 * Ivy
 I've recently switched over from =helm= to =ivy=. Ivy is simpler, and easier to extend.
 ** flx
@@ -315,7 +292,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+end_src
 * Moving Around
 ** Crux
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (use-package crux 
     :bind* (("C-c o" . crux-open-with)
             ("C-c n" . crux-cleanup-buffer-or-region)
@@ -326,7 +303,7 @@ Counsel contains ivy enhancements for commonly-used functions.
             ("M-d" . crux-duplicate-current-line-or-region)
             ("M-D" . crux-duplicate-and-comment-current-line-or-region)
             ("s-o" . crux-smart-open-line-above)))
-   #+end_src
+#+end_src
 ** Open file
    #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/open-in-external-app ()
@@ -630,17 +607,34 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+end_src
 ** Spellcheck with Flyspell
    #+begin_src emacs-lisp :tangle yes
-  (use-package flyspell 
-    :ensure f 
-    :diminish flyspell-mode
-    :init
-    (setenv "DICTIONARY" "en_GB")
-    :config   
-    (add-hook 'markdown-mode-hook 'flyspell-mode))
+     (use-package flyspell 
+       :ensure f 
+       :diminish flyspell-mode
+       :init
+       (setenv "DICTIONARY" "en_GB")
+       :config   
+       (add-hook 'text-mode-hook 'flyspell-mode))
    #+end_src
 ** Auto-fill-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'text-mode-hook 'auto-fill-mode)
+#+END_SRC
+** Conveniences
+*** Fill and unfill paragraphs
+Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-single-key.html.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun endless/fill-or-unfill ()
+    "Like `fill-paragraph', but unfill if used twice."
+    (interactive)
+    (let ((fill-column
+           (if (eq last-command 'endless/fill-or-unfill)
+               (progn (setq this-command nil)
+                      (point-max))
+             fill-column)))
+      (call-interactively #'fill-paragraph)))
+
+  (global-set-key [remap fill-paragraph]
+                  #'endless/fill-or-unfill)
 #+END_SRC
 * Language Support
 ** Direnv
@@ -665,15 +659,15 @@ Counsel contains ivy enhancements for commonly-used functions.
   (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
    #+end_src
 ** Nix
-   #+BEGIN_SRC emacs-lisp :tangle yes
-     (use-package nix-mode
-       :config
-       (add-hook 'nix-mode-hook (lambda ()
-                                  (aggressive-indent-mode -1)))
-       (use-package company-nixos-options
-         :config
-         (add-to-list 'company-backends 'company-nixos-options)))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package nix-mode
+    :config
+    (add-hook 'nix-mode-hook (lambda ()
+                               (aggressive-indent-mode -1)))
+    (use-package company-nixos-options
+      :config
+      (add-to-list 'company-backends 'company-nixos-options)))
+#+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
 (use-package go-mode
@@ -746,7 +740,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'python-mode-hook (lambda () (aggressive-indent-mode -1)))
 #+END_SRC
-*** Python path
+*** Python Path
 #+BEGIN_SRC emacs-lisp :tangle yes
   (eval-after-load "python-mode"
     (lambda ()
@@ -785,17 +779,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     :init
     (add-hook 'python-mode-hook 'yapf-mode))
 #+END_SRC
-*** Autopep8
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package py-autopep8
-    :init
-    (add-hook 'python-mode-hook 'py-autopep8-enable-on-save))
-    #+END_SRC
-*** Pyvenv
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package pyvenv)
-#+END_SRC
-*** Pytest
+*** pytest
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package pytest
     :bind (:map python-mode-map
@@ -1026,69 +1010,52 @@ npm install -g tern
     :defer t)
     #+END_SRC
 * Visual Enhancements
-** linum-mode (Disabled)
-   #+begin_src emacs-lisp :tangle no
-(add-hook 'prog-mode-hook 
-  (lambda ()
-    (linum-mode 1)))
-   #+end_src
-** hl-line-mode
-#+begin_src emacs-lisp :tangle no
-  (global-hl-line-mode 1)
-#+end_src
 ** whitespace-mode
-Show fill-column.
 #+begin_src emacs-lisp :tangle yes
-(require 'whitespace)
-(validate-setq whitespace-line-column 80) ;; limit line length
-(validate-setq whitespace-style '(face lines-tail))
+  (require 'whitespace)
+  (validate-setq whitespace-line-column 100) ;; limit line length
+  (validate-setq whitespace-style '(face lines-tail))
 
-(add-hook 'prog-mode-hook 'whitespace-mode)
-   #+end_src
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+#+end_src
 ** Page-break-lines
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package page-break-lines)
-   #+end_src
+#+end_src
 ** Smart-mode-line
-   #+begin_src emacs-lisp :tangle yes
-     (use-package smart-mode-line
-       :init
-       (add-hook 'after-init-hook 'sml/setup)
-       :config 
-       (validate-setq sml/theme 'respectful)
-       (validate-setq sml/name-width 30)
-       (validate-setq sml/shorten-directory t)
-       (validate-setq sml/shorten-modes t)
-       (validate-setq sml/mode-width 'full)
-       (validate-setq sml/replacer-regexp-list
-                      '(("^~/.org/" ":O:")
-                        ("^~/\\.emacs\\.d/" ":ED")))
-       (validate-setq rm-blacklist
-                      (format "^ \\(%s\\)$"
-                              (mapconcat #'identity
-                                         '("FlyC.*"
-                                           "Projectile.*"
-                                           "GitGutter"
-                                           "ivy"
-                                           "company"
-                                           ""
-                                           "doom"
-                                           ","
-                                           "ElDoc")
-                                         "\\|"))))
-   #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (use-package smart-mode-line
+    :init
+    (add-hook 'after-init-hook 'sml/setup)
+    :config 
+    (validate-setq sml/theme 'respectful)
+    (validate-setq sml/name-width 30)
+    (validate-setq sml/shorten-directory t)
+    (validate-setq sml/shorten-modes t)
+    (validate-setq sml/mode-width 'full)
+    (validate-setq sml/replacer-regexp-list
+                   '(("^~/.org/" ":O:")
+                     ("^~/\\.emacs\\.d/" ":ED")))
+    (validate-setq rm-blacklist
+                   (format "^ \\(%s\\)$"
+                           (mapconcat #'identity
+                                      '("FlyC.*"
+                                        "Projectile.*"
+                                        "GitGutter"
+                                        "ivy"
+                                        "company"
+                                        ""
+                                        "doom"
+                                        ","
+                                        "ElDoc")
+                                      "\\|"))))
+#+end_src
 *** Showing time
 #+begin_src emacs-lisp :tangle yes
   (display-time-mode 1)
   (eval-after-load "display-time-mode"
     (validate-setq display-time-24hr-format t))
 #+end_src
-** nyan-mode
-   #+begin_src emacs-lisp :tangle no
-  (use-package nyan-mode
-    :config
-    (nyan-mode 1))
-   #+end_src
 ** Zooming
    #+begin_src emacs-lisp :tangle yes
 (defhydra hydra-zoom (global-map "<f2>")
@@ -1097,51 +1064,55 @@ Show fill-column.
   ("o" text-scale-decrease "out"))
    #+end_src
 ** beacon
-   Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
-   #+begin_src emacs-lisp :tangle yes
+Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
+
+#+begin_src emacs-lisp :tangle yes
   (use-package beacon
     :diminish beacon-mode
-    :config
-    (beacon-mode 1)
+    :init
+    (add-hook 'after-init-hook 'beacon-mode)
+    :config 
     (validate-setq beacon-push-mark 10))
-   #+end_src
-** show-paren
-   Always show matching parenthesis.
-   #+begin_src emacs-lisp :tangle yes
+#+end_src
+** Show Matching parenthesis
+Always show matching parenthesis.
+#+begin_src emacs-lisp :tangle yes
 (show-paren-mode 1)
 (validate-setq show-paren-delay 0)
-   #+end_src
+#+end_src
 ** golden-ratio
-   Give the working window more screen estate.
-   #+begin_src emacs-lisp :tangle yes
-(use-package golden-ratio
-  :diminish golden-ratio-mode
-  :config (progn
-            (add-to-list 'golden-ratio-extra-commands 'ace-window)
-            (golden-ratio-mode 1)))
-   #+end_src
+Give the working window more screen estate.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package golden-ratio
+    :diminish golden-ratio-mode
+    :init
+    (add-hook 'after-init-hook 'golden-ratio-mode))
+#+end_src
 ** volatile-highlights
-   Highlights recently copied/pasted text.
-   #+begin_src emacs-lisp :tangle yes
-(use-package volatile-highlights
-  :diminish volatile-highlights-mode
-  :config (volatile-highlights-mode t))
-   #+end_src
+Highlights recently copied/pasted text.
+#+begin_src emacs-lisp :tangle yes
+     (use-package volatile-highlights
+       :diminish volatile-highlights-mode
+       :init
+       (add-hook 'after-init-hook 'volatile-highlights-mode))
+#+end_src
 ** git-gutter-fringe+
-   Displays added/modified/deleted on the left.
-   #+begin_src emacs-lisp :tangle yes
-     (use-package git-gutter-fringe+
-       :diminish git-gutter+-mode
-       :config
-       (global-git-gutter+-mode)
-       (set-face-foreground 'git-gutter+-modified "gold1")
-       (set-face-foreground 'git-gutter+-added    "SeaGreen")
-       (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-       (validate-setq git-gutter-fr+-side 'left-fringe))
-   #+end_src
+Displays added/modified/deleted on the left.
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-gutter-fringe+
+    :diminish git-gutter+-mode
+    :config
+    (global-git-gutter+-mode)
+    (set-face-foreground 'git-gutter+-modified "gold1")
+    (set-face-foreground 'git-gutter+-added    "SeaGreen")
+    (set-face-foreground 'git-gutter+-deleted  "IndianRed")
+    (validate-setq git-gutter-fr+-side 'left-fringe))
+#+end_src
 * Project Management
 ** Smerge-mode
 Useful when handling git merge conflicts.
+
 #+begin_src emacs-lisp :tangle yes
   (use-package smerge-mode
     :config
@@ -1208,31 +1179,13 @@ Useful when handling git merge conflicts.
         (cider-jack-in))))
 #+end_src
 
-* Profiling
-** esup
-#+begin_src emacs-lisp :tangle yes
-(use-package esup
-  :defer t)
-#+end_src
-** keyfreq
-#+begin_src emacs-lisp :tangle yes
-  (use-package keyfreq
-    :init
-    (add-hook 'after-init-hook 'keyfreq-mode)
-    (add-hook 'after-init-hook 'keyfreq-autosave-mode))
-#+end_src
 * Miscellaneous
 ** which-key
 #+begin_src emacs-lisp :tangle yes
-(use-package which-key
-  :diminish which-key-mode
-  :config (add-hook 'after-init-hook 'which-key-mode))
-#+end_src
-** Paradox
-Use Paradox instead of the default =package-list-packages=.
-#+begin_src emacs-lisp :tangle yes
-  (use-package paradox
-    :commands paradox-list-packages)
+  (use-package which-key
+    :diminish which-key-mode
+    :init
+    (add-hook 'after-init-hook 'which-key-mode))
 #+end_src
 ** darkroom
 #+begin_src emacs-lisp :tangle yes

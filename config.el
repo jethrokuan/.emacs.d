@@ -98,19 +98,6 @@
 
 (use-package hydra)
 
-(use-package notmuch
-  :bind (("<f10>" . notmuch))
-  :config
-  (define-key notmuch-search-mode-map "R"
-  (lambda ()
-    "mark message as read"
-    (interactive)
-    (notmuch-search-tag '("-unread")))))
-
-(require 'notmuch-address)
-(validate-setq notmuch-address-command "~/.emacs.d/goobook")
-(notmuch-address-message-insinuate)
-
 (use-package flx)
 
 (use-package counsel
@@ -395,9 +382,22 @@ The app is chosen from your OS's preference."
   :init
   (setenv "DICTIONARY" "en_GB")
   :config   
-  (add-hook 'markdown-mode-hook 'flyspell-mode))
+  (add-hook 'text-mode-hook 'flyspell-mode))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
+
+(defun endless/fill-or-unfill ()
+  "Like `fill-paragraph', but unfill if used twice."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(global-set-key [remap fill-paragraph]
+                #'endless/fill-or-unfill)
 
 (use-package direnv
   :config
@@ -498,12 +498,6 @@ The app is chosen from your OS's preference."
   :init
   (add-hook 'python-mode-hook 'yapf-mode))
 
-(use-package py-autopep8
-  :init
-  (add-hook 'python-mode-hook 'py-autopep8-enable-on-save))
-
-(use-package pyvenv)
-
 (use-package pytest
   :bind (:map python-mode-map
               ("C-c a" . pytest-all)
@@ -544,8 +538,8 @@ The app is chosen from your OS's preference."
             (validate-setq scss-compile-at-save nil)))
 
 (setq-default flycheck-disabled-checkers
-  (append flycheck-disabled-checkers
-    '(javascript-jshint)))
+              (append flycheck-disabled-checkers
+                      '(javascript-jshint)))
 (flycheck-add-mode 'javascript-eslint 'js2-mode)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 
@@ -664,7 +658,7 @@ The app is chosen from your OS's preference."
   :defer t)
 
 (require 'whitespace)
-(validate-setq whitespace-line-column 80) ;; limit line length
+(validate-setq whitespace-line-column 100) ;; limit line length
 (validate-setq whitespace-style '(face lines-tail))
 
 (add-hook 'prog-mode-hook 'whitespace-mode)
@@ -708,8 +702,9 @@ The app is chosen from your OS's preference."
 
 (use-package beacon
   :diminish beacon-mode
-  :config
-  (beacon-mode 1)
+  :init
+  (add-hook 'after-init-hook 'beacon-mode)
+  :config 
   (validate-setq beacon-push-mark 10))
 
 (show-paren-mode 1)
@@ -717,13 +712,13 @@ The app is chosen from your OS's preference."
 
 (use-package golden-ratio
   :diminish golden-ratio-mode
-  :config (progn
-            (add-to-list 'golden-ratio-extra-commands 'ace-window)
-            (golden-ratio-mode 1)))
+  :init
+  (add-hook 'after-init-hook 'golden-ratio-mode))
 
 (use-package volatile-highlights
   :diminish volatile-highlights-mode
-  :config (volatile-highlights-mode t))
+  :init
+  (add-hook 'after-init-hook 'volatile-highlights-mode))
 
 (use-package git-gutter-fringe+
   :diminish git-gutter+-mode
@@ -793,20 +788,10 @@ The app is chosen from your OS's preference."
       (run-hooks 'projectile-find-file-hook)
       (cider-jack-in))))
 
-(use-package esup
-  :defer t)
-
-(use-package keyfreq
-  :init
-  (add-hook 'after-init-hook 'keyfreq-mode)
-  (add-hook 'after-init-hook 'keyfreq-autosave-mode))
-
 (use-package which-key
   :diminish which-key-mode
-  :config (add-hook 'after-init-hook 'which-key-mode))
-
-(use-package paradox
-  :commands paradox-list-packages)
+  :init
+  (add-hook 'after-init-hook 'which-key-mode))
 
 (use-package darkroom
   :bind (("C-c M d" . darkroom-mode)
