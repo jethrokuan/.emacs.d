@@ -1,4 +1,3 @@
-
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -97,12 +96,11 @@
   :bind*
   (("C-c C-r" . ivy-resume)
    ("M-a" . counsel-M-x)
-   ("C-M-i" . counsel-imenu)
+   ("C-c i" . counsel-imenu)
    ("C-x C-f" . counsel-find-file)
    ("C-x j" . counsel-dired-jump)
    ("C-x l" . counsel-locate)
-   ("C-c g" . counsel-git)
-   ("C-c j" . counsel-git-grep)
+   ("C-c j" . counsel-git)
    ("C-c s" . counsel-projectile-rg)
    ("C-c f" . counsel-recentf)
    ("M-y" . counsel-yank-pop))
@@ -143,6 +141,78 @@
   (ivy-set-actions
    t
    '(("I" insert "insert"))))
+
+(require 'whitespace)
+(setq whitespace-line-column 80) ;; limit line length
+(setq whitespace-style '(face lines-tail))
+
+(add-hook 'prog-mode-hook 'whitespace-mode)
+
+(use-package page-break-lines)
+
+(use-package smart-mode-line
+  :init
+  (add-hook 'after-init-hook 'sml/setup)
+  :config 
+  (setq sml/theme 'respectful)
+  (setq sml/name-width 30)
+  (setq sml/shorten-directory t)
+  (setq sml/shorten-modes t)
+  (setq sml/mode-width 'full)
+  (setq sml/replacer-regexp-list
+                 '(("^~/.org/" ":O:")
+                   ("^~/\\.emacs\\.d/" ":ED")))
+  (setq rm-blacklist
+                 (format "^ \\(%s\\)$"
+                         (mapconcat #'identity
+                                    '("FlyC.*"
+                                      "Projectile.*"
+                                      "GitGutter"
+                                      "ivy"
+                                      "company"
+                                      ""
+                                      "doom"
+                                      ","
+                                      "ElDoc")
+                                    "\\|"))))
+
+(display-time-mode 1)
+(eval-after-load "display-time-mode"
+  (setq display-time-24hr-format t))
+
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("i" text-scale-increase "in")
+  ("o" text-scale-decrease "out"))
+
+(use-package beacon
+  :diminish beacon-mode
+  :init
+  (add-hook 'after-init-hook 'beacon-mode)
+  :config 
+  (setq beacon-push-mark 10))
+
+(show-paren-mode 1)
+(setq show-paren-delay 0)
+
+(use-package golden-ratio
+  :diminish golden-ratio-mode
+  :init
+  (add-hook 'after-init-hook 'golden-ratio-mode))
+
+(use-package volatile-highlights
+  :diminish volatile-highlights-mode
+  :init
+  (add-hook 'after-init-hook 'volatile-highlights-mode))
+
+(use-package git-gutter-fringe+
+  :diminish git-gutter+-mode
+  :config
+  (global-git-gutter+-mode)
+  (set-face-foreground 'git-gutter+-modified "gold1")
+  (set-face-foreground 'git-gutter+-added    "SeaGreen")
+  (set-face-foreground 'git-gutter+-deleted  "IndianRed")
+  (setq git-gutter-fr+-side 'left-fringe))
 
 (use-package crux 
   :bind* (("C-c o" . crux-open-with)
@@ -502,8 +572,8 @@
             (setq scss-compile-at-save nil)))
 
 (setq-default flycheck-disabled-checkers
-              (append flycheck-disabled-checkers
-                      '(javascript-jshint)))
+	      (append flycheck-disabled-checkers
+		      '(javascript-jshint)))
 (flycheck-add-mode 'javascript-eslint 'js2-mode)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 
@@ -621,78 +691,6 @@
 (use-package company-auctex
   :defer t)
 
-(require 'whitespace)
-(setq whitespace-line-column 100) ;; limit line length
-(setq whitespace-style '(face lines-tail))
-
-(add-hook 'prog-mode-hook 'whitespace-mode)
-
-(use-package page-break-lines)
-
-(use-package smart-mode-line
-  :init
-  (add-hook 'after-init-hook 'sml/setup)
-  :config 
-  (setq sml/theme 'respectful)
-  (setq sml/name-width 30)
-  (setq sml/shorten-directory t)
-  (setq sml/shorten-modes t)
-  (setq sml/mode-width 'full)
-  (setq sml/replacer-regexp-list
-                 '(("^~/.org/" ":O:")
-                   ("^~/\\.emacs\\.d/" ":ED")))
-  (setq rm-blacklist
-                 (format "^ \\(%s\\)$"
-                         (mapconcat #'identity
-                                    '("FlyC.*"
-                                      "Projectile.*"
-                                      "GitGutter"
-                                      "ivy"
-                                      "company"
-                                      ""
-                                      "doom"
-                                      ","
-                                      "ElDoc")
-                                    "\\|"))))
-
-(display-time-mode 1)
-(eval-after-load "display-time-mode"
-  (setq display-time-24hr-format t))
-
-(defhydra hydra-zoom (global-map "<f2>")
-  "zoom"
-  ("i" text-scale-increase "in")
-  ("o" text-scale-decrease "out"))
-
-(use-package beacon
-  :diminish beacon-mode
-  :init
-  (add-hook 'after-init-hook 'beacon-mode)
-  :config 
-  (setq beacon-push-mark 10))
-
-(show-paren-mode 1)
-(setq show-paren-delay 0)
-
-(use-package golden-ratio
-  :diminish golden-ratio-mode
-  :init
-  (add-hook 'after-init-hook 'golden-ratio-mode))
-
-(use-package volatile-highlights
-  :diminish volatile-highlights-mode
-  :init
-  (add-hook 'after-init-hook 'volatile-highlights-mode))
-
-(use-package git-gutter-fringe+
-  :diminish git-gutter+-mode
-  :config
-  (global-git-gutter+-mode)
-  (set-face-foreground 'git-gutter+-modified "gold1")
-  (set-face-foreground 'git-gutter+-added    "SeaGreen")
-  (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-  (setq git-gutter-fr+-side 'left-fringe))
-
 (use-package smerge-mode
   :config
   (global-set-key (kbd "C-c h s")
@@ -751,6 +749,9 @@
                   file (projectile-project-root)))
       (run-hooks 'projectile-find-file-hook)
       (cider-jack-in))))
+
+(use-package sos
+  :commands (sos))
 
 (use-package which-key
   :diminish which-key-mode

@@ -4,3 +4,6 @@ auto-save-list/
 /recentf
 /projectile-bookmarks.eld
 anaconda-mode/
+/.cache/
+url
+eshell/

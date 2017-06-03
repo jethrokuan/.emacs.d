@@ -1138,6 +1138,12 @@ Useful when handling git merge conflicts.
 #+end_src
 
 * Miscellaneous
+** SOS
+Search Stack Overflow
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sos
+    :commands (sos))
+#+END_SRC
 ** which-key
 #+begin_src emacs-lisp :tangle yes
   (use-package which-key
