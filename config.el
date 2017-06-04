@@ -286,11 +286,72 @@
   :bind* (("C-M-%" . vr/query-replace)
           ("C-c m" . vr/mc-mark)))
 
-(use-package electric-align
-  :ensure f
-  :load-path "elisp/"
-  :diminish electric-align-mode
-  :config (add-hook 'prog-mode-hook 'electric-align-mode))
+(defun jethro/align-repeat (start end regexp &optional justify-right after)
+  "Repeat alignment with respect to the given regular expression.
+If JUSTIFY-RIGHT is non nil justify to the right instead of the
+left. If AFTER is non-nil, add whitespace to the left instead of
+the right."
+  (interactive "r\nsAlign regexp: ")
+  (let* ((ws-regexp (if (string-empty-p regexp)
+                        "\\(\\s-+\\)"
+                      "\\(\\s-*\\)"))
+         (complete-regexp (if after
+                              (concat regexp ws-regexp)
+                            (concat ws-regexp regexp)))
+         (group (if justify-right -1 1)))
+    (message "%S" complete-regexp)
+    (align-regexp start end complete-regexp group 1 t)))
+
+;; Modified answer from http://emacs.stackexchange.com/questions/47/align-vertical-columns-of-numbers-on-the-decimal-point
+(defun jethro/align-repeat-decimal (start end)
+  "Align a table of numbers on decimal points and dollar signs (both optional)"
+  (interactive "r")
+  (require 'align)
+  (align-region start end nil
+                '((nil (regexp . "\\([\t ]*\\)\\$?\\([\t ]+[0-9]+\\)\\.?")
+                       (repeat . t)
+                       (group 1 2)
+                       (spacing 1 1)
+                       (justify nil t)))
+                nil))
+
+(defmacro jethro/create-align-repeat-x (name regexp &optional justify-right default-after)
+  (let ((new-func (intern (concat "jethro/align-repeat-" name))))
+    `(defun ,new-func (start end switch)
+       (interactive "r\nP")
+       (let ((after (not (eq (if switch t nil) (if ,default-after t nil)))))
+         (jethro/align-repeat start end ,regexp ,justify-right after)))))
+
+(jethro/create-align-repeat-x "comma" "," nil t)
+(jethro/create-align-repeat-x "semicolon" ";" nil t)
+(jethro/create-align-repeat-x "colon" ":" nil t)
+(jethro/create-align-repeat-x "equal" "=")
+(jethro/create-align-repeat-x "math-oper" "[+\\-*/]")
+(jethro/create-align-repeat-x "ampersand" "&")
+(jethro/create-align-repeat-x "bar" "|")
+(jethro/create-align-repeat-x "left-paren" "(")
+(jethro/create-align-repeat-x "right-paren" ")" t)
+(jethro/create-align-repeat-x "backslash" "\\\\")
+
+(defvar align-regexp-map nil "keymap for `align-regexp'")
+
+(setq align-regexp-map (make-sparse-keymap))
+(define-key align-regexp-map (kbd "&") 'jethro/align-repeat-ampersand)
+(define-key align-regexp-map (kbd "(") 'jethro/align-repeat-left-paren)
+(define-key align-regexp-map (kbd ")") 'jethro/align-repeat-right-paren)
+(define-key align-regexp-map (kbd ",") 'jethro/align-repeat-comma)
+(define-key align-regexp-map (kbd ".") 'jethro/align-repeat-decimal)
+(define-key align-regexp-map (kbd ":") 'jethro/align-repeat-colon)
+(define-key align-regexp-map (kbd ";") 'jethro/align-repeat-semicolon)
+(define-key align-regexp-map (kbd "=") 'jethro/align-repeat-equal)
+(define-key align-regexp-map (kbd "\\") 'jethro/align-repeat-backslash)
+(define-key align-regexp-map (kbd "a") 'align)
+(define-key align-regexp-map (kbd "c") 'align-current)
+(define-key align-regexp-map (kbd "m") 'jethro/align-repeat-math-oper)
+(define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
+(define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
+
+(bind-key* "C-x a" align-regexp-map)
 
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
@@ -572,8 +633,8 @@
             (setq scss-compile-at-save nil)))
 
 (setq-default flycheck-disabled-checkers
-	      (append flycheck-disabled-checkers
-		      '(javascript-jshint)))
+	(append flycheck-disabled-checkers
+		'(javascript-jshint)))
 (flycheck-add-mode 'javascript-eslint 'js2-mode)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 

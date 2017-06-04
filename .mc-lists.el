@@ -15,9 +15,8 @@
         sp-delete-char
         sp-forward-barf-sexp
         sp-forward-slurp-sexp
+        sp-backward-delete-char
         ))
 
 (setq mc/cmds-to-run-once
-      '(
-        sp-backward-delete-char
-        ))
+      '())
