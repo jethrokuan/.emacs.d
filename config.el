@@ -91,6 +91,10 @@
 
 (use-package flx)
 
+(use-package flx-isearch
+  :bind (("C-M-s" . flx-isearch-forward)
+         ("C-M-r" . flx-isearch-backward)))
+
 (use-package counsel
   :diminish ivy-mode
   :bind*

@@ -223,6 +223,12 @@ Flx is required for fuzzy-matching.
 #+begin_src emacs-lisp :tangle yes
   (use-package flx)
 #+end_src
+*** Fuzzy Isearch
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package flx-isearch
+    :bind (("C-M-s" . flx-isearch-forward)
+           ("C-M-r" . flx-isearch-backward)))
+#+END_SRC
 *** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
@@ -377,7 +383,17 @@ Displays added/modified/deleted on the left.
     (set-face-foreground 'git-gutter+-deleted  "IndianRed")
     (setq git-gutter-fr+-side 'left-fringe))
 #+end_src
+** helpful
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+#+END_SRC
 * Moving Around
+** guru-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package guru-mode
+    :init
+    (add-hook 'after-init-hook 'guru-mode))
+#+END_SRC
 ** Crux
 #+begin_src emacs-lisp :tangle yes
   (use-package crux 
@@ -390,7 +406,7 @@ Displays added/modified/deleted on the left.
             ("M-d" . crux-duplicate-current-line-or-region)
             ("M-D" . crux-duplicate-and-comment-current-line-or-region)
             ("s-o" . crux-smart-open-line-above)))
-#+end_src
+#+end_
 ** Anzu
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package anzu
@@ -580,6 +596,12 @@ Displays added/modified/deleted on the left.
   (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
   (bind-key* "C-x a" align-regexp-map)
+#+END_SRC
+** Fancy Narrow
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package fancy-narrow
+    :init
+    (add-hook 'after-init-hook 'fancy-narrow-mode))
 #+END_SRC
 ** aggressive-indent
    Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
