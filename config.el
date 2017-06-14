@@ -218,24 +218,11 @@
   (set-face-foreground 'git-gutter+-deleted  "IndianRed")
   (setq git-gutter-fr+-side 'left-fringe))
 
-(use-package crux 
-  :bind* (("C-c o" . crux-open-with)
-          ("C-c n" . crux-cleanup-buffer-or-region)
-          ("C-c D" . crux-delete-file-and-buffer)
-          ("C-a" . crux-move-beginning-of-line)
-          ("M-o" . crux-smart-open-line)
-          ("C-c r" . crux-rename-file-and-buffer)
-          ("M-d" . crux-duplicate-current-line-or-region)
-          ("M-D" . crux-duplicate-and-comment-current-line-or-region)
-          ("s-o" . crux-smart-open-line-above)))
 
-(use-package anzu
-  :diminish anzu-mode
+
+(use-package guru-mode
   :init
-  (add-hook 'after-init-hook 'global-anzu-mode)
-  :config
-  (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
-  (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
+  (add-hook 'after-init-hook 'guru-mode))
 
 (use-package avy
   :bind* (("C-'" . avy-goto-char)
@@ -356,6 +343,10 @@ the right."
 (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
 (bind-key* "C-x a" align-regexp-map)
+
+(use-package fancy-narrow
+  :init
+  (add-hook 'after-init-hook 'fancy-narrow-mode))
 
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
