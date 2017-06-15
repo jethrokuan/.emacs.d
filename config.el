@@ -221,8 +221,9 @@
 
 
 (use-package guru-mode
+  :diminish guru-mode
   :init
-  (add-hook 'after-init-hook 'guru-mode))
+  (add-hook 'after-init-hook 'guru-global-mode))
 
 (use-package avy
   :bind* (("C-'" . avy-goto-char)
