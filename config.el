@@ -225,6 +225,18 @@
   :init
   (add-hook 'after-init-hook 'guru-global-mode))
 
+(defun switch-to-previous-buffer ()
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) 1)))
+
+(use-package key-chord
+  :diminish key-chord-mode
+  :config
+  (key-chord-mode 1)
+  (key-chord-define-global ";q" 'avy-goto-char-timer)
+  (key-chord-define-global "jk" 'other-window)
+  (key-chord-define-global "qj" 'switch-to-previous-buffer))
+
 (use-package avy
   :bind* (("C-'" . avy-goto-char)
           ("C-," . avy-goto-char-2))
