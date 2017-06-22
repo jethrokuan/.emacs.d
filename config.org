@@ -537,6 +537,12 @@ Displays added/modified/deleted on the left.
                 ("M" . dired-ranger-move)))
     #+END_SRC
 * Editing Text
+** easy-kill
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package easy-kill
+    :config
+    (global-set-key [remap kill-ring-save] 'easy-kill))
+#+END_SRC
 ** visual-regexp
    #+begin_src emacs-lisp :tangle yes
   (use-package visual-regexp

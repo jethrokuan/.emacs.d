@@ -286,6 +286,10 @@
               ("P" . dired-ranger-paste)
               ("M" . dired-ranger-move)))
 
+(use-package easy-kill
+  :config
+  (global-set-key [remap kill-ring-save] 'easy-kill))
+
 (use-package visual-regexp
   :bind* (("C-M-%" . vr/query-replace)
           ("C-c m" . vr/mc-mark)))
