@@ -63,6 +63,9 @@
 
 (load "~/.emacs.d/secrets.el" t)
 
+(setq-default explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/bin/bash")
+
 (use-package exec-path-from-shell 
   :config
   (exec-path-from-shell-initialize))
@@ -615,6 +618,8 @@ the right."
               ("C-c p m" . pytest-pdb-module)
               ("C-c p ." . pytest-pdb-one)))
 
+(use-package realgud)
+
 (use-package highlight-indent-guides
   :init
   (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
@@ -643,6 +648,8 @@ the right."
   :mode "\\.scss\\'" 
   :config (progn
             (setq scss-compile-at-save nil)))
+
+(use-package indium)
 
 (setq-default flycheck-disabled-checkers
 	(append flycheck-disabled-checkers

@@ -170,7 +170,7 @@ repository.
 #+end_src
 ** Shell
 *** Default shell
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (setq-default explicit-shell-file-name "/bin/bash")
   (setq-default shell-file-name "/bin/bash")
 #+end_src
@@ -952,6 +952,10 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                 ("C-c p m" . pytest-pdb-module)
                 ("C-c p ." . pytest-pdb-one)))
 #+END_SRC
+*** realgud
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package realgud)
+#+END_SRC
 *** Highlight Indent Guides
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package highlight-indent-guides
@@ -1000,6 +1004,10 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
              (setq scss-compile-at-save nil)))
     #+end_src
 ** JS
+*** Indium
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package indium)
+#+END_SRC
 *** Flycheck
     #+begin_src emacs-lisp :tangle yes
       (setq-default flycheck-disabled-checkers
