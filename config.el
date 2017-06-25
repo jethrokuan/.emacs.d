@@ -774,15 +774,17 @@ the right."
   :defer t)
 
 (use-package smerge-mode
+  :bind (("C-c h s" . jethro/hydra-smerge/body))
   :config
-  (global-set-key (kbd "C-c h s")
-                  (defhydra hydra-smerge (:pre (smerge-mode 1) :color red :post (smerge-mode -1))
-                    "Smerge mode"
-                    ("<down>" smerge-next        "Next conflict")
-                    ("<up>"   smerge-prev        "Previous conflict")
-                    ("M-a"    smerge-keep-all    "Keep all")
-                    ("M-m"    smerge-keep-mine   "Keep mine")
-                    ("M-o"    smerge-keep-other  "Keep other"))))
+  (defhydra jethro/hydra-smerge (:pre (smerge-mode 1)
+                                      :color red
+                                      :post (smerge-mode -1))
+    "Smerge mode"
+    ("n" smerge-next        "Next conflict")
+    ("p"   smerge-prev        "Previous conflict")
+    ("a"    smerge-keep-all    "Keep all")
+    ("m"    smerge-keep-mine   "Keep mine")
+    ("o"    smerge-keep-other  "Keep other")))
 
 (use-package magit
   :bind (("s-g" . magit-status)
