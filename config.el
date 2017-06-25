@@ -291,6 +291,21 @@
               ("P" . dired-ranger-paste)
               ("M" . dired-ranger-move)))
 
+(defhydra jethro/window-movement ()
+  ("h" windmove-left)
+  ("s" windmove-right)
+  ("t" windmove-down)
+  ("n" windmove-up)
+  ("y" other-window "other") 
+  ("f" find-file "file")
+  ("F" find-file-other-window "other file")
+  ("v" (progn (split-window-right) (windmove-right)))
+  ("o" delete-other-windows :color blue)
+  ("d" delete-window "delete")
+  ("q" nil))
+
+(key-chord-define-global "-s" 'jethro/window-movement/body)
+
 (use-package easy-kill
   :config
   (global-set-key [remap kill-ring-save] 'easy-kill))
