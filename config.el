@@ -43,6 +43,8 @@
 
 (delete-selection-mode 1)
 
+(run-at-time (current-time) 300 'recentf-save-list)
+
 (setq sentence-end-double-space nil)
 
 (setq-default tab-width 2)

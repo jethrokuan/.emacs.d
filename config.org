@@ -115,6 +115,14 @@ Type over a selected region, instead of deleting before typing.
 (delete-selection-mode 1)
 #+end_src
 
+** Recentf
+When I'm using Emacs via =emacsclient=, my recent files don't get
+saved because I never ever quit Emacs. Instead, now I run the function
+every 5 minutes.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (run-at-time (current-time) 300 'recentf-save-list)
+#+END_SRC
 ** Sentences
 Emacs uses double-spaces by default. Use single spaces instead:
 
