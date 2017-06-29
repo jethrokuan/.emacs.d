@@ -53,9 +53,9 @@
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Iosevka-18"))
 (add-to-list 'default-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Iosevka-18"))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
@@ -244,14 +244,37 @@
   :init
   (add-hook 'after-init-hook 'volatile-highlights-mode))
 
-(use-package git-gutter-fringe+
-  :diminish git-gutter+-mode
-  :config
-  (global-git-gutter+-mode)
-  (set-face-foreground 'git-gutter+-modified "gold1")
-  (set-face-foreground 'git-gutter+-added    "SeaGreen")
-  (set-face-foreground 'git-gutter+-deleted  "IndianRed")
-  (setq git-gutter-fr+-side 'left-fringe))
+(use-package diff-hl
+  :bind (:map jethro-mode-map 
+              ("C-c h v" . jethro/hydra-diff-hl/body))
+  :init 
+  (defconst jethro/diff-hl-mode-hooks '(emacs-lisp-mode-hook
+                                        conf-space-mode-hook ;.tmux.conf
+                                        markdown-mode-hook
+                                        css-mode-hook
+                                        web-mode-hook
+                                        sh-mode-hook
+                                        python-mode-hook
+                                        yaml-mode-hook ;tmuxp yaml configs
+                                        c-mode-hook)
+    "List of hooks of major modes in which diff-hl-mode should be enabled.")
+
+  (dolist (hook jethro/diff-hl-mode-hooks)
+    (add-hook hook #'diff-hl-mode))
+
+  (defhydra jethro/hydra-diff-hl (:color red)
+    "diff-hl"
+    ("=" diff-hl-diff-goto-hunk "goto hunk")
+    ("<RET>" diff-hl-diff-goto-hunk "goto hunk")
+    ("u" diff-hl-revert-hunk "revert hunk")
+    ("[" diff-hl-previous-hunk "prev hunk")
+    ("p" diff-hl-previous-hunk "prev hunk")
+    ("]" diff-hl-next-hunk "next hunk")
+    ("n" diff-hl-next-hunk "next hunk")
+    ("a" jethro/add-change-log-entry-other-window-and-return "add change log entry")
+    ("q" nil "cancel"))
+
+  (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
 
 (use-package guru-mode
   :diminish guru-mode
