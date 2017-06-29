@@ -149,7 +149,6 @@ saved because I never ever quit Emacs. Instead, now I run the function
 every 5 minutes.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'recentf)
   (run-at-time (current-time) 300 'recentf-save-list)
 #+END_SRC
 
@@ -655,6 +654,7 @@ Use it to jump to function definitions. Requires no external depedencies.
   (use-package shackle
     :if (not (bound-and-true-p disable-pkg-shackle))
     :config
+    (shackle-mode 1)
     (progn
       (setq shackle-lighter "")
       (setq shackle-select-reused-windows nil) ; default nil

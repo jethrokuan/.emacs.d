@@ -68,7 +68,6 @@
 
 (delete-selection-mode 1)
 
-(require 'recentf)
 (run-at-time (current-time) 300 'recentf-save-list)
 
 (setq sentence-end-double-space nil)
@@ -413,6 +412,7 @@
 (use-package shackle
   :if (not (bound-and-true-p disable-pkg-shackle))
   :config
+  (shackle-mode 1)
   (progn
     (setq shackle-lighter "")
     (setq shackle-select-reused-windows nil) ; default nil
