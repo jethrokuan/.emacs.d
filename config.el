@@ -53,9 +53,9 @@
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
-             '(font . "Iosevka-18"))
+             '(font . "Iosevka-12"))
 (add-to-list 'default-frame-alist
-             '(font . "Iosevka-18"))
+             '(font . "Iosevka-12"))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
@@ -880,6 +880,34 @@ the right."
 (use-package company-auctex
   :defer t)
 
+(use-package vc
+  :bind (:map jethro-mode-map
+              ("C-x v =" . jethro/vc-diff)
+              ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
+  :config
+  (progn
+    (defun jethro/vc-diff (no-whitespace)
+      "Call `vc-diff' as usual if buffer is not modified.
+If the buffer is modified (yet to be saved), call `diff-buffer-with-file'.
+If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
+      (interactive "P")
+      (let* ((no-ws-switch '("-w"))
+             (vc-git-diff-switches (if no-whitespace
+                                       no-ws-switch
+                                     vc-git-diff-switches))
+             (vc-diff-switches (if no-whitespace
+                                   no-ws-switch
+                                 vc-diff-switches))
+             (diff-switches (if no-whitespace
+                                no-ws-switch
+                              diff-switches))
+             ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
+             ;; of `vc-diff' stays nil.
+             current-prefix-arg)
+        (if (buffer-modified-p)
+            (diff-buffer-with-file (current-buffer))
+          (call-interactively #'vc-diff))))))
+
 (use-package smerge-mode
   :bind (:map jethro-mode-map
               ("C-c h s" . jethro/hydra-smerge/body))
@@ -906,14 +934,14 @@ the right."
                                         ;; no merge conflicts remain.
                                         :post (smerge-auto-leave))
     "
-^Move^       ^Keep^               ^Diff^                 ^Other^
-^^-----------^^-------------------^^---------------------^^-------
-_n_ext       _b_ase               _<_: upper/base        _C_ombine
-_p_rev       _u_pper              _=_: upper/lower       _r_esolve
-^^           _l_ower              _>_: base/lower        _k_ill current
-^^           _a_ll                _R_efine
-^^           _RET_: current       _E_diff
-"
+   ^Move^       ^Keep^               ^Diff^                 ^Other^
+   ^^-----------^^-------------------^^---------------------^^-------
+   _n_ext       _b_ase               _<_: upper/base        _C_ombine
+   _p_rev       _u_pper              _=_: upper/lower       _r_esolve
+   ^^           _l_ower              _>_: base/lower        _k_ill current
+   ^^           _a_ll                _R_efine
+   ^^           _RET_: current       _E_diff
+   "
     ("n" smerge-next)
     ("p" smerge-prev)
     ("b" smerge-keep-base)
@@ -950,8 +978,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (require 'projectile)
   (use-package counsel-projectile 
-    :bind (("s-f" . counsel-projectile-find-file)
-           ("s-b" . counsel-projectile-switch-to-buffer))
+    :bind (:map jethro-mode-map
+                ("s-f" . counsel-projectile-find-file)
+                ("s-b" . counsel-projectile-switch-to-buffer))
     :config
     (counsel-projectile-on))
   (setq projectile-use-git-grep t)
@@ -959,7 +988,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq projectile-completion-system 'ivy)
 
   (setq projectile-switch-project-action
-                 #'projectile-commander)
+        #'projectile-commander)
   (def-projectile-commander-method ?S
     "Run a search in the project"
     (counsel-projectile-rg))
