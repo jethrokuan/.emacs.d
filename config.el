@@ -301,7 +301,8 @@
   (key-chord-mode 1)
   (key-chord-define-global ";q" 'avy-goto-char-timer)
   (key-chord-define-global "jk" 'other-window)
-  (key-chord-define-global "qj" 'switch-to-previous-buffer))
+  (key-chord-define-global "qj" 'switch-to-previous-buffer)
+  (key-chord-define-global "zv" 'ibuffer))
 
 (use-package crux 
   :bind (:map jethro-mode-map
@@ -388,6 +389,64 @@
   ("q" nil))
 
 (key-chord-define-global "-s" 'jethro/window-movement/body)
+
+(use-package ibuffer
+  :bind (:map jethro-mode-map
+              ([remap list-buffers] . ibuffer))
+  :config 
+  (setq ibuffer-default-sorting-mode 'major-mode)
+  (setq ibuffer-expert t)
+  (use-package ibuffer-projectile
+    :config
+    (progn
+      (defun jethro/ibuffer-customization ()
+        "My customization for `ibuffer'."
+        ;; ibuffer-projectile setup
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
+          (ibuffer-do-sort-by-major-mode))))) ; then do major-mode sort
+
+  ;; ibuffer-projectile setup
+  (add-hook 'ibuffer-hook #'jethro/ibuffer-customization))
+
+(use-package shackle
+  :if (not (bound-and-true-p disable-pkg-shackle))
+  :config
+  (progn
+    (setq shackle-lighter "")
+    (setq shackle-select-reused-windows nil) ; default nil
+    (setq shackle-default-alignment 'below) ; default below
+    (setq shackle-default-size 0.4) ; default 0.5
+
+    (setq shackle-rules
+          ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
+          '((compilation-mode              :select nil                                               )
+            ("*undo-tree*"                                                    :size 0.25 :align right)
+            ("*eshell*"                    :select t                          :other t               )
+            ("*Shell Command Output*"      :select nil                                               )
+            ("\\*Async Shell.*\\*" :regexp t :ignore t                                                 )
+            (occur-mode                    :select nil                                   :align t    )
+            ("*Help*"                      :select t   :inhibit-window-quit t :other t               )
+            ("*Completions*"                                                  :size 0.3  :align t    )
+            ("*Messages*"                  :select nil :inhibit-window-quit t :other t               )
+            ("\\*[Wo]*Man.*\\*"    :regexp t :select t   :inhibit-window-quit t :other t               )
+            ("\\*poporg.*\\*"      :regexp t :select t                          :other t               )
+            ("\\`\\*helm.*?\\*\\'"   :regexp t                                    :size 0.3  :align t    )
+            ("*Calendar*"                  :select t                          :size 0.3  :align below)
+            ("*info*"                      :select t   :inhibit-window-quit t                         :same t)
+            (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
+            (magit-log-mode                :select t   :inhibit-window-quit t                         :same t)))))
+
+(defun goto-match-paren (arg)
+  "Go to the matching parenthesis if on parenthesis, otherwise insert %.
+vi style of % jumping to matching brace."
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+        ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
+
+(bind-key "C-%" 'goto-match-paren jethro-mode-map)
 
 (use-package easy-kill
   :config
