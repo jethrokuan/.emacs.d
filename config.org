@@ -411,6 +411,18 @@ Highlights recently copied/pasted text.
        :init
        (add-hook 'after-init-hook 'volatile-highlights-mode))
 #+end_src
+** add-log
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package add-log
+    :commands (jethro/add-change-log-entry-other-window-and-return)
+    :config
+    (progn
+      (defun jethro/add-change-log-entry-other-window-and-return ()
+        "Call `add-change-log-entry-other-window' and return to the previous window."
+        (interactive)
+        (add-change-log-entry-other-window)
+        (select-window (previous-window)))))
+#+END_SRC
 ** diff-hl
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package diff-hl

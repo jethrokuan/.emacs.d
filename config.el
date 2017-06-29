@@ -244,6 +244,16 @@
   :init
   (add-hook 'after-init-hook 'volatile-highlights-mode))
 
+(use-package add-log
+  :commands (jethro/add-change-log-entry-other-window-and-return)
+  :config
+  (progn
+    (defun jethro/add-change-log-entry-other-window-and-return ()
+      "Call `add-change-log-entry-other-window' and return to the previous window."
+      (interactive)
+      (add-change-log-entry-other-window)
+      (select-window (previous-window)))))
+
 (use-package diff-hl
   :bind (:map jethro-mode-map 
               ("C-c h v" . jethro/hydra-diff-hl/body))
