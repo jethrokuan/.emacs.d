@@ -580,17 +580,22 @@ the right."
 
 (use-package company
   :diminish company-mode
+  :bind (:map company-active-map
+              ("M-n" . nil)
+              ("M-p" . nil)
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous))
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (require 'company-dabbrev)
   (require 'company-dabbrev-code)
   (setq company-dabbrev-ignore-case nil
-                 company-dabbrev-code-ignore-case nil
-                 company-dabbrev-downcase nil
-                 company-idle-delay 0
-                 company-begin-commands '(self-insert-command)
-                 company-transformers '(company-sort-by-occurrence))
+        company-dabbrev-code-ignore-case nil
+        company-dabbrev-downcase nil
+        company-idle-delay 0
+        company-begin-commands '(self-insert-command)
+        company-transformers '(company-sort-by-occurrence))
   (use-package company-quickhelp
     :config (company-quickhelp-mode 1)))
 
