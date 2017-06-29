@@ -62,6 +62,34 @@ when opening large files.
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
    #+end_src
+** =jethro-mode-map=
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar jethro-mode-map (make-sparse-keymap)
+    "Keymap for `jethro-mode'.")
+
+  (define-minor-mode jethro-mode
+    "A minor mode so that my key settings override annoying major modes."
+    ;; If init-value is not set to t, this mode does not get enabled in
+    ;; `fundamental-mode' buffers even after doing \"(global-jethro-mode 1)\".
+    ;; More info: http://emacs.stackexchange.com/q/16693/115
+    :init-value t
+    :lighter    " j"
+    :keymap     jethro-mode-map)
+
+  (define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
+
+  ;; https://github.com/jwiegley/use-package/blob/master/bind-key.el
+  ;; The keymaps in `emulation-mode-map-alists' take precedence over
+  ;; `minor-mode-map-alist'
+  (add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
+
+  ;; Turn off the minor mode in the minibuffer
+  (defun turn-off-jethro-mode ()
+    "Turn off jethro-mode."
+    (jethro-mode -1))
+  (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
+
+#+END_SRC
 ** Auto Revert
 Many times when switching git branches, files tend to change. By
 default, Emacs does not revert the buffers affected, which can lead to
@@ -121,6 +149,7 @@ saved because I never ever quit Emacs. Instead, now I run the function
 every 5 minutes.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'recentf)
   (run-at-time (current-time) 300 'recentf-save-list)
 #+END_SRC
 
@@ -203,22 +232,20 @@ repository.
     (mapcar 'kill-buffer (buffer-list))
     (delete-other-windows))
 
-  (bind-key* "C-c !" 'jethro/nuke-all-buffers)
+  (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
 #+end_src
 *** eshell with =C-x m=
 #+begin_src emacs-lisp :tangle yes
-  (bind-key* "C-x m" 'eshell)
-#+end_src
-*** mark-paragraph with =M-p=
-#+begin_src emacs-lisp :tangle yes
-  (bind-key* "M-p" 'mark-paragraph)
+  (bind-key "C-x m" 'eshell jethro-mode-map)
 #+end_src
 *** compile with =<f9>=
 #+begin_src emacs-lisp :tangle yes
-  (bind-key* "<f9>" (lambda ()
-                      (interactive)
-                      (setq-local compilation-read-command nil)
-                      (call-interactively 'compile)))
+  (defun jethro/compile () 
+    (interactive)
+    (setq-local compilation-read-command nil)
+    (call-interactively 'compile))
+
+  (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 #+end_src
 ** Hydra
 #+begin_src emacs-lisp :tangle yes
@@ -235,25 +262,27 @@ Flx is required for fuzzy-matching.
 *** Fuzzy Isearch
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package flx-isearch
-    :bind (("C-M-s" . flx-isearch-forward)
-           ("C-M-r" . flx-isearch-backward)))
+    :bind (:map jethro-mode-map
+                ("C-M-s" . flx-isearch-forward)
+                ("C-M-r" . flx-isearch-backward)))
 #+END_SRC
 *** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
     :diminish ivy-mode
-    :bind*
-    (("C-c C-r" . ivy-resume)
-     ("M-a" . counsel-M-x)
-     ("C-c i" . counsel-imenu)
-     ("C-x C-f" . counsel-find-file)
-     ("C-x j" . counsel-dired-jump)
-     ("C-x l" . counsel-locate)
-     ("C-c j" . counsel-git)
-     ("C-c s" . counsel-projectile-rg)
-     ("C-c f" . counsel-recentf)
-     ("M-y" . counsel-yank-pop))
+    :bind
+    (:map jethro-mode-map
+          ("C-c C-r" . ivy-resume)
+          ("M-a" . counsel-M-x)
+          ("C-c i" . counsel-imenu)
+          ("C-x C-f" . counsel-find-file)
+          ("C-x j" . counsel-dired-jump)
+          ("C-x l" . counsel-locate)
+          ("C-c j" . counsel-git)
+          ("C-c s" . counsel-projectile-rg)
+          ("C-c f" . counsel-recentf)
+          ("M-y" . counsel-yank-pop))
     :bind ((:map help-map
                  ("f" . counsel-describe-function)
                  ("v" . counsel-describe-variable)
@@ -265,10 +294,10 @@ Counsel contains ivy enhancements for commonly-used functions.
                  ("C-r" . counsel-expression-history))
            (:map ivy-minibuffer-map
                  ("<return>" . ivy-alt-done)
-                 ("M-<return" . ivy-immediate-done)))
+                 ("M-<return>" . ivy-immediate-done)))
     :init
     (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
-    :config 
+    :config
     (defun ivy-dired ()
       (interactive)
       (if ivy--directory
@@ -341,10 +370,12 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+end_src
 ** Zooming
    #+begin_src emacs-lisp :tangle yes
-(defhydra hydra-zoom (global-map "<f2>")
-  "zoom"
-  ("i" text-scale-increase "in")
-  ("o" text-scale-decrease "out"))
+     (defhydra jethro/hydra-zoom ()
+       "zoom"
+       ("i" text-scale-increase "in")
+       ("o" text-scale-decrease "out"))
+
+     (bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map)
    #+end_src
 ** beacon
 Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
@@ -392,10 +423,6 @@ Displays added/modified/deleted on the left.
     (set-face-foreground 'git-gutter+-deleted  "IndianRed")
     (setq git-gutter-fr+-side 'left-fringe))
 #+end_src
-** helpful
-#+BEGIN_SRC emacs-lisp :tangle yes
-
-#+END_SRC
 * Moving Around
 ** guru-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -421,45 +448,49 @@ Displays added/modified/deleted on the left.
 ** Crux
 #+begin_src emacs-lisp :tangle yes
   (use-package crux 
-    :bind* (("C-c o" . crux-open-with)
-            ("C-c n" . crux-cleanup-buffer-or-region)
-            ("C-c D" . crux-delete-file-and-buffer)
-            ("C-a" . crux-move-beginning-of-line)
-            ("M-o" . crux-smart-open-line)
-            ("C-c r" . crux-rename-file-and-buffer)
-            ("M-d" . crux-duplicate-current-line-or-region)
-            ("M-D" . crux-duplicate-and-comment-current-line-or-region)
-            ("s-o" . crux-smart-open-line-above)))
-#+end_
-** Anzu
-   #+BEGIN_SRC emacs-lisp :tangle yes
-     (use-package anzu
-       :diminish anzu-mode
-       :init
-       (add-hook 'after-init-hook 'global-anzu-mode)
-       :config
-       (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
-       (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
-   #+END_SRC
-** avy
-   Use avy to move between visible text.
-   #+begin_src emacs-lisp :tangle yes
+    :bind (:map jethro-mode-map
+                ("C-c o" . crux-open-with)
+                ("C-c n" . crux-cleanup-buffer-or-region)
+                ("C-c D" . crux-delete-file-and-buffer)
+                ("C-a" . crux-move-beginning-of-line)
+                ("M-o" . crux-smart-open-line)
+                ("C-c r" . crux-rename-file-and-buffer)
+                ("M-d" . crux-duplicate-current-line-or-region)
+                ("M-D" . crux-duplicate-and-comment-current-line-or-region)
+                ("s-o" . crux-smart-open-line-above)))
 
+#+end_src
+** Anzu
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package anzu
+    :diminish anzu-mode
+    :init
+    (add-hook 'after-init-hook 'global-anzu-mode)
+    :config
+    (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
+    (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
+#+END_SRC
+** avy
+Use avy to move between visible text.
+#+begin_src emacs-lisp :tangle yes
   (use-package avy
-    :bind* (("C-'" . avy-goto-char)
-            ("C-," . avy-goto-char-2))
+    :bind
+    (:map jethro-mode-map
+          ("C-'" . avy-goto-char)
+          ("C-," . avy-goto-char-2))
     :config
     (setq avy-keys '(?h ?t ?n ?s)))
-   #+end_src
+#+end_src
 ** dumb-jump
-   Use it to jump to function definitions. Requires no external depedencies.
-   #+begin_src emacs-lisp :tangle no
-(use-package dumb-jump
-  :diminish dumb-jump-mode
-  :bind (("C-M-g" . dumb-jump-go)
-         ("C-M-p" . dumb-jump-back)
-         ("C-M-q" . dumb-jump-quick-look)))
-   #+end_src
+Use it to jump to function definitions. Requires no external depedencies.
+#+begin_src emacs-lisp :tangle no
+  (use-package dumb-jump
+    :diminish dumb-jump-mode
+    :bind (:map jethro-mode-map
+                ("C-M-g" . dumb-jump-go)
+                ("C-M-p" . dumb-jump-back)
+                ("C-M-q" . dumb-jump-quick-look)))
+#+end_src
 ** Window switching
 #+begin_src emacs-lisp :tangle yes
   (use-package windmove 
@@ -570,11 +601,12 @@ Displays added/modified/deleted on the left.
     (global-set-key [remap kill-ring-save] 'easy-kill))
 #+END_SRC
 ** visual-regexp
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (use-package visual-regexp
-    :bind* (("C-M-%" . vr/query-replace)
-            ("C-c m" . vr/mc-mark)))
-   #+end_src
+    :bind (:map jethro-mode-map
+                ("C-M-%" . vr/query-replace)
+                ("C-c m" . vr/mc-mark)))
+#+end_src
 ** Align Regexp
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/align-repeat (start end regexp &optional justify-right after)
@@ -642,7 +674,7 @@ Displays added/modified/deleted on the left.
   (define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
   (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
-  (bind-key* "C-x a" align-regexp-map)
+  (bind-key "C-x a" 'align-regexp-map jethro-mode-map)
 #+END_SRC
 ** Fancy Narrow
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -660,17 +692,19 @@ Displays added/modified/deleted on the left.
 ** multiple-cursors
    A port of Sublime Text's multiple-cursors functionality.
    #+begin_src emacs-lisp :tangle yes
-(use-package multiple-cursors
-  :bind (("C-M-c" . mc/edit-lines)
-         ("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-previous-like-this)
-         ("C-c C-<" . mc/mark-all-like-this)))
+     (use-package multiple-cursors
+       :bind (:map jethro-mode-map
+                   ("C-M-c" . mc/edit-lines)
+                   ("C->" . mc/mark-next-like-this)
+                   ("C-<" . mc/mark-previous-like-this)
+                   ("C-c C-<" . mc/mark-all-like-this)))
    #+end_src
 ** expand-region
    Use this often, and in combination with multiple-cursors.
    #+begin_src emacs-lisp :tangle yes
-  (use-package expand-region
-    :bind (("C-=" . er/expand-region)))
+     (use-package expand-region
+       :bind (:map jethro-mode-map
+                   ("C-=" . er/expand-region)))
    #+end_src
 ** iedit
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -727,38 +761,43 @@ Displays added/modified/deleted on the left.
    #+end_src
 ** zap-up-to-char
    #+begin_src emacs-lisp :tangle yes
-  (autoload 'zap-up-to-char "misc"
-    "Kill up to, but not including ARGth occurrence of CHAR.
+     (autoload 'zap-up-to-char "misc"
+       "Kill up to, but not including ARGth occurrence of CHAR.
 
-    \(fn arg char)"
-    'interactive)
+       \(fn arg char)"
+       'interactive)
 
-  (bind-key* "M-z" 'zap-up-to-char)
+     (bind-key "M-z" 'zap-up-to-char jethro-mode-map)
    #+end_src
 ** move-text
    #+begin_src emacs-lisp :tangle yes
-  (use-package move-text
-    :bind (("M-<up>" . move-text-up)
-           ("M-<down>" . move-text-down)))
+     (use-package move-text
+       :bind (:map jethro-mode-map
+                   ("M-<up>" . move-text-up)
+                   ("M-<down>" . move-text-down)))
    #+end_src
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
+       :bind (:map jethro-mode-map
+                   ("C-c h f" . jethro/hydra-flycheck/body))
        :init
        (add-hook 'prog-mode-hook 'global-flycheck-mode)
        :config
-       (global-set-key (kbd "C-c h f")
-                       (defhydra hydra-flycheck
-                         (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
-                               :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
-                               :hint nil)
-                         "Errors"
-                         ("f"  flycheck-error-list-set-filter                            "Filter")
-                         ("n"  flycheck-next-error                                       "Next")
-                         ("p"  flycheck-previous-error                                   "Previous")
-                         ("<" flycheck-first-error                                      "First")
-                         (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-                         ("q"  nil)))
+       (setq-default flycheck-disabled-checkers
+                     (append flycheck-disabled-checkers
+                             '(javascript-jshint)))
+       (defhydra jethro/hydra-flycheck
+         (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
+               :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+               :hint nil)
+         "Errors"
+         ("f"  flycheck-error-list-set-filter                            "Filter")
+         ("n"  flycheck-next-error                                       "Next")
+         ("p"  flycheck-previous-error                                   "Previous")
+         ("<" flycheck-first-error                                      "First")
+         (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
+         ("q"  nil))
        (use-package flycheck-pos-tip
          :init
          (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode))
@@ -857,47 +896,48 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
-(use-package go-mode
-  :mode ("\\.go\\'" . go-mode)
-  :config (progn
-            (add-hook 'go-mode-hook 'compilation-auto-quit-window)
-            (add-hook 'go-mode-hook (lambda ()
-                                      (set (make-local-variable 'company-backends) '(company-go))
-                                      (company-mode)))
-            (add-hook 'go-mode-hook (lambda ()
-                                      (add-hook 'before-save-hook 'gofmt-before-save)
-                                      (local-set-key (kbd "M-.") 'godef-jump)))
-            (add-hook 'go-mode-hook
-                      (lambda ()
-                        (unless (file-exists-p "Makefile")
-                          (set (make-local-variable 'compile-command)
-                               (let ((file (file-name-nondirectory buffer-file-name)))
-                                 (format "go build %s"
-                                         file))))))
-            (use-package go-dlv
-              :config (require 'go-dlv))
-            (use-package golint
-              :config
-              (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
-              (require 'golint))
-            (use-package gorepl-mode
-              :config (add-hook 'go-mode-hook #'gorepl-mode))
-            (use-package company-go
-              :config (add-hook 'go-mode-hook (lambda ()
-                                                (set (make-local-variable 'company-backends) '(company-go))
-                                                (company-mode))))))
+     (use-package go-mode
+       :mode ("\\.go\\'" . go-mode)
+       :config
+       (add-hook 'go-mode-hook 'compilation-auto-quit-window)
+       (add-hook 'go-mode-hook (lambda ()
+                                 (set (make-local-variable 'company-backends) '(company-go))
+                                 (company-mode)))
+       (add-hook 'go-mode-hook (lambda ()
+                                 (add-hook 'before-save-hook 'gofmt-before-save)
+                                 (local-set-key (kbd "M-.") 'godef-jump)))
+       (add-hook 'go-mode-hook
+                 (lambda ()
+                   (unless (file-exists-p "Makefile")
+                     (set (make-local-variable 'compile-command)
+                          (let ((file (file-name-nondirectory buffer-file-name)))
+                            (format "go build %s"
+                                    file))))))
+       (use-package go-dlv
+         :config (require 'go-dlv))
+       (use-package golint
+         :config
+         (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
+         (require 'golint))
+       (use-package gorepl-mode
+         :config (add-hook 'go-mode-hook #'gorepl-mode))
+       (use-package company-go
+         :config (add-hook 'go-mode-hook (lambda ()
+                                           (set (make-local-variable 'company-backends) '(company-go))
+                                           (company-mode)))))
    #+end_src
 ** C
-   #+BEGIN_SRC emacs-lisp :tangle no
-  (add-hook 'c-mode-hook
-            (lambda ()
-              (unless (file-exists-p "Makefile")
-                (set (make-local-variable 'compile-command)
-                     (let ((file (file-name-nondirectory buffer-file-name)))
-                       (format "cc -Wall %s -o %s --std=c99"
-                               file
-                               (file-name-sans-extension file)))))))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defun jethro/compile-c () 
+    (unless (file-exists-p "Makefile")
+      (set (make-local-variable 'compile-command)
+           (let ((file (file-name-nondirectory buffer-file-name)))
+             (format "cc -Wall %s -o %s --std=c99"
+                     file
+                     (file-name-sans-extension file))))))
+
+  (add-hook 'c-mode-hook jethro/compile-c)
+#+END_SRC
 ** C++
 *** C++ compile function
     #+begin_src emacs-lisp :tangle yes
@@ -962,9 +1002,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+END_SRC
 *** yapfify
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package yapfify 
-    :init
-    (add-hook 'python-mode-hook 'yapf-mode))
+  (use-package yapfify)
 #+END_SRC
 *** pytest
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1030,18 +1068,35 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
              (setq scss-compile-at-save nil)))
     #+end_src
 ** JS
+*** JS2-mode
+Here I also added =tern-mode=. This requires the tern executable:
+#+begin_src bash :tangle no
+npm install -g tern
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package js2-mode
+    :mode ("\\.js\\'" . js2-mode)
+    :config
+    (use-package tern
+      :diminish tern-mode
+      :config
+      (setq js-switch-indent-offset 2)
+      (add-hook 'js2-mode-hook 'tern-mode) 
+      (use-package company-tern
+        :config
+        (add-to-list 'company-backends 'company-tern))))
+#+end_src
 *** Indium
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package indium)
 #+END_SRC
 *** Flycheck
-    #+begin_src emacs-lisp :tangle yes
-      (setq-default flycheck-disabled-checkers
-		    (append flycheck-disabled-checkers
-			    '(javascript-jshint)))
-      (flycheck-add-mode 'javascript-eslint 'js2-mode)
-      (flycheck-add-mode 'javascript-eslint 'web-mode)
-    #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (require 'flycheck)
+  (flycheck-add-mode 'javascript-eslint 'js2-mode)
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+#+end_src
 *** Skewer
     #+begin_src emacs-lisp :tangle yes
   (use-package skewer-mode  
@@ -1061,26 +1116,6 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                 (local-set-key (kbd "C-c b") 'js-send-buffer)
                 (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
                 (local-set-key (kbd "C-c l") 'js-load-file-and-go))))
-    #+end_src
-*** JS2-mode
-
-    Here I also added =tern-mode=. This requires the tern executable:
-    #+begin_src bash :tangle no
-npm install -g tern
-    #+end_src
-
-    #+begin_src emacs-lisp :tangle yes
-      (use-package js2-mode
-        :mode ("\\.js\\'" . js2-mode)
-        :config
-        (use-package tern
-          :diminish tern-mode
-          :config
-          (setq js-switch-indent-offset 2)
-          (add-hook 'js2-mode-hook 'tern-mode) 
-          (use-package company-tern
-            :config
-            (add-to-list 'company-backends 'company-tern))))
     #+end_src
 *** js-doc
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1210,23 +1245,65 @@ Useful when handling git merge conflicts.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package smerge-mode
-    :bind (("C-c h s" . jethro/hydra-smerge/body))
-    :config
-    (defhydra jethro/hydra-smerge (:pre (smerge-mode 1)
-                                        :color red
-                                        :post (smerge-mode -1))
-      "Smerge mode"
-      ("n" smerge-next        "Next conflict")
-      ("p"   smerge-prev        "Previous conflict")
-      ("a"    smerge-keep-all    "Keep all")
-      ("m"    smerge-keep-mine   "Keep mine")
-      ("o"    smerge-keep-other  "Keep other")))
+    :bind (:map jethro-mode-map
+                ("C-c h s" . jethro/hydra-smerge/body))
+    :init
+    (progn
+      (defun jethro/enable-smerge-maybe ()
+        "Auto-enable `smerge-mode' when merge conflict is detected."
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward "^<<<<<<< " nil :noerror)
+            (smerge-mode 1))))
+      (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append))
+    :config 
+    (defalias 'smerge-keep-upper 'smerge-keep-mine)
+    (defalias 'smerge-keep-lower 'smerge-keep-other)
+    (defalias 'smerge-diff-base-upper 'smerge-diff-base-mine)
+    (defalias 'smerge-diff-upper-lower 'smerge-diff-mine-other)
+    (defalias 'smerge-diff-base-lower 'smerge-diff-base-other)
+
+    (defhydra jethro/hydra-smerge (:color pink
+                                          :hint nil
+                                          :pre (smerge-mode 1)
+                                          ;; Disable `smerge-mode' when quitting hydra if
+                                          ;; no merge conflicts remain.
+                                          :post (smerge-auto-leave))
+      "
+  ^Move^       ^Keep^               ^Diff^                 ^Other^
+  ^^-----------^^-------------------^^---------------------^^-------
+  _n_ext       _b_ase               _<_: upper/base        _C_ombine
+  _p_rev       _u_pper              _=_: upper/lower       _r_esolve
+  ^^           _l_ower              _>_: base/lower        _k_ill current
+  ^^           _a_ll                _R_efine
+  ^^           _RET_: current       _E_diff
+  "
+      ("n" smerge-next)
+      ("p" smerge-prev)
+      ("b" smerge-keep-base)
+      ("u" smerge-keep-upper)
+      ("l" smerge-keep-lower)
+      ("a" smerge-keep-all)
+      ("RET" smerge-keep-current)
+      ("\C-m" smerge-keep-current)
+      ("<" smerge-diff-base-upper)
+      ("=" smerge-diff-upper-lower)
+      (">" smerge-diff-base-lower)
+      ("R" smerge-refine)
+      ("E" smerge-ediff)
+      ("C" smerge-combine-with-next)
+      ("r" smerge-resolve)
+      ("k" smerge-kill-current)
+      ("q" nil "cancel" :color blue)))
 #+end_src
 ** Magit
 #+begin_src emacs-lisp :tangle yes
   (use-package magit
-    :bind (("s-g" . magit-status)
-           ("s-G" . magit-blame))
+    :bind (:map jethro-mode-map
+                ("s-g" . magit-status)
+                ("C-c g" . magit-status)
+                ("s-G" . magit-blame)
+                ("C-c G" . magit-blame))
     :init
     (add-hook 'magit-mode-hook 'hl-line-mode)
     :config
@@ -1292,9 +1369,10 @@ Search Stack Overflow
 #+end_src
 ** darkroom
 #+begin_src emacs-lisp :tangle yes
-(use-package darkroom
-  :bind (("C-c M d" . darkroom-mode)
-         ("C-c M t" . darkroom-tentative-mode)))
+  (use-package darkroom
+    :bind (:map jethro-mode-map
+                ("C-c M d" . darkroom-mode)
+                ("C-c M t" . darkroom-tentative-mode)))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.

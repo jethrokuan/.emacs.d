@@ -22,6 +22,31 @@
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
+(defvar jethro-mode-map (make-sparse-keymap)
+  "Keymap for `jethro-mode'.")
+
+(define-minor-mode jethro-mode
+  "A minor mode so that my key settings override annoying major modes."
+  ;; If init-value is not set to t, this mode does not get enabled in
+  ;; `fundamental-mode' buffers even after doing \"(global-jethro-mode 1)\".
+  ;; More info: http://emacs.stackexchange.com/q/16693/115
+  :init-value t
+  :lighter    " j"
+  :keymap     jethro-mode-map)
+
+(define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
+
+;; https://github.com/jwiegley/use-package/blob/master/bind-key.el
+;; The keymaps in `emulation-mode-map-alists' take precedence over
+;; `minor-mode-map-alist'
+(add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
+
+;; Turn off the minor mode in the minibuffer
+(defun turn-off-jethro-mode ()
+  "Turn off jethro-mode."
+  (jethro-mode -1))
+(add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
+
 (global-auto-revert-mode 1)
 
 (setq custom-file "~/.emacs.d/custom.el")
@@ -43,6 +68,7 @@
 
 (delete-selection-mode 1)
 
+(require 'recentf)
 (run-at-time (current-time) 300 'recentf-save-list)
 
 (setq sentence-end-double-space nil)
@@ -81,38 +107,40 @@
   (mapcar 'kill-buffer (buffer-list))
   (delete-other-windows))
 
-(bind-key* "C-c !" 'jethro/nuke-all-buffers)
+(bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
 
-(bind-key* "C-x m" 'eshell)
+(bind-key "C-x m" 'eshell jethro-mode-map)
 
-(bind-key* "M-p" 'mark-paragraph)
+(defun jethro/compile () 
+  (interactive)
+  (setq-local compilation-read-command nil)
+  (call-interactively 'compile))
 
-(bind-key* "<f9>" (lambda ()
-                    (interactive)
-                    (setq-local compilation-read-command nil)
-                    (call-interactively 'compile)))
+(bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
 (use-package hydra)
 
 (use-package flx)
 
 (use-package flx-isearch
-  :bind (("C-M-s" . flx-isearch-forward)
-         ("C-M-r" . flx-isearch-backward)))
+  :bind (:map jethro-mode-map
+              ("C-M-s" . flx-isearch-forward)
+              ("C-M-r" . flx-isearch-backward)))
 
 (use-package counsel
   :diminish ivy-mode
-  :bind*
-  (("C-c C-r" . ivy-resume)
-   ("M-a" . counsel-M-x)
-   ("C-c i" . counsel-imenu)
-   ("C-x C-f" . counsel-find-file)
-   ("C-x j" . counsel-dired-jump)
-   ("C-x l" . counsel-locate)
-   ("C-c j" . counsel-git)
-   ("C-c s" . counsel-projectile-rg)
-   ("C-c f" . counsel-recentf)
-   ("M-y" . counsel-yank-pop))
+  :bind
+  (:map jethro-mode-map
+        ("C-c C-r" . ivy-resume)
+        ("M-a" . counsel-M-x)
+        ("C-c i" . counsel-imenu)
+        ("C-x C-f" . counsel-find-file)
+        ("C-x j" . counsel-dired-jump)
+        ("C-x l" . counsel-locate)
+        ("C-c j" . counsel-git)
+        ("C-c s" . counsel-projectile-rg)
+        ("C-c f" . counsel-recentf)
+        ("M-y" . counsel-yank-pop))
   :bind ((:map help-map
                ("f" . counsel-describe-function)
                ("v" . counsel-describe-variable)
@@ -124,10 +152,10 @@
                ("C-r" . counsel-expression-history))
          (:map ivy-minibuffer-map
                ("<return>" . ivy-alt-done)
-               ("M-<return" . ivy-immediate-done)))
+               ("M-<return>" . ivy-immediate-done)))
   :init
   (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
-  :config 
+  :config
   (defun ivy-dired ()
     (interactive)
     (if ivy--directory
@@ -189,10 +217,12 @@
 (eval-after-load "display-time-mode"
   (setq display-time-24hr-format t))
 
-(defhydra hydra-zoom (global-map "<f2>")
+(defhydra jethro/hydra-zoom ()
   "zoom"
   ("i" text-scale-increase "in")
   ("o" text-scale-decrease "out"))
+
+(bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map)
 
 (use-package beacon
   :diminish beacon-mode
@@ -223,8 +253,6 @@
   (set-face-foreground 'git-gutter+-deleted  "IndianRed")
   (setq git-gutter-fr+-side 'left-fringe))
 
-
-
 (use-package guru-mode
   :diminish guru-mode
   :init
@@ -242,9 +270,31 @@
   (key-chord-define-global "jk" 'other-window)
   (key-chord-define-global "qj" 'switch-to-previous-buffer))
 
+(use-package crux 
+  :bind (:map jethro-mode-map
+              ("C-c o" . crux-open-with)
+              ("C-c n" . crux-cleanup-buffer-or-region)
+              ("C-c D" . crux-delete-file-and-buffer)
+              ("C-a" . crux-move-beginning-of-line)
+              ("M-o" . crux-smart-open-line)
+              ("C-c r" . crux-rename-file-and-buffer)
+              ("M-d" . crux-duplicate-current-line-or-region)
+              ("M-D" . crux-duplicate-and-comment-current-line-or-region)
+              ("s-o" . crux-smart-open-line-above)))
+
+(use-package anzu
+  :diminish anzu-mode
+  :init
+  (add-hook 'after-init-hook 'global-anzu-mode)
+  :config
+  (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
+  (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
+
 (use-package avy
-  :bind* (("C-'" . avy-goto-char)
-          ("C-," . avy-goto-char-2))
+  :bind
+  (:map jethro-mode-map
+        ("C-'" . avy-goto-char)
+        ("C-," . avy-goto-char-2))
   :config
   (setq avy-keys '(?h ?t ?n ?s)))
 
@@ -311,8 +361,9 @@
   (global-set-key [remap kill-ring-save] 'easy-kill))
 
 (use-package visual-regexp
-  :bind* (("C-M-%" . vr/query-replace)
-          ("C-c m" . vr/mc-mark)))
+  :bind (:map jethro-mode-map
+              ("C-M-%" . vr/query-replace)
+              ("C-c m" . vr/mc-mark)))
 
 (defun jethro/align-repeat (start end regexp &optional justify-right after)
   "Repeat alignment with respect to the given regular expression.
@@ -379,7 +430,7 @@ the right."
 (define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
 (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
-(bind-key* "C-x a" align-regexp-map)
+(bind-key "C-x a" 'align-regexp-map jethro-mode-map)
 
 (use-package fancy-narrow
   :init
@@ -390,13 +441,15 @@ the right."
   :config (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
 (use-package multiple-cursors
-  :bind (("C-M-c" . mc/edit-lines)
-         ("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-previous-like-this)
-         ("C-c C-<" . mc/mark-all-like-this)))
+  :bind (:map jethro-mode-map
+              ("C-M-c" . mc/edit-lines)
+              ("C->" . mc/mark-next-like-this)
+              ("C-<" . mc/mark-previous-like-this)
+              ("C-c C-<" . mc/mark-all-like-this)))
 
 (use-package expand-region
-  :bind (("C-=" . er/expand-region)))
+  :bind (:map jethro-mode-map
+              ("C-=" . er/expand-region)))
 
 (use-package iedit)
 
@@ -453,28 +506,33 @@ the right."
   \(fn arg char)"
   'interactive)
 
-(bind-key* "M-z" 'zap-up-to-char)
+(bind-key "M-z" 'zap-up-to-char jethro-mode-map)
 
 (use-package move-text
-  :bind (("M-<up>" . move-text-up)
-         ("M-<down>" . move-text-down)))
+  :bind (:map jethro-mode-map
+              ("M-<up>" . move-text-up)
+              ("M-<down>" . move-text-down)))
 
 (use-package flycheck
+  :bind (:map jethro-mode-map
+              ("C-c h f" . jethro/hydra-flycheck/body))
   :init
   (add-hook 'prog-mode-hook 'global-flycheck-mode)
   :config
-  (global-set-key (kbd "C-c h f")
-                  (defhydra hydra-flycheck
-                    (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
-                          :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
-                          :hint nil)
-                    "Errors"
-                    ("f"  flycheck-error-list-set-filter                            "Filter")
-                    ("n"  flycheck-next-error                                       "Next")
-                    ("p"  flycheck-previous-error                                   "Previous")
-                    ("<" flycheck-first-error                                      "First")
-                    (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-                    ("q"  nil)))
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+  (defhydra jethro/hydra-flycheck
+    (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
+          :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+          :hint nil)
+    "Errors"
+    ("f"  flycheck-error-list-set-filter                            "Filter")
+    ("n"  flycheck-next-error                                       "Next")
+    ("p"  flycheck-previous-error                                   "Previous")
+    ("<" flycheck-first-error                                      "First")
+    (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
+    ("q"  nil))
   (use-package flycheck-pos-tip
     :init
     (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode))
@@ -551,33 +609,33 @@ the right."
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
-  :config (progn
-            (add-hook 'go-mode-hook 'compilation-auto-quit-window)
-            (add-hook 'go-mode-hook (lambda ()
+  :config
+  (add-hook 'go-mode-hook 'compilation-auto-quit-window)
+  (add-hook 'go-mode-hook (lambda ()
+                            (set (make-local-variable 'company-backends) '(company-go))
+                            (company-mode)))
+  (add-hook 'go-mode-hook (lambda ()
+                            (add-hook 'before-save-hook 'gofmt-before-save)
+                            (local-set-key (kbd "M-.") 'godef-jump)))
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (unless (file-exists-p "Makefile")
+                (set (make-local-variable 'compile-command)
+                     (let ((file (file-name-nondirectory buffer-file-name)))
+                       (format "go build %s"
+                               file))))))
+  (use-package go-dlv
+    :config (require 'go-dlv))
+  (use-package golint
+    :config
+    (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
+    (require 'golint))
+  (use-package gorepl-mode
+    :config (add-hook 'go-mode-hook #'gorepl-mode))
+  (use-package company-go
+    :config (add-hook 'go-mode-hook (lambda ()
                                       (set (make-local-variable 'company-backends) '(company-go))
-                                      (company-mode)))
-            (add-hook 'go-mode-hook (lambda ()
-                                      (add-hook 'before-save-hook 'gofmt-before-save)
-                                      (local-set-key (kbd "M-.") 'godef-jump)))
-            (add-hook 'go-mode-hook
-                      (lambda ()
-                        (unless (file-exists-p "Makefile")
-                          (set (make-local-variable 'compile-command)
-                               (let ((file (file-name-nondirectory buffer-file-name)))
-                                 (format "go build %s"
-                                         file))))))
-            (use-package go-dlv
-              :config (require 'go-dlv))
-            (use-package golint
-              :config
-              (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
-              (require 'golint))
-            (use-package gorepl-mode
-              :config (add-hook 'go-mode-hook #'gorepl-mode))
-            (use-package company-go
-              :config (add-hook 'go-mode-hook (lambda ()
-                                                (set (make-local-variable 'company-backends) '(company-go))
-                                                (company-mode))))))
+                                      (company-mode)))))
 
 (add-hook 'c++-mode-hook
           (lambda ()
@@ -621,9 +679,7 @@ the right."
   :commands
   (py-isort-buffer py-isort-region))
 
-(use-package yapfify 
-  :init
-  (add-hook 'python-mode-hook 'yapf-mode))
+(use-package yapfify)
 
 (use-package pytest
   :bind (:map python-mode-map
@@ -666,20 +722,6 @@ the right."
   :config (progn
             (setq scss-compile-at-save nil)))
 
-(use-package indium)
-
-(setq-default flycheck-disabled-checkers
-	(append flycheck-disabled-checkers
-		'(javascript-jshint)))
-(flycheck-add-mode 'javascript-eslint 'js2-mode)
-(flycheck-add-mode 'javascript-eslint 'web-mode)
-
-(use-package skewer-mode  
-  :bind (:map skewer-mode-map
-              ("C-c C-k" . skewer-load-buffer))
-  :config
-  (add-hook 'js2-mode-hook 'skewer-mode))
-
 (use-package js2-mode
   :mode ("\\.js\\'" . js2-mode)
   :config
@@ -691,6 +733,18 @@ the right."
     (use-package company-tern
       :config
       (add-to-list 'company-backends 'company-tern))))
+
+(use-package indium)
+
+(require 'flycheck)
+(flycheck-add-mode 'javascript-eslint 'js2-mode)
+(flycheck-add-mode 'javascript-eslint 'web-mode)
+
+(use-package skewer-mode  
+  :bind (:map skewer-mode-map
+              ("C-c C-k" . skewer-load-buffer))
+  :config
+  (add-hook 'js2-mode-hook 'skewer-mode))
 
 (use-package js-doc
   :config
@@ -789,21 +843,63 @@ the right."
   :defer t)
 
 (use-package smerge-mode
-  :bind (("C-c h s" . jethro/hydra-smerge/body))
-  :config
-  (defhydra jethro/hydra-smerge (:pre (smerge-mode 1)
-                                      :color red
-                                      :post (smerge-mode -1))
-    "Smerge mode"
-    ("n" smerge-next        "Next conflict")
-    ("p"   smerge-prev        "Previous conflict")
-    ("a"    smerge-keep-all    "Keep all")
-    ("m"    smerge-keep-mine   "Keep mine")
-    ("o"    smerge-keep-other  "Keep other")))
+  :bind (:map jethro-mode-map
+              ("C-c h s" . jethro/hydra-smerge/body))
+  :init
+  (progn
+    (defun jethro/enable-smerge-maybe ()
+      "Auto-enable `smerge-mode' when merge conflict is detected."
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^<<<<<<< " nil :noerror)
+          (smerge-mode 1))))
+    (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append))
+  :config 
+  (defalias 'smerge-keep-upper 'smerge-keep-mine)
+  (defalias 'smerge-keep-lower 'smerge-keep-other)
+  (defalias 'smerge-diff-base-upper 'smerge-diff-base-mine)
+  (defalias 'smerge-diff-upper-lower 'smerge-diff-mine-other)
+  (defalias 'smerge-diff-base-lower 'smerge-diff-base-other)
+
+  (defhydra jethro/hydra-smerge (:color pink
+                                        :hint nil
+                                        :pre (smerge-mode 1)
+                                        ;; Disable `smerge-mode' when quitting hydra if
+                                        ;; no merge conflicts remain.
+                                        :post (smerge-auto-leave))
+    "
+^Move^       ^Keep^               ^Diff^                 ^Other^
+^^-----------^^-------------------^^---------------------^^-------
+_n_ext       _b_ase               _<_: upper/base        _C_ombine
+_p_rev       _u_pper              _=_: upper/lower       _r_esolve
+^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _a_ll                _R_efine
+^^           _RET_: current       _E_diff
+"
+    ("n" smerge-next)
+    ("p" smerge-prev)
+    ("b" smerge-keep-base)
+    ("u" smerge-keep-upper)
+    ("l" smerge-keep-lower)
+    ("a" smerge-keep-all)
+    ("RET" smerge-keep-current)
+    ("\C-m" smerge-keep-current)
+    ("<" smerge-diff-base-upper)
+    ("=" smerge-diff-upper-lower)
+    (">" smerge-diff-base-lower)
+    ("R" smerge-refine)
+    ("E" smerge-ediff)
+    ("C" smerge-combine-with-next)
+    ("r" smerge-resolve)
+    ("k" smerge-kill-current)
+    ("q" nil "cancel" :color blue)))
 
 (use-package magit
-  :bind (("s-g" . magit-status)
-         ("s-G" . magit-blame))
+  :bind (:map jethro-mode-map
+              ("s-g" . magit-status)
+              ("C-c g" . magit-status)
+              ("s-G" . magit-blame)
+              ("C-c G" . magit-blame))
   :init
   (add-hook 'magit-mode-hook 'hl-line-mode)
   :config
@@ -858,8 +954,9 @@ the right."
   (add-hook 'after-init-hook 'which-key-mode))
 
 (use-package darkroom
-  :bind (("C-c M d" . darkroom-mode)
-         ("C-c M t" . darkroom-tentative-mode)))
+  :bind (:map jethro-mode-map
+              ("C-c M d" . darkroom-mode)
+              ("C-c M t" . darkroom-tentative-mode)))
 
 (use-package bury-successful-compilation
   :init
