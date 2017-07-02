@@ -1335,6 +1335,268 @@ npm install -g tern
   (use-package company-auctex
     :defer t)
     #+END_SRC
+* Org Mode for GTD
+This document aims to extensively document my implementation of
+Getting Things Done, a methodology by David Allen. This will always be
+a work-in-progress, and is *fully representative* of the GTD setup I
+am currently using.
+
+This document is written primarily for my own reference.
+However, it is also written with readers who are looking for
+inspiration when implementing GTD in org-mode.
+
+** Reasoning 
+There is no shortage of existing GTD implementations, in org-mode.
+Perhaps the best reference document out there is by Bernt Hansen,
+published [[http://doc.norang.ca/org-mode.html][here]]. However, there are some slight deviations from the GTD
+that David Allen proposes, and some conveniences he takes making the
+GTD system he implements weaker, that can perhaps be solved by writing
+some Elisp. This is a major adaptation of his setup, but with
+additional customizations that make it closer to the ideal system that
+David Allen speaks about.
+
+** Org-mode Setup
+We use =org-plus-contrib=, which contains several contrib plugins that
+may come in handy later, including =org-drill= and some =org-babel=
+language support.
+
+To install =org-plus-contrib=, one has to add the package archive to
+Emacs. This is typically where you also add MELPA.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+  (package-initialize))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'org)
+  (require 'bind-key)
+  (bind-key "C-c l" 'org-store-link)
+  (bind-key "C-c a" 'org-agenda)
+  (bind-key "C-c b" 'org-iswitchb)
+  (bind-key "C-c c" 'org-capture)
+#+END_SRC
+
+** Organizing Your Life Into Org-mode Files
+Bernt Hansen uses separate files as logical groups, such as a
+separation between work and life. This may suit your purpose, but this
+makes it a lot harder to write general Elisp code for. Once a new
+logical group appears, the code that generates the weekly review would
+have to change as well, for example.
+
+Instead, I use David Allen's physical categories as different files,
+and use org-mode tags to separate the different context. That is, I
+have the files:
+
+| file (.org) | Purpose                                                                                                                   |
+|-------------+---------------------------------------------------------------------------------------------------------------------------|
+| inbox       | Includes everything on your mind: tasks, ideas etc.                                                                       |
+| someday     | Includes things that will be done later on (with no specific deadline), to be reviewed often                              |
+| reference   | I don't actually have this file; I use [[http://jblevins.org/projects/deft/%5Ddeft-mode][deft-mode]] as my braindump                                                          |
+| waiting     | This contains a list of names of people as level one headings, and things I'm waiting for them to complete as subheadings |
+| next        | This contains one-off tasks that don't belong to projects.                                                                |
+| projects    | This contains the list of projects, and their corresponding todo items                                                    |
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-files '("~/.org/gtd/inbox.org"
+                           "~/.org/gtd/someday.org"
+                           "~/.org/gtd/projects.org"
+                           "~/.org/gtd/tickler.org"))
+#+END_SRC
+
+** Stage 1: Collecting
+Collecting needs to be convenient. This is achieved easily be using
+=org-capture=. The capture template is kept simple, to minimize
+friction in capturing new items as they pop up.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-capture-templates
+        `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
+           "* TODO %?
+  Captured %<%Y-%m-%d %H:%M>")
+          ("w" "Web site" entry (file "~/.org/deft/websites.org")
+           "* %c\n" :immediate-finish t)))
+#+END_SRC
+
+** Stage 2: Processing
+During predetermined times of each day, the inbox is to be processed,
+each item in =inbox= sorted into their respective folders.
+
+=org-agenda= provides a brilliant interface for viewing and processing
+the inbox. At the end of the "processing" stage, =inbox.org= should be
+empty, unless the processing is done on the whim. This will be
+facilitated with an iOS or android app later on.
+
+The process is clearly outlined in GTD, but key to the GTD
+implementation here are a few factors:
+
+1. *Which file*: Is this to be done someday when there's time, or is
+   this a project (old or new), or is this a simple action?
+2. *Adding of context*: Is this school-related, or work-related? Do I
+   have to be at a specific location to perform this task?
+
+At the end of the process, the item in =inbox= would have placed in
+either a non-actionable file, or an actionable file (=projects=, or
+=next=) with a physical actionable. To encourage this, we have a list
+of verbs.
+
+David Allen recommends processing inbox items top-down or bottom-up,
+one item at a time. However, I like to have an overview of my inbox,
+so I can estimate the number of items left to process.
+
+This process is therefore contigent on several factors:
+1. *There aren't too many items in the inbox at the same time.* This
+   can prove to be too distracting. Fortunately, I've yet to
+   experience this.
+2. *Processing of inbox is more regular.* Keeping inbox zero at all
+   times should be a goal, but not a priority.
+
+*** Org Agenda Inbox View
+This view is where I see all my inbox items: it is a simple list of
+captured items in =inbox.org=.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'org-agenda)
+  (setq jethro/org-agenda-inbox-view
+        `("i" "Inbox" todo ""
+          ((org-agenda-files '("~/.org/gtd/inbox.org")))))
+
+  (setq org-agenda-custom-commands
+        `(,jethro/org-agenda-inbox-view))
+#+END_SRC
+
+*** Org TODO Keywords
+| keyword   | meaning                                                                      |
+|-----------+------------------------------------------------------------------------------|
+| TODO      | An item that has yet to be processed, or cannot be attempted at this moment. |
+| NEXT      | An action that can be completed at this very moment, in the correct context  |
+| DONE      | An item that is completed, and ready to be archived                          |
+| WAITING   | An item that awaits input from an external party                             |
+| HOLD      | An item that is delayed due to circumstance                                  |
+| CANCELLED | An item that was once considered, but no longer to be attempted              |
+
+=WAITING=, =HOLD=, and =CANCELLED= are all keywords that require
+supplementary information. For example, who am I waiting for? Or why
+is this item on hold? As such, it is convenient to trigger a note when
+an item transitions to these states. Note that the triggers only
+happen with "slow" state transitions, i.e. =C-c C-t=.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+          (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+  (setq org-log-state-notes-insert-after-drawers nil)
+#+END_SRC
+*** The Process
+**** Step 1: Clarifying
+***** Tags
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-tag-alist (quote ((:startgroup)
+                              ("@errand" . ?e)
+                              ("@office" . ?o)
+                              ("@home" . ?h)
+                              ("@school" . ?s)
+                              (:endgroup)
+                              ("WAITING" . ?w)
+                              ("HOLD" . ?H)
+                              ("CANCELLED" . ?c))))
+
+  (setq org-fast-tag-selection-single-key nil)
+
+#+END_SRC
+**** Step 2: Organizing
+This step involves refiling the item in the appropriate location. We
+set =org-refile-allow-creating-parent-nodes= to ='confirm=, because this
+allows us to create new projects if there are no matches.
+
+When capturing new projects, it helps to pen down a few things about
+the project:
+
+1. Project Purpose/Principles
+2. Outcome Vision
+
+This is currently done using =org-add-note=, but when my elisp-fu gets
+stronger, I'd create a dedicated buffer with a template each time a
+project is created.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  ;; https://github.com/syl20bnr/spacemacs/issues/3094
+  (setq org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-targets '(("someday.org" :maxlevel . 1)
+                             ("projects.org" :maxlevel . 2)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/org-rename-item ()
+    (interactive)
+    (save-excursion
+      (when (org-at-heading-p)
+        (let* ((hl-text (nth 4 (org-heading-components)))
+               (new-header (read-string "New Text: " nil nil hl-text)))
+          (unless (or (null hl-text)
+                      (org-string-match-p "^[ \t]*:[^:]+:$" hl-text))
+            (beginning-of-line)
+            (search-forward hl-text (point-at-eol))
+            (replace-string
+             hl-text
+             new-header
+             nil (- (point) (length hl-text)) (point)))))))
+
+  (defun jethro/org-agenda-process-inbox-item (&optional goto rfloc no-update)
+    (interactive "P") 
+    (org-with-wide-buffer   
+     (org-agenda-set-tags) 
+     (org-agenda-refile nil nil t)
+     (org-mark-ring-push)
+     (org-refile-goto-last-stored)
+     (jethro/org-rename-item)
+     (org-mark-ring-goto)
+     (org-agenda-redo)))
+
+  (defun jethro/org-inbox-capture ()
+    "Capture a task in agenda mode."
+    (interactive)
+    (org-capture nil "i"))
+
+  (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
+  (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
+#+END_SRC
+
+***** TODO add advice
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defvar jethro/new-project-template
+    "
+      ,*Project Purpose/Principles*:
+
+      ,*Project Outcome*:
+      "
+    "Project template, inserted when a new project is created")
+
+  (defvar jethro/is-new-project nil
+    "Boolean indicating whether it's during the creation of a new project")
+
+  (defun jethro/refile-new-child-advice (orig-fun parent-target child)
+    (let ((res (funcall orig-fun parent-target child)))
+      (save-excursion
+        (find-file (nth 1 parent-target))
+        (goto-char (org-find-exact-headline-in-buffer child))
+        (org-add-note)
+        )
+      res))
+
+  (advice-add 'org-refile-new-child :around #'jethro/refile-new-child-advice)
+#+END_SRC
+** Stage 3: Reviewing
+
+** Stage 4: Doing
+
 * Project Management
 ** Version Control
 *** vc

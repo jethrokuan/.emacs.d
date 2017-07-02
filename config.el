@@ -931,6 +931,94 @@ the right."
 (use-package company-auctex
   :defer t)
 
+(require 'org)
+(require 'bind-key)
+(bind-key "C-c l" 'org-store-link)
+(bind-key "C-c a" 'org-agenda)
+(bind-key "C-c b" 'org-iswitchb)
+(bind-key "C-c c" 'org-capture)
+
+(setq org-agenda-files '("~/.org/gtd/inbox.org"
+                         "~/.org/gtd/someday.org"
+                         "~/.org/gtd/projects.org"
+                         "~/.org/gtd/tickler.org"))
+
+(setq org-capture-templates
+      `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
+         "* TODO %?
+Captured %<%Y-%m-%d %H:%M>")
+        ("w" "Web site" entry (file "~/.org/deft/websites.org")
+         "* %c\n" :immediate-finish t)))
+
+(require 'org-agenda)
+(setq jethro/org-agenda-inbox-view
+      `("i" "Inbox" todo ""
+        ((org-agenda-files '("~/.org/gtd/inbox.org")))))
+
+(setq org-agenda-custom-commands
+      `(,jethro/org-agenda-inbox-view))
+
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+        (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+(setq org-log-state-notes-insert-after-drawers nil)
+
+(setq org-tag-alist (quote ((:startgroup)
+                            ("@errand" . ?e)
+                            ("@office" . ?o)
+                            ("@home" . ?h)
+                            ("@school" . ?s)
+                            (:endgroup)
+                            ("WAITING" . ?w)
+                            ("HOLD" . ?H)
+                            ("CANCELLED" . ?c))))
+
+(setq org-fast-tag-selection-single-key nil)
+
+;; https://github.com/syl20bnr/spacemacs/issues/3094
+(setq org-refile-use-outline-path 'file
+      org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
+(setq org-refile-targets '(("someday.org" :maxlevel . 1)
+                           ("projects.org" :maxlevel . 2)))
+
+(defun jethro/org-rename-item ()
+  (interactive)
+  (save-excursion
+    (when (org-at-heading-p)
+      (let* ((hl-text (nth 4 (org-heading-components)))
+             (new-header (read-string "New Text: " nil nil hl-text)))
+        (unless (or (null hl-text)
+                    (org-string-match-p "^[ \t]*:[^:]+:$" hl-text))
+          (beginning-of-line)
+          (search-forward hl-text (point-at-eol))
+          (replace-string
+           hl-text
+           new-header
+           nil (- (point) (length hl-text)) (point)))))))
+
+(defun jethro/org-agenda-process-inbox-item (&optional goto rfloc no-update)
+  (interactive "P") 
+  (org-with-wide-buffer   
+   (org-agenda-set-tags) 
+   (org-agenda-refile nil nil t)
+   (org-mark-ring-push)
+   (org-refile-goto-last-stored)
+   (jethro/org-rename-item)
+   (org-mark-ring-goto)
+   (org-agenda-redo)))
+
+(defun jethro/org-inbox-capture ()
+  "Capture a task in agenda mode."
+  (interactive)
+  (org-capture nil "i"))
+
+(define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
+(define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
+
 (use-package vc
   :bind (:map jethro-mode-map
               ("C-x v =" . jethro/vc-diff)
