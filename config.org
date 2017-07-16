@@ -1462,9 +1462,6 @@ captured items in =inbox.org=.
   (setq jethro/org-agenda-inbox-view
         `("i" "Inbox" todo ""
           ((org-agenda-files '("~/.org/gtd/inbox.org")))))
-
-  (setq org-agenda-custom-commands
-        `(,jethro/org-agenda-inbox-view))
 #+END_SRC
 
 *** Org TODO Keywords
@@ -1594,7 +1591,46 @@ project is created.
   (advice-add 'org-refile-new-child :around #'jethro/refile-new-child-advice)
 #+END_SRC
 ** Stage 3: Reviewing
+*** Custom agenda Commands
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-custom-commands
+        `(,jethro/org-agenda-inbox-view
+          ,jethro/org-agenda-todo-view))
 
+  (setq jethro/org-agenda-todo-view
+        `(" " "Agenda"
+          ((agenda "" nil)
+           (tags-todo "@school"
+                      ((org-agenda-overriding-header "School")
+                       (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+           (tags-todo "@home"
+                      ((org-agenda-overriding-header "Home")
+                       (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+           (tags-todo "@office"
+                      ((org-agenda-overriding-header "Office")
+                       (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first))) 
+           (tags-todo "@errand"
+                      ((org-agenda-overriding-header "Errands")
+                       (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+           nil)))
+
+  (defun jethro/org-agenda-skip-all-siblings-but-first ()
+    "Skip all but the first non-done entry."
+    (let (should-skip-entry)
+      (unless (or (org-current-is-todo)
+                  (not (org-get-scheduled-time (point))))
+        (setq should-skip-entry t))
+      (save-excursion
+        (while (and (not should-skip-entry) (org-goto-sibling t))
+          (when (org-current-is-todo)
+            (setq should-skip-entry t))))
+      (when should-skip-entry
+        (or (outline-next-heading)
+             (goto-char (point-max))))))
+
+  (defun org-current-is-todo ()
+    (string= "TODO" (org-get-todo-state)))
+#+END_SRC
 ** Stage 4: Doing
 
 * Project Management

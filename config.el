@@ -955,9 +955,6 @@ Captured %<%Y-%m-%d %H:%M>")
       `("i" "Inbox" todo ""
         ((org-agenda-files '("~/.org/gtd/inbox.org")))))
 
-(setq org-agenda-custom-commands
-      `(,jethro/org-agenda-inbox-view))
-
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
         (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
@@ -1018,6 +1015,44 @@ Captured %<%Y-%m-%d %H:%M>")
 
 (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
 (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
+
+(setq org-agenda-custom-commands
+      `(,jethro/org-agenda-inbox-view
+        ,jethro/org-agenda-todo-view))
+
+(setq jethro/org-agenda-todo-view
+      `(" " "Agenda"
+        ((agenda "" nil)
+         (tags-todo "@school"
+                    ((org-agenda-overriding-header "School")
+                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+         (tags-todo "@home"
+                    ((org-agenda-overriding-header "Home")
+                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+         (tags-todo "@office"
+                    ((org-agenda-overriding-header "Office")
+                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first))) 
+         (tags-todo "@errand"
+                    ((org-agenda-overriding-header "Errands")
+                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+         nil)))
+
+(defun jethro/org-agenda-skip-all-siblings-but-first ()
+  "Skip all but the first non-done entry."
+  (let (should-skip-entry)
+    (unless (or (org-current-is-todo)
+                (not (org-get-scheduled-time (point))))
+      (setq should-skip-entry t))
+    (save-excursion
+      (while (and (not should-skip-entry) (org-goto-sibling t))
+        (when (org-current-is-todo)
+          (setq should-skip-entry t))))
+    (when should-skip-entry
+      (or (outline-next-heading)
+           (goto-char (point-max))))))
+
+(defun org-current-is-todo ()
+  (string= "TODO" (org-get-todo-state)))
 
 (use-package vc
   :bind (:map jethro-mode-map
