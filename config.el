@@ -1016,10 +1016,6 @@ Captured %<%Y-%m-%d %H:%M>")
 (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
 (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
 
-(setq org-agenda-custom-commands
-      `(,jethro/org-agenda-inbox-view
-        ,jethro/org-agenda-todo-view))
-
 (setq jethro/org-agenda-todo-view
       `(" " "Agenda"
         ((agenda "" nil)
@@ -1037,6 +1033,10 @@ Captured %<%Y-%m-%d %H:%M>")
                      (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
          nil)))
 
+(setq org-agenda-custom-commands
+      `(,jethro/org-agenda-inbox-view
+        ,jethro/org-agenda-todo-view))
+
 (defun jethro/org-agenda-skip-all-siblings-but-first ()
   "Skip all but the first non-done entry."
   (let (should-skip-entry)
@@ -1049,7 +1049,7 @@ Captured %<%Y-%m-%d %H:%M>")
           (setq should-skip-entry t))))
     (when should-skip-entry
       (or (outline-next-heading)
-           (goto-char (point-max))))))
+          (goto-char (point-max))))))
 
 (defun org-current-is-todo ()
   (string= "TODO" (org-get-todo-state)))
