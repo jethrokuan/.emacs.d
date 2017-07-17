@@ -191,26 +191,28 @@
   (add-hook 'after-init-hook 'sml/setup)
   :config 
   (setq sml/theme 'respectful)
-  (setq sml/name-width 30)
+  (setq sml/name-width 44)
   (setq sml/shorten-directory t)
-  (setq sml/shorten-modes t)
+  (setq sml/shorten-modes nil)
   (setq sml/mode-width 'full)
   (setq sml/replacer-regexp-list
-                 '(("^~/.org/" ":O:")
-                   ("^~/\\.emacs\\.d/" ":ED")))
+        '(("^~/.org/" ":O:")
+          ("^~/\\.emacs\\.d/" ":ED")))
   (setq rm-blacklist
-                 (format "^ \\(%s\\)$"
-                         (mapconcat #'identity
-                                    '("FlyC.*"
-                                      "Projectile.*"
-                                      "GitGutter"
-                                      "ivy"
-                                      "company"
-                                      ""
-                                      "doom"
-                                      ","
-                                      "ElDoc")
-                                    "\\|"))))
+        (format "^ \\(%s\\)$"
+                (mapconcat #'identity
+                           '("j"
+                             "FlyC.*"
+                             "Fill"
+                             "Projectile.*"
+                             "GitGutter"
+                             "ivy"
+                             "company"
+                             ""
+                             "OrgSrc"
+                             ","
+                             "ElDoc")
+                           "\\|"))))
 
 (display-time-mode 1)
 (eval-after-load "display-time-mode"
@@ -284,6 +286,138 @@
     ("q" nil "cancel"))
 
   (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
+
+(use-package eyebrowse
+  :bind (:map jethro-mode-map
+              ("M-0" . eyebrowse-switch-to-window-config-0)
+              ("M-1" . eyebrowse-switch-to-window-config-1)
+              ("M-2" . eyebrowse-switch-to-window-config-2)
+              ("M-3" . eyebrowse-switch-to-window-config-3)
+              ("M-4" . eyebrowse-switch-to-window-config-4)
+              ("M-5" . eyebrowse-switch-to-window-config-5)
+              ("M-6" . eyebrowse-switch-to-window-config-6)
+              ("M-7" . eyebrowse-switch-to-window-config-7)
+              ("M-8" . eyebrowse-switch-to-window-config-8)
+              ("M-9" . eyebrowse-switch-to-window-config-9))
+  :init
+  (eyebrowse-mode 1)
+  ;; hooks
+  (add-hook 'persp-before-switch-functions
+            #'jethro/update-eyebrowse-for-perspective)
+  (add-hook 'eyebrowse-post-window-switch-hook
+            #'jethro/save-eyebrowse-for-perspective)
+  (add-hook 'persp-activated-functions
+            #'jethro/load-eyebrowse-for-perspective)
+  (add-hook 'persp-before-save-state-to-file-functions #'jethro/update-eyebrowse-for-perspective)
+  (add-hook 'persp-after-load-state-functions #'jethro/load-eyebrowse-after-loading-layout))
+
+(use-package persp-mode
+  :bind
+  (:map jethro-mode-map
+        ("C-x b" . persp-switch-to-buffer)
+        ("C-x k" . persp-kill-buffer))
+  :init
+  (setq persp-keymap-prefix (kbd"C-c p"))
+  (setq persp-lighter
+        '(:eval
+          (format
+           (propertize
+            " %.20s"
+            'face (let ((persp (get-current-persp)))
+                    (if persp
+                        (if (persp-contain-buffer-p (current-buffer) persp)
+                            'persp-face-lighter-default
+                          'persp-face-lighter-buffer-not-in-persp)
+                      'persp-face-lighter-nil-persp)))
+           (safe-persp-name (get-current-persp)))))
+  (persp-mode 1))
+
+(use-package dash)
+(require 'dash)
+(defun jethro//get-persp-workspace (&optional persp frame)
+  "Get the correct workspace parameters for perspective.
+PERSP is the perspective, and defaults to the current perspective.
+FRAME is the frame where the parameters are expected to be used, and
+defaults to the current frame."
+  (let ((param-names (if (display-graphic-p frame)
+                         '(gui-eyebrowse-window-configs
+                           gui-eyebrowse-current-slot
+                           gui-eyebrowse-last-slot)
+                       '(term-eyebrowse-window-configs
+                         term-eyebrowse-current-slot
+                         term-eyebrowse-last-slot))))
+    (--map (persp-parameter it persp) param-names)))
+
+(defun jethro//set-persp-workspace (workspace-params &optional persp frame)
+  "Set workspace parameters for perspective.
+WORKSPACE-PARAMS should be a list containing 3 elements in this order:
+- window-configs, as returned by (eyebrowse--get 'window-configs)
+- current-slot, as returned by (eyebrowse--get 'current-slot)
+- last-slot, as returned by (eyebrowse--get 'last-slot)
+PERSP is the perspective, and defaults to the current perspective.
+FRAME is the frame where the parameters came from, and defaults to the
+current frame.
+Each perspective has two sets of workspace parameters: one set for
+graphical frames, and one set for terminal frames."
+  (let ((param-names (if (display-graphic-p frame)
+                         '(gui-eyebrowse-window-configs
+                           gui-eyebrowse-current-slot
+                           gui-eyebrowse-last-slot)
+                       '(term-eyebrowse-window-configs
+                         term-eyebrowse-current-slot
+                         term-eyebrowse-last-slot))))
+    (--zip-with (set-persp-parameter it other persp)
+                param-names workspace-params)))
+
+(defun jethro/load-eyebrowse-for-perspective (type &optional frame)
+  "Load an eyebrowse workspace according to a perspective's parameters.
+ FRAME's perspective is the perspective that is considered, defaulting to
+ the current frame's perspective.
+ If the perspective doesn't have a workspace, create one."
+  (when (eq type 'frame)
+    (let* ((workspace-params (jethro//get-persp-workspace (get-frame-persp frame) frame))
+           (window-configs (nth 0 workspace-params))
+           (current-slot (nth 1 workspace-params))
+           (last-slot (nth 2 workspace-params)))
+      (if window-configs
+          (progn
+            (eyebrowse--set 'window-configs window-configs frame)
+            (eyebrowse--set 'current-slot current-slot frame)
+            (eyebrowse--set 'last-slot last-slot frame)
+            (eyebrowse--load-window-config current-slot))
+        (eyebrowse--set 'window-configs nil frame)
+        (eyebrowse-init frame)
+        (jethro/save-eyebrowse-for-perspective frame)))))
+
+(defun jethro/load-eyebrowse-after-loading-layout (_state-file _phash persp-names)
+  "Bridge between `persp-after-load-state-functions' and
+`jethro/load-eyebrowse-for-perspective'.
+_PHASH is the hash were the loaded perspectives were placed, and
+PERSP-NAMES are the names of these perspectives."
+  (let ((cur-persp (get-current-persp)))
+    ;; load eyebrowse for current perspective only if it was one of the loaded
+    ;; perspectives
+    (when (member (or (and cur-persp (persp-name cur-persp))
+                      persp-nil-name)
+                  persp-names)
+      (jethro/load-eyebrowse-for-perspective 'frame))))
+
+(defun jethro/update-eyebrowse-for-perspective (&rest _args)
+  "Update and save current frame's eyebrowse workspace to its perspective."
+  (let* ((current-slot (eyebrowse--get 'current-slot))
+         (current-tag (nth 2 (assoc current-slot (eyebrowse--get 'window-configs)))))
+    (eyebrowse--update-window-config-element
+     (eyebrowse--current-window-config current-slot current-tag)))
+  (jethro/save-eyebrowse-for-perspective))
+
+(defun jethro/save-eyebrowse-for-perspective (&optional frame)
+  "Save FRAME's eyebrowse workspace to FRAME's perspective.
+FRAME defaults to the current frame."
+  (jethro//set-persp-workspace (list (eyebrowse--get 'window-configs frame)
+                                     (eyebrowse--get 'current-slot frame)
+                                     (eyebrowse--get 'last-slot frame))
+                               (get-frame-persp frame)
+                               frame))
 
 (use-package guru-mode
   :diminish guru-mode
@@ -515,10 +649,6 @@ the right."
 (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
 (bind-key "C-x a" 'align-regexp-map jethro-mode-map)
-
-(use-package fancy-narrow
-  :init
-  (add-hook 'after-init-hook 'fancy-narrow-mode))
 
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
@@ -1147,11 +1277,12 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (use-package projectile
   :demand t
-  :init (projectile-global-mode 1)
-  :bind-keymap* ("C-x p" . projectile-command-map)
+  :init
+  (setq projectile-keymap-prefix (kbd "C-x p"))
+  (projectile-global-mode 1)
   :config
   (require 'projectile)
-  (use-package counsel-projectile 
+  (use-package counsel-projectile
     :bind (:map jethro-mode-map
                 ("s-f" . counsel-projectile-find-file)
                 ("s-b" . counsel-projectile-switch-to-buffer))
@@ -1185,6 +1316,99 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                   file (projectile-project-root)))
       (run-hooks 'projectile-find-file-hook)
       (cider-jack-in))))
+
+(with-eval-after-load "persp-mode"
+  (defvar persp-mode-projectile-bridge-before-switch-selected-window-buffer nil)
+
+  ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
+
+  (persp-def-auto-persp "projectile"
+                        :parameters '((dont-save-to-file . t)
+                                      (persp-mode-projectile-bridge . t))
+                        :hooks '(projectile-before-switch-project-hook
+                                 projectile-after-switch-project-hook
+                                 projectile-find-file-hook
+                                 find-file-hook)
+                        :dyn-env '((after-switch-to-buffer-adv-suspend t))
+                        :switch 'frame
+                        :predicate
+                        #'(lambda (buffer &optional state)
+                            (if (eq 'projectile-before-switch-project-hook
+                                    (alist-get 'hook state))
+                                state
+                              (and
+                               projectile-mode
+                               (buffer-live-p buffer)
+                               (buffer-file-name buffer)
+                               ;; (not git-commit-mode)
+                               (projectile-project-p)
+                               (or state t))))
+                        :get-name
+                        #'(lambda (state)
+                            (if (eq 'projectile-before-switch-project-hook
+                                    (alist-get 'hook state))
+                                state
+                              (push (cons 'persp-name
+                                          (concat "p) "
+                                                  (with-current-buffer (alist-get 'buffer state)
+                                                    (projectile-project-name))))
+                                    state)
+                              state))
+                        :on-match
+                        #'(lambda (state)
+                            (let ((hook (alist-get 'hook state))
+                                  (persp (alist-get 'persp state))
+                                  (buffer (alist-get 'buffer state)))
+                              (case hook
+                                (projectile-before-switch-project-hook
+                                 (let ((win (if (minibuffer-window-active-p (selected-window))
+                                                (minibuffer-selected-window)
+                                              (selected-window))))
+                                   (when (window-live-p win)
+                                     (setq persp-mode-projectile-bridge-before-switch-selected-window-buffer
+                                           (window-buffer win)))))
+
+                                (projectile-after-switch-project-hook
+                                 (when (buffer-live-p
+                                        persp-mode-projectile-bridge-before-switch-selected-window-buffer)
+                                   (let ((win (selected-window)))
+                                     (unless (eq (window-buffer win)
+                                                 persp-mode-projectile-bridge-before-switch-selected-window-buffer)
+                                       (set-window-buffer
+                                        win persp-mode-projectile-bridge-before-switch-selected-window-buffer)))))
+
+                                (find-file-hook
+                                 (setcdr (assq :switch state) nil)))
+                              (if (case hook
+                                    (projectile-before-switch-project-hook nil)
+                                    (t t))
+                                  (persp--auto-persp-default-on-match state)
+                                (setcdr (assq :after-match state) nil)))
+                            state)
+                        :after-match
+                        #'(lambda (state)
+                            (when (eq 'find-file-hook (alist-get 'hook state))
+                              (run-at-time 0.5 nil
+                                           #'(lambda (buf persp)
+                                               (when (and (eq persp (get-current-persp))
+                                                          (not (eq buf (window-buffer (selected-window)))))
+                                                 ;; (switch-to-buffer buf)
+                                                 (persp-add-buffer buf persp t nil)))
+                                           (alist-get 'buffer state)
+                                           (get-current-persp)))
+                            (persp--auto-persp-default-after-match state)))
+
+  (add-hook 'persp-after-load-state-functions
+            #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t))
+
+(use-package persp-mode-projectile-bridge
+  :config
+  (add-hook 'persp-mode-projectile-bridge-mode-hook
+            #'(lambda ()
+                (if persp-mode-projectile-bridge-mode
+                    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                  (persp-mode-projectile-bridge-kill-perspectives))))
+  (persp-mode-projectile-bridge-mode 1))
 
 (use-package sos
   :commands (sos))
