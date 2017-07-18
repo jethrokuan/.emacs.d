@@ -603,13 +603,12 @@ Highlights recently copied/pasted text.
       (find buf (safe-persp-buffers (persp-get-by-name qualifier))))
 
     (defun persp-update-or-add-ibuffer-group ()
-      (let ((perspslist (mapcar #'(lambda (pn)
-                                    (list pn (cons 'persp pn)))
-                                (persp-names-sorted))))
+      (let ((perspslist (list (safe-persp-name (get-frame-persp))
+                              (cons 'persp (safe-persp-name (get-frame-persp))))))
         (setq ibuffer-saved-filter-groups
               (delete* "persp-mode" ibuffer-saved-filter-groups 
                        :test 'string= :key 'car))
-        (add-to-list 'ibuffer-saved-filter-groups (cons "persp-mode" perspslist))))
+        (add-to-list 'ibuffer-saved-filter-groups (list "persp-mode" perspslist))))
 
     (add-hook 'ibuffer-mode-hook
               #'(lambda ()
