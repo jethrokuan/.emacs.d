@@ -927,8 +927,11 @@ the right."
          ("\\.php\\'" . web-mode))
   :config
   (setq web-mode-enable-css-colorization t)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-markup-indent-offset 2))
+  (setq-default css-indent-offset 2
+                web-mode-markup-indent-offset 2
+                web-mode-css-indent-offset 2
+                web-mode-code-indent-offset 2
+                web-mode-attr-indent-offset 2))
 
 (use-package emmet-mode
   :diminish emmet-mode

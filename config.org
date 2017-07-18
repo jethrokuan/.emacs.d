@@ -1268,26 +1268,29 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** HTML
 *** Web-mode
     #+begin_src emacs-lisp :tangle yes
-   (use-package web-mode
-     :mode (("\\.html\\'" . web-mode)
-            ("\\.html\\.erb\\'" . web-mode)
-            ("\\.mustache\\'" . web-mode)
-            ("\\.jinja\\'" . web-mode)
-            ("\\.njk\\'" . web-mode)
-            ("\\.php\\'" . web-mode))
-     :config
-     (setq web-mode-enable-css-colorization t)
-     (setq web-mode-code-indent-offset 2)
-     (setq web-mode-markup-indent-offset 2))
+      (use-package web-mode
+        :mode (("\\.html\\'" . web-mode)
+               ("\\.html\\.erb\\'" . web-mode)
+               ("\\.mustache\\'" . web-mode)
+               ("\\.jinja\\'" . web-mode)
+               ("\\.njk\\'" . web-mode)
+               ("\\.php\\'" . web-mode))
+        :config
+        (setq web-mode-enable-css-colorization t)
+        (setq-default css-indent-offset 2
+                      web-mode-markup-indent-offset 2
+                      web-mode-css-indent-offset 2
+                      web-mode-code-indent-offset 2
+                      web-mode-attr-indent-offset 2))
     #+end_src
 *** Emmet-mode
-    #+begin_src emacs-lisp :tangle yes
-(use-package emmet-mode
-  :diminish emmet-mode
-  :config
-  (add-hook 'web-mode-hook 'emmet-mode)
-  (add-hook 'vue-mode-hook 'emmet-mode))
-    #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (use-package emmet-mode
+    :diminish emmet-mode
+    :config
+    (add-hook 'web-mode-hook 'emmet-mode)
+    (add-hook 'vue-mode-hook 'emmet-mode))
+#+end_src
 ** CSS
 *** Rainbow-mode
     #+begin_src emacs-lisp :tangle no
