@@ -1,3 +1,6 @@
+(setq user-full-name "Jethro Kuan"
+      user-mail-address "jethrokuan95@gmail.com")
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -9,18 +12,6 @@
   (require 'bind-key)
   (require 'diminish)
   (setq use-package-always-ensure t))
-
-(defun reload-init ()
-  (interactive)
-  (load-file "~/.emacs.d/init.el"))
-
-(global-set-key (kbd "<f11>") 'reload-init)
-
-(setq gc-cons-threshold 50000000)
-(setq large-file-warning-threshold 100000000)
-
-(setq user-full-name "Jethro Kuan"
-      user-mail-address "jethrokuan95@gmail.com")
 
 (defvar jethro-mode-map (make-sparse-keymap)
   "Keymap for `jethro-mode'.")
@@ -46,6 +37,15 @@
   "Turn off jethro-mode."
   (jethro-mode -1))
 (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
+
+(defun reload-init ()
+  (interactive)
+  (load-file "~/.emacs.d/init.el"))
+
+(bind-key "<f11>" 'reload-init jethro-mode-map)
+
+(setq gc-cons-threshold 50000000)
+(setq large-file-warning-threshold 100000000)
 
 (global-auto-revert-mode 1)
 
@@ -117,6 +117,8 @@
 
 (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
+(use-package dash)
+
 (use-package hydra)
 
 (use-package flx)
@@ -184,7 +186,8 @@
 
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
-(use-package page-break-lines)
+(custom-set-faces
+ '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 
 (use-package smart-mode-line
   :init
@@ -197,7 +200,7 @@
   (setq sml/mode-width 'full)
   (setq sml/replacer-regexp-list
         '(("^~/.org/" ":O:")
-          ("^~/\\.emacs\\.d/" ":ED")))
+          ("^~/\\.emacs\\.d/" ":ED:")))
   (setq rm-blacklist
         (format "^ \\(%s\\)$"
                 (mapconcat #'identity
@@ -214,16 +217,13 @@
                              "ElDoc")
                            "\\|"))))
 
-(display-time-mode 1)
-(eval-after-load "display-time-mode"
-  (setq display-time-24hr-format t))
+(with-eval-after-load 'hydra
+  (defhydra jethro/hydra-zoom ()
+    "zoom"
+    ("i" text-scale-increase "in")
+    ("o" text-scale-decrease "out"))
 
-(defhydra jethro/hydra-zoom ()
-  "zoom"
-  ("i" text-scale-increase "in")
-  ("o" text-scale-decrease "out"))
-
-(bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map)
+  (bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map))
 
 (use-package beacon
   :diminish beacon-mode
@@ -244,16 +244,6 @@
   :diminish volatile-highlights-mode
   :init
   (add-hook 'after-init-hook 'volatile-highlights-mode))
-
-(use-package add-log
-  :commands (jethro/add-change-log-entry-other-window-and-return)
-  :config
-  (progn
-    (defun jethro/add-change-log-entry-other-window-and-return ()
-      "Call `add-change-log-entry-other-window' and return to the previous window."
-      (interactive)
-      (add-change-log-entry-other-window)
-      (select-window (previous-window)))))
 
 (use-package diff-hl
   :bind (:map jethro-mode-map 
@@ -281,8 +271,7 @@
     ("[" diff-hl-previous-hunk "prev hunk")
     ("p" diff-hl-previous-hunk "prev hunk")
     ("]" diff-hl-next-hunk "next hunk")
-    ("n" diff-hl-next-hunk "next hunk")
-    ("a" jethro/add-change-log-entry-other-window-and-return "add change log entry")
+    ("n" diff-hl-next-hunk "next hunk") 
     ("q" nil "cancel"))
 
   (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
@@ -419,23 +408,34 @@ FRAME defaults to the current frame."
                                (get-frame-persp frame)
                                frame))
 
+(with-eval-after-load "ibuffer"
+
+  (require 'ibuf-ext)
+
+  (define-ibuffer-filter persp
+      "Toggle current view to buffers of current perspective."
+    (:description "persp-mode"
+                  :reader (persp-prompt (safe-persp-name (get-frame-persp)) t))
+    (find buf (safe-persp-buffers (persp-get-by-name qualifier))))
+
+  (defun persp-update-or-add-ibuffer-group ()
+    (let ((perspslist (mapcar #'(lambda (pn)
+                                  (list pn (cons 'persp pn)))
+                              (persp-names-sorted))))
+      (setq ibuffer-saved-filter-groups
+            (delete* "persp-mode" ibuffer-saved-filter-groups 
+                     :test 'string= :key 'car))
+      (add-to-list 'ibuffer-saved-filter-groups (cons "persp-mode" perspslist))))
+
+  (add-hook 'ibuffer-mode-hook
+            #'(lambda ()
+                (persp-update-or-add-ibuffer-group)
+                (ibuffer-switch-to-saved-filter-groups "persp-mode"))))
+
 (use-package guru-mode
   :diminish guru-mode
   :init
   (add-hook 'after-init-hook 'guru-global-mode))
-
-(defun switch-to-previous-buffer ()
-  (interactive)
-  (switch-to-buffer (other-buffer (current-buffer) 1)))
-
-(use-package key-chord
-  :diminish key-chord-mode
-  :config
-  (key-chord-mode 1)
-  (key-chord-define-global ";q" 'avy-goto-char-timer)
-  (key-chord-define-global "jk" 'other-window)
-  (key-chord-define-global "qj" 'switch-to-previous-buffer)
-  (key-chord-define-global "zv" 'ibuffer))
 
 (use-package crux 
   :bind (:map jethro-mode-map
@@ -463,14 +463,16 @@ FRAME defaults to the current frame."
         ("C-'" . avy-goto-char)
         ("C-," . avy-goto-char-2))
   :config
-  (setq avy-keys '(?h ?t ?n ?s)))
+  (setq avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 
-(use-package windmove 
-  :config
-  ;; use command key on Mac
-  (windmove-default-keybindings 'super)
-  ;; wrap around at edges
-  (setq windmove-wrap-around t))
+(use-package dumb-jump
+  :bind (("M-g o" . dumb-jump-go-other-window)
+         ("M-g j" . dumb-jump-go)
+         ("M-g i" . dumb-jump-go-prompt)
+         ("M-g x" . dumb-jump-go-prefer-external)
+         ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config (setq dumb-jump-selector 'ivy)
+  :ensure)
 
 (require 'dired)
 
@@ -521,27 +523,13 @@ FRAME defaults to the current frame."
   ("d" delete-window "delete")
   ("q" nil))
 
-(key-chord-define-global "-s" 'jethro/window-movement/body)
+(bind-key "M-'" 'jethro/window-movement/body jethro-mode-map)
 
 (use-package ibuffer
   :bind (:map jethro-mode-map
               ([remap list-buffers] . ibuffer))
   :config 
-  (setq ibuffer-default-sorting-mode 'major-mode)
-  (setq ibuffer-expert t)
-  (use-package ibuffer-projectile
-    :config
-    (progn
-      (defun jethro/ibuffer-customization ()
-        "My customization for `ibuffer'."
-        ;; ibuffer-projectile setup
-        (ibuffer-projectile-set-filter-groups)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
-          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
-          (ibuffer-do-sort-by-major-mode))))) ; then do major-mode sort
-
-  ;; ibuffer-projectile setup
-  (add-hook 'ibuffer-hook #'jethro/ibuffer-customization))
+  (setq ibuffer-expert t))
 
 (use-package shackle
   :diminish shackle-mode
@@ -665,8 +653,6 @@ the right."
   :bind (:map jethro-mode-map
               ("C-=" . er/expand-region)))
 
-(use-package iedit)
-
 (use-package smartparens
   :bind
   (:map smartparens-mode-map
@@ -731,7 +717,7 @@ the right."
   :bind (:map jethro-mode-map
               ("C-c h f" . jethro/hydra-flycheck/body))
   :init
-  (add-hook 'prog-mode-hook 'global-flycheck-mode)
+  (add-hook 'prog-mode-hook 'flycheck-mode)
   :config
   (setq-default flycheck-disabled-checkers
                 (append flycheck-disabled-checkers
@@ -769,15 +755,17 @@ the right."
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (require 'company-dabbrev)
-  (require 'company-dabbrev-code)
   (setq company-dabbrev-ignore-case nil
         company-dabbrev-code-ignore-case nil
         company-dabbrev-downcase nil
         company-idle-delay 0
+        company-minimum-prefix-length 2
+        company-require-match nil
         company-begin-commands '(self-insert-command)
         company-transformers '(company-sort-by-occurrence))
   (use-package company-quickhelp
+    :bind (:map company-active-map
+                ("M-h" . company-quickhelp-manual-begin))
     :config (company-quickhelp-mode 1)))
 
 (use-package flyspell 
