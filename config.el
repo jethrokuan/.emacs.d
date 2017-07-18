@@ -984,6 +984,29 @@ the right."
 (use-package vue-mode
   :mode "\\.vue\\'")
 
+(defun jethro/setup-react-mode ()
+  (yas-activate-extra-mode 'js-mode)
+  (web-mode-set-content-type "jsx")
+  (setq-local emmet-expand-jsx-className? t)
+  (setq-local web-mode-enable-auto-quoting nil))
+
+(define-derived-mode react-mode web-mode "react")
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . react-mode))
+(add-to-list 'auto-mode-alist '("\\.react.js\\'" . react-mode))
+(add-to-list 'auto-mode-alist '("\\index.android.js\\'" . react-mode))
+(add-to-list 'auto-mode-alist '("\\index.ios.js\\'" . react-mode))
+(add-to-list 'magic-mode-alist '("/\\*\\* @jsx React\\.DOM \\*/" . react-mode))
+(add-to-list 'magic-mode-alist '("^import React" . react-mode))
+
+(add-hook 'react-mode-hook 'jethro/setup-react-mode)
+
+;; Hooks
+(add-hook 'react-mode-hook 'tern-mode)
+(with-eval-after-load 'flycheck
+  (dolist (checker '(javascript-eslint javascript-standard))
+    (flycheck-add-mode checker 'react-mode)))
+(add-hook 'react-mode-hook 'emmet-mode)
+
 (use-package json-mode
   :mode "\\.json\\'"
   :config (add-hook 'json-mode-hook (lambda ()
