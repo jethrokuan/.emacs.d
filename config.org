@@ -807,6 +807,10 @@ Use it to jump to function definitions. Requires no external depedencies.
 
   (bind-key "C-%" 'goto-match-paren jethro-mode-map)
 #+END_SRC
+** occur
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (bind-key "C-c C-o" 'occur jethro-mode-map)
+#+END_SRC
 * Editing Text
 ** easy-kill
 #+BEGIN_SRC emacs-lisp :tangle yes
