@@ -181,6 +181,8 @@
    t
    '(("I" insert "insert"))))
 
+(use-package wgrep)
+
 (require 'whitespace)
 (setq whitespace-line-column 80) ;; limit line length
 (setq whitespace-style '(face lines-tail))

@@ -329,6 +329,10 @@ Counsel contains ivy enhancements for commonly-used functions.
      t
      '(("I" insert "insert"))))
    #+end_src
+*** wgrep
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package wgrep)
+#+END_SRC
 * Visual Enhancements
 ** Whitespace-mode
 #+begin_src emacs-lisp :tangle yes
