@@ -149,6 +149,7 @@ saved because I never ever quit Emacs. Instead, now I run the function
 every 5 minutes.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'recentf)
   (run-at-time (current-time) 300 'recentf-save-list)
 #+END_SRC
 
