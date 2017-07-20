@@ -124,17 +124,13 @@
 
 (use-package flx)
 
-(use-package flx-isearch
-  :bind (:map jethro-mode-map
-              ("C-M-s" . flx-isearch-forward)
-              ("C-M-r" . flx-isearch-backward)))
-
 (use-package counsel
   :diminish ivy-mode
   :bind
   (:map jethro-mode-map
         ("C-c C-r" . ivy-resume)
         ("M-a" . counsel-M-x)
+        ("C-s" . swiper)
         ("C-c i" . counsel-imenu)
         ("C-x C-f" . counsel-find-file)
         ("C-x j" . counsel-dired-jump)
@@ -142,21 +138,22 @@
         ("C-c j" . counsel-git)
         ("C-c s" . counsel-projectile-rg)
         ("C-c f" . counsel-recentf)
-        ("M-y" . counsel-yank-pop))
-  :bind ((:map help-map
-               ("f" . counsel-describe-function)
-               ("v" . counsel-describe-variable)
-               ("l" . counsel-info-lookup-symbol))
-         (:map ivy-minibuffer-map
-               ("C-d" . ivy-dired)
-               ("C-o" . ivy-occur))
-         (:map read-expression-map
-               ("C-r" . counsel-expression-history))
-         (:map ivy-minibuffer-map
-               ("<return>" . ivy-alt-done)
-               ("M-<return>" . ivy-immediate-done)))
+        ("M-y" . counsel-yank-pop)
+        :map swiper-map
+        ("C-r" . ivy-previous-line)
+        :map help-map
+        ("f" . counsel-describe-function)
+        ("v" . counsel-describe-variable)
+        ("l" . counsel-info-lookup-symbol)
+        :map ivy-minibuffer-map
+        ("C-d" . ivy-dired)
+        ("C-o" . ivy-occur)
+        ("<return>" . ivy-alt-done)
+        ("M-<return>" . ivy-immediate-done)
+        :map read-expression-map
+        ("C-r" . counsel-expression-history))
   :init
-  (add-hook 'after-init-hook (lambda () (ivy-mode 1)))
+  (add-hook 'after-init-hook 'ivy-mode)
   :config
   (defun ivy-dired ()
     (interactive)
@@ -451,14 +448,6 @@ FRAME defaults to the current frame."
               ("M-D" . crux-duplicate-and-comment-current-line-or-region)
               ("s-o" . crux-smart-open-line-above)))
 
-(use-package anzu
-  :diminish anzu-mode
-  :init
-  (add-hook 'after-init-hook 'global-anzu-mode)
-  :config
-  (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
-  (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
-
 (use-package avy
   :bind
   (:map jethro-mode-map
@@ -563,6 +552,8 @@ vi style of % jumping to matching brace."
         (t (self-insert-command (or arg 1)))))
 
 (bind-key "C-%" 'goto-match-paren jethro-mode-map)
+
+(bind-key "C-c C-o" 'occur jethro-mode-map)
 
 (use-package easy-kill
   :config
