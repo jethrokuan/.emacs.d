@@ -1162,16 +1162,16 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+END_SRC
 ** C++
 *** C++ compile function
-    #+begin_src emacs-lisp :tangle yes
-(add-hook 'c++-mode-hook
-          (lambda ()
-            (unless (file-exists-p "Makefile")
-              (set (make-local-variable 'compile-command)
-                   (let ((file (file-name-nondirectory buffer-file-name)))
-                     (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
-                             file
-                             (file-name-sans-extension file)))))))
-    #+end_src
+#+begin_src emacs-lisp :tangle yes
+  (add-hook 'c++-mode-hook
+            (lambda ()
+              (unless (file-exists-p "Makefile")
+                (set (make-local-variable 'compile-command)
+                     (let ((file (file-name-nondirectory buffer-file-name)))
+                       (format "g++ -Wall -s -pedantic-errors %s -o %s --std=c++14"
+                               file
+                               (file-name-sans-extension file)))))))
+#+end_src
 ** Fish
    #+begin_src emacs-lisp :tangle yes
   (use-package fish-mode
