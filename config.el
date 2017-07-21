@@ -950,15 +950,14 @@ the right."
   (add-hook 'js2-mode-hook 'skewer-mode))
 
 (use-package js-doc
+  :bind (:map js2-mode-map
+              ("C-c i" . js-doc-insert-function-doc)
+              ("@" . js-doc-insert-tag))
   :config
   (setq js-doc-mail-address "jethrokuan95@gmail.com"
         js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address)
         js-doc-url "http://www.jethrokuan.com/"
-        js-doc-license "MIT")
-  (add-hook 'js2-mode-hook
-            #'(lambda ()
-                (define-key js2-mode-map "\C-ci" 'js-doc-insert-function-doc)
-                (define-key js2-mode-map "@" 'js-doc-insert-tag))))
+        js-doc-license "MIT"))
 
 (use-package js2-refactor
   :config
@@ -1286,7 +1285,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :demand t
   :init
   (setq projectile-keymap-prefix (kbd "C-x p"))
-  (projectile-global-mode 1)
+  (add-hook 'after-init-hook 'projectile-mode)
   :config
   (require 'projectile)
   (use-package counsel-projectile
