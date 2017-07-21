@@ -180,6 +180,10 @@
 
 (use-package wgrep)
 
+(use-package rg
+  :bind (:map jethro-mode-map
+              ("M-s" . rg)))
+
 (require 'whitespace)
 (setq whitespace-line-column 80) ;; limit line length
 (setq whitespace-style '(face lines-tail))

@@ -335,6 +335,12 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wgrep)
 #+END_SRC
+*** rg
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package rg
+    :bind (:map jethro-mode-map
+                ("M-s" . rg)))
+#+END_SRC
 * Visual Enhancements
 ** Whitespace-mode
 #+begin_src emacs-lisp :tangle yes
