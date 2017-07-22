@@ -1004,28 +1004,34 @@ the right."
 (use-package vue-mode
   :mode "\\.vue\\'")
 
-(defun jethro/setup-react-mode ()
-  (yas-activate-extra-mode 'js-mode)
-  (web-mode-set-content-type "jsx")
+(defun jethro/setup-rjsx-mode ()  
   (setq-local emmet-expand-jsx-className? t)
   (setq-local web-mode-enable-auto-quoting nil))
 
-(define-derived-mode react-mode web-mode "react")
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . react-mode))
-(add-to-list 'auto-mode-alist '("\\.react.js\\'" . react-mode))
-(add-to-list 'auto-mode-alist '("\\index.android.js\\'" . react-mode))
-(add-to-list 'auto-mode-alist '("\\index.ios.js\\'" . react-mode))
-(add-to-list 'magic-mode-alist '("/\\*\\* @jsx React\\.DOM \\*/" . react-mode))
-(add-to-list 'magic-mode-alist '("^import React" . react-mode))
-
-(add-hook 'react-mode-hook 'jethro/setup-react-mode)
-
-;; Hooks
-(add-hook 'react-mode-hook 'tern-mode)
-(with-eval-after-load 'flycheck
-  (dolist (checker '(javascript-eslint javascript-standard))
-    (flycheck-add-mode checker 'react-mode)))
-(add-hook 'react-mode-hook 'emmet-mode)
+(use-package rjsx-mode
+  :init
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\.react.js\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\index.android.js\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\index.ios.js\\'" . rjsx-mode))
+  (add-to-list 'magic-mode-alist '("/\\*\\* @jsx React\\.DOM \\*/" . rjsx-mode))
+  (add-to-list 'magic-mode-alist '("^import React" . rjsx-mode))
+  (add-hook 'rjsx-mode-hook 'jethro/setup-rjsx-mode)
+  (add-hook 'rjsx-mode-hook 'tern-mode)
+  (add-hook 'rjsx-mode-hook 'emmet-mode)
+  :config
+  (with-eval-after-load 'flycheck
+    (dolist (checker '(javascript-eslint javascript-standard))
+      (flycheck-add-mode checker 'rjsx-mode)))
+  (defun jethro/line-align-closing-bracket ()
+    "Workaround sgml-mode and align closing bracket with opening bracket"
+    (save-excursion
+      (beginning-of-line)
+      (when (looking-at-p "^ +\/?> *$")
+        (delete-char sgml-basic-offset))))
+  (advice-add #'js-jsx-indent-line
+              :after
+              #'jethro/line-align-closing-bracket))
 
 (use-package json-mode
   :mode "\\.json\\'"
