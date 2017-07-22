@@ -13,6 +13,14 @@
   (require 'diminish)
   (setq use-package-always-ensure t))
 
+(use-package no-littering
+  :config
+  (require 'recentf)
+  (add-to-list 'recentf-exclude no-littering-var-directory)
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+
 (defvar jethro-mode-map (make-sparse-keymap)
   "Keymap for `jethro-mode'.")
 
@@ -66,10 +74,13 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(delete-selection-mode 1)
+(add-hook 'after-init-hook 'delete-selection-mode)
 
 (require 'recentf)
-(run-at-time (current-time) 300 'recentf-save-list)
+(run-at-time (* 5 60)
+             (lambda ()
+               (let ((inhibit-message t))
+                 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
 
@@ -79,10 +90,10 @@
 
 (setq-default truncate-lines t)
 
-(defun truncate-lines-hook ()
+(defun jethro/truncate-lines-hook ()
   (setq truncate-lines nil))
 
-(add-hook 'text-mode-hook 'truncate-lines-hook)
+(add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
 
 (setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
@@ -472,12 +483,19 @@ FRAME defaults to the current frame."
 (require 'dired)
 
 (let ((gls "/usr/local/bin/gls"))
-  (if (file-exists-p gls) (setq insert-directory-program gls)))
+  (if (file-exists-p gls)
+      (setq insert-directory-program gls)))
 
 (setq delete-by-moving-to-trash t)
 
 (require 'find-dired)
 (setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
+
+(use-package peep-dired
+  :bind (:map peep-dired-mode-map
+              ("SPC" . nil)
+              ("<backspace>" . nil))
+  (setq peep-dired-cleanup-eagerly t))
 
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 
@@ -775,6 +793,21 @@ the right."
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 
+(bind-key "M-/" 'hippie-expand)
+
+(setq hippie-expand-try-functions-list
+      '(yas-hippie-try-expand
+        try-expand-all-abbrevs
+        try-complete-file-name-partially
+        try-complete-file-name
+        try-expand-dabbrev
+        try-expand-dabbrev-from-kill
+        try-expand-dabbrev-all-buffers
+        try-expand-list
+        try-expand-line
+        try-complete-lisp-symbol-partially
+        try-complete-lisp-symbol))
+
 (defun endless/fill-or-unfill ()
   "Like `fill-paragraph', but unfill if used twice."
   (interactive)
@@ -1071,12 +1104,15 @@ the right."
 (use-package company-auctex
   :defer t)
 
-(require 'org)
-(require 'bind-key)
-(bind-key "C-c l" 'org-store-link)
-(bind-key "C-c a" 'org-agenda)
-(bind-key "C-c b" 'org-iswitchb)
-(bind-key "C-c c" 'org-capture)
+(use-package org-plus-contrib
+  :bind
+  (:map jethro-mode-map
+        ("C-c l" . org-store-link)
+        ("C-c a" . org-agenda)
+        ("C-c b" . org-iswitchb)
+        ("C-c c" . org-capture)))
+
+(add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
 
 (setq org-agenda-files '("~/.org/gtd/inbox.org"
                          "~/.org/gtd/someday.org"
