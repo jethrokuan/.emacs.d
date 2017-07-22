@@ -79,17 +79,12 @@ I defined a minor mode for my own keybindings. This allows me to:
 
   (define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
 
-  ;; https://github.com/jwiegley/use-package/blob/master/bind-key.el
-  ;; The keymaps in `emulation-mode-map-alists' take precedence over
-  ;; `minor-mode-map-alist'
-  (add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
-
   ;; Turn off the minor mode in the minibuffer
   (defun turn-off-jethro-mode ()
     "Turn off jethro-mode."
     (jethro-mode -1))
-  (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
 
+  (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
 #+END_SRC
 ** Reloading Emacs Config
 I want an easy way to reload my configuration when I change it. I bind
@@ -232,10 +227,15 @@ Set the default shell to bash, because fish doesn't play well with Emacs.
 #+end_src
 *** Add PATH to eshell
 #+begin_src emacs-lisp :tangle yes
-   (use-package exec-path-from-shell 
-     :config
-     (exec-path-from-shell-initialize))
+  (use-package exec-path-from-shell 
+    :config
+    (exec-path-from-shell-initialize))
 #+end_src
+*** Eshell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
+  (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
+#+END_SRC
 ** Theme (Zenburn)
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package zenburn-theme

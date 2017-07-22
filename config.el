@@ -35,15 +35,11 @@
 
 (define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
 
-;; https://github.com/jwiegley/use-package/blob/master/bind-key.el
-;; The keymaps in `emulation-mode-map-alists' take precedence over
-;; `minor-mode-map-alist'
-(add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
-
 ;; Turn off the minor mode in the minibuffer
 (defun turn-off-jethro-mode ()
   "Turn off jethro-mode."
   (jethro-mode -1))
+
 (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
 
 (defun reload-init ()
@@ -79,7 +75,7 @@
 (require 'recentf)
 (run-at-time (* 5 60) nil
 	     (lambda ()
-	       (let ((inhibit-message t))
+	 (let ((inhibit-message t))
 		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
@@ -108,6 +104,9 @@
 (use-package exec-path-from-shell 
   :config
   (exec-path-from-shell-initialize))
+
+(bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
+(bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 
 (use-package zenburn-theme
     :init
