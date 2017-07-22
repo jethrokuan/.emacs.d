@@ -77,10 +77,10 @@
 (add-hook 'after-init-hook 'delete-selection-mode)
 
 (require 'recentf)
-(run-at-time (* 5 60)
-             (lambda ()
-               (let ((inhibit-message t))
-                 (recentf-save-list))))
+(run-at-time (* 5 60) nil
+	     (lambda ()
+	       (let ((inhibit-message t))
+		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
 

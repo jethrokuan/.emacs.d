@@ -175,10 +175,10 @@ minibuffer.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'recentf)
-  (run-at-time (* 5 60)
-               (lambda ()
-                 (let ((inhibit-message t))
-                   (recentf-save-list))))
+  (run-at-time (* 5 60) nil
+	       (lambda ()
+		 (let ((inhibit-message t))
+		   (recentf-save-list))))
 #+END_SRC
 
 ** Editing Preferences
