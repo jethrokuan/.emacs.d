@@ -1,4 +1,4 @@
-#+TITLE: Jethro's Emacs.d Configuration 
+#+TITLE: Jethro's Emacs.d Configuration
 * Introduction
 This document is a constant work-in-progress, and will contain the
 latest updates to my Emacs configuration.
@@ -219,23 +219,62 @@ repository.
 (load "~/.emacs.d/secrets.el" t)
 #+end_src
 ** Shell
-*** Default shell
-Set the default shell to bash, because fish doesn't play well with Emacs.
+*** Set default shell to bash
+Because fish doesn't play well with Emacs.
 #+begin_src emacs-lisp :tangle yes
   (setq-default explicit-shell-file-name "/bin/bash")
   (setq-default shell-file-name "/bin/bash")
 #+end_src
-*** Add PATH to eshell
+*** Add PATH to shell
 #+begin_src emacs-lisp :tangle yes
   (use-package exec-path-from-shell 
     :config
     (exec-path-from-shell-initialize))
 #+end_src
-*** Eshell
+*** Eshell theme
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package eshell-git-prompt
+    :config
+    (eshell-git-prompt-use-theme 'powerline))
+#+END_SRC
+*** Open eshell in current directory
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/eshell-here ()
+    "Opens up a new shell in the directory associated with the
+  current buffer's file. The eshell is renamed to match that
+  directory to make multiple eshell windows easier."
+    (interactive)
+    (let* ((parent (if (buffer-file-name)
+                       (file-name-directory (buffer-file-name))
+                     default-directory))
+           (height (/ (window-total-height) 3))
+           (name   (car (last (split-string parent "/" t)))))
+      (split-window-vertically (- height))
+      (other-window 1)
+      (eshell "new")
+      (rename-buffer (concat "*eshell: " name "*"))
+
+      (insert (concat "ls"))
+      (eshell-send-input)))
+
+  (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
+#+END_SRC
+*** Exiting eshell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun eshell/x ()
+    (delete-window)
+    (eshell/exit))
+#+END_SRC
+*** Isearch
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'eshell)
   (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
   (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
+#+END_SRC
+*** Quitting Eshell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun eshell/x ()
+    (eshell/quit))
 #+END_SRC
 ** Theme (Zenburn)
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -252,10 +291,6 @@ Set the default shell to bash, because fish doesn't play well with Emacs.
     (delete-other-windows))
 
   (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
-#+end_src
-*** eshell with =C-x m=
-#+begin_src emacs-lisp :tangle yes
-  (bind-key "C-x m" 'eshell jethro-mode-map)
 #+end_src
 *** compile with =<f9>=
 #+begin_src emacs-lisp :tangle yes

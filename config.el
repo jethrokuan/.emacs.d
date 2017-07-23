@@ -105,9 +105,40 @@
   :config
   (exec-path-from-shell-initialize))
 
+(use-package eshell-git-prompt
+  :config
+  (eshell-git-prompt-use-theme 'powerline))
+
+(defun jethro/eshell-here ()
+  "Opens up a new shell in the directory associated with the
+current buffer's file. The eshell is renamed to match that
+directory to make multiple eshell windows easier."
+  (interactive)
+  (let* ((parent (if (buffer-file-name)
+                     (file-name-directory (buffer-file-name))
+                   default-directory))
+         (height (/ (window-total-height) 3))
+         (name   (car (last (split-string parent "/" t)))))
+    (split-window-vertically (- height))
+    (other-window 1)
+    (eshell "new")
+    (rename-buffer (concat "*eshell: " name "*"))
+
+    (insert (concat "ls"))
+    (eshell-send-input)))
+
+(bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
+
+(defun eshell/x ()
+  (delete-window)
+  (eshell/exit))
+
 (require 'eshell)
 (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
 (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
+
+(defun eshell/x ()
+  (eshell/quit))
 
 (use-package zenburn-theme
     :init
@@ -119,8 +150,6 @@
   (delete-other-windows))
 
 (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
-
-(bind-key "C-x m" 'eshell jethro-mode-map)
 
 (defun jethro/compile () 
   (interactive)
