@@ -35,6 +35,8 @@
 
 (define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
 
+(add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
+
 ;; Turn off the minor mode in the minibuffer
 (defun turn-off-jethro-mode ()
   "Turn off jethro-mode."
