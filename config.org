@@ -233,6 +233,7 @@ Set the default shell to bash, because fish doesn't play well with Emacs.
 #+end_src
 *** Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'eshell)
   (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
   (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 #+END_SRC

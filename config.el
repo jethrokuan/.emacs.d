@@ -105,6 +105,7 @@
   :config
   (exec-path-from-shell-initialize))
 
+(require 'eshell)
 (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
 (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 
