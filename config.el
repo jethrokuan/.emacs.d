@@ -852,6 +852,23 @@ the right."
 (global-set-key [remap fill-paragraph]
                 #'endless/fill-or-unfill)
 
+(defhydra jethro/hydra-draw-box (:color pink)
+  "Draw box with IBM single line box characters (ESC to Quit)."
+  ("ESC" nil :color blue) ;; Esc to exit.
+  ("'" (lambda () (interactive) (insert "┌")) "top left ┌")
+  ("," (lambda () (interactive) (insert "┬")) "top ┬")
+  ("." (lambda () (interactive) (insert "┐")) "top right ┐")
+  ("a" (lambda () (interactive) (insert "├")) "left ├")
+  ("o" (lambda () (interactive) (insert "┼")) "center ┼")
+  ("e" (lambda () (interactive) (insert "┤")) "right ┤")
+  (";" (lambda () (interactive) (insert "└")) "bottom left └")
+  ("q" (lambda () (interactive) (insert "┴")) "bottom ┴")
+  ("j" (lambda () (interactive) (insert "┘")) "bottom right ┘")
+  ("k" (lambda () (interactive) (insert "─")) "horizontal ─")
+  ("x" (lambda () (interactive) (insert "│")) "vertical │"))
+
+(bind-key "C-c h d" 'jethro/hydra-draw-box/body jethro-mode-map)
+
 (use-package direnv
   :config
   (direnv-mode)
