@@ -178,7 +178,6 @@ directory to make multiple eshell windows easier."
         ("C-x j" . counsel-dired-jump)
         ("C-x l" . counsel-locate)
         ("C-c j" . counsel-git)
-        ("C-c s" . counsel-projectile-rg)
         ("C-c f" . counsel-recentf)
         ("M-y" . counsel-yank-pop)
         :map swiper-map
@@ -1385,8 +1384,34 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (use-package counsel-projectile
     :bind (:map jethro-mode-map
                 ("s-f" . counsel-projectile-find-file)
-                ("s-b" . counsel-projectile-switch-to-buffer))
+                ("s-b" . counsel-projectile-switch-to-buffer)
+                ("C-c s" . jethro/counsel-projectile-rg))
     :config
+    (defun jethro/counsel-projectile-rg (&optional options)
+      "Ivy version of `projectile-rg'."
+      (interactive)
+      (if (projectile-project-p)
+          (let* ((options
+                  (if current-prefix-arg
+                      (read-string "options: ")
+                    options))
+                 (ignored
+                  (unless (eq (projectile-project-vcs) 'git)
+                    ;; rg supports git ignore files
+                    (append
+                     (cl-union (projectile-ignored-files-rel) grep-find-ignored-files)
+                     (cl-union (projectile-ignored-directories-rel) grep-find-ignored-directories))))
+                 (options
+                  (concat options " "
+                          (mapconcat (lambda (i)
+                                       (concat "--ignore-file " (shell-quote-argument i)))
+                                     ignored
+                                     " "))))
+            (counsel-rg (ivy-thing-at-point)
+                        (projectile-project-root)
+                        options
+                        (projectile-prepend-project-name "rg")))
+        (user-error "You're not in a project")))
     (counsel-projectile-on))
   (setq projectile-use-git-grep t)
   (setq projectile-create-missing-test-files t)
