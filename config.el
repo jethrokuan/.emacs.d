@@ -113,23 +113,27 @@
   :config
   (eshell-git-prompt-use-theme 'powerline))
 
-(defun jethro/eshell-here ()
-  "Opens up a new shell in the directory associated with the
-current buffer's file. The eshell is renamed to match that
-directory to make multiple eshell windows easier."
-  (interactive)
-  (let* ((parent (if (buffer-file-name)
-                     (file-name-directory (buffer-file-name))
-                   default-directory))
-         (height (/ (window-total-height) 3))
-         (name   (car (last (split-string parent "/" t)))))
-    (split-window-vertically (- height))
+(defun jethro/eshell-here (arg)
+  "Opens up a new shell in projectile root. If a prefix argument is
+passed, use the buffer's directory."
+  (interactive "P") 
+  (let* ((projectile? (not arg))
+         (name (if projectile?
+                   (projectile-project-name)
+                 (car
+                  (last
+                   (split-string
+                    (if (buffer-file-name)
+                        (file-name-directory (buffer-file-name))
+                      default-directory) "/" t)))))) 
+    (split-window-vertically)
     (other-window 1)
-    (eshell "new")
-    (rename-buffer (concat "*eshell: " name "*"))
-
-    (insert (concat "ls"))
-    (eshell-send-input)))
+    (if projectile?
+        (projectile-with-default-dir (projectile-project-root)
+          (eshell "new")
+          (rename-buffer (concat "*eshell: " name "*")))
+      (eshell "new")
+      (rename-buffer (concat "*eshell: " name "*")))))
 
 (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
 
@@ -141,7 +145,8 @@ directory to make multiple eshell windows easier."
 (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 
 (defun eshell/x ()
-  (eshell/quit))
+  (delete-window)
+  (eshell/exit))
 
 (use-package zenburn-theme
     :init
