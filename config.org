@@ -221,6 +221,9 @@ repository.
 (load "~/.emacs.d/secrets.el" t)
 #+end_src
 ** Shell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'eshell)
+#+END_SRC
 *** Set default shell to bash
 Because fish doesn't play well with Emacs.
 #+begin_src emacs-lisp :tangle yes
@@ -269,7 +272,6 @@ Because fish doesn't play well with Emacs.
 #+END_SRC
 *** Isearch
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'eshell)
   (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
   (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 #+END_SRC

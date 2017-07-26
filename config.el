@@ -100,6 +100,8 @@
 
 (load "~/.emacs.d/secrets.el" t)
 
+(require 'eshell)
+
 (setq-default explicit-shell-file-name "/bin/bash")
 (setq-default shell-file-name "/bin/bash")
 
@@ -135,7 +137,6 @@ directory to make multiple eshell windows easier."
   (delete-window)
   (eshell/exit))
 
-(require 'eshell)
 (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
 (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 
