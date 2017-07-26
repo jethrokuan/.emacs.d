@@ -174,6 +174,7 @@ directory to make multiple eshell windows easier."
         ("C-c C-r" . ivy-resume)
         ("M-a" . counsel-M-x)
         ("C-s" . swiper)
+        ("C-r" . swiper)
         ("C-c i" . counsel-imenu)
         ("C-x C-f" . counsel-find-file)
         ("C-x j" . counsel-dired-jump)
