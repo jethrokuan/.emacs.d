@@ -818,7 +818,14 @@ the right."
   (use-package company-quickhelp
     :bind (:map company-active-map
                 ("M-h" . company-quickhelp-manual-begin))
-    :config (company-quickhelp-mode 1)))
+    :config (company-quickhelp-mode 1))
+  (defun company-mode/backend-with-yas (backend)
+    (if (and (listp backend) (member 'company-yasnippet backend))
+        backend
+      (append (if (consp backend) backend (list backend))
+              '(:with company-yasnippet))))
+
+  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends)))
 
 (use-package flyspell 
   :ensure f 
