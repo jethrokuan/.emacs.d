@@ -138,7 +138,8 @@ passed, use the buffer's directory."
 (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
 
 (defun eshell/x ()
-  (delete-window)
+  (unless (one-window-p)
+    (delete-window))
   (eshell/exit))
 
 (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)

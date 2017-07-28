@@ -271,7 +271,8 @@ Because fish doesn't play well with Emacs.
 *** Exiting eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun eshell/x ()
-    (delete-window)
+    (unless (one-window-p)
+      (delete-window))
     (eshell/exit))
 #+END_SRC
 *** Isearch
