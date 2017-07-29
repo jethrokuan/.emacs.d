@@ -1298,6 +1298,95 @@ Captured %<%Y-%m-%d %H:%M>")
 (defun org-current-is-todo ()
   (string= "TODO" (org-get-todo-state)))
 
+(use-package deft
+  :bind
+  (:map jethro-mode-map
+        ("C-c n" . deft))
+  :config
+  (setq deft-extension "org")
+  (setq deft-text-mode 'org-mode)
+  (setq deft-directory "~/.org/deft/")
+  (setq deft-use-filename-as-title t))
+
+(defun jethro/org-export-deft-file (file)
+  (interactive)
+  (org-html-export-to-html t t))
+
+(defun jethro/org-kwds ()
+  "parse the buffer and return a cons list of (property . value)
+from lines like:
+#+PROPERTY: value"
+  (org-element-map (org-element-parse-buffer 'element) 'keyword
+    (lambda (keyword) (cons (org-element-property :key keyword)
+                            (org-element-property :value keyword)))))
+
+(defun jethro/org-kwd (KEYWORD)
+  "get the value of a KEYWORD in the form of #+KEYWORD: value"
+  (cdr (assoc KEYWORD (jethro/org-kwds))))
+
+(defun now-is ()
+  (concat (format-time-string "%Y-%m-%dT%T")
+          ((lambda (x) (concat (substring x 0 3) ":" (substring x 3 5)))
+           (format-time-string "%z"))))
+
+(defun jethro/promote-everything () 
+  "Promote all subtrees in buffer"
+  (interactive)
+  (save-excursion
+    (save-match-data 
+      (goto-char (point-min)) 
+      (while (search-forward-regexp "^\\*+" nil t)
+        (delete-backward-char 1)))))
+
+;; http://whyarethingsthewaytheyare.com/setting-up-the-blog/#workflow
+(defun jethro/org-hugo-export ()
+  "Export current subheading to the hugo blog."
+  (interactive)
+  ;; Save cursor position
+  (save-excursion
+    ;; Go to top level heading for subtree (you can change the number 10
+    ;; if you /really/ need more than 10 sublevels...)
+    ;; (unless (eq (org-current-level) 1)
+    ;;   (outline-up-heading 10)) 
+    (let* ((hl (org-element-at-point)) 
+           (title (org-element-property :title hl)) 
+           (slug (org-element-property :SLUG hl))
+           (filename (concat (jethro/org-kwd "HUGO_CONTENT_ROOT")
+                             (format "%s.org" slug)))
+           (date (org-element-property :DATE hl))
+           (tags
+            (format "%s"
+                    (mapconcat 'identity (org-get-tags) "\",\""))))
+      ;; Make the export
+      (org-copy-subtree)
+      (with-temp-buffer (generate-new-buffer filename) 
+                        (goto-char (point-min))
+                        (org-yank)
+                        (goto-char (point-min))
+                        (let ((end (search-forward ":END:")))
+                          (delete-region (point-min) end))
+                        (jethro/promote-everything)
+                        (insert "#+TITLE: " title)
+                        (insert "\n#+DATE:" date)
+                        (insert "\n#+SLUG: " slug)
+                        (insert "\n#+TAGS: " tags)
+                        (write-file filename)))))
+
+(defun jethro/get-post-title (title)
+  "Get post title from TITLE"
+  (replace-regexp-in-string " " "-" (replace-regexp-in-string "[^a-zA-Z0-9 ]" ""
+                                                              (downcase title))))
+(defun jethro/insert-blog-props ()
+  (interactive)
+  (let* ((title (cdr (assoc "ITEM" (org-entry-properties))))
+         (slug (jethro/get-post-title title))
+         (date (now-is))
+         (str (format ":PROPERTIES:
+:SLUG:     %s
+:DATE:     %s
+:END:" slug date)))
+    (insert str)))
+
 (use-package vc
   :bind (:map jethro-mode-map
               ("C-x v =" . jethro/vc-diff)
