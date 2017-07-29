@@ -1939,6 +1939,15 @@ npm install -g tern
     (org-html-export-to-html t t))
 #+END_SRC
 ** Org Mode for Blogging
+*** Blog Mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-derived-mode blog-mode org-mode "blog")
+  (add-to-list 'auto-mode-alist '("\\.blog\\'" . blog-mode))
+
+  (bind-key "C-c C-c" 'jethro/org-hugo-export blog-mode-map)
+  (bind-key "C-c TAB" 'jethro/insert-blog-props blog-mode-map)
+
+#+END_SRC
 *** Helpers
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/org-kwds ()

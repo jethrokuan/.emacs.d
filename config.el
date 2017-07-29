@@ -1312,6 +1312,12 @@ Captured %<%Y-%m-%d %H:%M>")
   (interactive)
   (org-html-export-to-html t t))
 
+(define-derived-mode blog-mode org-mode "blog")
+(add-to-list 'auto-mode-alist '("\\.blog\\'" . blog-mode))
+
+(bind-key "C-c C-c" 'jethro/org-hugo-export blog-mode-map)
+(bind-key "C-c TAB" 'jethro/insert-blog-props blog-mode-map)
+
 (defun jethro/org-kwds ()
   "parse the buffer and return a cons list of (property . value)
 from lines like:
