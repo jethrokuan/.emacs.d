@@ -1362,18 +1362,22 @@ from lines like:
            (date (org-element-property :DATE hl))
            (tags
             (format "%s"
-                    (mapconcat 'identity (org-get-tags) "\",\""))))
+                    (mapconcat 'identity (org-get-tags) " "))))
       ;; Make the export
       (org-copy-subtree)
       (with-temp-buffer (generate-new-buffer filename) 
                         (goto-char (point-min))
                         (org-yank)
                         (goto-char (point-min))
+                        (condition-case nil
+                            (while (org-promote-subtree)) 
+                          (error nil))
+                        (goto-char (point-min))
                         (let ((end (search-forward ":END:")))
                           (delete-region (point-min) end))
                         (jethro/promote-everything)
                         (insert "#+TITLE: " title)
-                        (insert "\n#+DATE:" date)
+                        (insert "\n#+DATE: " date)
                         (insert "\n#+SLUG: " slug)
                         (insert "\n#+TAGS: " tags)
                         (write-file filename)))))
