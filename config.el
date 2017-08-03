@@ -70,6 +70,8 @@
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
 
+(blink-cursor-mode 0)
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (add-hook 'after-init-hook 'delete-selection-mode)
@@ -149,9 +151,9 @@ passed, use the buffer's directory."
   (delete-window)
   (eshell/exit))
 
-(use-package zenburn-theme
-    :init
-    (load-theme 'zenburn t))
+(use-package color-theme-sanityinc-tomorrow
+  :init
+  (load-theme 'sanityinc-tomorrow-eighties t))
 
 (defun jethro/nuke-all-buffers ()
   (interactive)

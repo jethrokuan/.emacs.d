@@ -150,6 +150,10 @@ Remove the useless toolbars and splash screens.
   (setq inhibit-startup-message t)
 #+end_src
 
+** Remove blinking cursor
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (blink-cursor-mode 0)
+#+END_SRC
 ** Use y/n over yes/no
 y/n is easier to type than yes/no
 
@@ -286,11 +290,18 @@ Because fish doesn't play well with Emacs.
     (delete-window)
     (eshell/exit))
 #+END_SRC
-** Theme (Zenburn)
-#+BEGIN_SRC emacs-lisp :tangle yes
+** Theme
+*** Zenburn
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package zenburn-theme
       :init
       (load-theme 'zenburn t))
+#+END_SRC
+*** Tomorrow (Eighties)
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package color-theme-sanityinc-tomorrow
+    :init
+    (load-theme 'sanityinc-tomorrow-eighties t))
 #+END_SRC
 ** Custom Commands
 *** Nuke all buffers with =C-c !=
