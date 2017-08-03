@@ -151,9 +151,9 @@ passed, use the buffer's directory."
   (delete-window)
   (eshell/exit))
 
-(use-package color-theme-sanityinc-tomorrow
-  :init
-  (load-theme 'sanityinc-tomorrow-eighties t))
+(use-package zenburn-theme
+    :init
+    (load-theme 'zenburn t))
 
 (defun jethro/nuke-all-buffers ()
   (interactive)

@@ -292,13 +292,13 @@ Because fish doesn't play well with Emacs.
 #+END_SRC
 ** Theme
 *** Zenburn
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package zenburn-theme
       :init
       (load-theme 'zenburn t))
 #+END_SRC
 *** Tomorrow (Eighties)
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package color-theme-sanityinc-tomorrow
     :init
     (load-theme 'sanityinc-tomorrow-eighties t))
