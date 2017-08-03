@@ -280,13 +280,6 @@ passed, use the buffer's directory."
 
   (bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map))
 
-(use-package beacon
-  :diminish beacon-mode
-  :init
-  (add-hook 'after-init-hook 'beacon-mode)
-  :config 
-  (setq beacon-push-mark 10))
-
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 
@@ -806,10 +799,9 @@ the right."
               ("M-n" . nil)
               ("M-p" . nil)
               ("C-n" . company-select-next)
-              ("C-p" . company-select-previous))
-  :init
-  (add-hook 'after-init-hook 'global-company-mode)
+              ("C-p" . company-select-previous)) 
   :config
+  (global-company-mode 1)
   (setq company-dabbrev-ignore-case nil
         company-dabbrev-code-ignore-case nil
         company-dabbrev-downcase nil

@@ -473,7 +473,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 ** beacon
 Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package beacon
     :diminish beacon-mode
     :init
@@ -1124,10 +1124,9 @@ Use this often, and in combination with multiple-cursors.
                 ("M-n" . nil)
                 ("M-p" . nil)
                 ("C-n" . company-select-next)
-                ("C-p" . company-select-previous))
-    :init
-    (add-hook 'after-init-hook 'global-company-mode)
+                ("C-p" . company-select-previous)) 
     :config
+    (global-company-mode 1)
     (setq company-dabbrev-ignore-case nil
           company-dabbrev-code-ignore-case nil
           company-dabbrev-downcase nil
