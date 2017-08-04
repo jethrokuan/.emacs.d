@@ -116,6 +116,7 @@ change, the buffers reflect the latest editions as well.
 
 NOTE: This can be quite slow, when the changes are massive across branches.
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (diminish 'auto-revert-mode)
   (global-auto-revert-mode 1)
 #+END_SRC
 
@@ -312,6 +313,7 @@ Because fish doesn't play well with Emacs.
 *** color-identifiers-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package color-identifiers-mode
+    :diminish color-identifiers-mode
     :init
     (add-hook 'after-init-hook 'global-color-identifiers-mode)
     :config
@@ -1073,10 +1075,7 @@ Use this often, and in combination with multiple-cursors.
           ("C-M-<right>" . sp-backward-barf-sexp)
           ("M-S" . sp-split-sexp))
     :init
-    (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
-    (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
-    (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
-    (add-hook 'js2-mode-hook 'turn-on-smartparens-strict-mode)
+    (add-hook 'after-init-hook 'global-smartparens-strict-mode)
     :config
     (require 'smartparens-config)
 

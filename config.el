@@ -53,15 +53,16 @@
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
 
+(diminish 'auto-revert-mode)
 (global-auto-revert-mode 1)
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
 (add-to-list 'initial-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Iosevka-19"))
 (add-to-list 'default-frame-alist
-             '(font . "Iosevka-12"))
+             '(font . "Iosevka-19"))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
@@ -580,10 +581,7 @@ the right."
         ("C-M-<right>" . sp-backward-barf-sexp)
         ("M-S" . sp-split-sexp))
   :init
-  (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'js2-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'after-init-hook 'global-smartparens-strict-mode)
   :config
   (require 'smartparens-config)
 
@@ -655,9 +653,10 @@ the right."
               ("M-n" . nil)
               ("M-p" . nil)
               ("C-n" . company-select-next)
-              ("C-p" . company-select-previous)) 
+              ("C-p" . company-select-previous))
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (global-company-mode 1)
   (setq company-dabbrev-ignore-case nil
         company-dabbrev-code-ignore-case nil
         company-dabbrev-downcase nil
