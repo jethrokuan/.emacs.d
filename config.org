@@ -589,18 +589,10 @@ Highlights recently copied/pasted text.
                 ("M-9" . eyebrowse-switch-to-window-config-9))
     :init
     (eyebrowse-mode 1)
-    ;; hooks
-    (add-hook 'persp-before-switch-functions
-              #'jethro/update-eyebrowse-for-perspective)
-    (add-hook 'eyebrowse-post-window-switch-hook
-              #'jethro/save-eyebrowse-for-perspective)
-    (add-hook 'persp-activated-functions
-              #'jethro/load-eyebrowse-for-perspective)
-    (add-hook 'persp-before-save-state-to-file-functions #'jethro/update-eyebrowse-for-perspective)
-    (add-hook 'persp-after-load-state-functions #'jethro/load-eyebrowse-after-loading-layout))
+    ;; hooks)
 #+END_SRC
 *** Persp-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package persp-mode
     :bind
     (:map jethro-mode-map
@@ -623,7 +615,7 @@ Highlights recently copied/pasted text.
     (persp-mode 1))
 #+END_SRC
 *** Eyebrowse and Persp-Mode Integration
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package dash)
   (require 'dash)
   (defun jethro//get-persp-workspace (&optional persp frame)
@@ -710,9 +702,18 @@ Highlights recently copied/pasted text.
                                        (eyebrowse--get 'last-slot frame))
                                  (get-frame-persp frame)
                                  frame))
+
+  (add-hook 'persp-before-switch-functions
+            #'jethro/update-eyebrowse-for-perspective)
+  (add-hook 'eyebrowse-post-window-switch-hook
+            #'jethro/save-eyebrowse-for-perspective)
+  (add-hook 'persp-activated-functions
+            #'jethro/load-eyebrowse-for-perspective)
+  (add-hook 'persp-before-save-state-to-file-functions #'jethro/update-eyebrowse-for-perspective)
+  (add-hook 'persp-after-load-state-functions #'jethro/load-eyebrowse-after-loading-layout)
 #+END_SRC
 *** ibuffer
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (with-eval-after-load "ibuffer"
 
     (require 'ibuf-ext)
@@ -2249,7 +2250,7 @@ Useful when handling git merge conflicts.
         (cider-jack-in))))
 #+end_src
 *** ivy switch persp
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (defun jethro/ivy-persp-switch-project (arg)
     (interactive "P")
     (ivy-read "Switch to Project Perspective: "
