@@ -259,34 +259,6 @@ passed, use the buffer's directory."
 (custom-set-faces
  '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 
-(use-package smart-mode-line
-  :init
-  (add-hook 'after-init-hook 'sml/setup)
-  :config 
-  (setq sml/theme 'respectful)
-  (setq sml/name-width 44)
-  (setq sml/shorten-directory t)
-  (setq sml/shorten-modes nil)
-  (setq sml/mode-width 'full)
-  (setq sml/replacer-regexp-list
-        '(("^~/.org/" ":O:")
-          ("^~/\\.emacs\\.d/" ":ED:")))
-  (setq rm-blacklist
-        (format "^ \\(%s\\)$"
-                (mapconcat #'identity
-                           '("j"
-                             "FlyC.*"
-                             "Fill"
-                             "Projectile.*"
-                             "GitGutter"
-                             "ivy"
-                             "company"
-                             ""
-                             "OrgSrc"
-                             ","
-                             "ElDoc")
-                           "\\|"))))
-
 (with-eval-after-load 'hydra
   (defhydra jethro/hydra-zoom ()
     "zoom"

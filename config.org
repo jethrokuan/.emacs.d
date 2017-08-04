@@ -454,7 +454,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 #+END_SRC
 *** smart-mode-line
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line
     :init
     (add-hook 'after-init-hook 'sml/setup)
