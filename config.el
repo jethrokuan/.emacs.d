@@ -333,8 +333,7 @@ passed, use the buffer's directory."
               ("M-8" . eyebrowse-switch-to-window-config-8)
               ("M-9" . eyebrowse-switch-to-window-config-9))
   :init
-  (eyebrowse-mode 1)
-  ;; hooks)
+  (eyebrowse-mode 1))
 
 (use-package guru-mode
   :diminish guru-mode
