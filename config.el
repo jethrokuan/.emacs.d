@@ -157,6 +157,7 @@ passed, use the buffer's directory."
   (load-theme 'tao-yang t))
 
 (use-package color-identifiers-mode
+  :diminish color-identifiers-mode
   :init
   (add-hook 'after-init-hook 'global-color-identifiers-mode)
   :config
@@ -581,20 +582,20 @@ the right."
         ("C-M-<right>" . sp-backward-barf-sexp)
         ("M-S" . sp-split-sexp))
   :init
-  (add-hook 'after-init-hook 'global-smartparens-strict-mode)
+  (add-hook 'after-init-hook 'smartparens-global-strict-mode)
   :config
   (require 'smartparens-config)
 
   ;; Org-mode config
 
   (sp-with-modes 'org-mode
-    (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
-    (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
-    (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
-    (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "«" "»"))
+                 (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
+                 (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
+                 (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
+                 (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+                 (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+                 (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+                 (sp-local-pair "«" "»"))
 
   (defun sp--org-skip-asterisk (ms mb me)
     (or (and (= (line-beginning-position) mb)
