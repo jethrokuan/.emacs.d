@@ -326,6 +326,17 @@ Because fish doesn't play well with Emacs.
     (set-face-attribute 'font-lock-builtin-face nil :weight 'bold)
     (set-face-attribute 'font-lock-preprocessor-face nil :weight 'bold))
 #+END_SRC
+*** Rainbow-delimiters-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package rainbow-delimiters
+    :ensure t 
+    :init
+    (add-hook 'after-init-hook 'rainbow-delimiters-mode)
+    :config
+    (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                        :foreground 'unspecified
+                        :inherit 'error))
+#+END_SRC
 ** Custom Commands
 *** Nuke all buffers with =C-c !=
 #+begin_src emacs-lisp :tangle yes

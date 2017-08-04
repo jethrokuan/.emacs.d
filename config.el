@@ -170,6 +170,15 @@ passed, use the buffer's directory."
   (set-face-attribute 'font-lock-builtin-face nil :weight 'bold)
   (set-face-attribute 'font-lock-preprocessor-face nil :weight 'bold))
 
+(use-package rainbow-delimiters
+  :ensure t 
+  :init
+  (add-hook 'after-init-hook 'rainbow-delimiters-mode)
+  :config
+  (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                      :foreground 'unspecified
+                      :inherit 'error))
+
 (defun jethro/nuke-all-buffers ()
   (interactive)
   (mapcar 'kill-buffer (buffer-list))
