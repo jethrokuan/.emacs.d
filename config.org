@@ -518,8 +518,8 @@ Beacon makes sure you don't lose track of your cursor when jumping around a buff
 ** Show Matching parenthesis
 Always show matching parenthesis.
 #+begin_src emacs-lisp :tangle yes
-(show-paren-mode 1)
-(setq show-paren-delay 0)
+  (show-paren-mode 1)
+  (setq show-paren-delay 0)
 #+end_src
 ** golden-ratio
 Give the working window more screen estate.
