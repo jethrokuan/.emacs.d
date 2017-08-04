@@ -151,9 +151,24 @@ passed, use the buffer's directory."
   (delete-window)
   (eshell/exit))
 
-(use-package zenburn-theme
-    :init
-    (load-theme 'zenburn t))
+(use-package tao-theme
+  :init
+  (load-theme 'tao-yang t))
+
+(use-package color-identifiers-mode
+  :init
+  (add-hook 'after-init-hook 'global-color-identifiers-mode)
+  :config
+  (let ((faces '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-constant-face font-lock-type-face font-lock-function-name-face font-lock-variable-name-face font-lock-keyword-face font-lock-string-face font-lock-builtin-face font-lock-preprocessor-face font-lock-warning-face font-lock-doc-face)))
+    (dolist (face faces)
+      (set-face-attribute face nil :foreground nil :weight 'normal :slant 'normal)))
+
+  (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
+  (set-face-attribute 'font-lock-comment-face nil :slant 'italic)
+  (set-face-attribute 'font-lock-doc-face nil :slant 'italic)
+  (set-face-attribute 'font-lock-keyword-face nil :weight 'bold)
+  (set-face-attribute 'font-lock-builtin-face nil :weight 'bold)
+  (set-face-attribute 'font-lock-preprocessor-face nil :weight 'bold))
 
 (defun jethro/nuke-all-buffers ()
   (interactive)
