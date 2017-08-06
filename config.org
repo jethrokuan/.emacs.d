@@ -15,14 +15,7 @@ do may help you understand why my configuration is the way it is.
 I'm currently a Computer Science undergraduate, who does primarily
 back-end development (python), and some web development (HTML/CSS/JS,
 React). I also dabble in Lisps, and run most of my life in Org-mode.
-
-* Core Layer
-** User configuration
-#+begin_src emacs-lisp :tangle yes
-  (setq user-full-name "Jethro Kuan"
-        user-mail-address "jethrokuan95@gmail.com")
-#+end_src
-** Add [[https://github.com/jwiegley/use-package/issues/70][use-package]]
+** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
@@ -39,6 +32,13 @@ maintaining tidiness and performance.
   (require 'diminish)
   (setq use-package-always-ensure t))
 #+END_SRC
+* Core Layer
+** User Configuration
+First, some information about me:
+#+begin_src emacs-lisp :tangle yes
+  (setq user-full-name "Jethro Kuan"
+        user-mail-address "jethrokuan95@gmail.com")
+#+end_src
 ** Emacs Server
 Load the emacs server, if it is not running. This allows for
 almost-instant emacs "startup".
@@ -49,6 +49,12 @@ almost-instant emacs "startup".
     (server-start))
 #+END_SRC
 ** No littering
+This package sets out to fix this by changing the values of path
+variables to put files in either no-littering-etc-directory
+(defaulting to ~/.emacs.d/etc/) or no-littering-var-directory
+(defaulting to ~/.emacs.d/var/), and by using descriptive file names
+and subdirectories when appropriate. This is similar to a color-theme;
+a "path-theme" if you will.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package no-littering
     :config
@@ -114,7 +120,8 @@ Emacs does not revert the buffers affected, which can lead to some
 confusion. Turn on =auto-revert-mode= globally, so that when the files
 change, the buffers reflect the latest editions as well.
 
-NOTE: This can be quite slow, when the changes are massive across branches.
+NOTE: This can be quite slow, when the changes are massive across
+branches.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (diminish 'auto-revert-mode)
   (global-auto-revert-mode 1)
@@ -126,34 +133,6 @@ Using the customize interface can be nice, but it tends to pollute
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq custom-file "~/.emacs.d/custom.el")
-  (load custom-file)
-#+END_SRC
-** Font
-I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
-Office Code Pro and the Powerline font families.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'initial-frame-alist
-               '(font . "Iosevka-12"))
-  (add-to-list 'default-frame-alist
-               '(font . "Iosevka-12"))
-#+END_SRC
-
-** Removing UI Cruft
-Remove the useless toolbars and splash screens.
-
-#+begin_src emacs-lisp :tangle yes
-  (tooltip-mode -1)
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (setq inhibit-splash-screen t)
-  (setq inhibit-startup-message t)
-#+end_src
-
-** Remove blinking cursor
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (blink-cursor-mode 0)
 #+END_SRC
 ** Use y/n over yes/no
 y/n is easier to type than yes/no
@@ -162,7 +141,7 @@ y/n is easier to type than yes/no
   (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
-** Replace region nwhen typing
+** Replace region when typing
 Type over a selected region, instead of deleting before typing.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -225,92 +204,68 @@ repository.
 #+begin_src emacs-lisp :tangle yes
 (load "~/.emacs.d/secrets.el" t)
 #+end_src
-** Shell
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'eshell)
-#+END_SRC
-*** Set default shell to bash
-Because fish doesn't play well with Emacs.
+** Custom Commands
+*** Nuke all buffers with =C-c !=
 #+begin_src emacs-lisp :tangle yes
-  (setq-default explicit-shell-file-name "/bin/bash")
-  (setq-default shell-file-name "/bin/bash")
-#+end_src
-*** Add PATH to shell
-#+begin_src emacs-lisp :tangle yes
-  (use-package exec-path-from-shell 
-    :config
-    (exec-path-from-shell-initialize))
-#+end_src
-*** Eshell theme
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package eshell-git-prompt
-    :config
-    (eshell-git-prompt-use-theme 'powerline))
-#+END_SRC
-*** Open eshell in current/project directory
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/eshell-here (arg)
-    "Opens up a new shell in projectile root. If a prefix argument is
-  passed, use the buffer's directory."
-    (interactive "P") 
-    (let* ((projectile? (not arg))
-           (name (if projectile?
-                     (projectile-project-name)
-                   (car
-                    (last
-                     (split-string
-                      (if (buffer-file-name)
-                          (file-name-directory (buffer-file-name))
-                        default-directory) "/" t)))))) 
-      (split-window-vertically)
-      (other-window 1)
-      (if projectile?
-          (projectile-with-default-dir (projectile-project-root)
-            (eshell "new")
-            (rename-buffer (concat "*eshell: " name "*")))
-        (eshell "new")
-        (rename-buffer (concat "*eshell: " name "*")))))
+  (defun jethro/nuke-all-buffers ()
+    (interactive)
+    (mapcar 'kill-buffer (buffer-list))
+    (delete-other-windows))
 
-  (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
-#+END_SRC
-*** Exiting eshell
+  (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
+#+end_src
+*** compile with =<f9>=
+#+begin_src emacs-lisp :tangle yes
+  (defun jethro/compile ()
+    (interactive)
+    (setq-local compilation-read-command nil)
+    (call-interactively 'compile))
+
+  (bind-key "<f9>" 'jethro/compile jethro-mode-map)
+#+end_src
+* Appearance
+** Font
+I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
+Office Code Pro and the Powerline font families.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun eshell/x ()
-    (unless (one-window-p)
-      (delete-window))
-    (eshell/exit))
+  (add-to-list 'initial-frame-alist
+               '(font . "Iosevka-12"))
+  (add-to-list 'default-frame-alist
+               '(font . "Iosevka-12"))
 #+END_SRC
-*** Isearch
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
-  (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
-#+END_SRC
-*** Quitting Eshell
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun eshell/x ()
-    (delete-window)
-    (eshell/exit))
-#+END_SRC
-** Theme
-*** Zenburn
+
+** Removing UI Cruft
+Remove the useless toolbars and splash screens.
+
+#+begin_src emacs-lisp :tangle yes
+  (tooltip-mode -1)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (setq inhibit-splash-screen t)
+  (setq inhibit-startup-message t)
+#+end_src
+
+** Zenburn
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package zenburn-theme
       :init
       (load-theme 'zenburn t))
 #+END_SRC
-*** Tomorrow (Eighties)
+** Tomorrow (Eighties)
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package color-theme-sanityinc-tomorrow
     :init
     (load-theme 'sanityinc-tomorrow-eighties t))
 #+END_SRC
-*** tao
+** tao
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package tao-theme
     :init
     (load-theme 'tao-yang t))
 #+END_SRC
-*** color-identifiers-mode
+** color-identifiers-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package color-identifiers-mode
     :diminish color-identifiers-mode
@@ -328,7 +283,8 @@ Because fish doesn't play well with Emacs.
     (set-face-attribute 'font-lock-builtin-face nil :weight 'bold)
     (set-face-attribute 'font-lock-preprocessor-face nil :weight 'bold))
 #+END_SRC
-*** Rainbow-delimiters-mode
+** Rainbow-delimiters-mode
+   We use rainbow delimiters to show imbalanced parenthesis.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rainbow-delimiters
     :ensure t 
@@ -339,25 +295,168 @@ Because fish doesn't play well with Emacs.
                         :foreground 'unspecified
                         :inherit 'error))
 #+END_SRC
-** Custom Commands
-*** Nuke all buffers with =C-c !=
-#+begin_src emacs-lisp :tangle yes
-  (defun jethro/nuke-all-buffers ()
-    (interactive)
-    (mapcar 'kill-buffer (buffer-list))
-    (delete-other-windows))
+** Remove blinking cursor
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (blink-cursor-mode 0)
+#+END_SRC
+** Additional Code Highlighting
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package highlight-numbers
+    :init
+    (add-hook 'prog-mode-hook #'highlight-numbers-mode))
 
-  (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
-#+end_src
-*** compile with =<f9>=
-#+begin_src emacs-lisp :tangle yes
-  (defun jethro/compile () 
-    (interactive)
-    (setq-local compilation-read-command nil)
-    (call-interactively 'compile))
+  (use-package highlight-quoted
+    :init
+    (add-hook 'prog-mode-hook #'highlight-quoted-mode))
 
-  (bind-key "<f9>" 'jethro/compile jethro-mode-map)
+  (use-package highlight-defined
+    :init
+    (add-hook 'prog-mode-hook #'highlight-defined-mode))
+
+  (use-package highlight-operators
+    :init
+    (add-hook 'prog-mode-hook #'highlight-operators-mode))
+
+  (use-package highlight-escape-sequences
+    :init
+    (add-hook 'prog-mode-hook #'hes-mode))
+#+END_SRC
+* Shell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'eshell)
+#+END_SRC
+** Set default shell to bash
+Because fish doesn't play well with Emacs.
+#+begin_src emacs-lisp :tangle yes
+  (setq-default explicit-shell-file-name "/bin/bash")
+  (setq-default shell-file-name "/bin/bash")
 #+end_src
+** Add PATH to shell
+#+begin_src emacs-lisp :tangle yes
+  (use-package exec-path-from-shell 
+    :config
+    (exec-path-from-shell-initialize))
+#+end_src
+** Eshell configuration
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'em-smart)
+  (setq eshell-glob-case-insensitive nil
+        eshell-error-if-no-glob nil
+        eshell-scroll-to-bottom-on-input nil
+        eshell-where-to-jump 'begin
+        eshell-review-quick-commands nil
+        eshell-smart-space-goes-to-end t)
+#+END_SRC
+** Eshell theme
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package eshell-git-prompt
+    :config
+    (eshell-git-prompt-use-theme 'powerline))
+#+END_SRC
+** Open eshell in current/project directory
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/eshell-here ()
+    "Opens up a new shell in projectile root. If a prefix argument is
+  passed, use the buffer's directory."
+    (interactive) 
+    (let* ((projectile-name (projectile-project-name))
+           (current-directory (car
+                               (last
+                                (split-string
+                                 (if (buffer-file-name)
+                                     (file-name-directory (buffer-file-name))
+                                   default-directory) "/" t)))))
+      (split-window-vertically)
+      (other-window 1)
+      (if (equal projectile-name "-")
+          (progn
+            (eshell "new")
+            (rename-buffer (concat "*eshell: " current-directory "*")))
+        (projectile-with-default-dir (projectile-project-root)
+          (eshell "new")
+          (rename-buffer (concat "*eshell: " projectile-name "*"))))))
+
+  (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
+#+END_SRC
+** Exiting eshell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun eshell/x ()
+    (unless (one-window-p)
+      (delete-window))
+    (eshell/exit))
+#+END_SRC
+** Isearch
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
+  (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
+#+END_SRC
+** Quitting Eshell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun eshell/x ()
+    (delete-window)
+    (eshell/exit))
+#+END_SRC
+** with-editor
+Use =with-editor= to use current Emacs to open everything that invokes
+=$EDITOR=.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package with-editor
+    :ensure t
+    :init
+    (progn
+      (add-hook 'shell-mode-hook  'with-editor-export-editor)
+      (add-hook 'eshell-mode-hook 'with-editor-export-editor)))
+#+END_SRC
+* Web Browsing
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package eww
+    :defer t
+    :init
+    (setq browse-url-browser-function
+          '((".*google.*maps.*" . browse-url-generic)
+            ;; Github goes to firefox, but not gist
+            ("http.*\/\/github.com" . browse-url-generic)
+            ("groups.google.com" . browse-url-generic)
+            ("docs.google.com" . browse-url-generic)
+            ("melpa.org" . browse-url-generic)
+            ("build.*\.elastic.co" . browse-url-generic)
+            (".*-ci\.elastic.co" . browse-url-generic)
+            ("internal-ci\.elastic\.co" . browse-url-generic)
+            ("zendesk\.com" . browse-url-generic)
+            ("salesforce\.com" . browse-url-generic)
+            ("stackoverflow\.com" . browse-url-generic)
+            ("apache\.org\/jira" . browse-url-generic)
+            ("thepoachedegg\.net" . browse-url-generic)
+            ("zoom.us" . browse-url-generic)
+            ("t.co" . browse-url-generic)
+            ("twitter.com" . browse-url-generic)
+            ("\/\/a.co" . browse-url-generic)
+            ("youtube.com" . browse-url-generic)
+            ("." . eww-browse-url)))
+    (setq shr-external-browser 'browse-url-generic)
+    (setq browse-url-generic-program (executable-find "firefox"))
+    (add-hook 'eww-mode-hook #'toggle-word-wrap)
+    (add-hook 'eww-mode-hook #'visual-line-mode)
+    :config
+    (use-package s :ensure t)
+    (define-key eww-mode-map "o" 'eww)
+    (define-key eww-mode-map "O" 'eww-browse-with-external-browser)
+    (define-key eww-mode-map "j" 'next-line)
+    (define-key eww-mode-map "k" 'previous-line)
+
+    (use-package eww-lnum 
+      :bind (:map eww-mode-map
+                  ("f" . eww-lnum-follow)
+                  ("U" . eww-lnum-universal))))
+
+  (use-package link-hint
+    :bind ("C-c F" . link-hint-open-link))
+#+END_SRC
+** elfeed
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package elfeed
+    :bind ("<f6>" . elfeed))
+#+END_SRC
 * Core Utilities
 ** Dash
 Dash is a library used to simplify Emacs-lisp development. Some custom
@@ -393,8 +492,8 @@ Counsel contains ivy enhancements for commonly-used functions.
     (:map jethro-mode-map
           ("C-c C-r" . ivy-resume)
           ("M-a" . counsel-M-x)
-          ("C-s" . swiper)
-          ("C-r" . swiper)
+          ("C-s" . counsel-grep-or-swiper)
+          ("C-r" . counsel-grep-or-swiper)
           ("C-c i" . counsel-imenu)
           ("C-x C-f" . counsel-find-file)
           ("C-x j" . counsel-dired-jump)
@@ -428,7 +527,9 @@ Counsel contains ivy enhancements for commonly-used functions.
                    (substring ivy--current 0 -1)) nil t)
              (goto-char (match-beginning 0))))
         (user-error
-         "Not completing files currently"))) 
+         "Not completing files currently")))
+    (setq counsel-grep-base-command
+          "rg -i -M 120 --no-heading --line-number --color never '%s' %s")
     (setq counsel-find-file-at-point t)
     (setq ivy-use-virtual-buffers t)
     (setq ivy-display-style 'fancy)
@@ -2293,3 +2394,8 @@ Closes compile buffer if there are no errors.
     :init
     (add-hook 'after-init-hook 'bury-successful-compilation))
 #+end_src
+* Load Custom File
+Custom file should take precedence.
+#+BEGIN_SRC emacs-lisp :tangle yes
+(load custom-file)
+#+END_SRC

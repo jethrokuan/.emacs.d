@@ -1,6 +1,3 @@
-(setq user-full-name "Jethro Kuan"
-      user-mail-address "jethrokuan95@gmail.com")
-
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -12,6 +9,9 @@
   (require 'bind-key)
   (require 'diminish)
   (setq use-package-always-ensure t))
+
+(setq user-full-name "Jethro Kuan"
+      user-mail-address "jethrokuan95@gmail.com")
 
 (use-package no-littering
   :config
@@ -57,21 +57,6 @@
 (global-auto-revert-mode 1)
 
 (setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
-
-(add-to-list 'initial-frame-alist
-             '(font . "Iosevka-19"))
-(add-to-list 'default-frame-alist
-             '(font . "Iosevka-19"))
-
-(tooltip-mode -1)
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
-
-(blink-cursor-mode 0)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -103,54 +88,31 @@
 
 (load "~/.emacs.d/secrets.el" t)
 
-(require 'eshell)
+(defun jethro/nuke-all-buffers ()
+  (interactive)
+  (mapcar 'kill-buffer (buffer-list))
+  (delete-other-windows))
 
-(setq-default explicit-shell-file-name "/bin/bash")
-(setq-default shell-file-name "/bin/bash")
+(bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
 
-(use-package exec-path-from-shell 
-  :config
-  (exec-path-from-shell-initialize))
+(defun jethro/compile ()
+  (interactive)
+  (setq-local compilation-read-command nil)
+  (call-interactively 'compile))
 
-(use-package eshell-git-prompt
-  :config
-  (eshell-git-prompt-use-theme 'powerline))
+(bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
-(defun jethro/eshell-here (arg)
-  "Opens up a new shell in projectile root. If a prefix argument is
-passed, use the buffer's directory."
-  (interactive "P") 
-  (let* ((projectile? (not arg))
-         (name (if projectile?
-                   (projectile-project-name)
-                 (car
-                  (last
-                   (split-string
-                    (if (buffer-file-name)
-                        (file-name-directory (buffer-file-name))
-                      default-directory) "/" t)))))) 
-    (split-window-vertically)
-    (other-window 1)
-    (if projectile?
-        (projectile-with-default-dir (projectile-project-root)
-          (eshell "new")
-          (rename-buffer (concat "*eshell: " name "*")))
-      (eshell "new")
-      (rename-buffer (concat "*eshell: " name "*")))))
+(add-to-list 'initial-frame-alist
+             '(font . "Iosevka-12"))
+(add-to-list 'default-frame-alist
+             '(font . "Iosevka-12"))
 
-(bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
-
-(defun eshell/x ()
-  (unless (one-window-p)
-    (delete-window))
-  (eshell/exit))
-
-(bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
-(bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
-
-(defun eshell/x ()
-  (delete-window)
-  (eshell/exit))
+(tooltip-mode -1)
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
 
 (use-package tao-theme
   :init
@@ -181,19 +143,116 @@ passed, use the buffer's directory."
                       :foreground 'unspecified
                       :inherit 'error))
 
-(defun jethro/nuke-all-buffers ()
-  (interactive)
-  (mapcar 'kill-buffer (buffer-list))
-  (delete-other-windows))
+(blink-cursor-mode 0)
 
-(bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
+(require 'eshell)
 
-(defun jethro/compile () 
-  (interactive)
-  (setq-local compilation-read-command nil)
-  (call-interactively 'compile))
+(setq-default explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/bin/bash")
 
-(bind-key "<f9>" 'jethro/compile jethro-mode-map)
+(use-package exec-path-from-shell 
+  :config
+  (exec-path-from-shell-initialize))
+
+(require 'em-smart)
+(setq eshell-glob-case-insensitive nil
+      eshell-error-if-no-glob nil
+      eshell-scroll-to-bottom-on-input nil
+      eshell-where-to-jump 'begin
+      eshell-review-quick-commands nil
+      eshell-smart-space-goes-to-end t)
+
+(use-package eshell-git-prompt
+  :config
+  (eshell-git-prompt-use-theme 'powerline))
+
+(defun jethro/eshell-here ()
+  "Opens up a new shell in projectile root. If a prefix argument is
+passed, use the buffer's directory."
+  (interactive) 
+  (let* ((projectile-name (projectile-project-name))
+         (current-directory (car
+                             (last
+                              (split-string
+                               (if (buffer-file-name)
+                                   (file-name-directory (buffer-file-name))
+                                 default-directory) "/" t)))))
+    (split-window-vertically)
+    (other-window 1)
+    (if (equal projectile-name "-")
+        (progn
+          (eshell "new")
+          (rename-buffer (concat "*eshell: " current-directory "*")))
+      (projectile-with-default-dir (projectile-project-root)
+        (eshell "new")
+        (rename-buffer (concat "*eshell: " projectile-name "*"))))))
+
+(bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
+
+(defun eshell/x ()
+  (unless (one-window-p)
+    (delete-window))
+  (eshell/exit))
+
+(bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
+(bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
+
+(defun eshell/x ()
+  (delete-window)
+  (eshell/exit))
+
+(use-package with-editor
+  :ensure t
+  :init
+  (progn
+    (add-hook 'shell-mode-hook  'with-editor-export-editor)
+    (add-hook 'eshell-mode-hook 'with-editor-export-editor)))
+
+(use-package eww
+  :defer t
+  :init
+  (setq browse-url-browser-function
+        '((".*google.*maps.*" . browse-url-generic)
+          ;; Github goes to firefox, but not gist
+          ("http.*\/\/github.com" . browse-url-generic)
+          ("groups.google.com" . browse-url-generic)
+          ("docs.google.com" . browse-url-generic)
+          ("melpa.org" . browse-url-generic)
+          ("build.*\.elastic.co" . browse-url-generic)
+          (".*-ci\.elastic.co" . browse-url-generic)
+          ("internal-ci\.elastic\.co" . browse-url-generic)
+          ("zendesk\.com" . browse-url-generic)
+          ("salesforce\.com" . browse-url-generic)
+          ("stackoverflow\.com" . browse-url-generic)
+          ("apache\.org\/jira" . browse-url-generic)
+          ("thepoachedegg\.net" . browse-url-generic)
+          ("zoom.us" . browse-url-generic)
+          ("t.co" . browse-url-generic)
+          ("twitter.com" . browse-url-generic)
+          ("\/\/a.co" . browse-url-generic)
+          ("youtube.com" . browse-url-generic)
+          ("." . eww-browse-url)))
+  (setq shr-external-browser 'browse-url-generic)
+  (setq browse-url-generic-program (executable-find "firefox"))
+  (add-hook 'eww-mode-hook #'toggle-word-wrap)
+  (add-hook 'eww-mode-hook #'visual-line-mode)
+  :config
+  (use-package s :ensure t)
+  (define-key eww-mode-map "o" 'eww)
+  (define-key eww-mode-map "O" 'eww-browse-with-external-browser)
+  (define-key eww-mode-map "j" 'next-line)
+  (define-key eww-mode-map "k" 'previous-line)
+
+  (use-package eww-lnum 
+    :bind (:map eww-mode-map
+                ("f" . eww-lnum-follow)
+                ("U" . eww-lnum-universal))))
+
+(use-package link-hint
+  :bind ("C-c F" . link-hint-open-link))
+
+(use-package elfeed
+  :bind ("<f6>" . elfeed))
 
 (use-package dash)
 
@@ -207,8 +266,8 @@ passed, use the buffer's directory."
   (:map jethro-mode-map
         ("C-c C-r" . ivy-resume)
         ("M-a" . counsel-M-x)
-        ("C-s" . swiper)
-        ("C-r" . swiper)
+        ("C-s" . counsel-grep-or-swiper)
+        ("C-r" . counsel-grep-or-swiper)
         ("C-c i" . counsel-imenu)
         ("C-x C-f" . counsel-find-file)
         ("C-x j" . counsel-dired-jump)
@@ -242,7 +301,9 @@ passed, use the buffer's directory."
                  (substring ivy--current 0 -1)) nil t)
            (goto-char (match-beginning 0))))
       (user-error
-       "Not completing files currently"))) 
+       "Not completing files currently")))
+  (setq counsel-grep-base-command
+        "rg -i -M 120 --no-heading --line-number --color never '%s' %s")
   (setq counsel-find-file-at-point t)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-display-style 'fancy)
@@ -1422,3 +1483,5 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package bury-successful-compilation
   :init
   (add-hook 'after-init-hook 'bury-successful-compilation))
+
+(load custom-file)
