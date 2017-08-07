@@ -909,6 +909,13 @@ the right."
   :config
   (setq highlight-indent-guides-method 'character))
 
+(use-package isend-mode
+  :bind
+  (:map isend-mode-map
+        ("C-M-e" . isend-send-defun))
+  :init
+  (add-hook 'isend-mode-hook 'isend-default-python-setup))
+
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
          ("\\.html\\.erb\\'" . web-mode)

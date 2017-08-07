@@ -1516,6 +1516,15 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :config
     (setq highlight-indent-guides-method 'character))
 #+END_SRC
+*** Isend-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package isend-mode
+    :bind
+    (:map isend-mode-map
+          ("C-M-e" . isend-send-defun))
+    :init
+    (add-hook 'isend-mode-hook 'isend-default-python-setup))
+#+END_SRC
 ** HTML
 *** Web-mode
     #+begin_src emacs-lisp :tangle yes
