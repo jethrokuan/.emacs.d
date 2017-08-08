@@ -516,6 +516,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     :init
     (add-hook 'after-init-hook 'ivy-mode)
     :config
+    (setq counsel-grep-swiper-limit 20000)
     (defun ivy-dired ()
       (interactive)
       (if ivy--directory

@@ -65,7 +65,7 @@
 (require 'recentf)
 (run-at-time (* 5 60) nil
 	     (lambda ()
-	       (let ((inhibit-message t))
+	 (let ((inhibit-message t))
 		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
@@ -290,6 +290,7 @@ passed, use the buffer's directory."
   :init
   (add-hook 'after-init-hook 'ivy-mode)
   :config
+  (setq counsel-grep-swiper-limit 20000)
   (defun ivy-dired ()
     (interactive)
     (if ivy--directory

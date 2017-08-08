@@ -13,7 +13,7 @@
     ("c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
  '(elfeed-feeds
    (quote
-    ("reddit.com/r/emacs/.rss" "http://quillette.com/feed/" "https://news.ycombinator.com/rss" "http://planet.emacsen.org/atom.xml")))
+    ("https://news.ycombinator.com/rss" "http://planet.emacsen.org/atom.xml")))
  '(fci-rule-color "#F1F1F1")
  '(main-line-color1 "#1E1E1E")
  '(main-line-color2 "#111111")
