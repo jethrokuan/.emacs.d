@@ -13,7 +13,7 @@
     ("c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
  '(elfeed-feeds
    (quote
-    ("https://news.ycombinator.com/rss" "http://planet.emacsen.org/atom.xml")))
+    ("reddit.com/r/emacs/.rss" "http://quillette.com/feed/" "https://news.ycombinator.com/rss" "http://planet.emacsen.org/atom.xml")))
  '(fci-rule-color "#F1F1F1")
  '(main-line-color1 "#1E1E1E")
  '(main-line-color2 "#111111")
@@ -55,4 +55,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
+ '(fixed-pitch ((t (:family "Iosevka"))))
+ '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B")))))
+ '(variable-pitch ((t (:family "Georgia")))))

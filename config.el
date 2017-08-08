@@ -65,7 +65,7 @@
 (require 'recentf)
 (run-at-time (* 5 60) nil
 	     (lambda ()
-	 (let ((inhibit-message t))
+	       (let ((inhibit-message t))
 		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
@@ -102,10 +102,9 @@
 
 (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
-(add-to-list 'initial-frame-alist
-             '(font . "Iosevka-12"))
-(add-to-list 'default-frame-alist
-             '(font . "Iosevka-12"))
+(custom-set-faces
+ '(fixed-pitch ((t (:family "Iosevka"))))
+ '(variable-pitch ((t (:family "Georgia")))))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
