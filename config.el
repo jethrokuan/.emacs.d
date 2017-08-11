@@ -432,6 +432,13 @@ passed, use the buffer's directory."
   :config (setq dumb-jump-selector 'ivy)
   :ensure)
 
+(use-package windmove 
+  :config
+  ;; use command key on Mac
+  (windmove-default-keybindings 'super)
+  ;; wrap around at edges
+  (setq windmove-wrap-around t))
+
 (require 'dired)
 
 (let ((gls "/usr/local/bin/gls"))

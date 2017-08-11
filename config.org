@@ -895,7 +895,7 @@ Use it to jump to function definitions. Requires no external depedencies.
     :ensure)
 #+end_src
 ** Window switching
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package windmove 
     :config
     ;; use command key on Mac
