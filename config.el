@@ -795,8 +795,8 @@ the right."
 (bind-key "C-c h d" 'jethro/hydra-draw-box/body jethro-mode-map)
 
 (use-package direnv
-  :config
-  (direnv-mode)
+  :init
+  (add-hook 'after-init-hook 'direnv-mode)
   (setq direnv-always-show-summary t))
 
 (use-package slime
