@@ -133,10 +133,6 @@
 (setq-default explicit-shell-file-name "/bin/bash")
 (setq-default shell-file-name "/bin/bash")
 
-(use-package exec-path-from-shell 
-  :config
-  (exec-path-from-shell-initialize))
-
 (require 'em-smart)
 (setq eshell-glob-case-insensitive nil
       eshell-error-if-no-glob nil
