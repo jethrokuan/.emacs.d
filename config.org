@@ -1502,7 +1502,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                 ("C-c p ." . pytest-pdb-one)))
 #+END_SRC
 *** realgud
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package realgud)
 #+END_SRC
 *** Highlight Indent Guides
@@ -2291,7 +2291,7 @@ Useful when handling git merge conflicts.
     :demand t
     :init
     (setq projectile-keymap-prefix (kbd "C-x p"))
-    (add-hook 'after-init-hook 'projectile-mode)
+    (add-hook 'after-init-hook 'projectile-global-mode)
     :config
     (require 'projectile)
     (use-package counsel-projectile

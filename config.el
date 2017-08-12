@@ -885,8 +885,6 @@ the right."
               ("C-c p m" . pytest-pdb-module)
               ("C-c p ." . pytest-pdb-one)))
 
-(use-package realgud)
-
 (use-package highlight-indent-guides
   :init
   (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
@@ -1394,7 +1392,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :demand t
   :init
   (setq projectile-keymap-prefix (kbd "C-x p"))
-  (add-hook 'after-init-hook 'projectile-mode)
+  (add-hook 'after-init-hook 'projectile-global-mode)
   :config
   (require 'projectile)
   (use-package counsel-projectile
