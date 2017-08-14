@@ -1,3 +1,4 @@
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -64,9 +65,9 @@
 
 (require 'recentf)
 (run-at-time (* 5 60) nil
-	     (lambda ()
-	 (let ((inhibit-message t))
-		 (recentf-save-list))))
+             (lambda ()
+               (let ((inhibit-message t))
+                 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
 
@@ -130,8 +131,8 @@
 
 (require 'eshell)
 
-(setq-default explicit-shell-file-name "/bin/bash")
-(setq-default shell-file-name "/bin/bash")
+(setq-default explicit-shell-file-name "/run/current-system/sw/bin/bash")
+(setq-default shell-file-name "/run/current-system/sw/bin/bash")
 
 (require 'em-smart)
 (setq eshell-glob-case-insensitive nil
