@@ -46,10 +46,6 @@ maintaining tidiness and performance.
   (setq display-time-default-load-average nil)
   (display-time-mode t)
 
-  ;; Emacs server is not required to run EXWM but it has some interesting uses
-  ;; (see next section)
-  (server-start)
-
   ;;;; Below are configurations for EXWM
 
   ;; Add paths (not required if EXWM is installed from GNU ELPA)
@@ -676,7 +672,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+end_src
 ** Modeline
 *** Thick modeline bar
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (custom-set-faces
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 #+END_SRC

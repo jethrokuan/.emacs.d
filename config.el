@@ -1,4 +1,3 @@
-
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -22,10 +21,6 @@
 ;; You may want Emacs to show you the time
 (setq display-time-default-load-average nil)
 (display-time-mode t)
-
-;; Emacs server is not required to run EXWM but it has some interesting uses
-;; (see next section)
-(server-start)
 
 ;;;; Below are configurations for EXWM
 
@@ -179,9 +174,9 @@
 
 (require 'recentf)
 (run-at-time (* 5 60) nil
-             (lambda ()
-               (let ((inhibit-message t))
-                 (recentf-save-list))))
+	     (lambda ()
+	 (let ((inhibit-message t))
+		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
 
@@ -419,9 +414,6 @@ passed, use the buffer's directory."
 (setq whitespace-style '(face lines-tail))
 
 (add-hook 'prog-mode-hook 'whitespace-mode)
-
-(custom-set-faces
- '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 
 (with-eval-after-load 'hydra
   (defhydra jethro/hydra-zoom ()
