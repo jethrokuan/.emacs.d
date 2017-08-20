@@ -65,7 +65,7 @@
 (require 'recentf)
 (run-at-time (* 5 60) nil
 	     (lambda ()
-	       (let ((inhibit-message t))
+	 (let ((inhibit-message t))
 		 (recentf-save-list))))
 
 (setq sentence-end-double-space nil)
@@ -1080,7 +1080,6 @@ the right."
 (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
 
 (setq org-agenda-files '("~/.org/gtd/inbox.org"
-                         "~/.org/gtd/someday.org"
                          "~/.org/gtd/projects.org"
                          "~/.org/gtd/tickler.org"))
 
