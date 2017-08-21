@@ -1156,6 +1156,20 @@ Captured %<%Y-%m-%d %H:%M>")
 (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
 (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
 
+(defun jethro/mark-next-parent-tasks-todo ()
+  "Visit each parent task and change NEXT states to TODO"
+  (let ((mystate (or (and (fboundp 'org-state)
+                          state)
+                     (nth 2 (org-heading-components)))))
+    (when mystate
+      (save-excursion
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) (list "NEXT"))
+            (org-todo "TODO")))))))
+
+(add-hook 'org-after-todo-state-change-hook 'jethro/mark-next-parent-tasks-todo 'append)
+(add-hook 'org-clock-in-hook 'jethro/mark-next-parent-tasks-todo 'append)
+
 (setq jethro/org-agenda-todo-view
       `(" " "Agenda"
         ((agenda "" nil)
