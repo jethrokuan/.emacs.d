@@ -102,9 +102,7 @@
 
 (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
-(custom-set-faces
- '(fixed-pitch ((t (:family "Iosevka"))))
- '(variable-pitch ((t (:family "Georgia")))))
+(set-frame-font "Iosevka 16" nil t)
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
@@ -1160,7 +1158,6 @@ Captured %<%Y-%m-%d %H:%M>")
   "Visit each parent task and change NEXT states to TODO"
   (org-todo "NEXT"))
 
-(add-hook 'org-after-todo-state-change-hook 'jethro/set-todo-state-next 'append)
 (add-hook 'org-clock-in-hook 'jethro/set-todo-state-next 'append)
 
 (setq jethro/org-agenda-todo-view

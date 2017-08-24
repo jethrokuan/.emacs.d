@@ -341,9 +341,7 @@ I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternat
 Office Code Pro and the Powerline font families.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (custom-set-faces
-   '(fixed-pitch ((t (:family "Iosevka"))))
-   '(variable-pitch ((t (:family "Georgia")))))
+  (set-frame-font "Iosevka 16" nil t)
 #+END_SRC
 
 ** Removing UI Cruft
@@ -2145,7 +2143,6 @@ npm install -g tern
     "Visit each parent task and change NEXT states to TODO"
     (org-todo "NEXT"))
 
-  (add-hook 'org-after-todo-state-change-hook 'jethro/set-todo-state-next 'append)
   (add-hook 'org-clock-in-hook 'jethro/set-todo-state-next 'append)
 #+END_SRC
 *** Stage 3: Reviewing
