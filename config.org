@@ -1489,6 +1489,15 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
       :config
       (add-to-list 'company-backends 'company-nixos-options)))
 #+END_SRC
+** Haskell
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package haskell-mode
+    :mode ("\\.hs\\'" . haskell-mode)
+    :config
+    (use-package intero
+      :init
+      (add-hook 'haskell-mode-hook 'intero-mode)))
+#+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
      (use-package go-mode
