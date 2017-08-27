@@ -796,6 +796,13 @@ the right."
     :config
     (add-to-list 'company-backends 'company-nixos-options)))
 
+(use-package haskell-mode
+  :mode ("\\.hs\\'" . haskell-mode)
+  :config
+  (use-package intero
+    :init
+    (add-hook 'haskell-mode-hook 'intero-mode)))
+
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
   :config
