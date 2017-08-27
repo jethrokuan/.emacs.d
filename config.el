@@ -586,7 +586,40 @@ the right."
 
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
-  :config (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+  :config
+  (add-hook 'prog-mode-hook 'aggressive-indent-mode)
+  (setq aggressive-indent-excluded-modes
+        '(bibtex-mode
+          cider-repl-mode
+          coffee-mode
+          comint-mode
+          conf-mode
+          Custom-mode
+          diff-mode
+          doc-view-mode
+          dos-mode
+          erc-mode
+          jabber-chat-mode
+          haml-mode
+          haskell-mode
+          haskell-interactive-mode
+          image-mode
+          makefile-mode
+          makefile-gmake-mode
+          minibuffer-inactive-mode
+          netcmd-mode
+          python-mode
+          sass-mode
+          slim-mode
+          special-mode
+          shell-mode
+          snippet-mode
+          eshell-mode
+          tabulated-list-mode
+          term-mode
+          TeX-output-mode
+          text-mode
+          yaml-mode)))
 
 (use-package multiple-cursors
   :bind (:map jethro-mode-map
