@@ -2153,16 +2153,20 @@ npm install -g tern
            ((agenda "" nil)
             (tags-todo "@school"
                        ((org-agenda-overriding-header "School")
-                        (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        ))
             (tags-todo "@home"
                        ((org-agenda-overriding-header "Home")
-                        (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        ))
             (tags-todo "@office"
                        ((org-agenda-overriding-header "Office")
-                        (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first))) 
+                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        )) 
             (tags-todo "@errand"
                        ((org-agenda-overriding-header "Errands")
-                        (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        ))
             nil)))
 
    (setq org-agenda-custom-commands
@@ -2187,6 +2191,13 @@ npm install -g tern
      (string= "TODO" (org-get-todo-state)))
  #+END_SRC
 *** Stage 4: Doing
+**** Org-pomodoro
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-pomodoro
+    :bind
+    (:map org-agenda-mode-map
+          (("I" . org-pomodoro))))
+#+END_SRC
 ** Org Mode for Note taking
 *** Deft
 #+BEGIN_SRC emacs-lisp :tangle yes

@@ -1165,16 +1165,20 @@ Captured %<%Y-%m-%d %H:%M>")
         ((agenda "" nil)
          (tags-todo "@school"
                     ((org-agenda-overriding-header "School")
-                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                     ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                     ))
          (tags-todo "@home"
                     ((org-agenda-overriding-header "Home")
-                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                     ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                     ))
          (tags-todo "@office"
                     ((org-agenda-overriding-header "Office")
-                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first))) 
+                     ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                     )) 
          (tags-todo "@errand"
                     ((org-agenda-overriding-header "Errands")
-                     (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                     ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                     ))
          nil)))
 
 (setq org-agenda-custom-commands
@@ -1197,6 +1201,11 @@ Captured %<%Y-%m-%d %H:%M>")
 
 (defun org-current-is-todo ()
   (string= "TODO" (org-get-todo-state)))
+
+(use-package org-pomodoro
+  :bind
+  (:map org-agenda-mode-map
+        (("I" . org-pomodoro))))
 
 (use-package deft
   :bind
