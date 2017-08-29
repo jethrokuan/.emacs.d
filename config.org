@@ -1992,6 +1992,7 @@ npm install -g tern
 
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq org-agenda-files '("~/.org/gtd/inbox.org"
+                            "~/.org/gtd/timetable.org"
                             "~/.org/gtd/projects.org"
                             "~/.org/gtd/tickler.org"))
  #+END_SRC

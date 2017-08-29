@@ -1118,6 +1118,7 @@ the right."
 (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
 
 (setq org-agenda-files '("~/.org/gtd/inbox.org"
+                         "~/.org/gtd/timetable.org"
                          "~/.org/gtd/projects.org"
                          "~/.org/gtd/tickler.org"))
 
