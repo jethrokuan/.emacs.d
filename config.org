@@ -1525,11 +1525,18 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Haskell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package haskell-mode
-    :mode ("\\.hs\\'" . haskell-mode)
-    :config
-    (use-package intero
-      :init
-      (add-hook 'haskell-mode-hook 'intero-mode)))
+    :mode ("\\.hs\\'" . haskell-mode))
+#+END_SRC
+*** Dante
+Dante is a lightweight version of intero.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dante
+    :after haskell-mode
+    :commands 'dante-mode
+    :init
+    (add-hook 'haskell-mode-hook 'dante-mode)
+    (add-hook 'haskell-mode-hook 'flycheck-mode))
 #+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
@@ -1918,6 +1925,16 @@ npm install -g tern
   (use-package company-auctex
     :defer t)
     #+END_SRC
+** Dante
+Dante is a lightweight version of intero, that doesn't depend on stack.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dante 
+    :after haskell-mode
+    :commands 'dante-mode
+    :init
+    (add-hook 'haskell-mode-hook 'dante-mode)
+    (add-hook 'haskell-mode-hook 'flycheck-mode))
+#+END_SRC
 * Org-Mode
 ** Setup
  We use =org-plus-contrib=, which contains several contrib plugins that

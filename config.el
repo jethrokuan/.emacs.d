@@ -830,11 +830,7 @@ the right."
     (add-to-list 'company-backends 'company-nixos-options)))
 
 (use-package haskell-mode
-  :mode ("\\.hs\\'" . haskell-mode)
-  :config
-  (use-package intero
-    :init
-    (add-hook 'haskell-mode-hook 'intero-mode)))
+  :mode ("\\.hs\\'" . haskell-mode))
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
@@ -1106,6 +1102,13 @@ the right."
 
 (use-package company-auctex
   :defer t)
+
+(use-package dante 
+  :after haskell-mode
+  :commands 'dante-mode
+  :init
+  (add-hook 'haskell-mode-hook 'dante-mode)
+  (add-hook 'haskell-mode-hook 'flycheck-mode))
 
 (use-package org-plus-contrib
   :bind
