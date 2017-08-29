@@ -841,8 +841,10 @@ the right."
   :config
   (setq company-ghc-show-info t))
 
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-(add-hook 'haskell-mode-hook 'structured-haskell-mode)
+(use-package shm
+  :init
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'structured-haskell-mode))
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
