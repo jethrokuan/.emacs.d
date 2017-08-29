@@ -830,7 +830,19 @@ the right."
     (add-to-list 'company-backends 'company-nixos-options)))
 
 (use-package haskell-mode
-  :mode ("\\.hs\\'" . haskell-mode))
+  :mode ("\\.hs\\'" . haskell-mode)
+  :init
+  (add-hook 'haskell-mode-hook (lambda ()
+                                 (aggressive-indent-mode -1))))
+
+(use-package company-ghc
+  :init
+  (add-to-list 'company-backends 'company-ghc)
+  :config
+  (setq company-ghc-show-info t))
+
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(add-hook 'haskell-mode-hook 'structured-haskell-mode)
 
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)

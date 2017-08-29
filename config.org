@@ -1525,18 +1525,35 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Haskell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package haskell-mode
-    :mode ("\\.hs\\'" . haskell-mode))
+    :mode ("\\.hs\\'" . haskell-mode)
+    :init
+    (add-hook 'haskell-mode-hook (lambda ()
+                                   (aggressive-indent-mode -1))))
 #+END_SRC
 *** Dante
 Dante is a lightweight version of intero.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package dante
     :after haskell-mode
     :commands 'dante-mode
     :init
     (add-hook 'haskell-mode-hook 'dante-mode)
     (add-hook 'haskell-mode-hook 'flycheck-mode))
+#+END_SRC
+*** Company-ghc
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company-ghc
+    :init
+    (add-to-list 'company-backends 'company-ghc)
+    :config
+    (setq company-ghc-show-info t))
+#+END_SRC
+*** Structured Haskell Mode
+This relies on the layout rule to determine indentation
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'structured-haskell-mode)
 #+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
