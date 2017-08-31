@@ -601,7 +601,9 @@ the right."
           erc-mode
           jabber-chat-mode
           haml-mode
+          intero-mode
           haskell-mode
+          interative-haskell-mode
           haskell-interactive-mode
           image-mode
           makefile-mode
@@ -832,14 +834,15 @@ the right."
 (use-package haskell-mode
   :mode ("\\.hs\\'" . haskell-mode)
   :init
+  (add-hook 'haskell-mode-hook
+            (lambda ()
+              (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks")))
   (add-hook 'haskell-mode-hook (lambda ()
                                  (aggressive-indent-mode -1))))
 
-(use-package company-ghc
+(use-package intero
   :init
-  (add-to-list 'company-backends 'company-ghc)
-  :config
-  (setq company-ghc-show-info t))
+  (add-hook 'haskell-mode-hook 'intero-mode))
 
 (use-package shm
   :init

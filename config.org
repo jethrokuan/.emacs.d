@@ -1254,7 +1254,9 @@ Keep your text indented at all times. Remember to turn this off for indentation-
             erc-mode
             jabber-chat-mode
             haml-mode
+            intero-mode
             haskell-mode
+            interative-haskell-mode
             haskell-interactive-mode
             image-mode
             makefile-mode
@@ -1527,27 +1529,17 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   (use-package haskell-mode
     :mode ("\\.hs\\'" . haskell-mode)
     :init
+    (add-hook 'haskell-mode-hook
+              (lambda ()
+                (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks")))
     (add-hook 'haskell-mode-hook (lambda ()
                                    (aggressive-indent-mode -1))))
 #+END_SRC
-*** Dante
-Dante is a lightweight version of intero.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package dante
-    :after haskell-mode
-    :commands 'dante-mode
-    :init
-    (add-hook 'haskell-mode-hook 'dante-mode)
-    (add-hook 'haskell-mode-hook 'flycheck-mode))
-#+END_SRC
-*** Company-ghc
+*** Intero
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package company-ghc
+  (use-package intero
     :init
-    (add-to-list 'company-backends 'company-ghc)
-    :config
-    (setq company-ghc-show-info t))
+    (add-hook 'haskell-mode-hook 'intero-mode))
 #+END_SRC
 *** Structured Haskell Mode
 This relies on the layout rule to determine indentation
