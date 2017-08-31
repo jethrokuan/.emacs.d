@@ -102,7 +102,7 @@
 
 (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 
-(set-frame-font "Iosevka 16" nil t)
+(setq default-frame-alist '((font . "Iosevka-16")))
 
 (tooltip-mode -1)
 (tool-bar-mode -1)
