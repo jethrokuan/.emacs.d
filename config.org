@@ -1936,16 +1936,6 @@ npm install -g tern
   (use-package company-auctex
     :defer t)
     #+END_SRC
-** Dante
-Dante is a lightweight version of intero, that doesn't depend on stack.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dante 
-    :after haskell-mode
-    :commands 'dante-mode
-    :init
-    (add-hook 'haskell-mode-hook 'dante-mode)
-    (add-hook 'haskell-mode-hook 'flycheck-mode))
-#+END_SRC
 * Org-Mode
 ** Setup
  We use =org-plus-contrib=, which contains several contrib plugins that
