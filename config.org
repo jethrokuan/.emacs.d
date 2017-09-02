@@ -1967,6 +1967,11 @@ npm install -g tern
   (use-package company-auctex
     :defer t)
     #+END_SRC
+** Yaml
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package yaml-mode
+    :mode ("\\.yaml\\'" . yaml-mode))
+#+END_SRC
 * Org-Mode
 ** Setup
  We use =org-plus-contrib=, which contains several contrib plugins that
