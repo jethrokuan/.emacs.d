@@ -2242,21 +2242,29 @@ npm install -g tern
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq jethro/org-agenda-todo-view
          `(" " "Agenda"
-           ((agenda "" nil)
+           ((agenda ""
+                    ((org-agenda-ndays 1)
+                     (org-agenda-sorting-strategy
+                      '((agenda time-up priority-down tag-up)))
+                     (org-agenda-deadline-warning-days 1)))
             (tags-todo "@school"
                        ((org-agenda-overriding-header "School")
+                        (org-agenda-skip-entry-if 'scheduled 'deadline)
                         ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                         ))
             (tags-todo "@home"
                        ((org-agenda-overriding-header "Home")
+                        (org-agenda-skip-entry-if 'scheduled 'deadline)
                         ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                         ))
             (tags-todo "@office"
                        ((org-agenda-overriding-header "Office")
+                        (org-agenda-skip-entry-if 'scheduled 'deadline)
                         ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                         )) 
             (tags-todo "@errand"
                        ((org-agenda-overriding-header "Errands")
+                        (org-agenda-skip-entry-if 'scheduled 'deadline)
                         ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                         ))
             nil)))
