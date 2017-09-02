@@ -2132,12 +2132,11 @@ npm install -g tern
 ***** Step 1: Clarifying
 ****** Tags
  #+BEGIN_SRC emacs-lisp :tangle yes
-   (setq org-tag-alist (quote ((:startgroup)
-                               ("@errand" . ?e)
+   (setq org-tag-alist (quote (("@errand" . ?e)
                                ("@office" . ?o)
                                ("@home" . ?h)
                                ("@school" . ?s)
-                               (:endgroup)
+                               (:newline)
                                ("WAITING" . ?w)
                                ("HOLD" . ?H)
                                ("CANCELLED" . ?c))))
@@ -2243,29 +2242,22 @@ npm install -g tern
    (setq jethro/org-agenda-todo-view
          `(" " "Agenda"
            ((agenda ""
-                    ((org-agenda-ndays 1)
-                     (org-agenda-sorting-strategy
-                      '((agenda time-up priority-down tag-up)))
-                     (org-agenda-deadline-warning-days 1)))
+                    ((org-agenda-span 'day)))
             (tags-todo "@school"
                        ((org-agenda-overriding-header "School")
-                        (org-agenda-skip-entry-if 'scheduled 'deadline)
-                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
                         ))
             (tags-todo "@home"
                        ((org-agenda-overriding-header "Home")
-                        (org-agenda-skip-entry-if 'scheduled 'deadline)
-                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
                         ))
             (tags-todo "@office"
                        ((org-agenda-overriding-header "Office")
-                        (org-agenda-skip-entry-if 'scheduled 'deadline)
-                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
-                        )) 
+                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+                        ))
             (tags-todo "@errand"
                        ((org-agenda-overriding-header "Errands")
-                        (org-agenda-skip-entry-if 'scheduled 'deadline)
-                        ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                        (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
                         ))
             nil)))
 
@@ -2289,6 +2281,13 @@ npm install -g tern
 
    (defun org-current-is-todo ()
      (string= "TODO" (org-get-todo-state)))
+
+   (defun jethro/switch-to-agenda ()
+     (interactive)
+     (org-agenda nil " ")
+     (delete-other-windows))
+
+   (bind-key "<f10>" 'jethro/switch-to-agenda jethro-mode-map)
  #+END_SRC
 *** Stage 4: Doing
 **** Org-pomodoro
