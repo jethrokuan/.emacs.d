@@ -1364,9 +1364,43 @@ Use this often, and in combination with multiple-cursors.
        :init
        (add-hook 'prog-mode-hook 'flycheck-mode)
        :config
-       (setq-default flycheck-disabled-checkers
-                     (append flycheck-disabled-checkers
-                             '(javascript-jshint)))
+       (defun jethro/adjust-flycheck-automatic-syntax-eagerness ()
+         "Adjust how often we check for errors based on if there are any.
+     This lets us fix any errors as quickly as possible, but in a
+     clean buffer we're an order of magnitude laxer about checking."
+         (setq flycheck-idle-change-delay
+               (if flycheck-current-errors 0.3 3.0)))
+
+       ;; Each buffer gets its own idle-change-delay because of the
+       ;; buffer-sensitive adjustment above.
+       (make-variable-buffer-local 'flycheck-idle-change-delay)
+
+       ;; Remove newline checks, since they would trigger an immediate check
+       ;; when we want the idle-change-delay to be in effect while editing.
+       (setq-default flycheck-check-syntax-automatically '(save
+                                                           idle-change
+                                                           mode-enabled))
+
+       (add-hook 'flycheck-after-syntax-check-hook
+                 'jethro/adjust-flycheck-automatic-syntax-eagerness)
+
+       (defun flycheck-handle-idle-change ()
+         "Handle an expired idle time since the last change.
+     This is an overwritten version of the original
+     flycheck-handle-idle-change, which removes the forced deferred.
+     Timers should only trigger inbetween commands in a single
+     threaded system and the forced deferred makes errors never show
+     up before you execute another command."
+         (flycheck-clear-idle-change-timer)
+         (flycheck-buffer-automatically 'idle-change))
+
+       ;; Temporary workaround: Direnv needs to load PATH before flycheck looks
+       ;; for linters
+       (setq flycheck-executable-find
+             (lambda (cmd)
+               (direnv-update-environment default-directory)
+               (executable-find cmd)))
+  
        (defhydra jethro/hydra-flycheck
          (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
                :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
@@ -1380,10 +1414,7 @@ Use this often, and in combination with multiple-cursors.
          ("q"  nil))
        (use-package flycheck-pos-tip
          :init
-         (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode))
-       (use-package flycheck-color-mode-line
-         :init
-         (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)))
+         (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode)))
    #+end_src
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
@@ -1742,11 +1773,14 @@ npm install -g tern
   (use-package js2-mode
     :mode ("\\.js\\'" . js2-mode)
     :config
+    (setq-default flycheck-disabled-checkers
+                  (append flycheck-disabled-checkers
+                          '(javascript-jshint)))
+    (setq js-switch-indent-offset 2)
     (use-package tern
       :diminish tern-mode
-      :config
-      (setq js-switch-indent-offset 2)
-      (add-hook 'js2-mode-hook 'tern-mode) 
+      :config 
+      (add-hook 'js2-mode-hook 'tern-mode)
       (use-package company-tern
         :config
         (add-to-list 'company-backends 'company-tern))))
