@@ -2170,7 +2170,7 @@ npm install -g tern
          org-outline-path-complete-in-steps nil)
    (setq org-refile-allow-creating-parent-nodes 'confirm)
    (setq org-refile-targets '(("someday.org" :maxlevel . 1)
-                              ("projects.org" :maxlevel . 2)))
+                              ("projects.org" :maxlevel . 1)))
  #+END_SRC
 
  #+BEGIN_SRC emacs-lisp :tangle yes
