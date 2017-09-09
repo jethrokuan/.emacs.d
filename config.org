@@ -335,6 +335,12 @@ repository.
 
   (bind-key "<f9>" 'jethro/compile jethro-mode-map)
 #+end_src
+** Autosaving
+Auto save all open buffers, when Emacs loses focus.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'focus-out-hook
+            (lambda () (save-some-buffers t)))
+#+END_SRC
 * Appearance
 ** Font
 I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
