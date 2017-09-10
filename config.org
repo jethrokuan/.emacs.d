@@ -2297,6 +2297,10 @@ npm install -g tern
 
    (bind-key "<f10>" 'jethro/switch-to-agenda jethro-mode-map)
  #+END_SRC
+**** Column View
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
+#+END_SRC
 *** Stage 4: Doing
 **** Org-pomodoro
 #+BEGIN_SRC emacs-lisp :tangle yes
