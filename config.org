@@ -1551,6 +1551,15 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+begin_src emacs-lisp :tangle yes
   (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 #+end_src
+** Elixir
+*** elixir-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package elixir-mode)
+#+END_SRC
+*** Alchemist
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package alchemist)
+#+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
@@ -1879,9 +1888,28 @@ npm install -g tern
                 #'jethro/line-align-closing-bracket))
 #+END_SRC
 ** Typescript
+*** typescript-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package typescript-mode)
+#+END_SRC
+
+*** Tide
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
   (use-package tide
-    :mode "\\.ts\\'")
+    :mode "\\.ts\\'"
+    :init
+    (add-hook 'before-save-hook 'tide-format-before-save)
+    (add-hook 'typescript-mode-hook #'setup-tide-mode)
+    :config
+    (setq company-tooltip-align-annotations t))
 #+END_SRC
 ** JSON
    #+begin_src emacs-lisp :tangle yes
