@@ -2250,17 +2250,22 @@ npm install -g tern
 *** Stage 3: Reviewing
 **** Custom agenda Commands
  #+BEGIN_SRC emacs-lisp :tangle yes
-   (setq org-agenda-block-separator " ")
+   (setq org-agenda-block-separator nil)
    (setq jethro/org-agenda-todo-view
          `(" " "Agenda"
            ((agenda ""
                     ((org-agenda-span 'day)
                      (org-deadline-warning-days 365)))
-            (todo "NEXT" 
+            (todo "TODO"
+                  ((org-agenda-overriding-header "To Refile")
+                   (org-agenda-files '("~/.org/gtd/inbox.org"))))
+            (todo "NEXT"
                   ((org-agenda-overriding-header "In Progress")
+                   (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             (todo "TODO"
                   ((org-agenda-overriding-header "Todo")
+                   (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
 
