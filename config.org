@@ -1768,7 +1768,7 @@ This relies on the layout rule to determine indentation
    :config (progn
              (setq scss-compile-at-save nil)))
     #+end_src
-** JS
+** Javascript
 *** JS2-mode
 Here I also added =tern-mode=. This requires the tern executable:
 #+begin_src bash :tangle no
@@ -1877,6 +1877,11 @@ npm install -g tern
     (advice-add #'js-jsx-indent-line
                 :after
                 #'jethro/line-align-closing-bracket))
+#+END_SRC
+** Typescript
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package tide
+    :mode "\\.ts\\'")
 #+END_SRC
 ** JSON
    #+begin_src emacs-lisp :tangle yes
