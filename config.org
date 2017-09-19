@@ -1095,6 +1095,12 @@ Hide details and only show file and folder names.
                 ("P" . dired-ranger-paste)
                 ("M" . dired-ranger-move)))
     #+END_SRC
+*** all-the-icons-dired
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package all-the-icons-dired
+    :init
+    (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+#+END_SRC
 ** hydra window movements
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defhydra jethro/window-movement ()
