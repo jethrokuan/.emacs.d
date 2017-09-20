@@ -2652,6 +2652,12 @@ Useful when handling git merge conflicts.
 
   (bind-key "C-x p p" 'jethro/ivy-persp-switch-project jethro-mode-map)
 #+END_SRC
+*** Magithub
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package magithub
+    :after magit
+    :config (magithub-feature-autoinject t))
+#+END_SRC
 * Miscellaneous
 ** SOS
 Search Stack Overflow
