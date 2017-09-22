@@ -2358,8 +2358,7 @@ npm install -g tern
     (:map jethro-mode-map
           ("C-c n" . deft))
     :config
-    (setq deft-extension "org")
-    (setq deft-text-mode 'org-mode)
+    (setq deft-default-extension "org")
     (setq deft-directory "~/.org/deft/")
     (setq deft-use-filename-as-title t))
 #+END_SRC
