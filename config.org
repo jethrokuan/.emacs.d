@@ -1592,14 +1592,6 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :init
     (add-hook 'haskell-mode-hook 'intero-mode))
 #+END_SRC
-*** Structured Haskell Mode
-This relies on the layout rule to determine indentation
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package shm
-    :init
-    (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-    (add-hook 'haskell-mode-hook 'structured-haskell-mode))
-#+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
      (use-package go-mode
