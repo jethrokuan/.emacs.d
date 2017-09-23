@@ -1254,7 +1254,7 @@ Keep your text indented at all times. Remember to turn this off for indentation-
   (use-package aggressive-indent
     :diminish aggressive-indent-mode
     :config
-    (add-hook 'prog-mode-hook 'aggressive-indent-mode)
+    (add-hook 'after-init-hook 'global-aggressive-indent-mode)
     (setq aggressive-indent-excluded-modes
           '(bibtex-mode
             cider-repl-mode
