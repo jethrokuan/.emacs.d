@@ -1582,9 +1582,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :init
     (add-hook 'haskell-mode-hook
               (lambda ()
-                (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks")))
-    (add-hook 'haskell-mode-hook (lambda ()
-                                   (aggressive-indent-mode -1))))
+                (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks"))))
 #+END_SRC
 *** Intero
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1650,10 +1648,8 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+end_src
 ** Fish
    #+begin_src emacs-lisp :tangle yes
-  (use-package fish-mode
-    :mode ("\\.fish\\'" . fish-mode)
-    :init (add-hook 'fish-mode-hook
-                    (lambda () (aggressive-indent-mode -1))))
+     (use-package fish-mode
+       :mode ("\\.fish\\'" . fish-mode))
    #+end_src
 ** Rust
    #+begin_src emacs-lisp :tangle yes
@@ -1661,10 +1657,6 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   :mode ("\\.rs\\'" . rust-mode))
    #+end_src
 ** Python
-*** Disabling aggressive-indent-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'python-mode-hook (lambda () (aggressive-indent-mode -1)))
-#+END_SRC
 *** Python Path
 #+BEGIN_SRC emacs-lisp :tangle yes
   (eval-after-load "python-mode"
@@ -1675,8 +1667,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package sphinx-doc
     :init
-    (add-hook 'python-mode-hook (lambda ()
-                                  (sphinx-doc-mode 1))))
+    (add-hook 'python-mode-hook 'sphinx-doc-mode))
 #+END_SRC
 *** Anaconda
 #+BEGIN_SRC emacs-lisp :tangle yes
