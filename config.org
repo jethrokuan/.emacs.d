@@ -1435,7 +1435,7 @@ Use this often, and in combination with multiple-cursors.
   (use-package yasnippet
     :diminish yas-global-mode yas-minor-mode
     :init (add-hook 'after-init-hook 'yas-global-mode)
-    :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/")))
+    :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
    #+end_src
 ** Autocompletions with Company
 #+begin_src emacs-lisp :tangle yes
