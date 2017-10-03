@@ -362,24 +362,31 @@ Remove the useless toolbars and splash screens.
   (setq inhibit-startup-message t)
 #+end_src
 
-** Zenburn
+** Theme
+*** Challenger Deep
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package zenburn-theme
-      :init
-      (load-theme 'zenburn t))
-#+END_SRC
-** Tomorrow (Eighties)
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package color-theme-sanityinc-tomorrow
+  (use-package challenger-deep
     :init
-    (load-theme 'sanityinc-tomorrow-eighties t))
+    (load-theme 'challenger-deep t))
 #+END_SRC
-** tao
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package tao-theme
-    :init
-    (load-theme 'tao-yang t))
-#+END_SRC
+*** Zenburn
+ #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package zenburn-theme
+       :init
+       (load-theme 'zenburn t))
+ #+END_SRC
+*** Tomorrow (Eighties)
+ #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package color-theme-sanityinc-tomorrow
+     :init
+     (load-theme 'sanityinc-tomorrow-eighties t))
+ #+END_SRC
+*** tao
+ #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package tao-theme
+     :init
+     (load-theme 'tao-yang t))
+ #+END_SRC
 ** color-identifiers-mode
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package color-identifiers-mode
@@ -2054,6 +2061,16 @@ npm install -g tern
    I added an emacs-lisp easy template for my literate Emacs configuration.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
+#+END_SRC
+** General Org-mode setup
+*** Org Bullets
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-bullets
+    :init
+    (add-hook 'org-mode-hook 'org-bullets-mode)
+    :config
+    (setq org-bullets-bullet-list
+          '("◉" "◎" "⚫" "○" "►" "◇")))
 #+END_SRC
 ** Org Mode for GTD
  This document aims to extensively document my implementation of
