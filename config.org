@@ -34,23 +34,12 @@ maintaining tidiness and performance.
 #+END_SRC
 * EXWM
 #+BEGIN_SRC emacs-lisp :tangle no
-  ;; Disable menu-bar, tool-bar and scroll-bar to increase the usable space
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-
   ;; Shrink fringes to 1 pixel
   (fringe-mode 1)
 
   ;; You may want Emacs to show you the time
   (setq display-time-default-load-average nil)
   (display-time-mode t)
-
-  ;;;; Below are configurations for EXWM
-
-  ;; Add paths (not required if EXWM is installed from GNU ELPA)
-                                          ;(add-to-list 'load-path "/path/to/xelb/")
-                                          ;(add-to-list 'load-path "/path/to/exwm/")
 
   ;; Load EXWM
   (require 'exwm)
@@ -2072,6 +2061,10 @@ npm install -g tern
     (setq org-bullets-bullet-list
           '("◉" "◎" "⚫" "○" "►" "◇")))
 #+END_SRC
+*** Org Diary file
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-diary-file "~/.org/diary.org")
+#+END_SRC
 ** Org Mode for GTD
  This document aims to extensively document my implementation of
  Getting Things Done, a methodology by David Allen. This will always be
@@ -2273,6 +2266,7 @@ npm install -g tern
      (interactive)
      (org-capture nil "i"))
 
+   (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
    (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
    (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
  #+END_SRC
