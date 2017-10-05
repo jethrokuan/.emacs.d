@@ -1381,7 +1381,9 @@ Use this often, and in combination with multiple-cursors.
      (bind-key "M-z" 'zap-up-to-char jethro-mode-map)
    #+end_src
 ** move-text
-#+begin_src emacs-lisp :tangle yes
+I disabled this, because it interferes with some org-mode keybindings,
+and I realise I don't use this as much as I'd like to.
+#+begin_src emacs-lisp :tangle no
   (use-package move-text
     :bind (:map jethro-mode-map
                 ("M-<up>" . move-text-up)
