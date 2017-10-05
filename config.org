@@ -223,6 +223,7 @@ change, the buffers reflect the latest editions as well.
 
 NOTE: This can be quite slow, when the changes are massive across
 branches.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (diminish 'auto-revert-mode)
   (global-auto-revert-mode 1)
@@ -669,7 +670,7 @@ Counsel contains ivy enhancements for commonly-used functions.
   (require 'whitespace)
   (setq whitespace-line-column 80) ;; limit line length
   (setq whitespace-style '(face lines-tail))
-
+  (diminish 'whitespace-mode)
   (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
 ** Modeline
@@ -1389,6 +1390,16 @@ and I realise I don't use this as much as I'd like to.
                 ("M-<up>" . move-text-up)
                 ("M-<down>" . move-text-down)))
 #+end_src
+** ws-butler
+Only lines touched get trimmed. If the white space at end of buffer is
+changed, then blank lines at the end of buffer are truncated
+respecting require-final-newline. Trimming only happens when saving.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ws-butler
+    :diminish 'ws-butler-mode
+    :config
+    (add-hook 'prog-mode-hook 'ws-butler-mode))
+#+END_SRC
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
@@ -1501,6 +1512,7 @@ and I realise I don't use this as much as I'd like to.
 ** Auto-fill-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'text-mode-hook 'auto-fill-mode)
+  (diminish 'auto-fill-mode)
 #+END_SRC
 ** Hippie Expand
 #+BEGIN_SRC emacs-lisp :tangle yes
