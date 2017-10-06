@@ -2269,10 +2269,10 @@ npm install -g tern
      (org-with-wide-buffer   
       (org-agenda-set-tags) 
       (org-agenda-refile nil nil t)
-      (org-mark-ring-push)
-      (org-refile-goto-last-stored)
-      (jethro/org-rename-item)
-      (org-mark-ring-goto)
+      ;; (org-mark-ring-push)
+      ;; (org-refile-goto-last-stored)
+      ;; (jethro/org-rename-item)
+      ;; (org-mark-ring-goto)
       (org-agenda-redo)))
 
    (defun jethro/org-inbox-capture ()
