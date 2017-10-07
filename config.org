@@ -2555,7 +2555,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
            ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
           ("latex-notes"
            "\\documentclass[8pt]{article}
-    \\usepackage[margin={0.3in,0.3in}, a4paper,landscape]{geometry}
+    \\usepackage[margin={0.2in,0.2in}, a4paper,landscape]{geometry}
     \\usepackage{hyperref}
     \\usepackage{amsmath}
     \\usepackage{multicol}
@@ -2570,8 +2570,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}
     \\setlist[itemize]{leftmargin=*}
     \\setlist[enumerate]{leftmargin=*}
-    \\setlength\\columnsep{10pt}
-    \\setlength{\\columnseprule}{1pt}       
+    \\setlength\\columnsep{5pt}
+    \\setlength{\\columnseprule}{1pt}
     \\setlist{nosep}         
     \\usepackage{minted}
     \\usemintedstyle{bw}
