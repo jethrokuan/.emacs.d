@@ -2572,6 +2572,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     \\setlist[enumerate]{leftmargin=*}
     \\setlength\\columnsep{5pt}
     \\setlength{\\columnseprule}{1pt}
+    \\setlength{\\parindent}{0cm}
     \\setlist{nosep}         
     \\usepackage{minted}
     \\usemintedstyle{bw}
