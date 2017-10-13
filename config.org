@@ -1599,6 +1599,14 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package alchemist)
 #+END_SRC
+** Docker
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package docker
+    :commands docker-mode)
+
+  (use-package dockerfile-mode
+    :mode "Dockerfile\\'")
+#+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
