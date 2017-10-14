@@ -1113,6 +1113,16 @@ Hide details and only show file and folder names.
                 ("P" . dired-ranger-paste)
                 ("M" . dired-ranger-move)))
     #+END_SRC
+*** dired-subtree
+The dired-subtree package (part of the magnificent dired hacks) allows
+you to expand subdirectories in place, like a tree structure.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dired-subtree
+    :config
+    (bind-keys :map dired-mode-map
+               ("i" . dired-subtree-insert)
+               (";" . dired-subtree-remove)))
+#+END_SRC
 *** all-the-icons-dired
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package all-the-icons-dired
