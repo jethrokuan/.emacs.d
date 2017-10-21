@@ -2083,6 +2083,11 @@ npm install -g tern
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
 #+END_SRC
+
+** Saner Defaults
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-return-follows-link t)
+#+END_SRC
 ** General Org-mode setup
 *** Org Bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2638,6 +2643,26 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
                                           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
                                            (?p "Export to PDF" jethro/org-multicol-to-pdf))))
 #+end_src
+** Org Mode for Reading papers
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (key-chord-mode 1)
+  (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body)
+
+  (setq org-ref-notes-directory "~/.org/papers/"
+        org-ref-bibliography-notes "~/.org/papers/index.org"
+        org-ref-default-bibliography '("~/.org/papers/index.bib")
+        org-ref-pdf-directory "~/.org/papers/lib/")
+
+  (setq ivy-bibtex-bibliography "~/.org/papers/index.bib" ;; where your references are stored
+        ivy-bibtex-library-path "~/.org/papers/lib/" ;; where your pdfs etc are stored
+        ivy-bibtex-notes-path "~/.org/papers/index.org" ;; where your notes are stored
+        bibtex-completion-bibliography "~/.org/papers/index.bib" ;; writing completion
+        bibtex-completion-notes-path "~/.org/papers/index.org"
+        bibtex-completion-library-path "~/.org/papers/lib/")
+
+  (setq bibtex-completion-pdf-symbol "⌘")
+  (setq bibtex-completion-notes-symbol "✎")
+#+END_SRC
 * Project Management
 ** Version Control
 *** vc
