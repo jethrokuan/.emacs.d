@@ -2158,9 +2158,11 @@ npm install -g tern
    (setq org-capture-templates
          `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
             "* TODO %?
-   Captured %<%Y-%m-%d %H:%M>")
+      Captured %<%Y-%m-%d %H:%M>")
            ("w" "Web site" entry (file "~/.org/deft/websites.org")
-            "* %c\n" :immediate-finish t)))
+            "* %c\n" :immediate-finish t)
+           ("p" "paper" entry (file "~/.org/gtd/inbox.org")
+            "* TODO Read: %:title\n%a" :immediate-finish t)))
  #+END_SRC
 
 *** Stage 2: Processing
