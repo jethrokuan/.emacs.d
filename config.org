@@ -1124,7 +1124,7 @@ you to expand subdirectories in place, like a tree structure.
                (";" . dired-subtree-remove)))
 #+END_SRC
 *** all-the-icons-dired
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package all-the-icons-dired
     :init
     (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
