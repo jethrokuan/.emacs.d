@@ -2075,7 +2075,11 @@ npm install -g tern
            ("C-c l" . org-store-link)
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)
-           ("C-c c" . org-capture)))
+           ("C-c c" . org-capture))
+     :bind
+     (:map org-mode-map
+           ("M-n" . outline-next-visible-heading)
+           ("M-p" . outline-previous-visible-heading)))
  #+END_SRC
 
 ** Easy Templates
