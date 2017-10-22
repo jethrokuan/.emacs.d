@@ -568,6 +568,13 @@ Use =with-editor= to use current Emacs to open everything that invokes
   (use-package elfeed
     :bind ("<f6>" . elfeed))
 #+END_SRC
+*** elfeed-org
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package elfeed-org
+    :config
+    (elfeed-org)
+    (setq rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
+#+END_SRC
 * Core Utilities
 ** Dash
 Dash is a library used to simplify Emacs-lisp development. Some custom
