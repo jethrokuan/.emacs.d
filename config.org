@@ -816,6 +816,12 @@ Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
                             (format "%s %s %s" left padding right))))))
 #+END_SRC
 * Moving Around
+** Keychord
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package key-chord
+    :config
+    (key-chord-mode 1))
+#+END_SRC
 ** Layouts
 *** Eyebrowse
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2681,7 +2687,6 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
           bibtex-autokey-titlewords-stretch 1
           bibtex-autokey-titleword-length 5)
     (require 'org-ref-bibtex)
-    (key-chord-mode 1)
     (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body) 
     (require 'org-ref-url-utils)
     (require 'org-ref-arxiv))
