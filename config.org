@@ -2658,23 +2658,33 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 #+end_src
 ** Org Mode for Reading papers
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (key-chord-mode 1)
-  (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body)
-
-  (setq org-ref-notes-directory "~/.org/papers/"
-        org-ref-bibliography-notes "~/.org/papers/index.org"
-        org-ref-default-bibliography '("~/.org/papers/index.bib")
-        org-ref-pdf-directory "~/.org/papers/lib/")
-
-  (setq ivy-bibtex-bibliography "~/.org/papers/index.bib" ;; where your references are stored
-        ivy-bibtex-library-path "~/.org/papers/lib/" ;; where your pdfs etc are stored
-        ivy-bibtex-notes-path "~/.org/papers/index.org" ;; where your notes are stored
-        bibtex-completion-bibliography "~/.org/papers/index.bib" ;; writing completion
-        bibtex-completion-notes-path "~/.org/papers/index.org"
-        bibtex-completion-library-path "~/.org/papers/lib/")
-
-  (setq bibtex-completion-pdf-symbol "⌘")
-  (setq bibtex-completion-notes-symbol "✎")
+  (use-package org-ref
+    :after org
+    :config
+    (setq org-ref-notes-directory "~/.org/papers/"
+          org-ref-bibliography-notes "~/.org/papers/index.org"
+          org-ref-default-bibliography '("~/.org/papers/index.bib")
+          org-ref-pdf-directory "~/.org/papers/lib/")
+    (setq ivy-bibtex-bibliography "~/.org/papers/index.bib" ;; where your references are stored
+          ivy-bibtex-library-path "~/.org/papers/lib/" ;; where your pdfs etc are stored
+          ivy-bibtex-notes-path "~/.org/papers/index.org" ;; where your notes are stored
+          bibtex-completion-bibliography "~/.org/papers/index.bib" ;; writing completion
+          bibtex-completion-notes-path "~/.org/papers/index.org"
+          bibtex-completion-library-path "~/.org/papers/lib/")
+    (setq bibtex-completion-pdf-symbol "⌘")
+    (setq bibtex-completion-notes-symbol "✎")
+    (setq bibtex-autokey-year-length 4
+          bibtex-autokey-name-year-separator "-"
+          bibtex-autokey-year-title-separator "-"
+          bibtex-autokey-titleword-separator "-"
+          bibtex-autokey-titlewords 2
+          bibtex-autokey-titlewords-stretch 1
+          bibtex-autokey-titleword-length 5)
+    (require 'org-ref-bibtex)
+    (key-chord-mode 1)
+    (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body) 
+    (require 'org-ref-url-utils)
+    (require 'org-ref-arxiv))
 #+END_SRC
 * Project Management
 ** Version Control
