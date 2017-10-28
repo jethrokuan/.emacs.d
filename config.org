@@ -2899,12 +2899,11 @@ Search Stack Overflow
     :init
     (add-hook 'after-init-hook 'which-key-mode))
 #+end_src
-** darkroom
+** Olivetti
 #+begin_src emacs-lisp :tangle yes
-  (use-package darkroom
+  (use-package olivetti
     :bind (:map jethro-mode-map
-                ("C-c M d" . darkroom-mode)
-                ("C-c M t" . darkroom-tentative-mode)))
+                ("C-c M o" . olivetti-mode)))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
