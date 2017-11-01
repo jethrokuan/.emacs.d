@@ -452,12 +452,62 @@ Because fish doesn't play well with Emacs.
 ** Eshell configuration
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'em-smart)
-  (setq eshell-glob-case-insensitive nil
+
+  (setq eshell-scroll-to-bottom-on-input 'all
+        eshell-hist-ignoredups t
+        eshell-save-history-on-exit t
+        eshell-prefer-lisp-functions nil
+        eshell-destroy-buffer-when-process-dies t
+        eshell-glob-case-insensitive nil
         eshell-error-if-no-glob nil
-        eshell-scroll-to-bottom-on-input nil
         eshell-where-to-jump 'begin
         eshell-review-quick-commands nil
         eshell-smart-space-goes-to-end t)
+#+END_SRC
+** Fish-like auto-completion
+This was obtained from http://whyarethingsthewaytheyare.com/fishlike-autosuggestions-in-eshell/.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (with-eval-after-load 'company
+    (defun company-eshell-autosuggest-candidates (prefix)
+      (let* ((history
+              (cl-remove-duplicates
+               (mapcar (lambda (str)
+                         (string-trim (substring-no-properties str)))
+                       (ring-elements eshell-history-ring))
+               :from-end t
+               :test #'string=))
+             (most-similar (cl-find-if
+                            (lambda (str)
+                              (string-prefix-p prefix str))
+                            history)))
+        (when most-similar
+          `(,most-similar))))
+
+    (defun company-eshell-autosuggest--prefix ()
+      (let ((prefix
+             (string-trim-left
+              (buffer-substring-no-properties
+               (save-excursion
+                 (eshell-bol))
+               (save-excursion (end-of-line) (point))))))
+        (if (not (string-empty-p prefix))
+            prefix
+          'stop)))
+
+    (defun company-eshell-autosuggest (command &optional arg &rest ignored)
+      (interactive (list 'interactive))
+      (cl-case command
+        (interactive (company-begin-backend 'company-eshell))
+        (prefix (and (eq major-mode 'eshell-mode)
+                     (company-eshell-autosuggest--prefix)))
+        (candidates (company-eshell-autosuggest-candidates arg)))))
+
+  (defun setup-eshell-autosuggest ()
+    (require 'company)
+    (setq-local company-backends '(company-eshell-autosuggest))
+    (setq-local company-frontends '(company-preview-frontend)))
+
+  (add-hook 'eshell-mode-hook 'setup-eshell-autosuggest)
 #+END_SRC
 ** Eshell theme
 #+BEGIN_SRC emacs-lisp :tangle yes
