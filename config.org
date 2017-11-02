@@ -791,7 +791,7 @@ Show flycheck status in modeline.
                   (:eval (jethro/modeline-eyebrowse))))
 #+END_SRC
 *** Thick modeline bar
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle yes
   (custom-set-faces
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 #+END_SRC
