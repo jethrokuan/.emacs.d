@@ -772,15 +772,23 @@ Show flycheck status in modeline.
                     'local-map (make-mode-line-mouse-map
                                 'mouse-1 #'flycheck-list-errors)))))
 #+END_SRC
+*** Eyebrowse
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/modeline-eyebrowse ()
+    (when eyebrowse-mode
+      (eyebrowse-mode-line-indicator)))
+#+END_SRC
 *** Modeline Format
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq-default mode-line-format
                 `("%e"
                   mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
-                  " " 
+                  "  " 
                   (:eval (jethro/modeline-flycheck-status)) 
-                  " "
-                  (vc-mode vc-mode)))
+                  "  "
+                  (vc-mode vc-mode)
+                  "  "
+                  (:eval (jethro/modeline-eyebrowse))))
 #+END_SRC
 *** Thick modeline bar
 #+BEGIN_SRC emacs-lisp :tangle no
