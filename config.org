@@ -354,13 +354,13 @@ Remove the useless toolbars and splash screens.
 
 ** Theme
 *** Challenger Deep
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package challenger-deep
     :init
     (load-theme 'challenger-deep t))
 #+END_SRC
 *** Zenburn
- #+BEGIN_SRC emacs-lisp :tangle no
+ #+BEGIN_SRC emacs-lisp :tangle yes
    (use-package zenburn-theme
        :init
        (load-theme 'zenburn t))
@@ -731,6 +731,57 @@ Counsel contains ivy enhancements for commonly-used functions.
   (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
 ** Modeline
+*** Flycheck
+Show flycheck status in modeline.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defface jethro/ok-face
+    '((t :foreground "#bfebbf"))
+    "Face for ok status in the mode-line.")
+
+  (defface jethro/warning-face
+    '((t :foreground "#dfaf8f"))
+    "Face for warning status in the mode-line.")
+
+  (defface jethro/error-face
+    '((t :foreground "#cc9393"))
+    "Face for error status in the mode-line.")
+
+  (defun jethro/modeline-flycheck-status ()
+    "Return the status of flycheck to be displayed in the mode-line."
+    (when flycheck-mode
+      (let* ((text (pcase flycheck-last-status-change
+                     (`finished (if flycheck-current-errors
+                                    (let ((count (let-alist (flycheck-count-errors flycheck-current-errors)
+                                                   (+ (or .warning 0) (or .error 0)))))
+                                      (propertize (format "✖ %s Issue%s" count (if (eq 1 count) "" "s"))
+                                                  'face 'jethro/warning-face))
+                                  (propertize "✔ No Issues"
+                                              'face 'jethro/ok-face)))
+                     (`running     (propertize "⟲ Running"
+                                               'face 'jethro/warning-face))
+                     (`no-checker  (propertize "⚠ No Checker"
+                                               'face 'jethro/warning-face))
+                     (`not-checked "✖ Disabled")
+                     (`errored     (propertize "⚠ Error"
+                                               'face 'jethro/error-face))
+                     (`interrupted (propertize "⛔ Interrupted"
+                                               'face 'jethro/error-face))
+                     (`suspicious  ""))))
+        (propertize text
+                    'help-echo "Show Flycheck Errors"
+                    'local-map (make-mode-line-mouse-map
+                                'mouse-1 #'flycheck-list-errors)))))
+#+END_SRC
+*** Modeline Format
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq-default mode-line-format
+                `("%e"
+                  mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
+                  " " 
+                  (:eval (jethro/modeline-flycheck-status)) 
+                  " "
+                  (vc-mode vc-mode)))
+#+END_SRC
 *** Thick modeline bar
 #+BEGIN_SRC emacs-lisp :tangle no
   (custom-set-faces
