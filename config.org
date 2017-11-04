@@ -2267,6 +2267,23 @@ npm install -g tern
            ("M-n" . outline-next-visible-heading)
            ("M-p" . outline-previous-visible-heading)))
  #+END_SRC
+** Variable Pitch Mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'org-mode-hook
+            '(lambda ()
+               (variable-pitch-mode 1) ;; All fonts with variable pitch.
+               (mapc
+                (lambda (face) ;; Other fonts with fixed-pitch.
+                  (set-face-attribute face nil :inherit 'fixed-pitch))
+                (list 'org-code
+                      'org-link
+                      'org-block
+                      'org-table
+                      'org-block-begin-line
+                      'org-block-end-line
+                      'org-meta-line
+                      'org-document-info-keyword))))
+#+END_SRC
 ** Easy Templates
    I added an emacs-lisp easy template for my literate Emacs configuration.
 #+BEGIN_SRC emacs-lisp :tangle yes
