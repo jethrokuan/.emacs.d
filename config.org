@@ -2326,6 +2326,13 @@ npm install -g tern
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-diary-file "~/.org/diary.org")
 #+END_SRC
+** Org Download
+This extension facilitates moving images from point A to point B.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-download
+    :config
+    (setq org-download-image-dir "./images"))
+#+END_SRC
 ** Org Mode for GTD
  This document aims to extensively document my implementation of
  Getting Things Done, a methodology by David Allen. This will always be
