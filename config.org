@@ -1487,6 +1487,7 @@ Use this often, and in combination with multiple-cursors.
     :init
     (add-hook 'after-init-hook 'smartparens-global-strict-mode)
     :config
+    (require 'smartparens-config)
     (defhydra jethro/smartparens (:hint nil)
       "
   Sexps (quit with _q_)
@@ -2266,7 +2267,6 @@ npm install -g tern
            ("M-n" . outline-next-visible-heading)
            ("M-p" . outline-previous-visible-heading)))
  #+END_SRC
-
 ** Easy Templates
    I added an emacs-lisp easy template for my literate Emacs configuration.
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2719,27 +2719,27 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
   (setq org-latex-classes
         '(("article"
-           "\\documentclass[8pt]{article}
-  \\usepackage[margin={0.8in,1in}, a4paper]{geometry}
-  \\usepackage{booktabs}
+           "\\documentclass{article}
+  \\usepackage[margin=1in]{geometry}
+  \\usepackage{amsmath,amsthm,amssymb}
+
+  \\newcommand{\N}{\mathbb{N}}
+  \\newcommand{\Z}{\mathbb{Z}}
+
   \\usepackage{hyperref}
   \\usepackage{minted}
   \\usepackage{tabularx}
   \\usepackage{parskip}
+  \\linespread{1.1}
+  \\renewcommand\\headrulewidth{0.4pt}
+  \\renewcommand\\footrulewidth{0.4pt}
   \\setlength\\columnsep{10pt}
-  \\setlength{\\columnseprule}{1pt}
-  \\usepackage[compact]{titlesec}
-  \\titlespacing{\\section}{0pt}{*2}{*0}
-  \\titlespacing{\\subsection}{0pt}{*2}{*0}
-  \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
-  \\titleformat*{\\section}{\\large\\bfseries}
-  \\titleformat*{\\subsection}{\\normalsize\\bfseries}
-  \\titleformat*{\\subsubsection}{\\normalsize\\bfseries}"
+  \\setlength{\\columnseprule}{1pt}"
            ("\\section{%s}" . "\\section*{%s}")
            ("\\subsection{%s}" . "\\subsection*{%s}")
            ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
            ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
           ("book"
            "\\documentclass[10pt]{memoir}
                           \\usepackage{charter}
