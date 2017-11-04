@@ -2331,8 +2331,7 @@ This extension facilitates moving images from point A to point B.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-download
     :config
-    (setq org-download-image-dir "./images")
-    (setq org-download-screenshot-file "./images/screenshot.png"))
+    (setq org-download-image-dir "./images"))
 #+END_SRC
 ** Org Mode for GTD
  This document aims to extensively document my implementation of
