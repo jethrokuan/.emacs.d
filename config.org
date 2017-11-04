@@ -780,15 +780,29 @@ Show flycheck status in modeline.
 #+END_SRC
 *** Modeline Format
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/org-mode-line-string ()
+    "Returns org-mode-line-string if bound, empty
+  string if not"
+    (if (boundp 'org-mode-line-string)
+        org-mode-line-string
+      ""))
+
+  (defun jethro/org-pomodoro-mode-line ()
+    "Returns org-pomodoro-mode-line string if bound, empty
+  string if not"
+    (if (boundp 'org-pomodoro-mode-line)
+        org-pomodoro-mode-line
+      ""))
+
   (setq-default mode-line-format
                 `("%e"
                   mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
                   " " 
                   (:eval (jethro/modeline-flycheck-status))
                   " "
-                  (:eval org-mode-line-string)
+                  (:eval (jethro/org-mode-line-string))
                   " "
-                  (:eval org-pomodoro-mode-line)
+                  (:eval (jethro/org-pomodoro-mode-line))
                   " "
                   (vc-mode vc-mode)
                   " "
