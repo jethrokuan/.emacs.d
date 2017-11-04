@@ -788,6 +788,8 @@ Show flycheck status in modeline.
                   " "
                   (:eval org-mode-line-string)
                   " "
+                  (:eval org-pomodoro-mode-line)
+                  " "
                   (vc-mode vc-mode)
                   " "
                   (:eval (jethro/modeline-eyebrowse))))
@@ -2610,7 +2612,9 @@ npm install -g tern
   (use-package org-pomodoro
     :bind
     (:map org-agenda-mode-map
-          (("I" . org-pomodoro))))
+          (("I" . org-pomodoro)))
+    :config
+    (setq org-pomodoro-format "%s"))
 #+END_SRC
 ** Org Mode for Note taking
 *** Deft
