@@ -2255,64 +2255,52 @@ npm install -g tern
   (use-package yaml-mode
     :mode ("\\.yaml\\'" . yaml-mode))
 #+END_SRC
+** PDFs
+We use [[https://github.com/politza/pdf-tools][pdf-tools]] for PDF viewing, which has first class support for
+highlighting and annotations.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package pdf-tools
+    :defer 10
+    :config
+    (pdf-tools-install))
+#+END_SRC
 * Org-Mode
 ** Setup
- We use =org-plus-contrib=, which contains several contrib plugins that
- may come in handy later, including =org-drill= and some =org-babel=
- language support.
+*** Basics
+  We use =org-plus-contrib=, which contains several contrib plugins that
+  may come in handy later, including =org-drill= and some =org-babel=
+  language support.
 
- To install =org-plus-contrib=, one has to add the package archive to
- Emacs. This is typically where you also add MELPA.
+  To install =org-plus-contrib=, one has to add the package archive to
+  Emacs. This is typically where you also add MELPA.
 
- #+BEGIN_SRC emacs-lisp :tangle no
- (when (>= emacs-major-version 24)
-   (require 'package)
-   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-   (package-initialize))
- #+END_SRC
+  #+BEGIN_SRC emacs-lisp :tangle no
+  (when (>= emacs-major-version 24)
+    (require 'package)
+    (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+    (package-initialize))
+  #+END_SRC
 
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package org-plus-contrib
+      :bind
+      (:map jethro-mode-map
+            ("C-c l" . org-store-link)
+            ("C-c a" . org-agenda)
+            ("C-c b" . org-iswitchb)
+            ("C-c c" . org-capture))
+      :bind
+      (:map org-mode-map
+            ("M-n" . outline-next-visible-heading)
+            ("M-p" . outline-previous-visible-heading)))
+  #+END_SRC
+
+*** Saner Defaults
  #+BEGIN_SRC emacs-lisp :tangle yes
-   (use-package org-plus-contrib
-     :bind
-     (:map jethro-mode-map
-           ("C-c l" . org-store-link)
-           ("C-c a" . org-agenda)
-           ("C-c b" . org-iswitchb)
-           ("C-c c" . org-capture))
-     :bind
-     (:map org-mode-map
-           ("M-n" . outline-next-visible-heading)
-           ("M-p" . outline-previous-visible-heading)))
+   (setq org-return-follows-link t)
  #+END_SRC
-** Variable Pitch Mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'org-mode-hook
-            '(lambda ()
-               (variable-pitch-mode 1) ;; All fonts with variable pitch.
-               (mapc
-                (lambda (face) ;; Other fonts with fixed-pitch.
-                  (set-face-attribute face nil :inherit 'fixed-pitch))
-                (list 'org-code
-                      'org-link
-                      'org-block
-                      'org-table
-                      'org-block-begin-line
-                      'org-block-end-line
-                      'org-meta-line
-                      'org-document-info-keyword))))
-#+END_SRC
-** Easy Templates
-   I added an emacs-lisp easy template for my literate Emacs configuration.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
-#+END_SRC
-
-** Saner Defaults
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-return-follows-link t)
-#+END_SRC
-** General Org-mode setup
 *** Org Bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-bullets
@@ -2326,13 +2314,35 @@ npm install -g tern
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-diary-file "~/.org/diary.org")
 #+END_SRC
-** Org Download
-This extension facilitates moving images from point A to point B.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-download
-    :config
-    (setq org-download-image-dir "./images"))
-#+END_SRC
+*** Variable Pitch Mode
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (add-hook 'org-mode-hook
+             '(lambda ()
+                (variable-pitch-mode 1) ;; All fonts with variable pitch.
+                (mapc
+                 (lambda (face) ;; Other fonts with fixed-pitch.
+                   (set-face-attribute face nil :inherit 'fixed-pitch))
+                 (list 'org-code
+                       'org-link
+                       'org-block
+                       'org-table
+                       'org-block-begin-line
+                       'org-block-end-line
+                       'org-meta-line
+                       'org-document-info-keyword))))
+ #+END_SRC
+*** Easy Templates
+    I added an emacs-lisp easy template for my literate Emacs configuration.
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
+ #+END_SRC
+*** Org Download
+ This extension facilitates moving images from point A to point B.
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (use-package org-download
+     :config
+     (setq org-download-image-dir "./images"))
+ #+END_SRC
 ** Org Mode for GTD
  This document aims to extensively document my implementation of
  Getting Things Done, a methodology by David Allen. This will always be
