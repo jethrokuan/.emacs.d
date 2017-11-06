@@ -2595,7 +2595,8 @@ highlighting and annotations.
             (todo "NEXT"
                   ((org-agenda-overriding-header "In Progress")
                    (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
-                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+                   ;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
+                   ))
             (todo "TODO"
                   ((org-agenda-overriding-header "Todo")
                    (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
