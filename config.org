@@ -2259,7 +2259,17 @@ highlighting and annotations.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package pdf-tools
     :defer 10
+    :bind
+    (:map pdf-view-mode-map
+          (("h" . pdf-annot-add-highlight-markup-annotation)
+           ("t" . pdf-annot-add-text-annotation)
+           ("D" . pdf-annot-delete)
+           ("C-s" . isearch-forward)))
     :config
+    ;; More fine-grained resizing (10%)
+    (setq pdf-view-resize-factor 1.1)
+
+    ;; Install pdf tools
     (pdf-tools-install))
 #+END_SRC
 * Org-Mode
