@@ -2639,7 +2639,7 @@ highlighting and annotations.
      (org-agenda nil " ")
      (delete-other-windows))
 
-   (bind-key "<f10>" 'jethro/switch-to-agenda jethro-mode-map)
+   (bind-key "<f1>" 'jethro/switch-to-agenda jethro-mode-map)
  #+END_SRC
 **** Column View
 #+BEGIN_SRC emacs-lisp :tangle yes
