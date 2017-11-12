@@ -1478,9 +1478,8 @@ Use this often, and in combination with multiple-cursors.
 ** smartparens
 #+begin_src emacs-lisp :tangle yes
   (use-package smartparens
-    :bind (("C-c h S" . jethro/smartparens/body)
-           (:map smartparens-mode-map
-                 ("C-M-f" . sp-forward-sexp)
+    :bind (:map smartparens-mode-map
+                (("C-M-f" . sp-forward-sexp)
                  ("C-M-b" . sp-backward-sexp)
                  ("C-M-u" . sp-backward-up-sexp)
                  ("C-M-d" . sp-down-sexp)
