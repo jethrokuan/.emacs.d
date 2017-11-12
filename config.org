@@ -2410,7 +2410,7 @@ highlighting and annotations.
            ("w" "Web site" entry (file "~/.org/deft/websites.org")
             "* %c\n" :immediate-finish t)
            ("p" "paper" entry (file+headline "~/.org/gtd/projects.org" "Reading")
-            "* TODO Read: %:title :@home:@school: \n%a" :immediate-finish t)))
+            "* TODO Read: %(jethro/trim-citation-title \"%:title\") :@home:@school: \n%a" :immediate-finish t)))
  #+END_SRC
 
 *** Stage 2: Processing
@@ -2925,12 +2925,25 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     (require 'org-ref-url-utils)
     (require 'org-ref-arxiv))
 #+END_SRC
+*** Trimming citation titles
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/trim-citation-title (title)
+    "Removes newlines and curly braces and truncates long titles."
+    (let* ((title (if (string-match-p "\n" title)
+                      (replace-regexp-in-string "\n[ ]*" " " (substring title 1 -1))
+                    title))
+           (len (length title))
+           (end (min len 75)))
+      (substring title 0 end)))
+#+END_SRC
 *** Custom Arxiv Fetch Function
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/get-arxiv-paper (url)
+  (defun jethro/get-arxiv-paper ()
     "Fetches Arxiv paper, and adds it to inbox."
-    (interactive "sArxiv: ")
-    (let* ((pos 0)
+    (interactive)  
+    (require 'org-ref-arxiv)
+    (let* ((url (read-string "Arxiv:" (thing-at-point 'url)))
+           (pos 0)
            (bibfile (car org-ref-default-bibliography))
            (pdfdir org-ref-pdf-directory)
            (regexp "\\w+\\.\\w+$")
@@ -2943,6 +2956,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
         (org-capture nil "p"))))
 
   (bind-key "C-x \\" 'jethro/get-arxiv-paper jethro-mode-map)
+
 #+END_SRC
 * Project Management
 ** Version Control
