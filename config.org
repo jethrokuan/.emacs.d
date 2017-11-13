@@ -1941,7 +1941,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+end_src
 ** CSS
 *** Rainbow-mode
-    #+begin_src emacs-lisp :tangle no
+    #+begin_src emacs-lisp :tangle yes
    (use-package rainbow-mode
      :diminish rainbow-mode
      :config
