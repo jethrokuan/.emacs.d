@@ -2271,6 +2271,11 @@ highlighting and annotations.
     ;; Install pdf tools
     (pdf-tools-install))
 #+END_SRC
+** Scala
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ensime)
+#+END_SRC
+
 * Org-Mode
 ** Setup
 *** Basics
