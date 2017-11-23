@@ -703,13 +703,15 @@ Counsel contains ivy enhancements for commonly-used functions.
     (setq ivy-use-virtual-buffers t)
     (setq ivy-display-style 'fancy)
     (setq ivy-initial-inputs-alist nil)
+    (setq ivy-use-selectable-prompt t)
     (setq ivy-re-builders-alist
           '((ivy-switch-buffer . ivy--regex-plus)
             (swiper . ivy--regex-plus)
             (t . ivy--regex-fuzzy))) 
     (ivy-set-actions
      t
-     '(("I" insert "insert"))))
+     '(("I" insert "insert")))
+     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
    #+end_src
 *** wgrep
 #+BEGIN_SRC emacs-lisp :tangle yes
