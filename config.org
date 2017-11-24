@@ -2272,7 +2272,7 @@ highlighting and annotations.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package pdf-tools
-    :defer 10
+    :mode (("\\.pdf\\'" . pdf-view-mode))
     :bind
     (:map pdf-view-mode-map
           (("h" . pdf-annot-add-highlight-markup-annotation)
