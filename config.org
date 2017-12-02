@@ -33,7 +33,7 @@ maintaining tidiness and performance.
   (setq use-package-always-ensure t))
 #+END_SRC
 * EXWM
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle yes
   ;; Shrink fringes to 1 pixel
   (fringe-mode 1)
 
@@ -47,44 +47,11 @@ maintaining tidiness and performance.
   ;; Set the initial number of workspaces.
   (setq exwm-workspace-number 4)
 
-  ;; All buffers created in EXWM mode are named "*EXWM*". You may want to change
-  ;; it in `exwm-update-class-hook' and `exwm-update-title-hook', which are run
-  ;; when a new window class name or title is available. Here's some advice on
-  ;; this subject:
-  ;; + Always use `exwm-workspace-rename-buffer` to avoid naming conflict.
-  ;; + Only renaming buffer in one hook and avoid it in the other. There's no
-  ;;   guarantee on the order in which they are run.
-  ;; + For applications with multiple windows (e.g. GIMP), the class names of all
-  ;;   windows are probably the same. Using window titles for them makes more
-  ;;   sense.
-  ;; + Some application change its title frequently (e.g. browser, terminal).
-  ;;   Its class name may be more suitable for such case.
-  ;; In the following example, we use class names for all windows expect for
-  ;; Java applications and GIMP.
-  (add-hook 'exwm-update-class-hook
-            (lambda ()
-              (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                          (string= "gimp" exwm-instance-name))
-                (exwm-workspace-rename-buffer exwm-class-name))))
-  (add-hook 'exwm-update-title-hook
-            (lambda ()
-              (when (or (not exwm-instance-name)
-                        (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                        (string= "gimp" exwm-instance-name))
-                (exwm-workspace-rename-buffer exwm-title))))
-
   ;; `exwm-input-set-key' allows you to set a global key binding (available in
   ;; any case). Following are a few examples.
   ;; + We always need a way to go back to line-mode from char-mode
   (exwm-input-set-key (kbd "s-r") #'exwm-reset)
-  ;; + Bind a key to switch workspace interactively
-  (exwm-input-set-key (kbd "s-w") #'exwm-workspace-switch)
-  ;; + Bind "s-0" to "s-9" to switch to the corresponding workspace.
-  (dotimes (i 10)
-    (exwm-input-set-key (kbd (format "s-%d" i))
-                        `(lambda ()
-                           (interactive)
-                           (exwm-workspace-switch-create ,i))))
+
   ;; + Application launcher ('M-&' also works if the output buffer does not
   ;;   bother you). Note that there is no need for processes to be created by
   ;;   Emacs.
@@ -97,38 +64,10 @@ maintaining tidiness and performance.
                         (interactive)
                         (shell-command "rofi-pass")))
 
-  ;; The following example demonstrates how to set a key binding only available
-  ;; in line mode. It's simply done by first push the prefix key to
-  ;; `exwm-input-prefix-keys' and then add the key sequence to `exwm-mode-map'.
-  ;; The example shorten 'C-c q' to 'C-q'.
-  (push ?\C-q exwm-input-prefix-keys)
-  (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
-
-  ;; The following example demonstrates how to use simulation keys to mimic the
-  ;; behavior of Emacs. The argument to `exwm-input-set-simulation-keys' is a
-  ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press and
-  ;; DEST is what EXWM actually sends to application. Note that SRC must be a key
-  ;; sequence (of type vector or string), while DEST can also be a single key.
-  (exwm-input-set-simulation-keys
-   '(([?\C-b] . left)
-     ([?\C-f] . right)
-     ([?\C-p] . up)
-     ([?\C-n] . down)
-     ([?\C-a] . home)
-     ([?\C-e] . end)
-     ([?\M-v] . prior)
-     ([?\C-v] . next)
-     ([?\C-d] . delete)
-     ([?\C-k] . (S-end delete))))
-
   ;; You can hide the mode-line of floating X windows by uncommenting the
   ;; following lines
   (add-hook 'exwm-floating-setup-hook #'exwm-layout-hide-mode-line)
   (add-hook 'exwm-floating-exit-hook #'exwm-layout-show-mode-line)
-
-  ;; You can hide the minibuffer and echo area when they're not used, by
-  ;; uncommenting the following line
-  ;; (setq exwm-workspace-minibuffer-position 'bottom)
 
   ;; Do not forget to enable EXWM. It will start by itself when things are ready.
   (exwm-enable)
@@ -663,6 +602,7 @@ Counsel contains ivy enhancements for commonly-used functions.
           ("C-s" . counsel-grep-or-swiper)
           ("C-r" . counsel-grep-or-swiper)
           ("C-c i" . counsel-imenu)
+          ("C-x b" . ivy-switch-buffer)
           ("C-x C-f" . counsel-find-file)
           ("C-x j" . counsel-dired-jump)
           ("C-x l" . counsel-locate)
@@ -711,7 +651,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (ivy-set-actions
      t
      '(("I" insert "insert")))
-     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
+    (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
    #+end_src
 *** wgrep
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2692,6 +2632,24 @@ highlighting and annotations.
     (interactive)
     (org-html-export-to-html t t))
 #+END_SRC
+*** Publishing
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'ox-publish)
+  (setq org-publish-project-alist
+        '(("org-notes"
+           :base-directory "~/.org/deft/"
+           :base-extension "org"
+           :publishing-directory "~/.org/deft/html/"
+           :recursive t
+           :publishing-function org-html-publish-to-html
+           :headline-levels 4
+           :html-preamble (concat "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/htmlize.css'/>"
+                                  "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/readtheorg.css'/>"
+                                  "<script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>"
+                                  "<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>"
+                                  "<script type='text/javascript' src='http://www.pirilampo.org/styles/lib/js/jquery.stickytableheaders.js'></script>"
+                                  "<script type='text/javascript' src='http://www.pirilampo.org/styles/readtheorg/js/readtheorg.js'></script>"))))
+#+END_SRC
 ** Org Mode for Blogging
 *** Blog Mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2850,7 +2808,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
            ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
           ("latex-notes"
            "\\documentclass[8pt]{article}
-    \\usepackage[margin={0.2in,0.2in}, a4paper,landscape]{geometry}
+    \\usepackage[margin={0.1in,0.1in}, a4paper,landscape]{geometry}
     \\usepackage{hyperref}
     \\usepackage{amsmath}
     \\usepackage{multicol}
@@ -2868,7 +2826,9 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     \\setlength\\columnsep{5pt}
     \\setlength{\\columnseprule}{1pt}
     \\setlength{\\parindent}{0cm}
-    \\setlist{nosep}         
+    \\usepackage{setspace}
+    \\singlespacing
+    \\setlist{nosep}
     \\usepackage{minted}
     \\usemintedstyle{bw}
     \\usemintedstyle[java]{bw}
