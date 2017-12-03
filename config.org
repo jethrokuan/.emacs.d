@@ -45,12 +45,34 @@ maintaining tidiness and performance.
   (require 'exwm)
 
   ;; Set the initial number of workspaces.
-  (setq exwm-workspace-number 4)
+  (setq exwm-workspace-number 1)
 
   ;; `exwm-input-set-key' allows you to set a global key binding (available in
   ;; any case). Following are a few examples.
   ;; + We always need a way to go back to line-mode from char-mode
   (exwm-input-set-key (kbd "s-r") #'exwm-reset)
+
+
+  (exwm-input-set-simulation-keys
+   (mapcar (lambda (c) (cons (kbd (car c)) (cdr c)))
+           `(("C-b" . left)
+             ("C-f" . right)
+             ("C-p" . up)
+             ("C-n" . down)
+             ("C-a" . home)
+             ("C-e" . end)
+             ("M-v" . prior)
+             ("C-v" . next)
+             ("C-d" . delete)
+             ("C-m" . return)
+             ("C-i" . tab)
+             ("C-g" . escape)
+             ("C-s" . ?\C-f)
+             ("C-y" . ?\C-v)
+             ("M-w" . ?\C-c)
+             ("M-<" . C-home)
+             ("M->" . C-end)
+             ("C-M-h" . C-backspace))))
 
   ;; + Application launcher ('M-&' also works if the output buffer does not
   ;;   bother you). Note that there is no need for processes to be created by
@@ -71,6 +93,59 @@ maintaining tidiness and performance.
 
   ;; Do not forget to enable EXWM. It will start by itself when things are ready.
   (exwm-enable)
+#+END_SRC
+* Pass
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (progn
+    (use-package-ensure-elpa 'password-store 'f 'nil :ensure)
+    (eval-and-compile
+      (add-to-list 'load-path "/home/jethro/.emacs.d/elisp"))
+    (let
+	((now
+	  (current-time)))
+      (message "%s..." "Loading package password-store")
+      (prog1
+	  (if
+	      (not
+	       (require 'password-store nil 't))
+	      (ignore
+	       (message
+		(format "Cannot load %s" 'password-store)))
+	    (let
+		((now
+		  (current-time)))
+	      (message "%s..." "Configuring package password-store")
+	      (prog1
+		  (progn
+		    (condition-case-unless-debug err
+			(require 'password-store)
+		      (error
+		       (ignore
+			(display-warning 'use-package
+					 (format "%s %s: %s" "password-store" ":config"
+						 (error-message-string err))
+					 :error))))
+		    t)
+		(let
+		    ((elapsed
+		      (float-time
+		       (time-subtract
+			(current-time)
+			now))))
+		  (if
+		      (> elapsed 0.1)
+		      (message "%s...done (%.3fs)" "Configuring package password-store" elapsed)
+		    (message "%s...done" "Configuring package password-store"))))))
+	(let
+	    ((elapsed
+	      (float-time
+	       (time-subtract
+		(current-time)
+		now))))
+	  (if
+	      (> elapsed 0.1)
+	      (message "%s...done (%.3fs)" "Loading package password-store" elapsed)
+	    (message "%s...done" "Loading package password-store"))))))
 #+END_SRC
 * Core Layer
 ** User Configuration
@@ -104,36 +179,6 @@ a "path-theme" if you will.
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
-** =jethro-mode-map=
-I defined a minor mode for my own keybindings. This allows me to:
-
-1. Inspect what keybindings I have customized to my own liking
-2. Swap back to vanilla emacs keybindings if I disable =jethro-mode=
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defvar jethro-mode-map (make-sparse-keymap)
-    "Keymap for `jethro-mode'.")
-
-  (define-minor-mode jethro-mode
-    "A minor mode so that my key settings override annoying major modes."
-    ;; If init-value is not set to t, this mode does not get enabled in
-    ;; `fundamental-mode' buffers even after doing \"(global-jethro-mode 1)\".
-    ;; More info: http://emacs.stackexchange.com/q/16693/115
-    :init-value t
-    :lighter    " j"
-    :keymap     jethro-mode-map)
-
-  (define-globalized-minor-mode global-jethro-mode jethro-mode jethro-mode)
-
-  (add-to-list 'emulation-mode-map-alists `((jethro-mode . ,jethro-mode-map)))
-
-  ;; Turn off the minor mode in the minibuffer
-  (defun turn-off-jethro-mode ()
-    "Turn off jethro-mode."
-    (jethro-mode -1))
-
-  (add-hook 'minibuffer-setup-hook #'turn-off-jethro-mode)
-#+END_SRC
 ** Reloading Emacs Config
 I want an easy way to reload my configuration when I change it. I bind
 it to =<f11>=.
@@ -143,7 +188,7 @@ it to =<f11>=.
     (interactive)
     (load-file "~/.emacs.d/init.el"))
 
-  (bind-key "<f11>" 'reload-init jethro-mode-map)
+  (bind-key "<f11>" 'reload-init)
 #+END_SRC
 
 ** Emacs GC settings
@@ -253,7 +298,7 @@ repository.
     (mapcar 'kill-buffer (buffer-list))
     (delete-other-windows))
 
-  (bind-key "C-c !" 'jethro/nuke-all-buffers jethro-mode-map)
+  (bind-key "C-c !" 'jethro/nuke-all-buffers)
 #+end_src
 *** compile with =<f9>=
 #+begin_src emacs-lisp :tangle yes
@@ -262,7 +307,7 @@ repository.
     (setq-local compilation-read-command nil)
     (call-interactively 'compile))
 
-  (bind-key "<f9>" 'jethro/compile jethro-mode-map)
+  (bind-key "<f9>" 'jethro/compile)
 #+end_src
 ** Autosaving
 Auto save all open buffers, when Emacs loses focus.
@@ -477,7 +522,7 @@ This was obtained from http://whyarethingsthewaytheyare.com/fishlike-autosuggest
           (eshell "new")
           (rename-buffer (concat "*eshell: " projectile-name "*"))))))
 
-  (bind-key "C-x m" 'jethro/eshell-here jethro-mode-map)
+  (bind-key "C-x m" 'jethro/eshell-here)
 #+END_SRC
 ** Exiting eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -586,9 +631,8 @@ Flx is required for fuzzy-matching.
 *** Fuzzy Isearch
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package flx-isearch
-    :bind (:map jethro-mode-map
-                ("C-M-s" . flx-isearch-forward)
-                ("C-M-r" . flx-isearch-backward)))
+    :bind (("C-M-s" . flx-isearch-forward)
+           ("C-M-r" . flx-isearch-backward)))
 #+END_SRC
 *** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
@@ -596,32 +640,29 @@ Counsel contains ivy enhancements for commonly-used functions.
   (use-package counsel
     :diminish ivy-mode
     :bind
-    (:map jethro-mode-map
-          ("C-c C-r" . ivy-resume)
-          ("M-a" . counsel-M-x)
-          ("C-s" . counsel-grep-or-swiper)
-          ("C-r" . counsel-grep-or-swiper)
-          ("C-c i" . counsel-imenu)
-          ("C-x b" . ivy-switch-buffer)
-          ("C-x C-f" . counsel-find-file)
-          ("C-x j" . counsel-dired-jump)
-          ("C-x l" . counsel-locate)
-          ("C-c j" . counsel-git)
-          ("C-c f" . counsel-recentf)
-          ("M-y" . counsel-yank-pop)
-          :map swiper-map
-          ("C-r" . ivy-previous-line)
-          :map help-map
-          ("f" . counsel-describe-function)
-          ("v" . counsel-describe-variable)
-          ("l" . counsel-info-lookup-symbol)
-          :map ivy-minibuffer-map
-          ("C-d" . ivy-dired)
-          ("C-o" . ivy-occur)
-          ("<return>" . ivy-alt-done)
-          ("M-<return>" . ivy-immediate-done)
-          :map read-expression-map
-          ("C-r" . counsel-expression-history))
+    (("C-c C-r" . ivy-resume)
+     ("M-a" . counsel-M-x)
+     ("C-s" . counsel-grep-or-swiper)
+     ("C-r" . counsel-grep-or-swiper)
+     ("C-c i" . counsel-imenu)
+     ("C-x b" . ivy-switch-buffer)
+     ("C-x C-f" . counsel-find-file)
+     ("C-x j" . counsel-dired-jump)
+     ("C-x l" . counsel-locate)
+     ("C-c j" . counsel-git)
+     ("C-c f" . counsel-recentf)
+     ("M-y" . counsel-yank-pop)
+     :map help-map
+     ("f" . counsel-describe-function)
+     ("v" . counsel-describe-variable)
+     ("l" . counsel-info-lookup-symbol)
+     :map ivy-minibuffer-map
+     ("C-d" . ivy-dired)
+     ("C-o" . ivy-occur)
+     ("<return>" . ivy-alt-done)
+     ("M-<return>" . ivy-immediate-done)
+     :map read-expression-map
+     ("C-r" . counsel-expression-history))
     :init
     (add-hook 'after-init-hook 'ivy-mode)
     :config
@@ -660,8 +701,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 *** rg
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rg
-    :bind (:map jethro-mode-map
-                ("M-s" . rg)))
+    :bind (("M-s" . rg)))
 #+END_SRC
 * Visual Enhancements
 ** Whitespace-mode
@@ -793,7 +833,7 @@ Show flycheck status in modeline.
       ("i" text-scale-increase "in")
       ("o" text-scale-decrease "out"))
 
-    (bind-key "C-c h z" 'jethro/hydra-zoom/body jethro-mode-map))
+    (bind-key "C-c h z" 'jethro/hydra-zoom/body))
 #+end_src
 ** beacon
 Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
@@ -832,8 +872,7 @@ Highlights recently copied/pasted text.
 ** diff-hl
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package diff-hl
-    :bind (:map jethro-mode-map 
-                ("C-c h v" . jethro/hydra-diff-hl/body))
+    :bind (("C-c h v" . jethro/hydra-diff-hl/body))
     :init 
     (defconst jethro/diff-hl-mode-hooks '(emacs-lisp-mode-hook
                                           conf-space-mode-hook ;.tmux.conf
@@ -861,6 +900,7 @@ Highlights recently copied/pasted text.
       ("q" nil "cancel"))
 
     (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
+#+END_SRC
 *** Simple Custom mode-line
 Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -959,17 +999,16 @@ Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
 *** Eyebrowse
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eyebrowse
-    :bind (:map jethro-mode-map
-                ("M-0" . eyebrowse-switch-to-window-config-0)
-                ("M-1" . eyebrowse-switch-to-window-config-1)
-                ("M-2" . eyebrowse-switch-to-window-config-2)
-                ("M-3" . eyebrowse-switch-to-window-config-3)
-                ("M-4" . eyebrowse-switch-to-window-config-4)
-                ("M-5" . eyebrowse-switch-to-window-config-5)
-                ("M-6" . eyebrowse-switch-to-window-config-6)
-                ("M-7" . eyebrowse-switch-to-window-config-7)
-                ("M-8" . eyebrowse-switch-to-window-config-8)
-                ("M-9" . eyebrowse-switch-to-window-config-9))
+    :bind (("M-0" . eyebrowse-switch-to-window-config-0)
+           ("M-1" . eyebrowse-switch-to-window-config-1)
+           ("M-2" . eyebrowse-switch-to-window-config-2)
+           ("M-3" . eyebrowse-switch-to-window-config-3)
+           ("M-4" . eyebrowse-switch-to-window-config-4)
+           ("M-5" . eyebrowse-switch-to-window-config-5)
+           ("M-6" . eyebrowse-switch-to-window-config-6)
+           ("M-7" . eyebrowse-switch-to-window-config-7)
+           ("M-8" . eyebrowse-switch-to-window-config-8)
+           ("M-9" . eyebrowse-switch-to-window-config-9))
     :init
     (add-hook 'after-init-hook 'eyebrowse-mode))
 #+END_SRC
@@ -977,9 +1016,8 @@ Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package persp-mode
     :bind
-    (:map jethro-mode-map
-          ("C-x b" . persp-switch-to-buffer)
-          ("C-x k" . persp-kill-buffer))
+    (("C-x b" . persp-switch-to-buffer)
+     ("C-x k" . persp-kill-buffer))
     :init
     (setq persp-keymap-prefix (kbd "C-c p"))
     (setq persp-lighter
@@ -1129,16 +1167,15 @@ Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
 ** Crux
 #+begin_src emacs-lisp :tangle yes
   (use-package crux 
-    :bind (:map jethro-mode-map
-                ("C-c o" . crux-open-with)
-                ("C-c n" . crux-cleanup-buffer-or-region)
-                ("C-c D" . crux-delete-file-and-buffer)
-                ("C-a" . crux-move-beginning-of-line)
-                ("M-o" . crux-smart-open-line)
-                ("C-c r" . crux-rename-file-and-buffer)
-                ("M-d" . crux-duplicate-current-line-or-region)
-                ("M-D" . crux-duplicate-and-comment-current-line-or-region)
-                ("s-o" . crux-smart-open-line-above)))
+    :bind (("C-c o" . crux-open-with)
+           ("C-c n" . crux-cleanup-buffer-or-region)
+           ("C-c D" . crux-delete-file-and-buffer)
+           ("C-a" . crux-move-beginning-of-line)
+           ("M-o" . crux-smart-open-line)
+           ("C-c r" . crux-rename-file-and-buffer)
+           ("M-d" . crux-duplicate-current-line-or-region)
+           ("M-D" . crux-duplicate-and-comment-current-line-or-region)
+           ("s-o" . crux-smart-open-line-above)))
 
 #+end_src
 ** Anzu
@@ -1156,9 +1193,8 @@ Use avy to move between visible text.
 #+begin_src emacs-lisp :tangle yes
   (use-package avy
     :bind
-    (:map jethro-mode-map
-          ("C-'" . avy-goto-char)
-          ("C-," . avy-goto-char-2))
+    (("C-'" . avy-goto-char)
+     ("C-," . avy-goto-char-2))
     :config
     (setq avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 #+end_src
@@ -1290,13 +1326,12 @@ you to expand subdirectories in place, like a tree structure.
     ("d" delete-window "delete")
     ("q" nil))
 
-  (bind-key "M-'" 'jethro/window-movement/body jethro-mode-map)
+  (bind-key "M-'" 'jethro/window-movement/body)
 #+END_SRC
 ** ibuffer
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ibuffer
-    :bind (:map jethro-mode-map
-                ([remap list-buffers] . ibuffer))
+    :bind (([remap list-buffers] . ibuffer))
     :config 
     (setq ibuffer-expert t))
 #+END_SRC
@@ -1333,11 +1368,11 @@ you to expand subdirectories in place, like a tree structure.
           ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
           (t (self-insert-command (or arg 1)))))
 
-  (bind-key "C-%" 'goto-match-paren jethro-mode-map)
+  (bind-key "C-%" 'goto-match-paren)
 #+END_SRC
 ** occur
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (bind-key "C-c C-o" 'occur jethro-mode-map)
+  (bind-key "C-c C-o" 'occur)
 #+END_SRC
 * Editing Text
 ** easy-kill
@@ -1349,9 +1384,8 @@ you to expand subdirectories in place, like a tree structure.
 ** visual-regexp
 #+begin_src emacs-lisp :tangle yes
   (use-package visual-regexp
-    :bind (:map jethro-mode-map
-                ("C-M-%" . vr/query-replace)
-                ("C-c m" . vr/mc-mark)))
+    :bind (("C-M-%" . vr/query-replace)
+           ("C-c m" . vr/mc-mark)))
 #+end_src
 ** Align Regexp
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1420,7 +1454,7 @@ you to expand subdirectories in place, like a tree structure.
   (define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
   (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
 
-  (bind-key "C-x a" 'align-regexp-map jethro-mode-map)
+  (bind-key "C-x a" 'align-regexp-map)
 #+END_SRC
 ** aggressive-indent
 Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
@@ -1468,18 +1502,16 @@ Keep your text indented at all times. Remember to turn this off for indentation-
 A port of Sublime Text's multiple-cursors functionality.
 #+begin_src emacs-lisp :tangle yes
   (use-package multiple-cursors
-    :bind (:map jethro-mode-map
-                ("C-M-c" . mc/edit-lines)
-                ("C->" . mc/mark-next-like-this)
-                ("C-<" . mc/mark-previous-like-this)
-                ("C-c C-<" . mc/mark-all-like-this)))
+    :bind (("C-M-c" . mc/edit-lines)
+           ("C->" . mc/mark-next-like-this)
+           ("C-<" . mc/mark-previous-like-this)
+           ("C-c C-<" . mc/mark-all-like-this)))
 #+end_src
 ** expand-region
 Use this often, and in combination with multiple-cursors.
 #+begin_src emacs-lisp :tangle yes
   (use-package expand-region
-    :bind (:map jethro-mode-map
-                ("C-=" . er/expand-region)))
+    :bind (("C-=" . er/expand-region)))
 #+end_src
 ** smartparens
 #+begin_src emacs-lisp :tangle yes
@@ -1533,16 +1565,15 @@ Use this often, and in combination with multiple-cursors.
        \(fn arg char)"
        'interactive)
 
-     (bind-key "M-z" 'zap-up-to-char jethro-mode-map)
+     (bind-key "M-z" 'zap-up-to-char)
    #+end_src
 ** move-text
 I disabled this, because it interferes with some org-mode keybindings,
 and I realise I don't use this as much as I'd like to.
 #+begin_src emacs-lisp :tangle no
   (use-package move-text
-    :bind (:map jethro-mode-map
-                ("M-<up>" . move-text-up)
-                ("M-<down>" . move-text-down)))
+    :bind (("M-<up>" . move-text-up)
+           ("M-<down>" . move-text-down)))
 #+end_src
 ** ws-butler
 Only lines touched get trimmed. If the white space at end of buffer is
@@ -1557,8 +1588,7 @@ respecting require-final-newline. Trimming only happens when saving.
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
-       :bind (:map jethro-mode-map
-                   ("C-c h f" . jethro/hydra-flycheck/body))
+       :bind (("C-c h f" . jethro/hydra-flycheck/body))
        :init
        (add-hook 'prog-mode-hook 'flycheck-mode)
        :config
@@ -1598,7 +1628,7 @@ respecting require-final-newline. Trimming only happens when saving.
              (lambda (cmd)
                (direnv-update-environment default-directory)
                (executable-find cmd)))
-  
+
        (defhydra jethro/hydra-flycheck
          (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
                :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
@@ -1719,7 +1749,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     ("k" (lambda () (interactive) (insert "─")) "horizontal ─")
     ("x" (lambda () (interactive) (insert "│")) "vertical │"))
 
-  (bind-key "C-c h d" 'jethro/hydra-draw-box/body jethro-mode-map)
+  (bind-key "C-c h d" 'jethro/hydra-draw-box/body)
 #+END_SRC
 * Environment
 ** Direnv
@@ -2252,11 +2282,10 @@ highlighting and annotations.
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package org-plus-contrib
       :bind
-      (:map jethro-mode-map
-            ("C-c l" . org-store-link)
-            ("C-c a" . org-agenda)
-            ("C-c b" . org-iswitchb)
-            ("C-c c" . org-capture))
+      (("C-c l" . org-store-link)
+       ("C-c a" . org-agenda)
+       ("C-c b" . org-iswitchb)
+       ("C-c c" . org-capture))
       :bind
       (:map org-mode-map
             ("M-n" . outline-next-visible-heading)
@@ -2598,7 +2627,7 @@ highlighting and annotations.
      (org-agenda nil " ")
      (delete-other-windows))
 
-   (bind-key "<f1>" 'jethro/switch-to-agenda jethro-mode-map)
+   (bind-key "<f1>" 'jethro/switch-to-agenda)
  #+END_SRC
 **** Column View
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2619,8 +2648,7 @@ highlighting and annotations.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package deft
     :bind
-    (:map jethro-mode-map
-          ("C-c n" . deft))
+    (("C-c n" . deft))
     :config
     (setq deft-default-extension "org")
     (setq deft-directory "~/.org/deft/")
@@ -2635,6 +2663,7 @@ highlighting and annotations.
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'ox-publish)
+  (setq org-html-htmlize-output-type `nil)
   (setq org-publish-project-alist
         '(("org-notes"
            :base-directory "~/.org/deft/"
@@ -2643,6 +2672,7 @@ highlighting and annotations.
            :recursive t
            :publishing-function org-html-publish-to-html
            :headline-levels 4
+           :auto-sitemap t 
            :html-preamble (concat "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/htmlize.css'/>"
                                   "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/readtheorg.css'/>"
                                   "<script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>"
@@ -2934,7 +2964,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
         (find-file bibfile)
         (org-capture nil "p"))))
 
-  (bind-key "C-x \\" 'jethro/get-arxiv-paper jethro-mode-map)
+  (bind-key "C-x \\" 'jethro/get-arxiv-paper)
 
 #+END_SRC
 * Project Management
@@ -2942,9 +2972,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** vc
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package vc
-    :bind (:map jethro-mode-map
-                ("C-x v =" . jethro/vc-diff)
-                ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
+    :bind (("C-x v =" . jethro/vc-diff)
+           ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
     :config
     (progn
       (defun jethro/vc-diff (no-whitespace)
@@ -2974,8 +3003,7 @@ Useful when handling git merge conflicts.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package smerge-mode
-    :bind (:map jethro-mode-map
-                ("C-c h s" . jethro/hydra-smerge/body))
+    :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
     (progn
       (defun jethro/enable-smerge-maybe ()
@@ -3028,11 +3056,10 @@ Useful when handling git merge conflicts.
 *** Magit
  #+begin_src emacs-lisp :tangle yes
    (use-package magit
-     :bind (:map jethro-mode-map
-                 ("s-g" . magit-status)
-                 ("C-c g" . magit-status)
-                 ("s-G" . magit-blame)
-                 ("C-c G" . magit-blame))
+     :bind (("s-g" . magit-status)
+            ("C-c g" . magit-status)
+            ("s-G" . magit-blame)
+            ("C-c G" . magit-blame))
      :init
      (add-hook 'magit-mode-hook 'hl-line-mode)
      :config
@@ -3048,10 +3075,9 @@ Useful when handling git merge conflicts.
     :config
     (require 'projectile)
     (use-package counsel-projectile
-      :bind (:map jethro-mode-map
-                  ("s-f" . counsel-projectile-find-file)
-                  ("s-b" . counsel-projectile-switch-to-buffer)
-                  ("C-c s" . jethro/counsel-projectile-rg))
+      :bind (("s-f" . counsel-projectile-find-file)
+             ("s-b" . counsel-projectile-switch-to-buffer)
+             ("C-c s" . jethro/counsel-projectile-rg))
       :config
       (defun jethro/counsel-projectile-rg (&optional options)
         "Ivy version of `projectile-rg'."
@@ -3123,7 +3149,7 @@ Useful when handling git merge conflicts.
                           (let ((projectile-completion-system 'ivy))
                             (projectile-switch-project-by-name project))))))
 
-  (bind-key "C-x p p" 'jethro/ivy-persp-switch-project jethro-mode-map)
+  (bind-key "C-x p p" 'jethro/ivy-persp-switch-project)
 #+END_SRC
 *** Magithub (Disabled)
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -3148,8 +3174,7 @@ Search Stack Overflow
 ** Olivetti
 #+begin_src emacs-lisp :tangle yes
   (use-package olivetti
-    :bind (:map jethro-mode-map
-                ("C-c M o" . olivetti-mode)))
+    :bind (("C-c M o" . olivetti-mode)))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
