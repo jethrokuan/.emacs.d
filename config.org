@@ -34,13 +34,6 @@ maintaining tidiness and performance.
 #+END_SRC
 * EXWM
 #+BEGIN_SRC emacs-lisp :tangle yes
-  ;; Shrink fringes to 1 pixel
-  (fringe-mode 1)
-
-  ;; You may want Emacs to show you the time
-  (setq display-time-default-load-average nil)
-  (display-time-mode t)
-
   ;; Load EXWM
   (require 'exwm)
 
@@ -51,7 +44,6 @@ maintaining tidiness and performance.
   ;; any case). Following are a few examples.
   ;; + We always need a way to go back to line-mode from char-mode
   (exwm-input-set-key (kbd "s-r") #'exwm-reset)
-
 
   (exwm-input-set-simulation-keys
    (mapcar (lambda (c) (cons (kbd (car c)) (cdr c)))
@@ -77,14 +69,11 @@ maintaining tidiness and performance.
   ;; + Application launcher ('M-&' also works if the output buffer does not
   ;;   bother you). Note that there is no need for processes to be created by
   ;;   Emacs.
+
   (exwm-input-set-key (kbd "s-SPC")
-                      (lambda ()
-                        (interactive)
-                        (shell-command "rofi -show run")))
-  (exwm-input-set-key (kbd "s-p")
-                      (lambda ()
-                        (interactive)
-                        (shell-command "rofi-pass")))
+                      (lambda (command)
+                        (interactive (list (read-shell-command "$ ")))
+                        (start-process-shell-command command nil command)))
 
   ;; You can hide the mode-line of floating X windows by uncommenting the
   ;; following lines
