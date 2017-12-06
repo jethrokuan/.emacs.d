@@ -2090,6 +2090,11 @@ npm install -g tern
                 :after
                 #'jethro/line-align-closing-bracket))
 #+END_SRC
+** Java
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package gradle-mode
+    :hook java-mode)
+#+END_SRC
 ** Typescript
 *** typescript-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
