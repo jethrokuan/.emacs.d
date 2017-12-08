@@ -628,30 +628,31 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
     :diminish ivy-mode
-    :bind
+    :bind*
     (("C-c C-r" . ivy-resume)
      ("M-a" . counsel-M-x)
      ("C-s" . counsel-grep-or-swiper)
      ("C-r" . counsel-grep-or-swiper)
      ("C-c i" . counsel-imenu)
      ("C-x b" . ivy-switch-buffer)
+     ("C-x k" . kill-buffer)
      ("C-x C-f" . counsel-find-file)
      ("C-x j" . counsel-dired-jump)
      ("C-x l" . counsel-locate)
      ("C-c j" . counsel-git)
      ("C-c f" . counsel-recentf)
-     ("M-y" . counsel-yank-pop)
-     :map help-map
-     ("f" . counsel-describe-function)
-     ("v" . counsel-describe-variable)
-     ("l" . counsel-info-lookup-symbol)
-     :map ivy-minibuffer-map
-     ("C-d" . ivy-dired)
-     ("C-o" . ivy-occur)
-     ("<return>" . ivy-alt-done)
-     ("M-<return>" . ivy-immediate-done)
-     :map read-expression-map
-     ("C-r" . counsel-expression-history))
+     ("M-y" . counsel-yank-pop))
+    :bind (:map help-map
+                ("f" . counsel-describe-function)
+                ("v" . counsel-describe-variable)
+                ("l" . counsel-info-lookup-symbol)
+                :map ivy-minibuffer-map
+                ("C-d" . ivy-dired)
+                ("C-o" . ivy-occur)
+                ("<return>" . ivy-alt-done)
+                ("M-<return>" . ivy-immediate-done)
+                :map read-expression-map
+                ("C-r" . counsel-expression-history))
     :init
     (add-hook 'after-init-hook 'ivy-mode)
     :config
