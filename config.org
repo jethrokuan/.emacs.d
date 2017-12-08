@@ -33,7 +33,7 @@ maintaining tidiness and performance.
   (setq use-package-always-ensure t))
 #+END_SRC
 * EXWM
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Load EXWM
   (require 'exwm)
 
@@ -890,29 +890,6 @@ Highlights recently copied/pasted text.
       ("q" nil "cancel"))
 
     (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
-#+END_SRC
-*** Simple Custom mode-line
-Copied from https://github.com/bastibe/.emacs.d/blob/master/init.el
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq-default mode-line-format
-                '(((:eval (let* ((buffer-name (concat
-                                               (propertize (buffer-name) 'face '(:weight bold))
-                                               ":" (propertize (format-mode-line "%l,%c") 'face '(:weight light))))
-                                 (left (concat (format-mode-line mode-line-front-space)
-                                               "(" (if (buffer-modified-p) "⋯" "✓") ")"
-                                               " "
-                                               (format "%-30s" buffer-name)
-                                               "    "
-                                               (if vc-mode (concat "" vc-mode " (" (symbol-name (vc-state (buffer-file-name))) ")") "")
-                                               "  "
-                                               (format-mode-line mode-line-misc-info)))
-                                 (right (concat "("
-                                                (propertize (format-mode-line mode-name) 'face '(:weight bold))
-                                                (format-mode-line minor-mode-alist)
-                                                ")"
-                                                (format-mode-line mode-line-end-spaces)))
-                                 (padding (make-string (- (window-width) 4 (length left) (length right)) ? )))
-                            (format "%s %s %s" left padding right))))))
 #+END_SRC
 * Moving Around
 ** Scroll Other Window
