@@ -84,7 +84,7 @@ maintaining tidiness and performance.
   (exwm-enable)
 #+END_SRC
 * Pass
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (progn
     (use-package-ensure-elpa 'password-store 'f 'nil :ensure)
     (eval-and-compile
@@ -1220,6 +1220,7 @@ Hide details and only show file and folder names.
     :bind (:map peep-dired-mode-map
                 ("SPC" . nil)
                 ("<backspace>" . nil))
+    :config
     (setq peep-dired-cleanup-eagerly t))
 #+END_SRC
 *** Sort directories first
@@ -2120,6 +2121,7 @@ npm install -g tern
              markdown-live-preview-delete-export 'delete-on-destroy))
 
      (use-package org-table
+       :ensure nil
        :after 'markdown-mode
        :init
        (add-hook 'markdown-mode-hook 'orgtbl-mode))
@@ -2634,23 +2636,38 @@ highlighting and annotations.
 #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'ox-publish)
-  (setq org-html-htmlize-output-type `nil)
+  (require'ox-publish)
+  (setq org-html-htmlize-output-type nil)
+  (setq org-html-head-include-default-style nil)
   (setq org-publish-project-alist
-        '(("org-notes"
+        '(("org-notes-assets"
+           :base-directory "~/.org/deft/css/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+           :publishing-directory "~/.org/deft/docs/css/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+          ("org-notes-images"
+           :base-directory "~/.org/deft/images/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+           :publishing-directory "~/.org/deft/docs/images/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+          ("org-notes"
            :base-directory "~/.org/deft/"
            :base-extension "org"
-           :publishing-directory "~/.org/deft/html/"
+           :publishing-directory "~/.org/deft/docs/"
            :recursive t
            :publishing-function org-html-publish-to-html
            :headline-levels 4
-           :auto-sitemap t 
-           :html-preamble (concat "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/htmlize.css'/>"
-                                  "<link rel='stylesheet' type='text/css' href='http://www.pirilampo.org/styles/readtheorg/css/readtheorg.css'/>"
-                                  "<script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>"
-                                  "<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>"
-                                  "<script type='text/javascript' src='http://www.pirilampo.org/styles/lib/js/jquery.stickytableheaders.js'></script>"
-                                  "<script type='text/javascript' src='http://www.pirilampo.org/styles/readtheorg/js/readtheorg.js'></script>"))))
+           :auto-sitemap t
+           :author "Jethro Kuan"
+           :email "jethrokuan95@gmail.com"
+           :sitemap-filename "index.org"
+           :sitemap-title "Jethro's Braindump"
+           :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
+          ("org" :components ("org-notes-assets" "org-notes-images"))))
 #+END_SRC
 ** Org Mode for Blogging
 *** Blog Mode
