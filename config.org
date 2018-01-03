@@ -20,17 +20,19 @@ Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+  (unless (and
+           (package-installed-p 'use-package)
+           (package-installed-p 'diminish))
+    (package-refresh-contents)
+    (package-install 'use-package)
+    (package-install 'diminish))
 
-(eval-and-compile
-  (defvar use-package-verbose t) 
-  (require 'cl)
-  (require 'use-package)
-  (require 'bind-key)
-  (require 'diminish)
-  (setq use-package-always-ensure t))
+  (eval-when-compile
+    (require 'use-package))
+  (require 'diminish)                ;; if you use :diminish
+  (require 'bind-key)                ;; if you use any :bind variant
+
+  (setq use-package-always-ensure t)
 #+END_SRC
 * EXWM
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -135,6 +137,33 @@ maintaining tidiness and performance.
 	      (> elapsed 0.1)
 	      (message "%s...done (%.3fs)" "Loading package password-store" elapsed)
 	    (message "%s...done" "Loading package password-store"))))))
+#+END_SRC
+* Email
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package notmuch
+    :preface (setq-default notmuch-command (executable-find "notmuch"))
+    :if notmuch-command
+    :bind (("C-. m" . notmuch)
+           :map notmuch-search-mode-map
+           ;; bind 'r' to reply-all, and 'R' to reply
+           ("r" . notmuch-search-reply-to-thread)
+           ("R" . notmuch-search-reply-to-thread-sender))
+    :init
+    (progn
+      (setq notmuch-always-prompt-for-sender t)
+      (setq notmuch-archive-tags '("-inbox" "-unread"))
+      (setq notmuch-crypto-process-mime t)
+      (setq notmuch-hello-sections '(notmuch-hello-insert-saved-searches))
+      (setq notmuch-labeler-hide-known-labels t)
+      (setq notmuch-search-oldest-first nil)
+      (setq notmuch-draft-save-plaintext t))
+    (setq message-send-mail-function 'message-send-mail-with-sendmail
+          sendmail-program (executable-find "msmtp")
+          message-sendmail-f-is-evil nil)
+    :config
+    (progn
+      (setq notmuch-archive-tags '("-inbox" "-unread"))
+      (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
 #+END_SRC
 * Core Layer
 ** User Configuration
@@ -3060,9 +3089,9 @@ Useful when handling git merge conflicts.
     :demand t
     :init
     (setq projectile-keymap-prefix (kbd "C-x p"))
-    (add-hook 'after-init-hook 'projectile-global-mode)
     :config
     (require 'projectile)
+    (projectile-global-mode)
     (use-package counsel-projectile
       :bind (("s-f" . counsel-projectile-find-file)
              ("s-b" . counsel-projectile-switch-to-buffer)
