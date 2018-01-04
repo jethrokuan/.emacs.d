@@ -2401,7 +2401,9 @@ highlighting and annotations.
            ("w" "Web site" entry (file "~/.org/deft/websites.org")
             "* %c\n" :immediate-finish t)
            ("p" "paper" entry (file+headline "~/.org/gtd/projects.org" "Reading")
-            "* TODO Read: %(jethro/trim-citation-title \"%:title\") :@home:@school: \n%a" :immediate-finish t)))
+            "* TODO Read: %(jethro/trim-citation-title \"%:title\") :@home:@school: \n%a" :immediate-finish t)
+           ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
+            "* TODO Reply: %a :@home:@school:" :immediate-finish t)))
  #+END_SRC
 
 *** Stage 2: Processing
