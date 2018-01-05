@@ -15,6 +15,19 @@ do may help you understand why my configuration is the way it is.
 I'm currently a Computer Science undergraduate, who does primarily
 back-end development (python), and some web development (HTML/CSS/JS,
 React). I also dabble in Lisps, and run most of my life in Org-mode.
+** Straight
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
+         (bootstrap-version 3))
+     (unless (file-exists-p bootstrap-file)
+       (with-current-buffer
+           (url-retrieve-synchronously
+            "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+            'silent 'inhibit-cookies)
+         (goto-char (point-max))
+         (eval-print-last-sexp)))
+     (load bootstrap-file nil 'nomessage))
+ #+END_SRC
 ** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
@@ -32,112 +45,9 @@ maintaining tidiness and performance.
   (require 'diminish)                ;; if you use :diminish
   (require 'bind-key)                ;; if you use any :bind variant
 
-  (setq use-package-always-ensure t)
+  (setq straight-use-package-by-default t)
 #+END_SRC
-* EXWM
-#+BEGIN_SRC emacs-lisp :tangle no
-  ;; Load EXWM
-  (require 'exwm)
 
-  ;; Set the initial number of workspaces.
-  (setq exwm-workspace-number 1)
-
-  ;; `exwm-input-set-key' allows you to set a global key binding (available in
-  ;; any case). Following are a few examples.
-  ;; + We always need a way to go back to line-mode from char-mode
-  (exwm-input-set-key (kbd "s-r") #'exwm-reset)
-
-  (exwm-input-set-simulation-keys
-   (mapcar (lambda (c) (cons (kbd (car c)) (cdr c)))
-           `(("C-b" . left)
-             ("C-f" . right)
-             ("C-p" . up)
-             ("C-n" . down)
-             ("C-a" . home)
-             ("C-e" . end)
-             ("M-v" . prior)
-             ("C-v" . next)
-             ("C-d" . delete)
-             ("C-m" . return)
-             ("C-i" . tab)
-             ("C-g" . escape)
-             ("C-s" . ?\C-f)
-             ("C-y" . ?\C-v)
-             ("M-w" . ?\C-c)
-             ("M-<" . C-home)
-             ("M->" . C-end)
-             ("C-M-h" . C-backspace))))
-
-  ;; + Application launcher ('M-&' also works if the output buffer does not
-  ;;   bother you). Note that there is no need for processes to be created by
-  ;;   Emacs.
-
-  (exwm-input-set-key (kbd "s-SPC")
-                      (lambda (command)
-                        (interactive (list (read-shell-command "$ ")))
-                        (start-process-shell-command command nil command)))
-
-  ;; You can hide the mode-line of floating X windows by uncommenting the
-  ;; following lines
-  (add-hook 'exwm-floating-setup-hook #'exwm-layout-hide-mode-line)
-  (add-hook 'exwm-floating-exit-hook #'exwm-layout-show-mode-line)
-
-  ;; Do not forget to enable EXWM. It will start by itself when things are ready.
-  (exwm-enable)
-#+END_SRC
-* Pass
-#+BEGIN_SRC emacs-lisp :tangle no
-  (progn
-    (use-package-ensure-elpa 'password-store 'f 'nil :ensure)
-    (eval-and-compile
-      (add-to-list 'load-path "/home/jethro/.emacs.d/elisp"))
-    (let
-	((now
-	  (current-time)))
-      (message "%s..." "Loading package password-store")
-      (prog1
-	  (if
-	      (not
-	       (require 'password-store nil 't))
-	      (ignore
-	       (message
-		(format "Cannot load %s" 'password-store)))
-	    (let
-		((now
-		  (current-time)))
-	      (message "%s..." "Configuring package password-store")
-	      (prog1
-		  (progn
-		    (condition-case-unless-debug err
-			(require 'password-store)
-		      (error
-		       (ignore
-			(display-warning 'use-package
-					 (format "%s %s: %s" "password-store" ":config"
-						 (error-message-string err))
-					 :error))))
-		    t)
-		(let
-		    ((elapsed
-		      (float-time
-		       (time-subtract
-			(current-time)
-			now))))
-		  (if
-		      (> elapsed 0.1)
-		      (message "%s...done (%.3fs)" "Configuring package password-store" elapsed)
-		    (message "%s...done" "Configuring package password-store"))))))
-	(let
-	    ((elapsed
-	      (float-time
-	       (time-subtract
-		(current-time)
-		now))))
-	  (if
-	      (> elapsed 0.1)
-	      (message "%s...done (%.3fs)" "Loading package password-store" elapsed)
-	    (message "%s...done" "Loading package password-store"))))))
-#+END_SRC
 * Email
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
@@ -2147,13 +2057,9 @@ npm install -g tern
              markdown-enable-wiki-links t
              markdown-indent-on-enter 'indent-and-new-item
              markdown-asymmetric-header t
-             markdown-live-preview-delete-export 'delete-on-destroy))
-
-     (use-package org-table
-       :ensure nil
-       :after 'markdown-mode
-       :init
-       (add-hook 'markdown-mode-hook 'orgtbl-mode))
+             markdown-live-preview-delete-export 'delete-on-destroy)
+       (eval-after-load 'org
+         (add-hook 'markdown-mode-hook 'orgtbl-mode)))
    #+end_src
 ** Clojure
 *** Clojure-mode
