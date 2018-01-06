@@ -15,19 +15,6 @@ do may help you understand why my configuration is the way it is.
 I'm currently a Computer Science undergraduate, who does primarily
 back-end development (python), and some web development (HTML/CSS/JS,
 React). I also dabble in Lisps, and run most of my life in Org-mode.
-** Straight
- #+BEGIN_SRC emacs-lisp :tangle yes
-   (let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
-         (bootstrap-version 3))
-     (unless (file-exists-p bootstrap-file)
-       (with-current-buffer
-           (url-retrieve-synchronously
-            "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-            'silent 'inhibit-cookies)
-         (goto-char (point-max))
-         (eval-print-last-sexp)))
-     (load bootstrap-file nil 'nomessage))
- #+END_SRC
 ** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
@@ -44,8 +31,6 @@ maintaining tidiness and performance.
     (require 'use-package))
   (require 'diminish)                ;; if you use :diminish
   (require 'bind-key)                ;; if you use any :bind variant
-
-  (setq straight-use-package-by-default t)
 #+END_SRC
 
 * Email
@@ -160,7 +145,7 @@ Type over a selected region, instead of deleting before typing.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'after-init-hook 'delete-selection-mode)
-#+end_src
+#+end_srcn
 
 ** Recentf
 When I'm using Emacs via =emacsclient=, my recent files don't get
@@ -2189,7 +2174,7 @@ highlighting and annotations.
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package org-plus-contrib
+    (use-package org
       :bind
       (("C-c l" . org-store-link)
        ("C-c a" . org-agenda)
@@ -2303,14 +2288,13 @@ highlighting and annotations.
    (setq org-capture-templates
          `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
             "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>") 
-           ("p" "paper" entry (file+headline "~/.org/gtd/projects.org" "Reading")
-            "* TODO Read: %(jethro/trim-citation-title \"%:title\") :@home:@school: \n%a" :immediate-finish t)
+           ("p" "paper" entry (file "~/.org/papers/papers.org")
+            "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
            ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
             "* TODO Reply: %a :@home:@school:" :immediate-finish t)
            ("w" "Weekly Review" entry (file+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))))
  #+END_SRC
-
 *** Stage 2: Processing
  During predetermined times of each day, the inbox is to be processed,
  each item in =inbox= sorted into their respective folders.
@@ -2510,10 +2494,6 @@ highlighting and annotations.
                    (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
-
-   (setq org-agenda-custom-commands
-         `(,jethro/org-agenda-inbox-view
-           ,jethro/org-agenda-todo-view))
 
    (defun jethro/org-agenda-skip-all-siblings-but-first ()
      "Skip all but the first non-done entry."
@@ -2836,14 +2816,14 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     :after org
     :config
     (setq org-ref-notes-directory "~/.org/papers/"
-          org-ref-bibliography-notes "~/.org/papers/index.org"
+          org-ref-bibliography-notes "~/.org/papers/notes.org"
           org-ref-default-bibliography '("~/.org/papers/index.bib")
           org-ref-pdf-directory "~/.org/papers/lib/")
     (setq ivy-bibtex-bibliography "~/.org/papers/index.bib" ;; where your references are stored
           ivy-bibtex-library-path "~/.org/papers/lib/" ;; where your pdfs etc are stored
-          ivy-bibtex-notes-path "~/.org/papers/index.org" ;; where your notes are stored
+          ivy-bibtex-notes-path "~/.org/papers/notes.org" ;; where your notes are stored
           bibtex-completion-bibliography "~/.org/papers/index.bib" ;; writing completion
-          bibtex-completion-notes-path "~/.org/papers/index.org"
+          bibtex-completion-notes-path "~/.org/papers/notes.org"
           bibtex-completion-library-path "~/.org/papers/lib/")
     (setq bibtex-completion-pdf-symbol "⌘")
     (setq bibtex-completion-notes-symbol "✎")
@@ -2891,6 +2871,24 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 
   (bind-key "C-x \\" 'jethro/get-arxiv-paper)
 
+#+END_SRC
+*** Custom Agenda View
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq jethro/org-agenda-papers-view
+        `("p" "Papers"
+          ((todo "TODO"
+                 ((org-agenda-overriding-header "To Read")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           (todo "DONE"
+                 ((org-agenda-overriding-header "To Read")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           nil)))
+#+END_SRC
+** Putting it all together
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-custom-commands
+        `(,jethro/org-agenda-todo-view
+          ,jethro/org-agenda-papers-view))
 #+END_SRC
 * Project Management
 ** Version Control
