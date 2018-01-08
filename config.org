@@ -144,8 +144,8 @@ y/n is easier to type than yes/no
 Type over a selected region, instead of deleting before typing.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'after-init-hook 'delete-selection-mode)
-#+end_srcn
+  (delete-selection-mode 1)
+#+end_src
 
 ** Recentf
 When I'm using Emacs via =emacsclient=, my recent files don't get
@@ -2875,8 +2875,11 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** Custom Agenda View
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq jethro/org-agenda-papers-view
-        `("p" "Papers"
-          ((todo "TODO"
+        `("p" "Papers" 
+          ((todo "NEXT"
+                 ((org-agenda-overriding-header "In Progress")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           (todo "TODO"
                  ((org-agenda-overriding-header "To Read")
                   (org-agenda-files '("~/.org/papers/papers.org"))))
            (todo "DONE"
