@@ -341,8 +341,11 @@ Because fish doesn't play well with Emacs.
   (setq-default shell-file-name "/run/current-system/sw/bin/bash")
 #+end_src
 ** Add PATH to shell
-#+begin_src emacs-lisp :tangle no
-  (use-package exec-path-from-shell 
+We only use this for Mac OS setups: this doesn't work well with NixOS.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns))
     :config
     (exec-path-from-shell-initialize))
 #+end_src
