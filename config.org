@@ -555,13 +555,12 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
     :diminish ivy-mode
-    :bind
+    :bind*
     (("C-c C-r" . ivy-resume)
      ("M-a" . counsel-M-x)
-     ("C-s" . counsel-grep-or-swiper)
-     ("C-r" . counsel-grep-or-swiper)
      ("C-c i" . counsel-imenu)
      ("C-x b" . ivy-switch-buffer)
+     ("C-x B" . ivy-switch-buffer-other-window)
      ("C-x k" . kill-buffer)
      ("C-x C-f" . counsel-find-file)
      ("C-x j" . counsel-dired-jump)
@@ -579,16 +578,9 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("<return>" . ivy-alt-done)
      ("M-<return>" . ivy-immediate-done)
      :map read-expression-map
-     ("C-r" . counsel-expression-history)
-     :map swiper-map
-     ("M-q" . swiper-query-replace)
-     ("C-l". swiper-recenter-top-bottom)
-     ("C-." . swiper-mc)
-     ("C-'" . swiper-avy))
-    :init
-    (add-hook 'after-init-hook 'ivy-mode)
+     ("C-r" . counsel-expression-history))
     :config
-    (setq counsel-grep-swiper-limit 20000)
+    (ivy-mode t)  
     (defun ivy-dired ()
       (interactive)
       (if ivy--directory
@@ -599,9 +591,7 @@ Counsel contains ivy enhancements for commonly-used functions.
                    (substring ivy--current 0 -1)) nil t)
              (goto-char (match-beginning 0))))
         (user-error
-         "Not completing files currently")))
-    (setq counsel-grep-base-command
-          "rg -i -M 120 --no-heading --line-number --color never '%s' %s")
+         "Not completing files currently"))) 
     (setq counsel-find-file-at-point t)
     (setq ivy-use-virtual-buffers t)
     (setq ivy-display-style 'fancy)
@@ -616,6 +606,23 @@ Counsel contains ivy enhancements for commonly-used functions.
      '(("I" insert "insert")))
     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
    #+end_src
+*** Swiper
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package swiper
+    :bind
+    (("C-s" . swiper)
+     ("C-r" . swiper)
+     ("C-c C-s" . counsel-grep-or-swiper)
+     :map swiper-map
+     ("M-q" . swiper-query-replace)
+     ("C-l". swiper-recenter-top-bottom)
+     ("C-." . swiper-mc)
+     ("C-'" . swiper-avy))
+    :config
+    (setq counsel-grep-swiper-limit 20000)
+    (setq counsel-grep-base-command
+          "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
+#+END_SRC
 *** wgrep
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wgrep)
