@@ -1999,7 +1999,8 @@ npm install -g tern
 ** Java
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package gradle-mode
-    :hook java-mode)
+    :init
+    (add-hook 'java-mode-hook 'gradle-mode))
 #+END_SRC
 ** Typescript
 *** typescript-mode
