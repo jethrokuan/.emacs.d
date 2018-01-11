@@ -2294,6 +2294,7 @@ highlighting and annotations.
 
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package org-plus-contrib
+      :mode ("\\.org\\'" . org-mode)
       :bind
       (("C-c l" . org-store-link)
        ("C-c a" . org-agenda)
@@ -2402,7 +2403,9 @@ inspiration when implementing GTD in org-mode.
            ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
            ("w" "Weekly Review" entry (file+datetree "~/.org/gtd/reviews.org")
-            (file "~/.org/gtd/templates/weekly_review.org"))))
+            (file "~/.org/gtd/templates/weekly_review.org"))
+           ("s" "Snippet" entry (file "~/.org/deft/capture.org")
+            "* Snippet %<%Y-%m-%d %H:%M>\n%?")))
  #+END_SRC
 *** Stage 2: Processing
  During predetermined times of each day, process the inbox, each item
