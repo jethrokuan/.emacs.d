@@ -34,6 +34,16 @@ maintaining tidiness and performance.
 #+END_SRC
 
 * Email
+Managing email in emacs is not so simple. Thankfully, I use NixOS, which
+provides a reproducible environment for my email setup. You can see it
+[[https://github.com/jethrokuan/nix-config/blob/master/modules/email.nix][here]]. 
+
+The setup involves running mbsync every 5 minutes for a bidirectional
+sync using the IMAP protocol. I use Gmail as my mail store, and ~pass~
+to provide my account credentials.
+
+[[https://github.com/jethrokuan/dotfiles/tree/master/mbsync][mbsync configuration]]
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
@@ -59,6 +69,16 @@ maintaining tidiness and performance.
     (progn
       (setq notmuch-archive-tags '("-inbox" "-unread"))
       (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
+#+END_SRC
+** Org-mode Integration
+I use org-mode to manage everything. ~org-notmuch~ provides the
+facility to capture email into a task.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-notmuch
+    :after org
+    :config
+    (require 'org-notmuch))
 #+END_SRC
 * Core Layer
 ** User Configuration
@@ -2258,13 +2278,11 @@ highlighting and annotations.
 
 * Org-Mode
 ** Setup
-*** Basics
-  We use =org-plus-contrib=, which contains several contrib plugins that
-  may come in handy later, including =org-drill= and some =org-babel=
-  language support.
+  I use =org-plus-contrib=, which contains several contrib plugins,
+  including =org-drill= and some =org-babel= language support.
 
-  To install =org-plus-contrib=, one has to add the package archive to
-  Emacs. This is typically where you also add MELPA.
+  To install =org-plus-contrib=, add the package archive to
+  Emacs.
 
   #+BEGIN_SRC emacs-lisp :tangle no
   (when (>= emacs-major-version 24)
@@ -2275,7 +2293,7 @@ highlighting and annotations.
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package org
+    (use-package org-plus-contrib
       :bind
       (("C-c l" . org-store-link)
        ("C-c a" . org-agenda)
@@ -2284,13 +2302,12 @@ highlighting and annotations.
       :bind
       (:map org-mode-map
             ("M-n" . outline-next-visible-heading)
-            ("M-p" . outline-previous-visible-heading)))
+            ("M-p" . outline-previous-visible-heading))
+      :config
+      (setq org-return-follows-link t)
+      (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
   #+END_SRC
 
-*** Saner Defaults
- #+BEGIN_SRC emacs-lisp :tangle yes
-   (setq org-return-follows-link t)
- #+END_SRC
 *** Org Bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-bullets
@@ -2305,6 +2322,9 @@ highlighting and annotations.
   (setq org-agenda-diary-file "~/.org/diary.org")
 #+END_SRC
 *** Variable Pitch Mode
+We use a font that's easier on the eyes for long blocks of text.
+(DejaVu Sans Mono).
+
  #+BEGIN_SRC emacs-lisp :tangle yes
    (add-hook 'org-mode-hook
              '(lambda ()
@@ -2321,37 +2341,25 @@ highlighting and annotations.
                        'org-meta-line
                        'org-document-info-keyword))))
  #+END_SRC
-*** Easy Templates
-    I added an emacs-lisp easy template for my literate Emacs configuration.
- #+BEGIN_SRC emacs-lisp :tangle yes
-   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
- #+END_SRC
-*** Org Download
- This extension facilitates moving images from point A to point B.
- #+BEGIN_SRC emacs-lisp :tangle yes
-   (use-package org-download
-     :config
-     (setq org-download-image-dir "./images"))
- #+END_SRC
 ** Org Mode for GTD
- This document aims to extensively document my implementation of
- Getting Things Done, a methodology by David Allen. This will always be
- a work-in-progress, and is *fully representative* of the GTD setup I
- am currently using.
+This subsection aims to extensively document my implementation of
+Getting Things Done, a methodology by David Allen. This will always be
+a work-in-progress, and is *fully representative* of the GTD setup I
+am currently using.
 
- This document is written primarily for my own reference.
- However, it is also written with readers who are looking for
- inspiration when implementing GTD in org-mode.
+This document is written primarily for my own reference.
+However, it is also written with readers who are looking for
+inspiration when implementing GTD in org-mode.
 
-*** Reasoning 
+*** Why my own implementation of GTD?
  There is no shortage of existing GTD implementations, in org-mode.
  Perhaps the best reference document out there is by Bernt Hansen,
- published [[http://doc.norang.ca/org-mode.html][here]]. However, there are some slight deviations from the GTD
- that David Allen proposes, and some conveniences he takes making the
- GTD system he implements weaker, that can perhaps be solved by writing
- some Elisp. This is a major adaptation of his setup, but with
- additional customizations that make it closer to the ideal system that
- David Allen speaks about.
+ published [[http://doc.norang.ca/org-mode.html][here]]. However, there are some slight deviations from the
+ GTD that David Allen proposes, and some conveniences he takes making
+ the GTD system he implements weaker, that can perhaps be solved by
+ writing some Elisp. This is a major adaptation of his setup, but with
+ additional customizations that make it more similar to the ideal
+ system that David Allen speaks about.
 
 *** Organizing Your Life Into Org-mode Files
  Bernt Hansen uses separate files as logical groups, such as a
@@ -2369,13 +2377,13 @@ highlighting and annotations.
  | inbox       | Includes everything on your mind: tasks, ideas etc.                                                                       |
  | someday     | Includes things that will be done later on (with no specific deadline), to be reviewed often                              |
  | reference   | I don't actually have this file; I use [[http://jblevins.org/projects/deft/%5Ddeft-mode][deft-mode]] as my braindump                                                          |
- | waiting     | This contains a list of names of people as level one headings, and things I'm waiting for them to complete as subheadings |
  | next        | This contains one-off tasks that don't belong to projects.                                                                |
  | projects    | This contains the list of projects, and their corresponding todo items                                                    |
 
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq org-agenda-files '("~/.org/gtd/inbox.org"
                             "~/.org/gtd/timetable.org"
+                            "~/.org/gtd/next.org"
                             "~/.org/gtd/projects.org"
                             "~/.org/gtd/tickler.org"))
  #+END_SRC
@@ -2392,31 +2400,27 @@ highlighting and annotations.
            ("p" "paper" entry (file "~/.org/papers/papers.org")
             "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
            ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
-            "* TODO Reply: %a :@home:@school:" :immediate-finish t)
+            "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
            ("w" "Weekly Review" entry (file+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))))
  #+END_SRC
 *** Stage 2: Processing
- During predetermined times of each day, the inbox is to be processed,
- each item in =inbox= sorted into their respective folders.
+ During predetermined times of each day, process the inbox, each item
+ in =inbox= sorted into their respective folders.
 
- =org-agenda= provides a brilliant interface for viewing and processing
- the inbox. At the end of the "processing" stage, =inbox.org= should be
- empty, unless the processing is done on the whim. This will be
- facilitated with an iOS or android app later on.
+ =org-agenda= provides a brilliant interface for processing the inbox.
+ At the end of the "processing" stage, =inbox.org= should be empty.
 
- The process is clearly outlined in GTD, but key to the GTD
- implementation here are a few factors:
+ A few factors are key:
 
  1. *Which file*: Is this to be done someday when there's time, or is
     this a project (old or new), or is this a simple action?
  2. *Adding of context*: Is this school-related, or work-related? Do I
     have to be at a specific location to perform this task?
 
- At the end of the process, the item in =inbox= would have placed in
- either a non-actionable file, or an actionable file (=projects=, or
- =next=) with a physical actionable. To encourage this, we have a list
- of verbs.
+ Each item in =inbox.org= would be placed in either a non-actionable
+ file, or an actionable file (=projects=, or =next=) with a physical
+ actionable.
 
  David Allen recommends processing inbox items top-down or bottom-up,
  one item at a time. However, I like to have an overview of my inbox,
@@ -2500,7 +2504,8 @@ highlighting and annotations.
    (setq org-refile-use-outline-path 'file
          org-outline-path-complete-in-steps nil)
    (setq org-refile-allow-creating-parent-nodes 'confirm)
-   (setq org-refile-targets '(("someday.org" :maxlevel . 1)
+   (setq org-refile-targets '(("next.org" :maxlevel . 1)
+                              ("someday.org" :maxlevel . 1)
                               ("projects.org" :maxlevel . 1)))
  #+END_SRC
 
@@ -2587,12 +2592,16 @@ highlighting and annotations.
                    (org-agenda-files '("~/.org/gtd/inbox.org"))))
             (todo "NEXT"
                   ((org-agenda-overriding-header "In Progress")
-                   (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
+                   (org-agenda-files '("~/.org/gtd/someday.org"
+                                       "~/.org/gtd/projects.org"
+                                       "~/.org/gtd/next.org"))
                    ;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
                    ))
             (todo "TODO"
                   ((org-agenda-overriding-header "Todo")
-                   (org-agenda-files '("~/.org/gtd/someday.org" "~/.org/gtd/projects.org"))
+                   (org-agenda-files '("~/.org/gtd/someday.org"
+                                       "~/.org/gtd/projects.org"
+                                       "~/.org/gtd/next.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
 
@@ -2651,6 +2660,14 @@ highlighting and annotations.
     (interactive)
     (org-html-export-to-html t t))
 #+END_SRC
+*** Org Download
+This extension facilitates moving images from point A to point B. Use
+this to capture screenshots into deft.
+ #+BEGIN_SRC emacs-lisp :tangle yes
+   (use-package org-download
+     :config
+     (setq org-download-image-dir "./images"))
+ #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require'ox-publish)
@@ -2990,8 +3007,9 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 #+END_SRC
 ** Putting it all together
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-custom-commands
-        `(,jethro/org-agenda-todo-view
+  (setq org-agenda-custom-commands 
+        `(,jethro/org-agenda-inbox-view
+          ,jethro/org-agenda-todo-view
           ,jethro/org-agenda-papers-view))
 #+END_SRC
 * Project Management
