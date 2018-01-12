@@ -2709,6 +2709,12 @@ this to capture screenshots into deft.
            :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
           ("org" :components ("org-notes-assets" "org-notes-images"))))
 #+END_SRC
+*** Emojis
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package emojify
+    :config
+    (add-hook 'org-mode-hook 'emojify-mode))
+#+END_SRC
 ** Org Mode for Blogging
 *** Blog Mode
 #+BEGIN_SRC emacs-lisp :tangle yes
