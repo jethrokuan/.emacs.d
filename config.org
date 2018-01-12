@@ -536,7 +536,8 @@ Use =with-editor= to use current Emacs to open everything that invokes
 ** elfeed
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed
-    :bind ("<f6>" . elfeed))
+    :config
+    (setq elfeed-db-directory "~/.elfeed"))
 #+END_SRC
 *** elfeed-org
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -544,6 +545,64 @@ Use =with-editor= to use current Emacs to open everything that invokes
     :config
     (elfeed-org)
     (setq rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
+#+END_SRC
+*** starring elfeed articles
+Based on http://matt.hackinghistory.ca/2015/11/22/elfeed/.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  ;; add a star
+  (defun jethro/elfeed-star ()
+    "Apply starred to all selected entries."
+    (interactive )
+    (let* ((entries (elfeed-search-selected))
+           (tag (intern "starred")))
+
+      (cl-loop for entry in entries do (elfeed-tag entry tag))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  ;; remove a start
+  (defun jethro/elfeed-unstar ()
+    "Remove starred tag from all selected entries."
+    (interactive )
+    (let* ((entries (elfeed-search-selected))
+           (tag (intern "starred")))
+
+      (cl-loop for entry in entries do (elfeed-untag entry tag))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  ;; face for starred articles
+  (defface elfeed-search-starred-title-face
+    '((t :foreground "#FFDA46"))
+    "Marks a starred Elfeed entry.")
+
+  (push '(starred elfeed-search-starred-title-face) elfeed-search-face-alist)
+
+  (defalias 'elfeed-toggle-star
+    (elfeed-expose #'elfeed-search-toggle-all 'starred))
+
+  (eval-after-load 'elfeed-search
+    '(define-key elfeed-search-mode-map (kbd "m") 'elfeed-toggle-star))
+#+END_SRC
+*** syncing elfeed database
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/elfeed-load-db-and-open ()
+    "Wrapper to load the elfeed db from disk before opening"
+    (interactive)
+    (elfeed-db-load)
+    (elfeed)
+    (elfeed-search-update--force))
+
+  (defun jethro/elfeed-save-db-and-bury ()
+    "Wrapper to save the elfeed db to disk before burying buffer"
+    (interactive)
+    (elfeed-db-save)
+    (quit-window))
+
+  (bind-key "<f6>" 'jethro/elfeed-load-db-and-open)
+
+  (eval-after-load 'elfeed-search
+    '(define-key elfeed-search-mode-map (kbd "q") 'jethro/elfeed-save-db-and-bury))
 #+END_SRC
 * Core Utilities
 ** Dash
@@ -2304,10 +2363,10 @@ highlighting and annotations.
       :bind
       (:map org-mode-map
             ("M-n" . outline-next-visible-heading)
-            ("M-p" . outline-previous-visible-heading))
-      :config
-      (setq org-return-follows-link t)
-      (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
+            ("M-p" . outline-previous-visible-heading)))
+
+    (setq org-return-follows-link t)
+    (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
   #+END_SRC
 
 *** Org Bullets
