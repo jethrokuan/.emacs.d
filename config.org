@@ -9,12 +9,15 @@ Notes:
 2. I use [[https://stumpwm.github.io/][StumpWM]], and many of my keybindings are designed around that
 
 ** About the Author
-Typically this section is unimportant, but knowing who I am and what I
-do may help you understand why my configuration is the way it is.
-
 I'm currently a Computer Science undergraduate, who does primarily
 back-end development (python), and some web development (HTML/CSS/JS,
 React). I also dabble in Lisps, and run most of my life in Org-mode.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq user-full-name "Jethro Kuan"
+        user-mail-address "jethrokuan95@gmail.com")
+#+end_src
+
 ** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
@@ -33,69 +36,7 @@ maintaining tidiness and performance.
   (require 'bind-key)                ;; if you use any :bind variant
 #+END_SRC
 
-* Email
-Managing email in emacs is not so simple. Thankfully, I use NixOS, which
-provides a reproducible environment for my email setup. You can see it
-[[https://github.com/jethrokuan/nix-config/blob/master/modules/email.nix][here]]. 
-
-The setup involves running mbsync every 5 minutes for a bidirectional
-sync using the IMAP protocol. I use Gmail as my mail store, and ~pass~
-to provide my account credentials.
-
-[[https://github.com/jethrokuan/dotfiles/tree/master/mbsync][mbsync configuration]]
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package notmuch
-    :preface (setq-default notmuch-command (executable-find "notmuch"))
-    :if notmuch-command
-    :bind (("<f3>" . notmuch)
-           :map notmuch-search-mode-map
-           ;; bind 'r' to reply-all, and 'R' to reply
-           ("r" . notmuch-search-reply-to-thread)
-           ("R" . notmuch-search-reply-to-thread-sender))
-    :init
-    (progn
-      (setq notmuch-always-prompt-for-sender t)
-      (setq notmuch-archive-tags '("-inbox" "-unread"))
-      (setq notmuch-crypto-process-mime t)
-      (setq notmuch-hello-sections '(notmuch-hello-insert-saved-searches))
-      (setq notmuch-labeler-hide-known-labels t)
-      (setq notmuch-search-oldest-first nil)
-      (setq notmuch-draft-save-plaintext t))
-    (setq message-send-mail-function 'message-send-mail-with-sendmail
-          sendmail-program (executable-find "msmtp")
-          message-sendmail-f-is-evil nil)
-    :config
-    (progn
-      (setq notmuch-archive-tags '("-inbox" "-unread"))
-      (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
-#+END_SRC
-** Org-mode Integration
-I use org-mode to manage everything. ~org-notmuch~ provides the
-facility to capture email into a task.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-notmuch
-    :after org
-    :config
-    (require 'org-notmuch))
-#+END_SRC
-* Core Layer
-** User Configuration
-First, some information about me:
-#+begin_src emacs-lisp :tangle yes
-  (setq user-full-name "Jethro Kuan"
-        user-mail-address "jethrokuan95@gmail.com")
-#+end_src
-** Emacs Server
-Load the emacs server, if it is not running. This allows for
-almost-instant emacs "startup".
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (require 'server)
-  (unless (server-running-p)
-    (server-start))
-#+END_SRC
+* Better Defaults
 ** No littering
 This package sets out to fix this by changing the values of path
 variables to put files in either no-littering-etc-directory
@@ -103,6 +44,7 @@ variables to put files in either no-littering-etc-directory
 (defaulting to ~/.emacs.d/var/), and by using descriptive file names
 and subdirectories when appropriate. This is similar to a color-theme;
 a "path-theme" if you will.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package no-littering
     :config
@@ -166,7 +108,6 @@ Type over a selected region, instead of deleting before typing.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (delete-selection-mode 1)
 #+end_src
-
 ** Recentf
 When I'm using Emacs via =emacsclient=, my recent files don't get
 saved because I never ever quit Emacs. Instead, now I run the function
@@ -209,20 +150,6 @@ text-modes like org-mode and markdown-mode.
   (add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
 #+end_src
 
-** Backup directory
-#+begin_src emacs-lisp :tangle yes
-  (setq backup-directory-alist
-        `((".*" . ,temporary-file-directory)))
-  (setq auto-save-file-name-transforms
-        `((".*" ,temporary-file-directory t)))
-#+end_src
-** Load secrets
-Store secrets in a different file, not committed into the git
-repository.
-
-#+begin_src emacs-lisp :tangle yes
-(load "~/.emacs.d/secrets.el" t)
-#+end_src
 ** Custom Commands
 *** Nuke all buffers with =C-c !=
 #+begin_src emacs-lisp :tangle yes
@@ -242,14 +169,61 @@ repository.
 
   (bind-key "<f9>" 'jethro/compile)
 #+end_src
-** Autosaving
+** Auto-saving on focus out
 Auto save all open buffers, when Emacs loses focus.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'focus-out-hook
             (lambda () (save-some-buffers t)))
 #+END_SRC
+* Email
+Managing email in emacs is not so simple. Thankfully, I use NixOS, which
+provides a reproducible environment for my email setup. You can see it
+[[https://github.com/jethrokuan/nix-config/blob/master/modules/email.nix][here]]. 
+
+The setup involves running mbsync every 5 minutes for a bidirectional
+sync using the IMAP protocol. I use Gmail as my mail store, and ~pass~
+to provide my account credentials.
+
+[[https://github.com/jethrokuan/dotfiles/tree/master/mbsync][mbsync configuration]]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package notmuch
+    :preface (setq-default notmuch-command (executable-find "notmuch"))
+    :if notmuch-command
+    :bind (("<f3>" . notmuch)
+           :map notmuch-search-mode-map
+           ;; bind 'r' to reply-all, and 'R' to reply
+           ("r" . notmuch-search-reply-to-thread)
+           ("R" . notmuch-search-reply-to-thread-sender))
+    :init
+    (progn
+      (setq notmuch-always-prompt-for-sender t)
+      (setq notmuch-archive-tags '("-inbox" "-unread"))
+      (setq notmuch-crypto-process-mime t)
+      (setq notmuch-hello-sections '(notmuch-hello-insert-saved-searches))
+      (setq notmuch-labeler-hide-known-labels t)
+      (setq notmuch-search-oldest-first nil)
+      (setq notmuch-draft-save-plaintext t))
+    (setq message-send-mail-function 'message-send-mail-with-sendmail
+          sendmail-program (executable-find "msmtp")
+          message-sendmail-f-is-evil nil)
+    :config
+    (progn
+      (setq notmuch-archive-tags '("-inbox" "-unread"))
+      (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
+#+END_SRC
+** Org-mode Integration
+I use org-mode to manage everything. ~org-notmuch~ provides the
+facility to capture email into a task.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-notmuch
+    :after org
+    :config
+    (require 'org-notmuch))
+#+END_SRC
 * Appearance
-** Font
+n** Font
 I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
 Office Code Pro and the Powerline font families.
 
@@ -270,48 +244,12 @@ Remove the useless toolbars and splash screens.
 #+end_src
 
 ** Theme
-*** Challenger Deep
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package challenger-deep
-    :init
-    (load-theme 'challenger-deep t))
-#+END_SRC
 *** Zenburn
  #+BEGIN_SRC emacs-lisp :tangle yes
    (use-package zenburn-theme
        :init
        (load-theme 'zenburn t))
  #+END_SRC
-*** Tomorrow (Eighties)
- #+BEGIN_SRC emacs-lisp :tangle no
-   (use-package color-theme-sanityinc-tomorrow
-     :init
-     (load-theme 'sanityinc-tomorrow-eighties t))
- #+END_SRC
-*** tao
- #+BEGIN_SRC emacs-lisp :tangle no
-   (use-package tao-theme
-     :init
-     (load-theme 'tao-yang t))
- #+END_SRC
-** color-identifiers-mode
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package color-identifiers-mode
-    :diminish color-identifiers-mode
-    :init
-    (add-hook 'after-init-hook 'global-color-identifiers-mode)
-    :config
-    (let ((faces '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-constant-face font-lock-type-face font-lock-function-name-face font-lock-variable-name-face font-lock-keyword-face font-lock-string-face font-lock-builtin-face font-lock-preprocessor-face font-lock-warning-face font-lock-doc-face)))
-      (dolist (face faces)
-        (set-face-attribute face nil :foreground nil :weight 'normal :slant 'normal)))
-
-    (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
-    (set-face-attribute 'font-lock-comment-face nil :slant 'italic)
-    (set-face-attribute 'font-lock-doc-face nil :slant 'italic)
-    (set-face-attribute 'font-lock-keyword-face nil :weight 'bold)
-    (set-face-attribute 'font-lock-builtin-face nil :weight 'bold)
-    (set-face-attribute 'font-lock-preprocessor-face nil :weight 'bold))
-#+END_SRC
 ** Rainbow-delimiters-mode
    We use rainbow delimiters to show imbalanced parenthesis.
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -328,40 +266,18 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
-** Additional Code Highlighting
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package highlight-numbers
-    :init
-    (add-hook 'prog-mode-hook #'highlight-numbers-mode))
-
-  (use-package highlight-quoted
-    :init
-    (add-hook 'prog-mode-hook #'highlight-quoted-mode))
-
-  (use-package highlight-defined
-    :init
-    (add-hook 'prog-mode-hook #'highlight-defined-mode))
-
-  (use-package highlight-operators
-    :init
-    (add-hook 'prog-mode-hook #'highlight-operators-mode))
-
-  (use-package highlight-escape-sequences
-    :init
-    (add-hook 'prog-mode-hook #'hes-mode))
-#+END_SRC
-* Shell
+* Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'eshell)
 #+END_SRC
 ** Set default shell to bash
 Because fish doesn't play well with Emacs.
 #+begin_src emacs-lisp :tangle yes
-  (setq-default explicit-shell-file-name "/run/current-system/sw/bin/bash")
-  (setq-default shell-file-name "/run/current-system/sw/bin/bash")
+  (setq-default explicit-shell-file-name (executable-find "bash"))
+  (setq-default shell-file-name (executable-find "bash"))
 #+end_src
 ** Add PATH to shell
-We only use this for Mac OS setups: this doesn't work well with NixOS.
+We only use this for Mac OS setups: this doesn't work with NixOS.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package exec-path-from-shell
@@ -385,55 +301,9 @@ We only use this for Mac OS setups: this doesn't work well with NixOS.
         eshell-smart-space-goes-to-end t)
 #+END_SRC
 ** Fish-like auto-completion
-This was obtained from http://whyarethingsthewaytheyare.com/fishlike-autosuggestions-in-eshell/.
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (with-eval-after-load 'company
-    (defun company-eshell-autosuggest-candidates (prefix)
-      (let* ((history
-              (cl-remove-duplicates
-               (mapcar (lambda (str)
-                         (string-trim (substring-no-properties str)))
-                       (ring-elements eshell-history-ring))
-               :from-end t
-               :test #'string=))
-             (most-similar (cl-find-if
-                            (lambda (str)
-                              (string-prefix-p prefix str))
-                            history)))
-        (when most-similar
-          `(,most-similar))))
-
-    (defun company-eshell-autosuggest--prefix ()
-      (let ((prefix
-             (string-trim-left
-              (buffer-substring-no-properties
-               (save-excursion
-                 (eshell-bol))
-               (save-excursion (end-of-line) (point))))))
-        (if (not (string-empty-p prefix))
-            prefix
-          'stop)))
-
-    (defun company-eshell-autosuggest (command &optional arg &rest ignored)
-      (interactive (list 'interactive))
-      (cl-case command
-        (interactive (company-begin-backend 'company-eshell))
-        (prefix (and (eq major-mode 'eshell-mode)
-                     (company-eshell-autosuggest--prefix)))
-        (candidates (company-eshell-autosuggest-candidates arg)))))
-
-  (defun setup-eshell-autosuggest ()
-    (require 'company)
-    (setq-local company-backends '(company-eshell-autosuggest))
-    (setq-local company-frontends '(company-preview-frontend)))
-
-  (add-hook 'eshell-mode-hook 'setup-eshell-autosuggest)
-#+END_SRC
-** Eshell theme
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package eshell-git-prompt
-    :config
-    (eshell-git-prompt-use-theme 'powerline))
+  (use-package esh-autosuggest
+    :hook (eshell-mode . esh-autosuggest-mode))
 #+END_SRC
 ** Open eshell in current/project directory
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -472,24 +342,7 @@ This was obtained from http://whyarethingsthewaytheyare.com/fishlike-autosuggest
   (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
   (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 #+END_SRC
-** Quitting Eshell
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun eshell/x ()
-    (delete-window)
-    (eshell/exit))
-#+END_SRC
-** with-editor
-Use =with-editor= to use current Emacs to open everything that invokes
-=$EDITOR=.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package with-editor
-    :ensure t
-    :init
-    (progn
-      (add-hook 'shell-mode-hook  'with-editor-export-editor)
-      (add-hook 'eshell-mode-hook 'with-editor-export-editor)))
-#+END_SRC
-* Web Browsing
+* Web Browsing with eww
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eww
     :defer t
@@ -533,20 +386,20 @@ Use =with-editor= to use current Emacs to open everything that invokes
                   ("f" . eww-lnum-follow)
                   ("U" . eww-lnum-universal))))
 #+END_SRC
-** elfeed
+* Reading feeds with elfeed
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed
     :config
     (setq elfeed-db-directory "~/.elfeed"))
 #+END_SRC
-*** elfeed-org
+** elfeed-org
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed-org
     :config
     (elfeed-org)
     (setq rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
 #+END_SRC
-*** starring elfeed articles
+** starring elfeed articles
 Based on http://matt.hackinghistory.ca/2015/11/22/elfeed/.
 #+BEGIN_SRC emacs-lisp :tangle yes
   ;; add a star
@@ -584,7 +437,7 @@ Based on http://matt.hackinghistory.ca/2015/11/22/elfeed/.
   (eval-after-load 'elfeed-search
     '(define-key elfeed-search-mode-map (kbd "m") 'elfeed-toggle-star))
 #+END_SRC
-*** syncing elfeed database
+** syncing elfeed database
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/elfeed-load-db-and-open ()
     "Wrapper to load the elfeed db from disk before opening"
@@ -605,30 +458,19 @@ Based on http://matt.hackinghistory.ca/2015/11/22/elfeed/.
     '(define-key elfeed-search-mode-map (kbd "q") 'jethro/elfeed-save-db-and-bury))
 #+END_SRC
 * Core Utilities
-** Dash
-Dash is a library used to simplify Emacs-lisp development. Some custom
-elisp code use Dash, so I load it first here anyway.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dash)
-#+END_SRC
 ** Hydra
 #+begin_src emacs-lisp :tangle yes
   (use-package hydra)
 #+end_src
 ** Ivy
-I've recently switched over from =helm= to =ivy=. Ivy is simpler, and
-easier to extend.
+Ivy is generic completion frontend for Emacs. Ivy is more efficient,
+simpler and more customizable.
 *** flx
 Flx is required for fuzzy-matching.
+
 #+begin_src emacs-lisp :tangle yes
   (use-package flx)
 #+end_src
-*** Fuzzy Isearch
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package flx-isearch
-    :bind (("C-M-s" . flx-isearch-forward)
-           ("C-M-r" . flx-isearch-backward)))
-#+END_SRC
 *** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
@@ -704,33 +546,42 @@ Counsel contains ivy enhancements for commonly-used functions.
           "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
 #+END_SRC
 *** wgrep
-#+BEGIN_SRC emacs-lisp :tangle yes
+    wgrep allows you to edit a grep buffer and apply those changes to the
+    file buffer.
+
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wgrep)
-#+END_SRC
+    #+END_SRC
 *** rg
-#+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rg
-    :bind (("M-s" . rg)))
-#+END_SRC
+    :bind* (("M-s" . rg)))
+    #+END_SRC
 * Visual Enhancements
+** nyan-mode
+   #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package nyan-mode
+    :init
+    (add-hook 'after-init-hook 'nyan-mode))
+   #+END_SRC
 ** Whitespace-mode
-#+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp :tangle yes
   (require 'whitespace)
   (setq whitespace-line-column 80) ;; limit line length
   (setq whitespace-style '(face lines-tail))
   (diminish 'whitespace-mode)
   (add-hook 'prog-mode-hook 'whitespace-mode)
-#+end_src
+   #+end_src
 ** Modeline
 *** Nyan-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/modeline-nyan ()
     (when nyan-mode
       (nyan-create)))
-#+END_SRC
+    #+END_SRC
 *** Flycheck
-Show flycheck status in modeline.
-#+BEGIN_SRC emacs-lisp :tangle yes
+    Show flycheck status in modeline.
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (defface jethro/ok-face
     '((t :foreground "#bfebbf"))
     "Face for ok status in the mode-line.")
@@ -768,15 +619,15 @@ Show flycheck status in modeline.
                     'help-echo "Show Flycheck Errors"
                     'local-map (make-mode-line-mouse-map
                                 'mouse-1 #'flycheck-list-errors)))))
-#+END_SRC
+    #+END_SRC
 *** Eyebrowse
-#+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/modeline-eyebrowse ()
     (when eyebrowse-mode
       (eyebrowse-mode-line-indicator)))
-#+END_SRC
+    #+END_SRC
 *** Modeline Format
-#+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/org-mode-line-string ()
     "Returns org-mode-line-string if bound, empty
   string if not"
@@ -806,14 +657,14 @@ Show flycheck status in modeline.
                   (vc-mode vc-mode)
                   " "
                   (:eval (jethro/modeline-eyebrowse))))
-#+END_SRC
+    #+END_SRC
 *** Thick modeline bar
-#+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp :tangle yes
   (custom-set-faces
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
-#+END_SRC
+    #+END_SRC
 *** smart-mode-line
-#+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line
     :init
     (add-hook 'after-init-hook 'sml/setup)
@@ -841,9 +692,9 @@ Show flycheck status in modeline.
                                ","
                                "ElDoc")
                              "\\|"))))
-#+end_src
+    #+end_src
 ** Zooming
-#+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp :tangle yes
   (with-eval-after-load 'hydra
     (defhydra jethro/hydra-zoom ()
       "zoom"
@@ -851,43 +702,44 @@ Show flycheck status in modeline.
       ("o" text-scale-decrease "out"))
 
     (bind-key "C-c h z" 'jethro/hydra-zoom/body))
-#+end_src
+   #+end_src
 ** beacon
-Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
+   Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
 
-#+begin_src emacs-lisp :tangle no
+   #+begin_src emacs-lisp :tangle yes
   (use-package beacon
     :diminish beacon-mode
     :init
     (add-hook 'after-init-hook 'beacon-mode)
     :config 
     (setq beacon-push-mark 10))
-#+end_src
+   #+end_src
 ** Show Matching parenthesis
-Always show matching parenthesis.
-#+begin_src emacs-lisp :tangle yes
+   Always show matching parenthesis.
+   #+begin_src emacs-lisp :tangle yes
   (show-paren-mode 1)
   (setq show-paren-delay 0)
-#+end_src
+   #+end_src
 ** golden-ratio
-Give the working window more screen estate.
+   Give the working window more screen estate.
 
-#+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp :tangle yes
   (use-package golden-ratio
     :diminish golden-ratio-mode
     :init
     (add-hook 'after-init-hook 'golden-ratio-mode))
-#+end_src
+   #+end_src
 ** volatile-highlights
-Highlights recently copied/pasted text.
-#+begin_src emacs-lisp :tangle yes
+   Highlights recently copied/pasted text.
+
+   #+begin_src emacs-lisp :tangle yes
      (use-package volatile-highlights
        :diminish volatile-highlights-mode
        :init
        (add-hook 'after-init-hook 'volatile-highlights-mode))
-#+end_src
+   #+end_src
 ** diff-hl
-#+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package diff-hl
     :bind (("C-c h v" . jethro/hydra-diff-hl/body))
     :init 
@@ -917,16 +769,13 @@ Highlights recently copied/pasted text.
       ("q" nil "cancel"))
 
     (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
-#+END_SRC
-** nyan-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package nyan-mode
-    :init
-    (add-hook 'after-init-hook 'nyan-mode))
-#+END_SRC
+   #+END_SRC
 * Moving Around
 ** Scroll Other Window
- #+BEGIN_SRC emacs-lisp :tangle yes
+   This minor mode changes the binding of scroll-other-window based on
+   the active major mode.
+
+   #+BEGIN_SRC emacs-lisp :tangle yes
    (defvar-local sow-scroll-up-command nil)
 
    (defvar-local sow-scroll-down-command nil)
@@ -984,20 +833,19 @@ Highlights recently copied/pasted text.
                      'pdf-view-scroll-up-or-next-page
                      sow-scroll-down-command
                      'pdf-view-scroll-down-or-previous-page)))
- #+END_SRC
+   #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'after-init-hook 'sow-mode)
-#+END_SRC
+   #+END_SRC
 ** Keychord
-#+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package key-chord
     :config
     (key-chord-mode 1))
-#+END_SRC
-** Layouts
-*** Eyebrowse
-#+BEGIN_SRC emacs-lisp :tangle yes
+   #+END_SRC
+** Eyebrowse
+   #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eyebrowse
     :bind (("M-0" . eyebrowse-switch-to-window-config-0)
            ("M-1" . eyebrowse-switch-to-window-config-1)
@@ -1011,157 +859,12 @@ Highlights recently copied/pasted text.
            ("M-9" . eyebrowse-switch-to-window-config-9))
     :init
     (add-hook 'after-init-hook 'eyebrowse-mode))
-#+END_SRC
-*** Persp-mode
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package persp-mode
-    :bind
-    (("C-x b" . persp-switch-to-buffer)
-     ("C-x k" . persp-kill-buffer))
-    :init
-    (setq persp-keymap-prefix (kbd "C-c p"))
-    (setq persp-lighter
-          '(:eval
-            (format
-             (propertize
-              " [p] %.10s"
-              'face (let ((persp (get-current-persp)))
-                      (if persp
-                          (if (persp-contain-buffer-p (current-buffer) persp)
-                              'persp-face-lighter-default
-                            'persp-face-lighter-buffer-not-in-persp)
-                        'persp-face-lighter-nil-persp)))
-             (file-name-nondirectory (directory-file-name (safe-persp-name (get-current-persp)))))))
-    (persp-mode 1))
-#+END_SRC
-*** Eyebrowse and Persp-Mode Integration
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package dash)
-  (require 'dash)
-  (defun jethro//get-persp-workspace (&optional persp frame)
-    "Get the correct workspace parameters for perspective.
-  PERSP is the perspective, and defaults to the current perspective.
-  FRAME is the frame where the parameters are expected to be used, and
-  defaults to the current frame."
-    (let ((param-names (if (display-graphic-p frame)
-                           '(gui-eyebrowse-window-configs
-                             gui-eyebrowse-current-slot
-                             gui-eyebrowse-last-slot)
-                         '(term-eyebrowse-window-configs
-                           term-eyebrowse-current-slot
-                           term-eyebrowse-last-slot))))
-      (--map (persp-parameter it persp) param-names)))
-
-  (defun jethro//set-persp-workspace (workspace-params &optional persp frame)
-    "Set workspace parameters for perspective.
-  WORKSPACE-PARAMS should be a list containing 3 elements in this order:
-  - window-configs, as returned by (eyebrowse--get 'window-configs)
-  - current-slot, as returned by (eyebrowse--get 'current-slot)
-  - last-slot, as returned by (eyebrowse--get 'last-slot)
-  PERSP is the perspective, and defaults to the current perspective.
-  FRAME is the frame where the parameters came from, and defaults to the
-  current frame.
-  Each perspective has two sets of workspace parameters: one set for
-  graphical frames, and one set for terminal frames."
-    (let ((param-names (if (display-graphic-p frame)
-                           '(gui-eyebrowse-window-configs
-                             gui-eyebrowse-current-slot
-                             gui-eyebrowse-last-slot)
-                         '(term-eyebrowse-window-configs
-                           term-eyebrowse-current-slot
-                           term-eyebrowse-last-slot))))
-      (--zip-with (set-persp-parameter it other persp)
-                  param-names workspace-params)))
-
-  (defun jethro/load-eyebrowse-for-perspective (type &optional frame)
-    "Load an eyebrowse workspace according to a perspective's parameters.
-   FRAME's perspective is the perspective that is considered, defaulting to
-   the current frame's perspective.
-   If the perspective doesn't have a workspace, create one."
-    (when (eq type 'frame)
-      (let* ((workspace-params (jethro//get-persp-workspace (get-frame-persp frame) frame))
-             (window-configs (nth 0 workspace-params))
-             (current-slot (nth 1 workspace-params))
-             (last-slot (nth 2 workspace-params)))
-        (if window-configs
-            (progn
-              (eyebrowse--set 'window-configs window-configs frame)
-              (eyebrowse--set 'current-slot current-slot frame)
-              (eyebrowse--set 'last-slot last-slot frame)
-              (eyebrowse--load-window-config current-slot))
-          (eyebrowse--set 'window-configs nil frame)
-          (eyebrowse-init frame)
-          (jethro/save-eyebrowse-for-perspective frame)))))
-
-  (defun jethro/load-eyebrowse-after-loading-layout (_state-file _phash persp-names)
-    "Bridge between `persp-after-load-state-functions' and
-  `jethro/load-eyebrowse-for-perspective'.
-  _PHASH is the hash were the loaded perspectives were placed, and
-  PERSP-NAMES are the names of these perspectives."
-    (let ((cur-persp (get-current-persp)))
-      ;; load eyebrowse for current perspective only if it was one of the loaded
-      ;; perspectives
-      (when (member (or (and cur-persp (persp-name cur-persp))
-                        persp-nil-name)
-                    persp-names)
-        (jethro/load-eyebrowse-for-perspective 'frame))))
-
-  (defun jethro/update-eyebrowse-for-perspective (&rest _args)
-    "Update and save current frame's eyebrowse workspace to its perspective."
-    (let* ((current-slot (eyebrowse--get 'current-slot))
-           (current-tag (nth 2 (assoc current-slot (eyebrowse--get 'window-configs)))))
-      (eyebrowse--update-window-config-element
-       (eyebrowse--current-window-config current-slot current-tag)))
-    (jethro/save-eyebrowse-for-perspective))
-
-  (defun jethro/save-eyebrowse-for-perspective (&optional frame)
-    "Save FRAME's eyebrowse workspace to FRAME's perspective.
-  FRAME defaults to the current frame."
-    (jethro//set-persp-workspace (list (eyebrowse--get 'window-configs frame)
-                                       (eyebrowse--get 'current-slot frame)
-                                       (eyebrowse--get 'last-slot frame))
-                                 (get-frame-persp frame)
-                                 frame))
-
-  (add-hook 'persp-before-switch-functions
-            #'jethro/update-eyebrowse-for-perspective)
-  (add-hook 'eyebrowse-post-window-switch-hook
-            #'jethro/save-eyebrowse-for-perspective)
-  (add-hook 'persp-activated-functions
-            #'jethro/load-eyebrowse-for-perspective)
-  (add-hook 'persp-before-save-state-to-file-functions #'jethro/update-eyebrowse-for-perspective)
-  (add-hook 'persp-after-load-state-functions #'jethro/load-eyebrowse-after-loading-layout)
-#+END_SRC
-*** ibuffer
-#+BEGIN_SRC emacs-lisp :tangle no
-  (with-eval-after-load "ibuffer"
-
-    (require 'ibuf-ext)
-
-    (define-ibuffer-filter persp
-        "Toggle current view to buffers of current perspective."
-      (:description "persp-mode"
-                    :reader (persp-prompt (safe-persp-name (get-frame-persp)) t))
-      (find buf (safe-persp-buffers (persp-get-by-name qualifier))))
-
-    (defun persp-update-or-add-ibuffer-group ()
-      (let ((perspslist (list (safe-persp-name (get-frame-persp))
-                              (cons 'persp (safe-persp-name (get-frame-persp))))))
-        (setq ibuffer-saved-filter-groups
-              (delete* "persp-mode" ibuffer-saved-filter-groups 
-                       :test 'string= :key 'car))
-        (add-to-list 'ibuffer-saved-filter-groups (list "persp-mode" perspslist))))
-
-    (add-hook 'ibuffer-mode-hook
-              #'(lambda ()
-                  (persp-update-or-add-ibuffer-group)
-                  (ibuffer-switch-to-saved-filter-groups "persp-mode"))))
-#+END_SRC
+   #+END_SRC
 ** Crux
 #+begin_src emacs-lisp :tangle yes
   (use-package crux 
     :bind (("C-c o" . crux-open-with)
-           ("C-c n" . crux-cleanup-buffer-or-region)
+           ("C-c C" . crux-cleanup-buffer-or-region)
            ("C-c D" . crux-delete-file-and-buffer)
            ("C-a" . crux-move-beginning-of-line)
            ("M-o" . crux-smart-open-line)
@@ -1171,28 +874,20 @@ Highlights recently copied/pasted text.
            ("s-o" . crux-smart-open-line-above)))
 
 #+end_src
-** Anzu
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package anzu
-    :diminish anzu-mode
-    :init
-    (add-hook 'after-init-hook 'global-anzu-mode)
-    :config
-    (define-key isearch-mode-map [remap isearch-query-replace]  #'anzu-isearch-query-replace)
-    (define-key isearch-mode-map [remap isearch-query-replace-regexp] #'anzu-isearch-query-replace-regexp))
-#+END_SRC
 ** avy
 Use avy to move between visible text.
 #+begin_src emacs-lisp :tangle yes
   (use-package avy
-    :bind
+    :bind*
     (("C-'" . avy-goto-char)
      ("C-," . avy-goto-char-2))
     :config
     (setq avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 #+end_src
 ** dumb-jump
-Use it to jump to function definitions. Requires no external depedencies.
+Use it to jump to function definitions. Requires no external
+dependencies.
+
 #+begin_src emacs-lisp :tangle yes
   (use-package dumb-jump
     :bind (("M-g o" . dumb-jump-go-other-window)
@@ -1263,18 +958,11 @@ Hide details and only show file and folder names.
   (require 'dired-x)
     #+end_src
 *** allow editing of permissions
-    #+BEGIN_SRC emacs-lisp :tangle yes
-      (use-package wdired
-        :config
-        (setq wdired-allow-to-change-permissions t))
-    #+END_SRC
-*** dired-k
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dired-k
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package wdired
     :config
-    (define-key dired-mode-map (kbd "K") 'dired-k)
-    (setq dired-k-style 'git))
-    #+END_SRC
+    (setq wdired-allow-to-change-permissions t))
+#+END_SRC
 *** dired-narrow
     #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package dired-narrow
@@ -1298,29 +986,6 @@ you to expand subdirectories in place, like a tree structure.
     (bind-keys :map dired-mode-map
                ("i" . dired-subtree-insert)
                (";" . dired-subtree-remove)))
-#+END_SRC
-*** all-the-icons-dired
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package all-the-icons-dired
-    :init
-    (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
-#+END_SRC
-** hydra window movements
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defhydra jethro/window-movement ()
-    ("h" windmove-left)
-    ("s" windmove-right)
-    ("t" windmove-down)
-    ("n" windmove-up)
-    ("y" other-window "other") 
-    ("f" find-file "file")
-    ("F" find-file-other-window "other file")
-    ("v" (progn (split-window-right) (windmove-right)))
-    ("o" delete-other-windows :color blue)
-    ("d" delete-window "delete")
-    ("q" nil))
-
-  (bind-key "M-'" 'jethro/window-movement/body)
 #+END_SRC
 ** ibuffer
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1351,18 +1016,6 @@ you to expand subdirectories in place, like a tree structure.
             ("*info*" :select t :inhibit-window-quit t :same t)
             (magit-status-mode :select t :inhibit-window-quit t :same t)
             (magit-log-mode :select t :inhibit-window-quit t :same t))))
-#+END_SRC
-** go to matching parentheses
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun goto-match-paren (arg)
-    "Go to the matching parenthesis if on parenthesis, otherwise insert %.
-  vi style of % jumping to matching brace."
-    (interactive "p")
-    (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
-          ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
-          (t (self-insert-command (or arg 1)))))
-
-  (bind-key "C-%" 'goto-match-paren)
 #+END_SRC
 ** occur
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1561,14 +1214,6 @@ Use this often, and in combination with multiple-cursors.
 
      (bind-key "M-z" 'zap-up-to-char)
    #+end_src
-** move-text
-I disabled this, because it interferes with some org-mode keybindings,
-and I realise I don't use this as much as I'd like to.
-#+begin_src emacs-lisp :tangle no
-  (use-package move-text
-    :bind (("M-<up>" . move-text-up)
-           ("M-<down>" . move-text-down)))
-#+end_src
 ** ws-butler
 Only lines touched get trimmed. If the white space at end of buffer is
 changed, then blank lines at the end of buffer are truncated
@@ -1709,8 +1354,7 @@ respecting require-final-newline. Trimming only happens when saving.
           try-complete-lisp-symbol-partially
           try-complete-lisp-symbol))
 #+END_SRC
-** Conveniences
-*** Fill and unfill paragraphs
+** Fill and unfill paragraphs
 Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-single-key.html.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun endless/fill-or-unfill ()
@@ -1745,8 +1389,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 
   (bind-key "C-c h d" 'jethro/hydra-draw-box/body)
 #+END_SRC
-* Environment
-** Direnv
+* Direnv
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package direnv
     :init
