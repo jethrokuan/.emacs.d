@@ -722,6 +722,12 @@ Counsel contains ivy enhancements for commonly-used functions.
   (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
 ** Modeline
+*** Nyan-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/modeline-nyan ()
+    (when nyan-mode
+      (nyan-create)))
+#+END_SRC
 *** Flycheck
 Show flycheck status in modeline.
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -788,6 +794,8 @@ Show flycheck status in modeline.
   (setq-default mode-line-format
                 `("%e"
                   mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
+                  " "
+                  (:eval (jethro/modeline-nyan))
                   " " 
                   (:eval (jethro/modeline-flycheck-status))
                   " "
@@ -909,6 +917,12 @@ Highlights recently copied/pasted text.
       ("q" nil "cancel"))
 
     (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
+#+END_SRC
+** nyan-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package nyan-mode
+    :init
+    (add-hook 'after-init-hook 'nyan-mode))
 #+END_SRC
 * Moving Around
 ** Scroll Other Window
