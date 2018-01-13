@@ -2369,15 +2369,6 @@ highlighting and annotations.
     (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
   #+END_SRC
 
-*** Org Bullets
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-bullets
-    :init
-    (add-hook 'org-mode-hook 'org-bullets-mode)
-    :config
-    (setq org-bullets-bullet-list
-          '("◉" "◎" "⚫" "○" "►" "◇")))
-#+END_SRC
 *** Org Diary file
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-diary-file "~/.org/diary.org")
