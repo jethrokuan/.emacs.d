@@ -12,3 +12,4 @@ var/
 config.el
 /straight/*
 !/straight/versions
+/secrets.el

@@ -175,6 +175,10 @@ Auto save all open buffers, when Emacs loses focus.
   (add-hook 'focus-out-hook
             (lambda () (save-some-buffers t)))
 #+END_SRC
+* Secrets
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file "./secrets.el")
+#+END_SRC
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
@@ -2050,6 +2054,14 @@ We use a font that's easier on the eyes for long blocks of text.
                        'org-meta-line
                        'org-document-info-keyword))))
  #+END_SRC
+*** Org Gcal
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-gcal
+    :config
+    (setq org-gcal-client-id jethro/org-gcal-client-id
+          org-gcal-client-secret jethro/org-gcal-client-secret
+          org-gcal-file-alist '(("jethrokuan95@gmail.com" .  "~/.org/gtd/schedule.org"))))
+#+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
 Getting Things Done, a methodology by David Allen. This will always be
@@ -2094,7 +2106,8 @@ inspiration when implementing GTD in org-mode.
                             "~/.org/gtd/timetable.org"
                             "~/.org/gtd/next.org"
                             "~/.org/gtd/projects.org"
-                            "~/.org/gtd/tickler.org"))
+                            "~/.org/gtd/tickler.org"
+                            "~/.org/gtd/schedule.org"))
  #+END_SRC
 
 *** Stage 1: Collecting
@@ -2337,6 +2350,7 @@ inspiration when implementing GTD in org-mode.
 
    (defun jethro/switch-to-agenda ()
      (interactive)
+     (org-gcal-fetch)
      (org-agenda nil " ")
      (delete-other-windows))
 
