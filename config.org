@@ -2065,9 +2065,13 @@ We use a font that's easier on the eyes for long blocks of text.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-gcal
     :config
+    (setq jethro/org-gcal-directory "~/.org/gtd/calendars/")
     (setq org-gcal-client-id jethro/org-gcal-client-id
           org-gcal-client-secret jethro/org-gcal-client-secret
-          org-gcal-file-alist '(("jethrokuan95@gmail.com" .  "~/.org/gtd/schedule.org"))))
+          org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "personal.org"))
+                                ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "school.org"))
+                                ("wing.nus@gmail.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "wing.org"))
+                                ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "nushackers.org")))))
 #+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
@@ -2109,12 +2113,10 @@ inspiration when implementing GTD in org-mode.
  | projects    | This contains the list of projects, and their corresponding todo items                                                    |
 
  #+BEGIN_SRC emacs-lisp :tangle yes
-   (setq org-agenda-files '("~/.org/gtd/inbox.org"
-                            "~/.org/gtd/timetable.org"
-                            "~/.org/gtd/next.org"
-                            "~/.org/gtd/projects.org"
-                            "~/.org/gtd/tickler.org"
-                            "~/.org/gtd/schedule.org"))
+   (require 'find-lisp)
+   (setq jethro/org-agenda-directory "~/.org/gtd/")
+   (setq org-agenda-files
+         (find-lisp-find-files jethro/org-agenda-directory "\.org$"))
  #+END_SRC
 
 *** Stage 1: Collecting
