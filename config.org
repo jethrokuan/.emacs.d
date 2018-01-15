@@ -393,7 +393,14 @@ We only use this for Mac OS setups: this doesn't work with NixOS.
 * Reading feeds with elfeed
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed
+    :bind
+    (:map elfeed-search-mode-map
+          ("S" . jethro/elfeed-db-save))
     :config
+    (defun jethro/elfeed-db-save ()
+      (interactive)
+      (elfeed-db-save)
+      (message "elfeed db saved!"))
     (setq elfeed-db-directory "~/.elfeed"))
 #+END_SRC
 ** elfeed-org
