@@ -177,7 +177,7 @@ Auto save all open buffers, when Emacs loses focus.
 #+END_SRC
 * Secrets
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (load-file "./secrets.el")
+  (load-file "~/.emacs.d/secrets.el")
 #+END_SRC
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
@@ -2123,7 +2123,7 @@ inspiration when implementing GTD in org-mode.
             "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
            ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
-           ("w" "Weekly Review" entry (file+datetree "~/.org/gtd/reviews.org")
+           ("w" "Weekly Review" entry (file+olp+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))
            ("s" "Snippet" entry (file "~/.org/deft/capture.org")
             "* Snippet %<%Y-%m-%d %H:%M>\n%?")))
