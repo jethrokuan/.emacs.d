@@ -196,7 +196,7 @@ to provide my account credentials.
     :if notmuch-command
     :bind (("<f3>" . notmuch)
            :map notmuch-search-mode-map
-           ;; bind 'r' to reply-all, and 'R' to reply
+           ("t" . jethro/notmuch-toggle-read)
            ("r" . notmuch-search-reply-to-thread)
            ("R" . notmuch-search-reply-to-thread-sender))
     :init
@@ -212,6 +212,12 @@ to provide my account credentials.
           sendmail-program (executable-find "msmtp")
           message-sendmail-f-is-evil nil)
     :config
+    (defun jethro/notmuch-toggle-read ()
+      "toggle read status of message"
+      (interactive)
+      (if (member "unread" (notmuch-search-get-tags))
+          (notmuch-search-tag (list "-unread"))
+        (notmuch-search-tag (list "+unread"))))
     (progn
       (setq notmuch-archive-tags '("-inbox" "-unread"))
       (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
