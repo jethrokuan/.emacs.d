@@ -2371,6 +2371,7 @@ inspiration when implementing GTD in org-mode.
      (interactive)
      (org-gcal-fetch)
      (org-agenda nil " ")
+     (org-agenda-log-mode)
      (delete-other-windows))
 
    (bind-key "<f1>" 'jethro/switch-to-agenda)
