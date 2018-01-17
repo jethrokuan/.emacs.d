@@ -2072,12 +2072,15 @@ We use a font that's easier on the eyes for long blocks of text.
   (use-package org-gcal
     :config
     (setq jethro/org-gcal-directory "~/.org/gtd/calendars/")
+    (defun jethro/get-gcal-file-location (loc)
+      (concat (file-name-as-directory jethro/org-gcal-directory) loc))
     (setq org-gcal-client-id jethro/org-gcal-client-id
           org-gcal-client-secret jethro/org-gcal-client-secret
-          org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "personal.org"))
-                                ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "school.org"))
-                                ("wing.nus@gmail.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "wing.org"))
-                                ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(concat (file-name-as-directory jethro/org-gcal-directory) "nushackers.org")))))
+          org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
+                                ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
+                                ("wing.nus@gmail.com" . ,(jethro/get-gcal-file-location "wing.org"))
+                                ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_public.org"))
+                                ("linuxnus.org_r7v0mr9m4h4u9rjpf2chimo61o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_private.org")))))
 #+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
