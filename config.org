@@ -2243,8 +2243,8 @@ inspiration when implementing GTD in org-mode.
    (setq org-refile-use-outline-path 'file
          org-outline-path-complete-in-steps nil)
    (setq org-refile-allow-creating-parent-nodes 'confirm)
-   (setq org-refile-targets '(("next.org" :maxlevel . 1)
-                              ("someday.org" :maxlevel . 1)
+   (setq org-refile-targets '(("next.org" :level . 0)
+                              ("someday.org" :level . 0)
                               ("projects.org" :maxlevel . 1)))
  #+END_SRC
 
@@ -2284,6 +2284,7 @@ inspiration when implementing GTD in org-mode.
 
    (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
    (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
+   (define-key org-agenda-mode-map "R" 'org-agenda-refile)
    (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
  #+END_SRC
 
