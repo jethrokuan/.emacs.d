@@ -198,7 +198,9 @@ to provide my account credentials.
            :map notmuch-search-mode-map
            ("t" . jethro/notmuch-toggle-read)
            ("r" . notmuch-search-reply-to-thread)
-           ("R" . notmuch-search-reply-to-thread-sender))
+           ("R" . notmuch-search-reply-to-thread-sender)
+           :map notmuch-show-mode-map
+           ("o" . browse-url-at-point))
     :init
     (progn
       (setq notmuch-always-prompt-for-sender t)
