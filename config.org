@@ -2338,6 +2338,7 @@ inspiration when implementing GTD in org-mode.
 **** Custom agenda Commands
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq org-agenda-block-separator nil)
+   (setq org-agenda-start-with-log-mode t)
    (setq jethro/org-agenda-todo-view
          `(" " "Agenda"
            ((agenda ""
@@ -2381,7 +2382,6 @@ inspiration when implementing GTD in org-mode.
    (defun jethro/switch-to-agenda ()
      (interactive)
      (org-agenda nil " ")
-     (org-agenda-log-mode)
      (delete-other-windows))
 
    (bind-key "<f1>" 'jethro/switch-to-agenda)
