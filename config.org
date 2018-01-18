@@ -117,9 +117,9 @@ minibuffer.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'recentf)
   (run-at-time (* 5 60) nil
-	       (lambda ()
-		 (let ((inhibit-message t))
-		   (recentf-save-list))))
+         (lambda ()
+     (let ((inhibit-message t))
+       (recentf-save-list))))
 #+END_SRC
 
 ** Editing Preferences
@@ -2084,6 +2084,15 @@ We use a font that's easier on the eyes for long blocks of text.
                                 ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_public.org"))
                                 ("linuxnus.org_r7v0mr9m4h4u9rjpf2chimo61o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_private.org")))))
 #+END_SRC
+**** Run on Timer
+Run org-gcal-fetch every 5 minutes to update the calendars.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (run-at-time (* 5 60) nil
+               (lambda ()
+                 (let ((inhibit-message t))
+                   (org-gcal-fetch))))
+
+#+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
 Getting Things Done, a methodology by David Allen. This will always be
@@ -2371,7 +2380,6 @@ inspiration when implementing GTD in org-mode.
 
    (defun jethro/switch-to-agenda ()
      (interactive)
-     (org-gcal-fetch)
      (org-agenda nil " ")
      (org-agenda-log-mode)
      (delete-other-windows))
