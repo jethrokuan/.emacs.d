@@ -37,6 +37,19 @@ maintaining tidiness and performance.
 #+END_SRC
 
 * Better Defaults
+** Function Redefinition
+Some warnings are generated when functions are redefined via
+=defadvice=. For example:
+
+#+BEGIN_QUOTE
+ad-handle-definition: `tramp-read-passwd' got redefined
+#+END_QUOTE
+
+To suppress these warnings, we accept these redefinitions:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq ad-redefinition-action 'accept)
+#+END_SRC
 ** No littering
 This package sets out to fix this by changing the values of path
 variables to put files in either no-littering-etc-directory
