@@ -2880,39 +2880,11 @@ Useful when handling git merge conflicts.
     :init
     (setq projectile-keymap-prefix (kbd "C-x p"))
     :config
-    (require 'projectile)
     (projectile-global-mode)
     (use-package counsel-projectile
       :bind (("s-f" . counsel-projectile-find-file)
              ("s-b" . counsel-projectile-switch-to-buffer)
-             ("C-c s" . jethro/counsel-projectile-rg))
-      :config
-      (defun jethro/counsel-projectile-rg (&optional options)
-        "Ivy version of `projectile-rg'."
-        (interactive)
-        (if (projectile-project-p)
-            (let* ((options
-                    (if current-prefix-arg
-                        (read-string "options: ")
-                      options))
-                   (ignored
-                    (unless (eq (projectile-project-vcs) 'git)
-                      ;; rg supports git ignore files
-                      (append
-                       (cl-union (projectile-ignored-files-rel) grep-find-ignored-files)
-                       (cl-union (projectile-ignored-directories-rel) grep-find-ignored-directories))))
-                   (options
-                    (concat options " "
-                            (mapconcat (lambda (i)
-                                         (concat "--ignore-file " (shell-quote-argument i)))
-                                       ignored
-                                       " "))))
-              (counsel-rg (ivy-thing-at-point)
-                          (projectile-project-root)
-                          options
-                          (projectile-prepend-project-name "rg")))
-          (user-error "You're not in a project")))
-      (counsel-projectile-on))
+             ("C-c s" . counsel-projectile-rg)))
     (setq projectile-use-git-grep t)
     (setq projectile-create-missing-test-files t)
     (setq projectile-completion-system 'ivy)
