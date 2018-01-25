@@ -2356,8 +2356,7 @@ inspiration when implementing GTD in org-mode.
                    ))
             (todo "TODO"
                   ((org-agenda-overriding-header "Todo")
-                   (org-agenda-files '("~/.org/gtd/someday.org"
-                                       "~/.org/gtd/projects.org"
+                   (org-agenda-files '("~/.org/gtd/projects.org"
                                        "~/.org/gtd/next.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
