@@ -250,7 +250,7 @@ facility to capture email into a task.
     (require 'org-notmuch))
 #+END_SRC
 * Appearance
-n** Font
+** Font
 I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
 Office Code Pro and the Powerline font families.
 
@@ -510,9 +510,9 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
     :diminish ivy-mode
-    :bind*
+    :bind
     (("C-c C-r" . ivy-resume)
-     ("M-a" . counsel-M-x)
+     ("M-x" . counsel-M-x)
      ("C-c i" . counsel-imenu)
      ("C-x b" . ivy-switch-buffer)
      ("C-x B" . ivy-switch-buffer-other-window)
@@ -537,17 +537,6 @@ Counsel contains ivy enhancements for commonly-used functions.
     :init
     (add-hook 'after-init-hook 'ivy-mode)
     :config
-    (defun ivy-dired ()
-      (interactive)
-      (if ivy--directory
-          (ivy-quit-and-run
-           (dired ivy--directory)
-           (when (re-search-forward
-                  (regexp-quote
-                   (substring ivy--current 0 -1)) nil t)
-             (goto-char (match-beginning 0))))
-        (user-error
-         "Not completing files currently"))) 
     (setq counsel-find-file-at-point t)
     (setq ivy-use-virtual-buffers t)
     (setq ivy-display-style 'fancy)
@@ -593,142 +582,42 @@ Counsel contains ivy enhancements for commonly-used functions.
     #+END_SRC
 * Visual Enhancements
 ** nyan-mode
-   #+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nyan-mode
     :init
     (add-hook 'after-init-hook 'nyan-mode))
-   #+END_SRC
+#+END_SRC
 ** Whitespace-mode
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (require 'whitespace)
-  (setq whitespace-line-column 80) ;; limit line length
+  (setq whitespace-line-column 80)
   (setq whitespace-style '(face lines-tail))
   (diminish 'whitespace-mode)
   (add-hook 'prog-mode-hook 'whitespace-mode)
-   #+end_src
+#+end_src
 ** Modeline
-*** Nyan-mode
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/modeline-nyan ()
-    (when nyan-mode
-      (nyan-create)))
-    #+END_SRC
-*** Flycheck
-    Show flycheck status in modeline.
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (defface jethro/ok-face
-    '((t :foreground "#bfebbf"))
-    "Face for ok status in the mode-line.")
-
-  (defface jethro/warning-face
-    '((t :foreground "#dfaf8f"))
-    "Face for warning status in the mode-line.")
-
-  (defface jethro/error-face
-    '((t :foreground "#cc9393"))
-    "Face for error status in the mode-line.")
-
-  (defun jethro/modeline-flycheck-status ()
-    "Return the status of flycheck to be displayed in the mode-line."
-    (when flycheck-mode
-      (let* ((text (pcase flycheck-last-status-change
-                     (`finished (if flycheck-current-errors
-                                    (let ((count (let-alist (flycheck-count-errors flycheck-current-errors)
-                                                   (+ (or .warning 0) (or .error 0)))))
-                                      (propertize (format "✖ %s Issue%s" count (if (eq 1 count) "" "s"))
-                                                  'face 'jethro/warning-face))
-                                  (propertize "✔ No Issues"
-                                              'face 'jethro/ok-face)))
-                     (`running     (propertize "⟲ Running"
-                                               'face 'jethro/warning-face))
-                     (`no-checker  (propertize "⚠ No Checker"
-                                               'face 'jethro/warning-face))
-                     (`not-checked "✖ Disabled")
-                     (`errored     (propertize "⚠ Error"
-                                               'face 'jethro/error-face))
-                     (`interrupted (propertize "⛔ Interrupted"
-                                               'face 'jethro/error-face))
-                     (`suspicious  ""))))
-        (propertize text
-                    'help-echo "Show Flycheck Errors"
-                    'local-map (make-mode-line-mouse-map
-                                'mouse-1 #'flycheck-list-errors)))))
-    #+END_SRC
-*** Eyebrowse
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/modeline-eyebrowse ()
-    (when eyebrowse-mode
-      (eyebrowse-mode-line-indicator)))
-    #+END_SRC
-*** Modeline Format
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/org-mode-line-string ()
-    "Returns org-mode-line-string if bound, empty
-  string if not"
-    (if (boundp 'org-mode-line-string)
-        org-mode-line-string
-      ""))
-
-  (defun jethro/org-pomodoro-mode-line ()
-    "Returns org-pomodoro-mode-line string if bound, empty
-  string if not"
-    (if (boundp 'org-pomodoro-mode-line)
-        org-pomodoro-mode-line
-      ""))
-
-  (setq-default mode-line-format
-                `("%e"
-                  mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
-                  " "
-                  (:eval (jethro/modeline-nyan))
-                  " " 
-                  (:eval (jethro/modeline-flycheck-status))
-                  " "
-                  (:eval (jethro/org-mode-line-string))
-                  " "
-                  (:eval (jethro/org-pomodoro-mode-line))
-                  " "
-                  (vc-mode vc-mode)
-                  " "
-                  (:eval (jethro/modeline-eyebrowse))))
-    #+END_SRC
 *** Thick modeline bar
-    #+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
   (custom-set-faces
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
-    #+END_SRC
+#+END_SRC
 *** smart-mode-line
-    #+begin_src emacs-lisp :tangle yes
-  (use-package smart-mode-line
-    :init
-    (add-hook 'after-init-hook 'sml/setup)
-    :config 
-    (setq sml/theme 'respectful)
-    (setq sml/name-width 44)
-    (setq sml/shorten-directory t)
-    (setq sml/shorten-modes nil)
-    (setq sml/mode-width 'full)
-    (setq sml/replacer-regexp-list
-          '(("^~/.org/" ":O:")
-            ("^~/\\.emacs\\.d/" ":ED:")))
-    (setq rm-blacklist
-          (format "^ \\(%s\\)$"
-                  (mapconcat #'identity
-                             '("j"
-                               "FlyC.*"
-                               "Fill"
-                               "Projectile.*"
-                               "GitGutter"
-                               "ivy"
-                               "company"
-                               ""
-                               "OrgSrc"
-                               ","
-                               "ElDoc")
-                             "\\|"))))
-    #+end_src
+#+begin_src emacs-lisp :tangle yes
+      (use-package smart-mode-line
+        :init
+        (add-hook 'after-init-hook 'sml/setup)
+        :config 
+        (setq sml/theme 'respectful)
+        (setq sml/name-width 44)
+        (setq sml/shorten-directory t)
+        (setq sml/shorten-modes nil)
+        (setq sml/mode-width 'full)
+        (setq sml/replacer-regexp-list
+              '(("^~/.org/" ":O:")
+                ("^~/\\.emacs\\.d/" ":ED:"))))
+#+end_src
 ** Zooming
-   #+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (with-eval-after-load 'hydra
     (defhydra jethro/hydra-zoom ()
       "zoom"
@@ -736,7 +625,7 @@ Counsel contains ivy enhancements for commonly-used functions.
       ("o" text-scale-decrease "out"))
 
     (bind-key "C-c h z" 'jethro/hydra-zoom/body))
-   #+end_src
+#+end_src
 ** beacon
    Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
 
@@ -1800,7 +1689,12 @@ of an Emacs server.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package meghanada
-    :defer t
+    :bind
+    (:map meghanada-mode-map
+          ("C-S-t" . meghanada-switch-testcase)
+          ("M-RET" . meghanada-local-variable)
+          ("M-r" . meghanada-reference)
+          ("M-t" . meghanada-typeinfo))
     :init
     (add-hook 'java-mode-hook
               (lambda ()
@@ -1820,18 +1714,9 @@ of an Emacs server.
     (setq c-basic-offset 2)
     (setq meghanada-server-remote-debug t)
     (setq meghanada-javac-xlint "-Xlint:all,-processing")
-    :bind
-    (:map meghanada-mode-map
-          ("C-S-t" . meghanada-switch-testcase)
-          ("M-RET" . meghanada-local-variable)
-          ("M-r" . meghanada-reference)
-          ("M-t" . meghanada-typeinfo)
-          ("C-z" . hydra-meghanada/body))
-    :commands
-    (meghanada-mode))
-
-  (defhydra hydra-meghanada (:hint nil :exit t)
-    "
+    (with-eval-after-load 'hydra
+      (defhydra jethro/hydra-meghanada (:hint nil :exit t)
+        "
   ^Edit^                           ^Tast or Task^
   ^^^^^^-------------------------------------------------------
   _f_: meghanada-compile-file      _m_: meghanada-restart
@@ -1844,67 +1729,35 @@ of an Emacs server.
   _l_: helm-ls-git-ls
   _q_: exit
   "
-    ("f" meghanada-compile-file)
-    ("m" meghanada-restart)
+        ("f" meghanada-compile-file)
+        ("m" meghanada-restart)
 
-    ("c" meghanada-compile-project)
-    ("o" meghanada-optimize-import)
-    ("s" meghanada-switch-test-case)
-    ("v" meghanada-local-variable)
-    ("i" meghanada-import-all)
+        ("c" meghanada-compile-project)
+        ("o" meghanada-optimize-import)
+        ("s" meghanada-switch-test-case)
+        ("v" meghanada-local-variable)
+        ("i" meghanada-import-all)
 
-    ("g" magit-status)
-    ("l" helm-ls-git-ls)
+        ("g" magit-status)
+        ("l" helm-ls-git-ls)
 
-    ("t" meghanada-run-task)
-    ("T" meghanada-typeinfo)
-    ("j" meghanada-run-junit-test-case)
-    ("J" meghanada-run-junit-class)
-    ("R" meghanada-run-junit-recent)
-    ("r" meghanada-reference)
+        ("t" meghanada-run-task)
+        ("T" meghanada-typeinfo)
+        ("j" meghanada-run-junit-test-case)
+        ("J" meghanada-run-junit-class)
+        ("R" meghanada-run-junit-recent)
+        ("r" meghanada-reference)
 
-    ("q" exit)
-    ("z" nil "leave"))
+        ("q" exit)
+        ("z" nil "leave"))
+
+      (bind-key "C-c h m" 'jethro/hydra-meghanada/body meghanada-mode-map)) 
+    :commands
+    (meghanada-mode))
 #+END_SRC
 **** Meghanada Hydra
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defhydra jethro/hydra-meghanada (:hint nil :exit t)
-    "
-  ^Edit^                           ^Tast or Task^
-  ^^^^^^-------------------------------------------------------
-  _f_: meghanada-compile-file      _m_: meghanada-restart
-  _c_: meghanada-compile-project   _t_: meghanada-run-task
-  _o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
-  _s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
-  _v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
-  _i_: meghanada-import-all        _r_: meghanada-reference
-  _g_: magit-status                _T_: meghanada-typeinfo
-  _l_: helm-ls-git-ls
-  _q_: exit
-  "
-    ("f" meghanada-compile-file)
-    ("m" meghanada-restart)
 
-    ("c" meghanada-compile-project)
-    ("o" meghanada-optimize-import)
-    ("s" meghanada-switch-test-case)
-    ("v" meghanada-local-variable)
-    ("i" meghanada-import-all)
-
-    ("g" magit-status)
-    ("l" helm-ls-git-ls)
-
-    ("t" meghanada-run-task)
-    ("T" meghanada-typeinfo)
-    ("j" meghanada-run-junit-test-case)
-    ("J" meghanada-run-junit-class)
-    ("R" meghanada-run-junit-recent)
-    ("r" meghanada-reference)
-
-    ("q" exit)
-    ("z" nil "leave"))
-
-  (bind-key "C-c h m" 'jethro/hydra-meghanada/body meghanada-mode-map)
 #+END_SRC
 *** Disassembling Java Code
 #+BEGIN_SRC emacs-lisp :tangle yes
