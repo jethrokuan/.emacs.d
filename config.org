@@ -23,17 +23,19 @@ Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (unless (and
-           (package-installed-p 'use-package)
-           (package-installed-p 'diminish))
+  (unless (and (package-installed-p 'use-package)
+               (package-installed-p 'diminish))
     (package-refresh-contents)
     (package-install 'use-package)
     (package-install 'diminish))
 
   (eval-when-compile
-    (require 'use-package))
-  (require 'diminish)                ;; if you use :diminish
-  (require 'bind-key)                ;; if you use any :bind variant
+    (require 'use-package)
+    (require 'diminish)
+    (require 'bind-key))
+
+  ;; Always demand if daemon-mode
+  (setq use-package-always-demand (daemonp))
 #+END_SRC
 
 * Better Defaults
