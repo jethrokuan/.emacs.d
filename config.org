@@ -6,7 +6,7 @@ latest updates to my Emacs configuration.
 Notes:
 1. I use a Dvorak 60% keyboard, so some of the keybindings may not be
    suitable for you.
-2. I use [[https://stumpwm.github.io/][StumpWM]], and many of my keybindings are designed around that
+2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around that
 
 ** About the Author
 I'm currently a Computer Science undergraduate, who does primarily
