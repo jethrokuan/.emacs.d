@@ -1937,7 +1937,8 @@ highlighting and annotations.
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package org-plus-contrib
+    (use-package org
+      :ensure org-plus-contrib
       :mode ("\\.org\\'" . org-mode)
       :bind
       (("C-c l" . org-store-link)
