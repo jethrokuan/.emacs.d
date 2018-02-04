@@ -2776,6 +2776,69 @@ Closes compile buffer if there are no errors.
     :init
     (add-hook 'after-init-hook 'bury-successful-compilation))
 #+end_src
+** Transcribing
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-minor-mode transcribe-mode
+    "A minor mode for transcription of audio."
+    :light "Transcribe mode"
+    :keymap (make-sparse-keymap))
+
+  (defun tag-word-or-region (text-begin text-end)
+    "Surround current word or region with given text."
+    (interactive "sStart tag: \nsEnd tag: ")
+    (let (pos1 pos2 bds)
+      (if (and transient-mark-mode mark-active)
+          (progn
+            (goto-char (region-end))
+            (insert text-end)
+            (goto-char (region-beginning))
+            (insert text-begin))
+        (progn
+          (setq bds (bounds-of-thing-at-point 'symbol))
+          (goto-char (cdr bds))
+          (insert text-end)
+          (goto-char (car bds))
+          (insert text-begin)))))
+
+  (sp-with-modes 'transcribe-mode
+    (sp-local-pair ">" "<")
+    (sp-local-pair "<" ">")
+    (sp-local-pair "°" "°")
+    (sp-local-pair "[" "]")
+    (sp-local-pair "((" "))")
+    (sp-local-pair "(" ")"))
+
+  (defhydra jethro/hydra-transcribe (:color blue :hint nil)
+    "
+  ^Command^
+  ^^-------------------------------------------------------------------------------
+  _._: Falling Intonation                   _d_: Softer Relative           
+  _,_: Continuing Intonation                _j_: Sharp Fall in Pitch       
+  _?_: Rising Intonation                    _k_: Sharp Rise in Pitch       
+  _/_: Weak Rising Intonation (¿)           _>_: Rapid Delivery            
+  _:_: Prolongation                         _<_: Slow Delivery             
+  _-_: Halt or Self Interruption
+  _u_: Stress or Emphasis
+  _c_: Increased Loudness
+  "
+    ("." (lambda () (interactive) (insert-char ?.)))
+    ("," (lambda () (interactive) (insert-char ?,)))
+    ("?" (lambda () (interactive) (insert-char ??)))
+    ("/" (lambda () (interactive) (insert-char ?¿)))
+    (":" (lambda () (interactive) (insert-char ?:)))
+    ("-" (lambda () (interactive) (insert-char ?-)))
+    ("u" (lambda () (interactive) (tag-word-or-region "_" "_")))
+    ("c" (lambda () (interactive) (upcase-dwim)))
+    ("d" (lambda () (interactive) (tag-word-or-region "°" "°")))
+    ("j" (lambda () (interactive) (insert-char ?↓)))
+    ("k" (lambda () (interactive) (insert-char ?↑)))
+    (">" (lambda () (interactive) (tag-word-or-region ">" "<")))
+    ("<" (lambda () (interactive) (tag-word-or-region "<" ">")))
+    ("[" (lambda () (interactive) (tag-word-or-region "[" "]"))) 
+    ("q" nil))
+
+  (key-chord-define transcribe-mode-map "kk" 'jethro/hydra-transcribe/body)
+#+END_SRC
 * Load Custom File
 Custom file should take precedence.
 #+BEGIN_SRC emacs-lisp :tangle yes
