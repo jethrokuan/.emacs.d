@@ -2686,6 +2686,10 @@ Useful when handling git merge conflicts.
      :config
      (setq magit-auto-revert-mode nil))
  #+end_src
+*** Gists
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package gist)
+#+END_SRC
 ** Projectile
 #+begin_src emacs-lisp :tangle yes
   (use-package projectile
