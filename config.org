@@ -2804,6 +2804,7 @@ Closes compile buffer if there are no errors.
           (goto-char (car bds))
           (insert text-begin)))))
 
+  (require 'smartparens-config)
   (sp-with-modes 'transcribe-mode
     (sp-local-pair ">" "<")
     (sp-local-pair "<" ">")
