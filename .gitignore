@@ -7,9 +7,8 @@ anaconda-mode/
 /.cache/
 url
 eshell/
+meghanada/
 /persp-confs/
 var/
 config.el
-/straight/*
-!/straight/versions
 /secrets.el
