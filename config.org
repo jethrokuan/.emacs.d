@@ -2727,25 +2727,8 @@ Useful when handling git merge conflicts.
         (run-hooks 'projectile-find-file-hook)
         (cider-jack-in))))
 #+end_src
-*** ivy switch persp
-#+BEGIN_SRC emacs-lisp :tangle no
-  (defun jethro/ivy-persp-switch-project (arg)
-    (interactive "P")
-    (ivy-read "Switch to Project Perspective: "
-              (if (projectile-project-p)
-                  (cons (abbreviate-file-name (projectile-project-root))
-                        (projectile-relevant-known-projects))
-                projectile-known-projects)
-              :action (lambda (project)
-                        (let ((persp-reset-windows-on-nil-window-conf t))
-                          (persp-switch project)
-                          (let ((projectile-completion-system 'ivy))
-                            (projectile-switch-project-by-name project))))))
-
-  (bind-key "C-x p p" 'jethro/ivy-persp-switch-project)
-#+END_SRC
-*** Magithub (Disabled)
-#+BEGIN_SRC emacs-lisp :tangle no
+*** Magithub
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package magithub
     :after magit
     :config (magithub-feature-autoinject t))
