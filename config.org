@@ -581,12 +581,6 @@ Counsel contains ivy enhancements for commonly-used functions.
     :bind* (("M-s" . rg)))
     #+END_SRC
 * Visual Enhancements
-** nyan-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package nyan-mode
-    :init
-    (add-hook 'after-init-hook 'nyan-mode))
-#+END_SRC
 ** Whitespace-mode
 #+begin_src emacs-lisp :tangle yes
   (require 'whitespace)
@@ -2364,12 +2358,6 @@ this to capture screenshots into deft.
            :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
           ("org" :components ("org-notes-assets" "org-notes-images"))))
 #+END_SRC
-*** Emojis
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package emojify
-    :config
-    (add-hook 'org-mode-hook 'emojify-mode))
-#+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
 #+begin_src emacs-lisp :tangle yes
@@ -2728,7 +2716,7 @@ Useful when handling git merge conflicts.
         (cider-jack-in))))
 #+end_src
 *** Magithub
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package magithub
     :after magit
     :config (magithub-feature-autoinject t))
