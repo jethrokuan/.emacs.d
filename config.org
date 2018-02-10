@@ -1488,10 +1488,6 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                 ("C-c p m" . pytest-pdb-module)
                 ("C-c p ." . pytest-pdb-one)))
 #+END_SRC
-*** realgud
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package realgud)
-#+END_SRC
 *** Highlight Indent Guides
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package highlight-indent-guides
