@@ -1613,13 +1613,6 @@ npm install -g tern
     (add-hook 'js2-mode-hook #'js2-refactor-mode)
     (js2r-add-keybindings-with-prefix "C-c C-j"))
     #+end_src
-*** Vue-mode
-    Additional support for Vue.js projects.
-
-    #+begin_src emacs-lisp :tangle yes
- (use-package vue-mode
-   :mode "\\.vue\\'")
-    #+end_src
 *** React-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/setup-rjsx-mode ()  
