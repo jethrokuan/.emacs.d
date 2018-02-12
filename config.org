@@ -2039,7 +2039,7 @@ inspiration when implementing GTD in org-mode.
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq org-capture-templates
          `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
-            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>") 
+            "* TODO %?")
            ("p" "paper" entry (file "~/.org/papers/papers.org")
             "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
            ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
