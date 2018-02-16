@@ -420,6 +420,7 @@ We only use this for Mac OS setups: this doesn't work with NixOS.
     (:map elfeed-search-mode-map
           ("S" . jethro/elfeed-db-save))
     :config
+    (setq shr-width 80)
     (defun jethro/elfeed-db-save ()
       (interactive)
       (elfeed-db-save)
