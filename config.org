@@ -2354,6 +2354,12 @@ this to capture screenshots into deft.
            :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
           ("org" :components ("org-notes-assets" "org-notes-images"))))
 #+END_SRC
+** Org mode for Journalling
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-journal
+    :config
+    (setq org-journal-dir "~/.org/journal/"))
+#+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
 #+begin_src emacs-lisp :tangle yes
