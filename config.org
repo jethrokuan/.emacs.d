@@ -215,7 +215,9 @@ to provide my account credentials.
            ("r" . notmuch-search-reply-to-thread)
            ("R" . notmuch-search-reply-to-thread-sender)
            :map notmuch-show-mode-map
-           ("o" . browse-url-at-point))
+           ("<tab>" . org-next-link)
+           ("<backtab>". org-previous-link)
+           ("<return>" . browse-url-at-point))
     :init
     (progn
       (setq notmuch-always-prompt-for-sender t)
