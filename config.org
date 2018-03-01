@@ -606,7 +606,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
 #+END_SRC
 *** smart-mode-line
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
       (use-package smart-mode-line
         :init
         (add-hook 'after-init-hook 'sml/setup)
@@ -620,15 +620,6 @@ Counsel contains ivy enhancements for commonly-used functions.
               '(("^~/.org/" ":O:")
                 ("^~/\\.emacs\\.d/" ":ED:"))))
 #+end_src
-*** feebleline
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package feebleline
-    :config
-    (feebleline-mode)
-    (window-divider-mode t)
-    (setq window-divider-default-bottom-width 1)
-    (setq window-divider-default-places (quote bottom-only)))
-#+END_SRC
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
   (with-eval-after-load 'hydra
