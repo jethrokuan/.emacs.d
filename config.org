@@ -295,13 +295,6 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
-** Dimmer
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dimmer
-    :config
-    (setq dimmer-fraction 0.4)
-    (dimmer-mode))
-#+END_SRC
 * Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'eshell)
