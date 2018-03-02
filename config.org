@@ -2090,6 +2090,13 @@ inspiration when implementing GTD in org-mode.
            ((org-agenda-files '("~/.org/gtd/inbox.org")))))
  #+END_SRC
 
+**** Org Aenda Someday View
+This view is where I review the thingns I would like to do someday:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq jethro/org-agenda-someday-view
+        `("s" "Someday" todo ""
+          ((org-agenda-files '("~/.org/gtd/someday.org")))))
+#+END_SRC
 **** Org TODO Keywords
  | keyword   | meaning                                                                      |
  |-----------+------------------------------------------------------------------------------|
@@ -2570,6 +2577,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-custom-commands 
         `(,jethro/org-agenda-inbox-view
+          ,jethro/org-agenda-someday-view
           ,jethro/org-agenda-todo-view
           ,jethro/org-agenda-papers-view))
 #+END_SRC
