@@ -1687,13 +1687,9 @@ of an Emacs server.
                 (google-make-newline-indent)
                 (meghanada-mode t)
                 (smartparens-mode t)
-                (rainbow-delimiters-mode t)
-                (highlight-symbol-mode t)
                 (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-
     :config
-    (use-package realgud
-      :ensure t)
+    (use-package realgud)
     (setq indent-tabs-mode nil)
     (setq tab-width 2)
     (setq c-basic-offset 2)
