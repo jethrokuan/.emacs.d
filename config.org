@@ -1812,9 +1812,7 @@ of an Emacs server.
              markdown-enable-wiki-links t
              markdown-indent-on-enter 'indent-and-new-item
              markdown-asymmetric-header t
-             markdown-live-preview-delete-export 'delete-on-destroy)
-       (eval-after-load 'org
-         (add-hook 'markdown-mode-hook 'orgtbl-mode)))
+             markdown-live-preview-delete-export 'delete-on-destroy))
    #+end_src
 ** Clojure
 *** Clojure-mode
