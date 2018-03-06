@@ -12,3 +12,4 @@ meghanada/
 var/
 config.el
 /secrets.el
+eclipse.jdt.ls/
