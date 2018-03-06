@@ -2757,6 +2757,10 @@ Search Stack Overflow
   (use-package sos
     :commands (sos))
 #+END_SRC
+** writegood-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package writegood-mode)
+#+END_SRC
 ** which-key
 #+begin_src emacs-lisp :tangle yes
   (use-package which-key
