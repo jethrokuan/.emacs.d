@@ -1768,6 +1768,11 @@ of an Emacs server.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package autodisass-java-bytecode)
 #+END_SRC
+*** Groovy mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package groovy-mode
+    :mode ("\\.gradle\\'" . groovy-mode))
+#+END_SRC
 ** Typescript
 *** typescript-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1814,6 +1819,11 @@ of an Emacs server.
              markdown-asymmetric-header t
              markdown-live-preview-delete-export 'delete-on-destroy))
    #+end_src
+** AsciiDoc
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package adoc-mode
+    :mode ("\\.adoc\\'" . adoc-mode))
+#+END_SRC
 ** Clojure
 *** Clojure-mode
     #+begin_src emacs-lisp :tangle yes
