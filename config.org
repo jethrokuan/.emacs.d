@@ -209,7 +209,7 @@ to provide my account credentials.
   (use-package notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
     :if notmuch-command
-    :bind (("<f3>" . notmuch)
+    :bind (("<f2>" . notmuch)
            :map notmuch-search-mode-map
            ("t" . jethro/notmuch-toggle-read)
            ("r" . notmuch-search-reply-to-thread)
@@ -217,7 +217,7 @@ to provide my account credentials.
            :map notmuch-show-mode-map
            ("<tab>" . org-next-link)
            ("<backtab>". org-previous-link)
-           ("<return>" . browse-url-at-point))
+           ("C-<return>" . browse-url-at-point))
     :init
     (progn
       (setq notmuch-always-prompt-for-sender t)
