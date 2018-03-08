@@ -1876,27 +1876,26 @@ of an Emacs server.
 ** Latex
 *** AucTeX
     #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package auctex
-    :defer t
-    :config
-    (setq TeX-auto-save t
-          TeX-parse-self t
-          TeX-syntactic-comment t
-          ;; Synctex support
-          TeX-source-correlate-start-server nil
-          ;; Don't insert line-break at inline math
-          LaTeX-fill-break-at-separators nil)
-    (setq TeX-view-program-list '(("Evince" "evince --page-index=%(outpage) %o")
-                                  ("qpdfview" "qpdfview %o#%(outpage)")))
-    (setq TeX-view-program-selection '((output-pdf "qpdfview")
-                                       (output-pdf "Evince")))
-    (when latex-enable-auto-fill
-      (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
-    (when latex-enable-folding
-      (add-hook 'LaTeX-mode-hook 'TeX-fold-mode))
-    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-    (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
-    (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
+      (use-package auctex
+        :defer t
+        :config
+        (setq TeX-auto-save t
+              TeX-parse-self t
+              TeX-syntactic-comment t
+              ;; Synctex support
+              TeX-source-correlate-start-server nil
+              ;; Don't insert line-break at inline math
+              LaTeX-fill-break-at-separators nil)
+        (setq TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")
+                                      ("qpdfview" "qpdfview %o#%(outpage)")))
+        (setq TeX-view-program-selection '((output-pdf "zathura")))
+        (when latex-enable-auto-fill
+          (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
+        (when latex-enable-folding
+          (add-hook 'LaTeX-mode-hook 'TeX-fold-mode))
+        (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+        (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
+        (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
     #+END_SRC
 *** Autocomplete support
     #+BEGIN_SRC emacs-lisp :tangle yes
