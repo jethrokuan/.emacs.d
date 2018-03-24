@@ -274,13 +274,13 @@ Remove the useless toolbars and splash screens.
 
 ** Theme
 *** Zenburn
- #+BEGIN_SRC emacs-lisp :tangle no
+ #+BEGIN_SRC emacs-lisp :tangle yes
    (use-package zenburn-theme
        :init
        (load-theme 'zenburn t))
  #+END_SRC
 *** Tao-theme
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package tao-theme
     :init
     (load-theme 'tao-yang t)
@@ -608,18 +608,18 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+END_SRC
 *** smart-mode-line
 #+begin_src emacs-lisp :tangle yes
-      (use-package smart-mode-line
-        :init
-        (add-hook 'after-init-hook 'sml/setup)
-        :config 
-        (setq sml/theme 'respectful)
-        (setq sml/name-width 44)
-        (setq sml/shorten-directory t)
-        (setq sml/shorten-modes nil)
-        (setq sml/mode-width 'full)
-        (setq sml/replacer-regexp-list
-              '(("^~/.org/" ":O:")
-                ("^~/\\.emacs\\.d/" ":ED:"))))
+  (use-package smart-mode-line
+    :init
+    (add-hook 'after-init-hook 'sml/setup)
+    :config 
+    (setq sml/theme 'respectful)
+    (setq sml/name-width 44)
+    (setq sml/shorten-directory t)
+    (setq sml/shorten-modes nil)
+    (setq sml/mode-width 'full)
+    (setq sml/replacer-regexp-list
+          '(("^~/.org/" ":O:")
+            ("^~/\\.emacs\\.d/" ":ED:"))))
 #+end_src
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
