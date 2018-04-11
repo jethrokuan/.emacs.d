@@ -2418,8 +2418,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\usepackage[margin=1in]{geometry}
   \\usepackage{amsmath,amsthm,amssymb}
 
-  \\newcommand{\N}{\mathbb{N}}
-  \\newcommand{\Z}{\mathbb{Z}}
+  \\newcommand{\\N}{\\mathbb{N}}
+  \\newcommand{\\Z}{\\mathbb{Z}}
 
   \\usepackage{hyperref}
   \\usepackage{minted}
