@@ -2650,7 +2650,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** Smerge-mode
 Useful when handling git merge conflicts.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package smerge-mode
     :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
