@@ -229,7 +229,10 @@ to provide my account credentials.
       (setq notmuch-draft-save-plaintext t))
     (setq message-send-mail-function 'message-send-mail-with-sendmail
           sendmail-program (executable-find "msmtp")
-          message-sendmail-f-is-evil nil)
+          message-sendmail-envelope-from 'header
+          mail-envelope-from 'header
+          mail-specify-envelope-from t
+          mail-interactive t)
     (setq notmuch-saved-searches '((:name "personal" :query "tag:inbox AND tag:personal")
                                    (:name "unread" :query "tag:inbox AND tag:unread")
                                    (:name "nushackers" :query "tag:inbox AND tag:nushackers")
