@@ -2207,41 +2207,62 @@ This view is where I review the thingns I would like to do someday:
  #+END_SRC
 
  #+BEGIN_SRC emacs-lisp :tangle yes
-   (defun jethro/org-rename-item ()
-     (interactive)
-     (save-excursion
-       (when (org-at-heading-p)
-         (let* ((hl-text (nth 4 (org-heading-components)))
-                (new-header (read-string "New Text: " nil nil hl-text)))
-           (unless (or (null hl-text)
-                       (org-string-match-p "^[ \t]*:[^:]+:$" hl-text))
-             (beginning-of-line)
-             (search-forward hl-text (point-at-eol))
-             (replace-string
-              hl-text
-              new-header
-              nil (- (point) (length hl-text)) (point)))))))
+   (defvar jethro/org-agenda-bulk-process-key ?f
+     "Default key for bulk processing inbox items.")
 
-   (defun jethro/org-agenda-process-inbox-item (&optional goto rfloc no-update)
-     (interactive "P") 
-     (org-with-wide-buffer   
+   (defun jethro/org-process-inbox ()
+     "Called in org-agenda-mode, processes all inbox items."
+     (interactive)
+     (org-agenda-bulk-mark-regexp "inbox:")
+     (jethro/bulk-process-entries))
+
+   (defun jethro/org-agenda-process-inbox-item ()
+     "Process a single item in the org-agenda."
+     (org-with-wide-buffer
       (org-agenda-set-tags)
       (org-agenda-priority)
       (org-agenda-set-effort)
-      (org-agenda-refile nil nil t)
-      ;; (org-mark-ring-push)
-      ;; (org-refile-goto-last-stored)
-      ;; (jethro/org-rename-item)
-      ;; (org-mark-ring-goto)
-      (org-agenda-redo)))
+      (org-agenda-refile nil nil t)))
+
+   (defun jethro/bulk-process-entries ()
+     (if (not (null org-agenda-bulk-marked-entries))
+         (let ((entries (reverse org-agenda-bulk-marked-entries))
+               (processed 0)
+               (skipped 0))
+           (dolist (e entries)
+             (let ((pos (text-property-any (point-min) (point-max) 'org-hd-marker e)))
+               (if (not pos)
+                   (progn (message "Skipping removed entry at %s" e)
+                          (cl-incf skipped))
+                 (goto-char pos)
+                 (let (org-loop-over-headlines-in-active-region) (funcall 'jethro/org-agenda-process-inbox-item))
+                 ;; `post-command-hook' is not run yet.  We make sure any
+                 ;; pending log note is processed.
+                 (when (or (memq 'org-add-log-note (default-value 'post-command-hook))
+                           (memq 'org-add-log-note post-command-hook))
+                   (org-add-log-note))
+                 (cl-incf processed))))
+           (org-agenda-redo)
+           (unless org-agenda-persistent-marks (org-agenda-bulk-unmark-all))
+           (message "Acted on %d entries%s%s"
+                    processed
+                    (if (= skipped 0)
+                        ""
+                      (format ", skipped %d (disappeared before their turn)"
+                              skipped))
+                    (if (not org-agenda-persistent-marks) "" " (kept marked)")))
+       ))
+
+
 
    (defun jethro/org-inbox-capture ()
      "Capture a task in agenda mode."
-     (interactive)
      (org-capture nil "i"))
 
+   (setq org-agenda-bulk-custom-functions '((jethro/org-agenda-bulk-process-key jethro/org-agenda-process-inbox-item)))
+
    (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
-   (define-key org-agenda-mode-map "r" 'jethro/org-agenda-process-inbox-item)
+   (define-key org-agenda-mode-map "r" 'jethro/org-process-inbox)
    (define-key org-agenda-mode-map "R" 'org-agenda-refile)
    (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
  #+END_SRC
