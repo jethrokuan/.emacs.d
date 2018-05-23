@@ -236,7 +236,8 @@ to provide my account credentials.
     (setq notmuch-saved-searches '((:name "personal" :query "tag:inbox AND tag:personal")
                                    (:name "unread" :query "tag:inbox AND tag:unread")
                                    (:name "nushackers" :query "tag:inbox AND tag:nushackers")
-                                   (:name "nus" :query "tag:inbox AND tag:nus")))
+                                   (:name "nus" :query "tag:inbox AND tag:nus")
+                                   (:name "untagged" :query "tag:untagged")))
 
     :config
     (defun jethro/notmuch-toggle-read ()
