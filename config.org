@@ -34,6 +34,8 @@ maintaining tidiness and performance.
     (require 'diminish)
     (require 'bind-key))
 
+  (setq use-package-always-ensure t)
+
   ;; Always demand if daemon-mode
   (setq use-package-always-demand (daemonp))
 #+END_SRC
@@ -256,6 +258,7 @@ facility to capture email into a task.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-notmuch
+    :ensure f
     :after org
     :config
     (require 'org-notmuch))
@@ -327,6 +330,7 @@ We only use this for Mac OS setups: this doesn't work with NixOS.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package exec-path-from-shell
+    :ensure f
     :if (memq window-system '(mac ns))
     :config
     (exec-path-from-shell-initialize))
@@ -585,6 +589,8 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("C-'" . swiper-avy))
     :config
     (setq counsel-grep-swiper-limit 20000)
+    (setq counsel-rg-base-command
+          "rg -i -M 120 --no-heading --line-number --color never %s .")
     (setq counsel-grep-base-command
           "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
 #+END_SRC
@@ -1486,7 +1492,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     (add-hook 'python-mode-hook 'sphinx-doc-mode))
 #+END_SRC
 *** Anaconda
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package anaconda-mode
     :init
     (add-hook 'python-mode-hook 'anaconda-mode)
@@ -1498,6 +1504,12 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :config
     (eval-after-load "company"
       '(add-to-list 'company-backends '(company-anaconda))))
+#+END_SRC
+*** lsp-python
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package lsp-python
+    :hook
+    (python-mode . lsp-python-enable))
 #+END_SRC
 *** isort
 #+BEGIN_SRC emacs-lisp :tangle yes
