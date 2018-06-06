@@ -2269,6 +2269,7 @@ This view is where I review the thingns I would like to do someday:
 
 
    (defun jethro/org-inbox-capture ()
+     (interactive)
      "Capture a task in agenda mode."
      (org-capture nil "i"))
 
