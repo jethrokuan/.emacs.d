@@ -2693,7 +2693,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** Smerge-mode
 Useful when handling git merge conflicts.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package smerge-mode
     :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
@@ -2706,12 +2706,6 @@ Useful when handling git merge conflicts.
             (smerge-mode 1))))
       (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append))
     :config 
-    (defalias 'smerge-keep-upper 'smerge-keep-mine)
-    (defalias 'smerge-keep-lower 'smerge-keep-other)
-    (defalias 'smerge-diff-base-upper 'smerge-diff-base-mine)
-    (defalias 'smerge-diff-upper-lower 'smerge-diff-mine-other)
-    (defalias 'smerge-diff-base-lower 'smerge-diff-base-other)
-
     (defhydra jethro/hydra-smerge (:color pink
                                           :hint nil
                                           :pre (smerge-mode 1)
@@ -2730,14 +2724,14 @@ Useful when handling git merge conflicts.
       ("n" smerge-next)
       ("p" smerge-prev)
       ("b" smerge-keep-base)
-      ("u" smerge-keep-upper)
-      ("l" smerge-keep-lower)
+      ("u" smerge-keep-mine)
+      ("l" smerge-keep-other)
       ("a" smerge-keep-all)
       ("RET" smerge-keep-current)
       ("\C-m" smerge-keep-current)
-      ("<" smerge-diff-base-upper)
-      ("=" smerge-diff-upper-lower)
-      (">" smerge-diff-base-lower)
+      ("<" smerge-diff-base-mine)
+      ("=" smerge-diff-mine-other)
+      (">" smerge-diff-base-other)
       ("R" smerge-refine)
       ("E" smerge-ediff)
       ("C" smerge-combine-with-next)
