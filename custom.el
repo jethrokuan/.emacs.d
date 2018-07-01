@@ -13,6 +13,7 @@
  ;; If there is more than one, they won't work right.
  '(cursor ((t (:background "dim gray"))))
  '(org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
+ '(org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
  '(org-headline-done ((t (:foreground "#171717" :strike-through t))))
  '(org-level-1 ((t (:foreground "#090909" :weight bold :height 1.3))))
  '(org-level-2 ((t (:foreground "#090909" :weight normal :height 1.2))))
