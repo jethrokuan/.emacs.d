@@ -286,13 +286,13 @@ Remove the useless toolbars and splash screens.
 
 ** Theme
 *** Zenburn
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp :tangle no
    (use-package zenburn-theme
        :init
        (load-theme 'zenburn t))
  #+END_SRC
 *** Tao-theme
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package tao-theme
     :init
     (load-theme 'tao-yang t)
