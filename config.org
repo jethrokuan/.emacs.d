@@ -6,12 +6,19 @@ latest updates to my Emacs configuration.
 Notes:
 1. I use a Dvorak 60% keyboard, so some of the keybindings may not be
    suitable for you.
-2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around that
+2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around that.
 
 ** About the Author
-I'm currently a Computer Science undergraduate, who does primarily
-back-end development (python), and some web development (HTML/CSS/JS,
-React). I also dabble in Lisps, and run most of my life in Org-mode.
+I'm currently a Computer Science undergraduate at the National
+University of Singapore. My configuration centers around my daily
+Emacs usage, which involves:
+
+1. Backend development (primarily in Python and JS)
+2. Frontend development (HTML/CSS/JS/React)
+3. ML/DL stuff (Python)
+4. Email (notmuch)
+5. RSS (elfeed + elfeed-org)
+6. Getting Things Done (org-mode)
 
 #+begin_src emacs-lisp :tangle yes
   (setq user-full-name "Jethro Kuan"
@@ -2693,7 +2700,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** Smerge-mode
 Useful when handling git merge conflicts.
 
-#+begin_src emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package smerge-mode
     :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
@@ -2750,7 +2757,7 @@ Useful when handling git merge conflicts.
      (add-hook 'magit-mode-hook 'hl-line-mode)
      :config
      (setq magit-auto-revert-mode nil))
- #+end_src
+ #+END_SRC
 *** Gists
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package gist)
