@@ -2007,12 +2007,12 @@ highlighting and annotations.
   (setq org-agenda-diary-file "~/.org/diary.org")
 #+END_SRC
 *** Variable Pitch Mode
-We use a font that's easier on the eyes for long blocks of text.
-(DejaVu Sans Mono).
+We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
 
  #+BEGIN_SRC emacs-lisp :tangle yes
    (add-hook 'org-mode-hook
              '(lambda ()
+                (setq line-spacing 0.2) ;; Add more line padding for readability
                 (variable-pitch-mode 1) ;; All fonts with variable pitch.
                 (mapc
                  (lambda (face) ;; Other fonts with fixed-pitch.
