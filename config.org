@@ -199,6 +199,14 @@ Auto save all open buffers, when Emacs loses focus.
   (add-hook 'focus-out-hook
             (lambda () (save-some-buffers t)))
 #+END_SRC
+** Auto-scroll
+I want the page to scroll down when I hit a certain threshold, rather
+than waiting for the cursor to reach the bottom of the screen. This
+keeps my eyes centered in the middle of the screen.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq maximum-scroll-margin 0.5 scroll-margin most-positive-fixnum)
+#+END_SRC
 * Secrets
 #+BEGIN_SRC emacs-lisp :tangle yes
   (load-file "~/.emacs.d/secrets.el")
