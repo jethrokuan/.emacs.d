@@ -2050,6 +2050,13 @@ Run org-gcal-fetch every 5 minutes to update the calendars.
                    (org-gcal-fetch))))
 
 #+END_SRC
+*** org-bullets
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-bullets
+    :hook (org-mode . org-bullets-mode)
+    :config
+    (setq org-bullets-bullet-list '(" ")))
+#+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
 Getting Things Done, a methodology by David Allen. This will always be
