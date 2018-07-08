@@ -1,7 +1,11 @@
-#+TITLE: Jethro's Emacs.d Configuration
+#+TITLE: Jethro's Emacs Configuration
 * Introduction
+
 This document is a constant work-in-progress, and will contain the
 latest updates to my Emacs configuration.
+
+If you have want to contact me for any reason, you can reach me at my
+email: =jethrokuan95@gmail.com=.
 
 Notes:
 1. I use a Dvorak 60% keyboard, so some of the keybindings may not be
@@ -9,6 +13,7 @@ Notes:
 2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around that.
 
 ** About the Author
+
 I'm currently a Computer Science undergraduate at the National
 University of Singapore. My configuration centers around my daily
 Emacs usage, which involves:
@@ -26,6 +31,7 @@ Emacs usage, which involves:
 #+end_src
 
 ** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
+
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
@@ -48,7 +54,9 @@ maintaining tidiness and performance.
 #+END_SRC
 
 * Better Defaults
+
 ** Function Redefinition
+
 Some warnings are generated when functions are redefined via
 =defadvice=. For example:
 
@@ -61,13 +69,14 @@ To suppress these warnings, we accept these redefinitions:
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq ad-redefinition-action 'accept)
 #+END_SRC
+
 ** No littering
+
 This package sets out to fix this by changing the values of path
-variables to put files in either no-littering-etc-directory
-(defaulting to ~/.emacs.d/etc/) or no-littering-var-directory
+variables to put files in either =no-littering-etc-directory=
+(defaulting to ~/.emacs.d/etc/) or =no-littering-var-directory=
 (defaulting to ~/.emacs.d/var/), and by using descriptive file names
-and subdirectories when appropriate. This is similar to a color-theme;
-a "path-theme" if you will.
+and subdirectories when appropriate. 
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package no-littering
@@ -78,27 +87,34 @@ a "path-theme" if you will.
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
+
 ** Reloading Emacs Config
+
 I want an easy way to reload my configuration when I change it. I bind
 it to =<f11>=.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun reload-init ()
+  (defun jethro/reload-init ()
+    "Reloads the config file."
     (interactive)
     (load-file "~/.emacs.d/init.el"))
 
-  (bind-key "<f11>" 'reload-init)
+  (bind-key "<f11>" 'jethro/reload-init)
 #+END_SRC
 
 ** Emacs GC settings
+
 Reduce the frequency of garbage collection by making it happen on each
 50MB of allocated data (the default is on every 0.76MB). Also, warn
 when opening large files.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq gc-cons-threshold 50000000)
   (setq large-file-warning-threshold 100000000)
 #+END_SRC
+
 ** Auto Revert
+
 Often when switching git branches, files tend to change. By default,
 Emacs does not revert the buffers affected, which can lead to some
 confusion. Turn on =auto-revert-mode= globally, so that when the files
@@ -113,13 +129,16 @@ branches.
 #+END_SRC
 
 ** Custom file
+
 Using the customize interface can be nice, but it tends to pollute
 =init.el=. Move all customizations to a separate file.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq custom-file "~/.emacs.d/custom.el")
 #+END_SRC
+
 ** Use y/n over yes/no
+
 y/n is easier to type than yes/no
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -127,12 +146,15 @@ y/n is easier to type than yes/no
 #+END_SRC
 
 ** Replace region when typing
+
 Type over a selected region, instead of deleting before typing.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (delete-selection-mode 1)
 #+end_src
+
 ** Recentf
+
 When I'm using Emacs via =emacsclient=, my recent files don't get
 saved because I never ever quit Emacs. Instead, now I run the function
 every 5 minutes. Inhibit recentf from printing messages into the
@@ -147,6 +169,7 @@ minibuffer.
 #+END_SRC
 
 ** Editing Preferences
+
 Emacs uses double-spaces by default. Use single spaces instead:
 
 #+begin_src emacs-lisp :tangle yes
@@ -162,6 +185,7 @@ Also, use 2 spaces for tabs. Death to tabs!
 #+end_src
 
 ** Line wrapping for text modes
+
 Don't wrap lines for coding. Create a hook that enables wrapping, for
 text-modes like org-mode and markdown-mode.
 
@@ -174,8 +198,21 @@ text-modes like org-mode and markdown-mode.
   (add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
 #+end_src
 
+** No lockfiles
+Emacs creates lock files to make sure that only one instance of emacs
+is editing a particular file. However, this often interferes with some
+of the language server stuff that facilitates auto-completion, among
+other things. Since I use the emacs daemon, I won't face these issues,
+and hence I turn it off.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq create-lockfiles nil)
+#+END_SRC
+
 ** Custom Commands
+
 *** Nuke all buffers with =C-c !=
+
 #+begin_src emacs-lisp :tangle yes
   (defun jethro/nuke-all-buffers ()
     (interactive)
@@ -184,7 +221,9 @@ text-modes like org-mode and markdown-mode.
 
   (bind-key "C-c !" 'jethro/nuke-all-buffers)
 #+end_src
+
 *** compile with =<f9>=
+
 #+begin_src emacs-lisp :tangle yes
   (defun jethro/compile ()
     (interactive)
@@ -193,13 +232,17 @@ text-modes like org-mode and markdown-mode.
 
   (bind-key "<f9>" 'jethro/compile)
 #+end_src
+
 ** Auto-saving on focus out
+
 Auto save all open buffers, when Emacs loses focus.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'focus-out-hook
             (lambda () (save-some-buffers t)))
 #+END_SRC
+
 ** Auto-scroll
+
 I want the page to scroll down when I hit a certain threshold, rather
 than waiting for the cursor to reach the bottom of the screen. This
 keeps my eyes centered in the middle of the screen.
@@ -207,10 +250,7 @@ keeps my eyes centered in the middle of the screen.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq maximum-scroll-margin 0.5 scroll-margin most-positive-fixnum)
 #+END_SRC
-* Secrets
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (load-file "~/.emacs.d/secrets.el")
-#+END_SRC
+
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
@@ -2036,14 +2076,23 @@ We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
  #+END_SRC
 *** Org Gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-gcal
+  (require 'auth-source-pass)
+
+  (use-package password-store
+    :after auth-source-pass
+    :load-path "./elisp"
     :config
+    (setq auth-source-backend '(password-store)))
+
+  (use-package org-gcal
+    :after '(auth-source-pass password-store)
+    :config
+    (setq jethro/org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
+    (setq org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
     (setq jethro/org-gcal-directory "~/.org/gtd/calendars/")
     (defun jethro/get-gcal-file-location (loc)
       (concat (file-name-as-directory jethro/org-gcal-directory) loc))
-    (setq org-gcal-client-id jethro/org-gcal-client-id
-          org-gcal-client-secret jethro/org-gcal-client-secret
-          org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
+    (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
                                 ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
                                 ("wing.nus@gmail.com" . ,(jethro/get-gcal-file-location "wing.org"))
                                 ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_public.org"))
@@ -2055,9 +2104,10 @@ Run org-gcal-fetch every 5 minutes to update the calendars.
   (run-at-time (* 5 60) nil
                (lambda ()
                  (let ((inhibit-message t))
+                   (org-gcal-refresh-token)
                    (org-gcal-fetch))))
-
 #+END_SRC
+
 *** org-bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-bullets
