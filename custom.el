@@ -8,7 +8,8 @@
     ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
  '(safe-local-variable-values
    (quote
-    ((org-download-image-dir . "./images/ai/")
+    ((org-download-image-dir . "./images/spark/")
+     (org-download-image-dir . "./images/ai/")
      (org-download-image-dir . "./images/nlp/")
      (org-download-image-dir . "./images/operating_systems/")
      (org-download-image-dir . "./images/software-engineering/")))))
