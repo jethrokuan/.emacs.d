@@ -897,15 +897,6 @@ dependencies.
     :custom
     (dumb-jump-selector 'ivy))
 #+end_src
-** Window switching
-#+begin_src emacs-lisp :tangle yes
-  (use-package windmove 
-    :config
-    ;; use command key on Mac
-    (windmove-default-keybindings 'super)
-    ;; wrap around at edges
-    (setq windmove-wrap-around t))
-#+end_src
 ** Dired
 *** Requiring =dired=
 #+BEGIN_SRC emacs-lisp :tangle yes
