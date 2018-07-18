@@ -1392,9 +1392,10 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 * Direnv
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package direnv
-    :init
-    (add-hook 'after-init-hook 'direnv-mode)
-    (setq direnv-always-show-summary t))
+    :hook
+    (after-init . direnv-mode)
+    :custom
+    (direnv-always-show-summary t))
 #+END_SRC
 * Languages
 ** Language Servers
