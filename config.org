@@ -917,24 +917,6 @@ dependencies.
   (require 'find-dired)
   (setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
 #+END_SRC
-*** Hide details
-Hide details and only show file and folder names.
-#+begin_src emacs-lisp :tangle no
-  (defun jethro/dired-mode-setup-hook ()
-    "hook for dired-mode"
-    (dired-hide-details-mode 1))
-
-  (add-hook 'dired-mode-hook 'jethro/dired-mode-setup-hook)
-#+end_src
-*** Peep Dired
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package peep-dired
-    :bind (:map peep-dired-mode-map
-                ("SPC" . nil)
-                ("<backspace>" . nil))
-    :custom
-    (peep-dired-cleanup-eagerly t))
-#+END_SRC
 *** Sort directories first
     #+begin_src emacs-lisp :tangle yes
 (setq dired-listing-switches "-aBhl  --group-directories-first")
