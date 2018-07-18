@@ -617,16 +617,17 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("C-r" . counsel-expression-history))
     :init
     (add-hook 'after-init-hook 'ivy-mode)
+    :custom
+    (counsel-find-file-at-point t)
+    (ivy-use-virtual-buffers t)
+    (ivy-display-style 'fancy)
+    (ivy-initial-inputs-alist nil)
+    (ivy-use-selectable-prompt t)
+    (ivy-re-builders-alist
+     '((ivy-switch-buffer . ivy--regex-plus)
+       (swiper . ivy--regex-plus)
+       (t . ivy--regex-fuzzy)))
     :config
-    (setq counsel-find-file-at-point t)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-display-style 'fancy)
-    (setq ivy-initial-inputs-alist nil)
-    (setq ivy-use-selectable-prompt t)
-    (setq ivy-re-builders-alist
-          '((ivy-switch-buffer . ivy--regex-plus)
-            (swiper . ivy--regex-plus)
-            (t . ivy--regex-fuzzy))) 
     (ivy-set-actions
      t
      '(("I" insert "insert")))
@@ -644,12 +645,12 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("C-l". swiper-recenter-top-bottom)
      ("C-." . swiper-mc)
      ("C-'" . swiper-avy))
-    :config
-    (setq counsel-grep-swiper-limit 20000)
-    (setq counsel-rg-base-command
-          "rg -i -M 120 --no-heading --line-number --color never %s .")
-    (setq counsel-grep-base-command
-          "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
+    :custom
+    (counsel-grep-swiper-limit 20000)
+    (counsel-rg-base-command
+     "rg -i -M 120 --no-heading --line-number --color never %s .")
+    (counsel-grep-base-command
+     "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
 #+END_SRC
 *** wgrep
     wgrep allows you to edit a grep buffer and apply those changes to the
