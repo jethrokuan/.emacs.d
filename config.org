@@ -448,46 +448,47 @@ We only use this for Mac OS setups: this doesn't work with NixOS.
 * Web Browsing with eww
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eww
-    :defer t
+    :bind
+    (:map eww-mode-map
+          ("o" . eww)
+          ("O" . eww-browse-with-external-browser)
+          ("j" . next-line)
+          ("k" . previous-line))
     :init
-    (setq browse-url-browser-function
-          '((".*google.*maps.*" . browse-url-generic)
-            ;; Github goes to firefox, but not gist
-            ("http.*\/\/github.com" . browse-url-generic)
-            ("groups.google.com" . browse-url-generic)
-            ("docs.google.com" . browse-url-generic)
-            ("melpa.org" . browse-url-generic)
-            ("build.*\.elastic.co" . browse-url-generic)
-            (".*-ci\.elastic.co" . browse-url-generic)
-            ("internal-ci\.elastic\.co" . browse-url-generic)
-            ("zendesk\.com" . browse-url-generic)
-            ("salesforce\.com" . browse-url-generic)
-            ("stackoverflow\.com" . browse-url-generic)
-            ("apache\.org\/jira" . browse-url-generic)
-            ("thepoachedegg\.net" . browse-url-generic)
-            ("zoom.us" . browse-url-generic)
-            ("t.co" . browse-url-generic)
-            ("twitter.com" . browse-url-generic)
-            ("\/\/a.co" . browse-url-generic)
-            ("youtube.com" . browse-url-generic)
-            ("." . eww-browse-url)))
-    (setq shr-external-browser 'browse-url-generic)
-    (setq browse-url-browser-function 'browse-url-firefox
-          browse-url-new-window-flag  t
-          browse-url-firefox-new-window-is-tab t) 
     (add-hook 'eww-mode-hook #'toggle-word-wrap)
     (add-hook 'eww-mode-hook #'visual-line-mode)
-    :config
-    (use-package s :ensure t)
-    (define-key eww-mode-map "o" 'eww)
-    (define-key eww-mode-map "O" 'eww-browse-with-external-browser)
-    (define-key eww-mode-map "j" 'next-line)
-    (define-key eww-mode-map "k" 'previous-line)
+    :custom
+    (browse-url-browser-function
+     '((".*google.*maps.*" . browse-url-generic)
+       ;; Github goes to firefox, but not gist
+       ("http.*\/\/github.com" . browse-url-generic)
+       ("groups.google.com" . browse-url-generic)
+       ("docs.google.com" . browse-url-generic)
+       ("melpa.org" . browse-url-generic)
+       ("build.*\.elastic.co" . browse-url-generic)
+       (".*-ci\.elastic.co" . browse-url-generic)
+       ("internal-ci\.elastic\.co" . browse-url-generic)
+       ("zendesk\.com" . browse-url-generic)
+       ("salesforce\.com" . browse-url-generic)
+       ("stackoverflow\.com" . browse-url-generic)
+       ("apache\.org\/jira" . browse-url-generic)
+       ("thepoachedegg\.net" . browse-url-generic)
+       ("zoom.us" . browse-url-generic)
+       ("t.co" . browse-url-generic)
+       ("twitter.com" . browse-url-generic)
+       ("\/\/a.co" . browse-url-generic)
+       ("youtube.com" . browse-url-generic)
+       ("." . eww-browse-url)))
+    (shr-external-browser 'browse-url-generic)
+    (browse-url-browser-function 'browse-url-firefox)
+    (browse-url-new-window-flag  t)
+    (browse-url-firefox-new-window-is-tab t))
 
-    (use-package eww-lnum 
-      :bind (:map eww-mode-map
-                  ("f" . eww-lnum-follow)
-                  ("U" . eww-lnum-universal))))
+  (use-package eww-lnum
+    :after eww
+    :bind (:map eww-mode-map
+                ("f" . eww-lnum-follow)
+                ("U" . eww-lnum-universal)))
 #+END_SRC
 * Reading feeds with elfeed
 #+BEGIN_SRC emacs-lisp :tangle yes
