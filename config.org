@@ -1325,12 +1325,12 @@ respecting require-final-newline. Trimming only happens when saving.
 ** Spellcheck with Flyspell
 #+begin_src emacs-lisp :tangle yes
   (use-package flyspell 
-    :ensure f 
+    :ensure f
     :diminish flyspell-mode
     :init
     (setenv "DICTIONARY" "en_GB")
-    :config   
-    (add-hook 'text-mode-hook 'flyspell-mode))
+    :hook
+    (text-mode . flyspell-mode))
 #+end_src
 ** Auto-fill-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
