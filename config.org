@@ -2258,7 +2258,7 @@ This view is where I review the thingns I would like to do someday:
      "Capture a task in agenda mode."
      (org-capture nil "i"))
 
-   (setq org-agenda-bulk-custom-functions '((jethro/org-agenda-bulk-process-key jethro/org-agenda-process-inbox-item)))
+   (setq org-agenda-bulk-custom-functions `((,jethro/org-agenda-bulk-process-key jethro/org-agenda-process-inbox-item)))
 
    (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
    (define-key org-agenda-mode-map "r" 'jethro/org-process-inbox)
