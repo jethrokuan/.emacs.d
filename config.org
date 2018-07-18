@@ -242,16 +242,6 @@ Auto save all open buffers, when Emacs loses focus.
             (lambda () (save-some-buffers t)))
 #+END_SRC
 
-** Auto-scroll
-
-I want the page to scroll down when I hit a certain threshold, rather
-than waiting for the cursor to reach the bottom of the screen. This
-keeps my eyes centered in the middle of the screen.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq maximum-scroll-margin 0.5 scroll-margin most-positive-fixnum)
-#+END_SRC
-
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
