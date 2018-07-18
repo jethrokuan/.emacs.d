@@ -84,9 +84,9 @@ and subdirectories when appropriate.
     (require 'recentf)
     (add-to-list 'recentf-exclude no-littering-var-directory)
     (add-to-list 'recentf-exclude no-littering-etc-directory)
-    :custom
-    (auto-save-file-name-transforms
-     `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+    :config
+    (setq auto-save-file-name-transforms
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
 
 ** Reloading Emacs Config
@@ -1843,7 +1843,7 @@ npm install -g tern
     #+begin_src emacs-lisp :tangle yes
       (use-package cider
         :after clojure-mode
-        :hookn
+        :hook
         (cider-repl-mode-hook . company-mode)
         (cider-mode . company-mode)
         :diminish subword-mode
@@ -1886,7 +1886,7 @@ npm install -g tern
       (use-package auctex
         :custom
         (TeX-auto-save t)
-        (-parse-self t)
+        (TeX-parse-self t)
         (TeX-syntactic-comment t)
         ;; Synctex Support
         (TeX-source-correlate-start-server nil)
