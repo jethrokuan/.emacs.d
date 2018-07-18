@@ -932,8 +932,8 @@ Hide details and only show file and folder names.
     :bind (:map peep-dired-mode-map
                 ("SPC" . nil)
                 ("<backspace>" . nil))
-    :config
-    (setq peep-dired-cleanup-eagerly t))
+    :custom
+    (peep-dired-cleanup-eagerly t))
 #+END_SRC
 *** Sort directories first
     #+begin_src emacs-lisp :tangle yes
@@ -951,8 +951,8 @@ Hide details and only show file and folder names.
 *** allow editing of permissions
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wdired
-    :config
-    (setq wdired-allow-to-change-permissions t))
+    :custom
+    (wdired-allow-to-change-permissions t))
 #+END_SRC
 *** dired-narrow
     #+BEGIN_SRC emacs-lisp :tangle yes
@@ -973,17 +973,17 @@ The dired-subtree package (part of the magnificent dired hacks) allows
 you to expand subdirectories in place, like a tree structure.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package dired-subtree
-    :config
-    (bind-keys :map dired-mode-map
-               ("i" . dired-subtree-insert)
-               (";" . dired-subtree-remove)))
+    :bind
+    (:map dired-mode-map
+          ("i" . dired-subtree-insert)
+          (";" . dired-subtree-remove)))
 #+END_SRC
 ** ibuffer
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ibuffer
     :bind (([remap list-buffers] . ibuffer))
-    :config 
-    (setq ibuffer-expert t))
+    :custom
+    (ibuffer-expert t))
 #+END_SRC
 ** shackle
 #+BEGIN_SRC emacs-lisp :tangle yes
