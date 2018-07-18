@@ -1293,21 +1293,18 @@ respecting require-final-newline. Trimming only happens when saving.
                 ("M-p" . nil)
                 ("C-n" . company-select-next)
                 ("C-p" . company-select-previous))
-    :init
-    (add-hook 'after-init-hook 'global-company-mode)
+    :hook
+    (after-init . global-company-mode)
+    :custom
+    (company-dabbrev-ignore-case nil)
+    (company-dabbrev-code-ignore-case nil)
+    (company-dabbrev-downcase nil)
+    (company-idle-delay 0)
+    (company-minimum-prefix-length 2)
+    (company-require-match nil)
+    (company-begin-commands '(self-insert-command))
+    (company-transformers '(company-sort-by-occurrence))
     :config
-    (setq company-dabbrev-ignore-case nil
-          company-dabbrev-code-ignore-case nil
-          company-dabbrev-downcase nil
-          company-idle-delay 0
-          company-minimum-prefix-length 2
-          company-require-match nil
-          company-begin-commands '(self-insert-command)
-          company-transformers '(company-sort-by-occurrence))
-    (use-package company-quickhelp
-      :bind (:map company-active-map
-                  ("M-h" . company-quickhelp-manual-begin))
-      :config (company-quickhelp-mode 1))
     (defun company-mode/backend-with-yas (backend)
       (if (and (listp backend) (member 'company-yasnippet backend))
           backend
@@ -1315,6 +1312,13 @@ respecting require-final-newline. Trimming only happens when saving.
                 '(:with company-yasnippet))))
 
     (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends)))
+
+  (use-package company-quickhelp
+    :after company
+    :bind (:map company-active-map
+                ("M-h" . company-quickhelp-manual-begin))
+    :hook
+    (company-mode . company-quickhelp-mode))
 #+end_src
 ** Spellcheck with Flyspell
 #+begin_src emacs-lisp :tangle yes
