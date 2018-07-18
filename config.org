@@ -736,8 +736,8 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+begin_src emacs-lisp :tangle yes
      (use-package volatile-highlights
        :diminish volatile-highlights-mode
-       :init
-       (add-hook 'after-init-hook 'volatile-highlights-mode))
+       :hook
+       (after-init . volatile-highlights-mode))
    #+end_src
 ** diff-hl
    #+BEGIN_SRC emacs-lisp :tangle yes
