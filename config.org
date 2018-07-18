@@ -1576,6 +1576,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 *** lsp-python
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package lsp-python
+    :after lsp-mode company-lsp
     :hook
     (python-mode . lsp-python-enable))
 #+END_SRC
@@ -1604,10 +1605,10 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 *** Highlight Indent Guides
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package highlight-indent-guides
-    :init
-    (add-hook 'python-mode-hook 'highlight-indent-guides-mode)
-    :config
-    (setq highlight-indent-guides-method 'character))
+    :hook
+    (python-mode . highlight-indent-guides-mode)
+    :custom
+    (highlight-indent-guides-method 'character))
 #+END_SRC
 *** Isend-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1615,8 +1616,8 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
     :bind
     (:map isend-mode-map
           ("C-M-e" . isend-send-defun))
-    :init
-    (add-hook 'isend-mode-hook 'isend-default-python-setup))
+    :hook
+    (isend-mode. isend-default-python-setup))
 #+END_SRC
 ** HTML
 *** Web-mode
@@ -1628,8 +1629,9 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                ("\\.jinja\\'" . web-mode)
                ("\\.njk\\'" . web-mode)
                ("\\.php\\'" . web-mode))
+        :custom
+        (web-mode-enable-css-colorization t)
         :config
-        (setq web-mode-enable-css-colorization t)
         (setq-default css-indent-offset 2
                       web-mode-markup-indent-offset 2
                       web-mode-css-indent-offset 2
@@ -1640,25 +1642,25 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+begin_src emacs-lisp :tangle yes
   (use-package emmet-mode
     :diminish emmet-mode
-    :config
-    (add-hook 'web-mode-hook 'emmet-mode)
-    (add-hook 'vue-mode-hook 'emmet-mode))
+    :hook
+    (web-mode . emmet-mode)
+    (vue-mode . emmet-mode))
 #+end_src
 ** CSS
 *** Rainbow-mode
     #+begin_src emacs-lisp :tangle yes
-   (use-package rainbow-mode
-     :diminish rainbow-mode
-     :config
-     (add-hook 'css-mode-hook 'rainbow-mode)
-     (add-hook 'scss-mode-hook 'rainbow-mode))
+      (use-package rainbow-mode
+        :diminish rainbow-mode
+        :hook
+        (css-mode . rainbow-mode)
+        (scss-mode . rainbow-mode))
     #+end_src
 *** SCSS-mode
     #+begin_src emacs-lisp :tangle yes
- (use-package scss-mode
-   :mode "\\.scss\\'" 
-   :config (progn
-             (setq scss-compile-at-save nil)))
+      (use-package scss-mode
+        :mode "\\.scss\\'" 
+        :custom
+        (scss-compile-at-save nil))
     #+end_src
 ** Javascript
 *** JS2-mode
@@ -1674,14 +1676,19 @@ npm install -g tern
     (setq-default flycheck-disabled-checkers
                   (append flycheck-disabled-checkers
                           '(javascript-jshint)))
-    (setq js-switch-indent-offset 2)
-    (use-package tern
-      :diminish tern-mode
-      :config 
-      (add-hook 'js2-mode-hook 'tern-mode)
-      (use-package company-tern
-        :config
-        (add-to-list 'company-backends 'company-tern))))
+    :custom
+    (js-switch-indent-offset 2))
+
+  (use-package tern
+    :after js2-mode
+    :diminish tern-mode
+    :hook
+    (js2-mode .tern-mode))
+
+  (use-package company-tern
+    :after company tern
+    :config
+    (add-to-list 'company-backends 'company-tern))
 #+end_src
 *** Indium
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1703,15 +1710,16 @@ npm install -g tern
     #+end_src
 *** js-comint
     #+begin_src emacs-lisp :tangle no
-  (use-package js-comint
-    :config
-    (add-hook 'js2-mode-hook
-              (lambda ()
-                (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
-                (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
-                (local-set-key (kbd "C-c b") 'js-send-buffer)
-                (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
-                (local-set-key (kbd "C-c l") 'js-load-file-and-go))))
+      (use-package js-comint
+        :after js2-mode
+        :config
+        (add-hook 'js2-mode-hook
+                  (lambda ()
+                    (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
+                    (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
+                    (local-set-key (kbd "C-c b") 'js-send-buffer)
+                    (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
+                    (local-set-key (kbd "C-c l") 'js-load-file-and-go))))
     #+end_src
 *** js-doc
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1719,18 +1727,20 @@ npm install -g tern
     :bind (:map js2-mode-map
                 ("C-c i" . js-doc-insert-function-doc)
                 ("@" . js-doc-insert-tag))
-    :config
-    (setq js-doc-mail-address "jethrokuan95@gmail.com"
-          js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address)
-          js-doc-url "http://www.jethrokuan.com/"
-          js-doc-license "MIT"))
+    :custom
+    (js-doc-mail-address "jethrokuan95@gmail.com")
+    (js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address))
+    (js-doc-url "http://www.jethrokuan.com/")
+    (js-doc-license "MIT"))
 #+END_SRC
 *** JS2-refactor
     #+begin_src emacs-lisp :tangle yes
-  (use-package js2-refactor
-    :config
-    (add-hook 'js2-mode-hook #'js2-refactor-mode)
-    (js2r-add-keybindings-with-prefix "C-c C-j"))
+      (use-package js2-refactor
+        :after js2-mode
+        :hook
+        (js2-mode . js2-refactor-mode)
+        :config
+        (js2r-add-keybindings-with-prefix "C-c C-j"))
     #+end_src
 *** React-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1774,93 +1784,9 @@ npm install -g tern
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package lsp-java
     :after lsp-mode
-    :init
-    (add-hook 'java-mode-hook 'lsp-java-enable))
+    :hook
+    (java-mode . lsp-java-enable))
 #+END_SRC
-*** Meghanada
-Meghanada is a new minor-mode (meghanada-mode) that aims at improving
-the editing experience for the Java. It works by using a combination
-of an Emacs server.
-
-- Gradle and Maven project support
-- No need build tool's plugin
-- Run build tool task
-- Compile your project
-- Syntax check and analyze java source (flycheck-meghanada)
-- Support Generic Types
-- Code completion with company-mode (company-meghanada)
-- Optimize import
-- Jump declaration
-- Run Junit test (include test runner)
-- Diagnostic reporting with flycheck (flycheck-meghanada)
-- Show symbol's type info with el-doc
-- Search references
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package meghanada
-    :bind
-    (:map meghanada-mode-map
-          ("C-S-t" . meghanada-switch-testcase)
-          ("M-RET" . meghanada-local-variable)
-          ("M-r" . meghanada-reference)
-          ("M-t" . meghanada-typeinfo))
-    :init
-    (add-hook 'java-mode-hook
-              (lambda ()
-                (google-set-c-style)
-                (google-make-newline-indent)
-                (meghanada-mode t)
-                (smartparens-mode t)
-                (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-    :config
-    (use-package realgud)
-    (setq indent-tabs-mode nil)
-    (setq tab-width 2)
-    (setq c-basic-offset 2)
-    (setq meghanada-server-remote-debug t)
-    (setq meghanada-javac-xlint "-Xlint:all,-processing")
-    (with-eval-after-load 'hydra
-      (defhydra jethro/hydra-meghanada (:hint nil :exit t)
-        "
-  ^Edit^                           ^Tast or Task^
-  ^^^^^^-------------------------------------------------------
-  _f_: meghanada-compile-file      _m_: meghanada-restart
-  _c_: meghanada-compile-project   _t_: meghanada-run-task
-  _o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
-  _s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
-  _v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
-  _i_: meghanada-import-all        _r_: meghanada-reference
-  _g_: magit-status                _T_: meghanada-typeinfo
-  _l_: helm-ls-git-ls
-  _q_: exit
-  "
-        ("f" meghanada-compile-file)
-        ("m" meghanada-restart)
-
-        ("c" meghanada-compile-project)
-        ("o" meghanada-optimize-import)
-        ("s" meghanada-switch-test-case)
-        ("v" meghanada-local-variable)
-        ("i" meghanada-import-all)
-
-        ("g" magit-status)
-        ("l" helm-ls-git-ls)
-
-        ("t" meghanada-run-task)
-        ("T" meghanada-typeinfo)
-        ("j" meghanada-run-junit-test-case)
-        ("J" meghanada-run-junit-class)
-        ("R" meghanada-run-junit-recent)
-        ("r" meghanada-reference)
-
-        ("q" exit)
-        ("z" nil "leave"))
-
-      (bind-key "C-c h m" 'jethro/hydra-meghanada/body meghanada-mode-map)) 
-    :commands
-    (meghanada-mode))
-#+END_SRC
-
 *** Disassembling Java Code
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package autodisass-java-bytecode)
@@ -1878,43 +1804,39 @@ of an Emacs server.
 
 *** Tide
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    (company-mode +1))
-
   (use-package tide
+    :after typescript-mode
     :mode "\\.ts\\'"
-    :init
-    (add-hook 'before-save-hook 'tide-format-before-save)
-    (add-hook 'typescript-mode-hook #'setup-tide-mode)
-    :config
-    (setq company-tooltip-align-annotations t))
+    :hook
+    (before-save . tide-format-before-save)
+    (typescript-mode . (lambda ()
+                         (tide-setup)
+                         (flycheck-mode +1)
+                         (eldoc-mode +1)
+                         (tide-hl-identifier-mode +1)
+                         (company-mode +1))))
 #+END_SRC
 ** JSON
    #+begin_src emacs-lisp :tangle yes
- (use-package json-mode
-   :mode "\\.json\\'"
-   :config (add-hook 'json-mode-hook (lambda ()
-                                       (make-local-variable 'js-indent-level)
-                                       (setq js-indent-level 2))))
+     (use-package json-mode
+       :mode "\\.json\\'"
+       :hook
+       (json-mode . (lambda ()
+                      (make-local-variable 'js-indent-level)
+                      (setq js-indent-level 2))))
    #+end_src
 ** Markdown
    #+begin_src emacs-lisp :tangle yes
      (use-package markdown-mode
        :mode ("\\.md\\'" . markdown-mode)
        :commands (markdown-mode gfm-mode)
-       :init
-       (setq markdown-fontify-code-blocks-natively t)
-       :config 
-       (setq markdown-command "multimarkdown --snippet --smart --notes"
-             markdown-enable-wiki-links t
-             markdown-indent-on-enter 'indent-and-new-item
-             markdown-asymmetric-header t
-             markdown-live-preview-delete-export 'delete-on-destroy))
+       :custom
+       (markdown-fontify-code-blocks-natively t)
+       (markdown-command "multimarkdown --snippet --smart --notes")
+       (markdown-enable-wiki-links t)
+       (markdown-indent-on-enter 'indent-and-new-item)
+       (markdown-asymmetric-header t)
+       (markdown-live-preview-delete-export 'delete-on-destroy))
    #+end_src
 ** AsciiDoc
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1924,68 +1846,74 @@ of an Emacs server.
 ** Clojure
 *** Clojure-mode
     #+begin_src emacs-lisp :tangle yes
-  (use-package clojure-mode
-    :mode (("\\.clj\\'" . clojure-mode)
-           ("\\.boot\\'" . clojure-mode)
-           ("\\.edn\\'" . clojure-mode)
-           ("\\.cljs\\'" . clojurescript-mode)
-           ("\\.cljs\\.hl\\'" . clojurescript-mode))
-    :init
-    (add-hook 'clojure-mode-hook #'eldoc-mode)
-    (add-hook 'clojure-mode-hook #'subword-mode)
-    (add-hook 'clojure-mode-hook #'cider-mode)
-    (add-hook 'clojure-mode-hook #'clj-refactor-mode))
+      (use-package clojure-mode
+        :mode (("\\.clj\\'" . clojure-mode)
+               ("\\.boot\\'" . clojure-mode)
+               ("\\.edn\\'" . clojure-mode)
+               ("\\.cljs\\'" . clojurescript-mode)
+               ("\\.cljs\\.hl\\'" . clojurescript-mode))
+        :hook
+        (clojure-mode . eldoc-mode)
+        (clojure-mode . subword-mode)
+        (clojure-mode . cider-mode))
     #+end_src
 *** Cider
     #+begin_src emacs-lisp :tangle yes
       (use-package cider
-        :init
-        (add-hook 'cider-mode-hook #'clj-refactor-mode)
-        (add-hook 'cider-repl-mode-hook #'company-mode)
-        (add-hook 'cider-mode-hook #'company-mode)
+        :after clojure-mode
+        :hookn
+        (cider-repl-mode-hook . company-mode)
+        (cider-mode . company-mode)
         :diminish subword-mode
+        :custom
+        (nrepl-log-messages t)
+        (cider-repl-display-in-current-window t)
+        (cider-repl-use-clojure-font-lock t)
+        (cider-prompt-save-file-on-load 'always-save)
+        (cider-font-lock-dynamically '(macro core function var))
+        (nrepl-hide-special-buffers t)
+        (cider-show-error-buffer nil)
+        (cider-overlays-use-font-lock t)
+        (cider-repl-result-prefix ";; => ")
+        (cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
         :config
-        (setq nrepl-log-messages t                  
-              cider-repl-display-in-current-window t
-              cider-repl-use-clojure-font-lock t    
-              cider-prompt-save-file-on-load 'always-save
-              cider-font-lock-dynamically '(macro core function var)
-              nrepl-hide-special-buffers t
-              cider-show-error-buffer nil
-              cider-overlays-use-font-lock t
-              cider-repl-result-prefix ";; => ")
-        (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
         (cider-repl-toggle-pretty-printing))
     #+end_src
 *** clj-refactor
     #+begin_src emacs-lisp :tangle yes
-(use-package clj-refactor
-  :defines cljr-add-keybindings-with-prefix
-  :diminish clj-refactor-mode
-  :config (cljr-add-keybindings-with-prefix "C-c C-j"))
+      (use-package clj-refactor
+        :after clojure-mode cider
+        :defines cljr-add-keybindings-with-prefix
+        :diminish clj-refactor-mode
+        :hook
+        (clojure-mode . clj-refactor-mode)
+        (cider-mode . clj-refactor-mode)
+        :config
+        (cljr-add-keybindings-with-prefix "C-c C-j"))
     #+end_src
 *** Squiggly-clojure
     #+begin_src emacs-lisp :tangle yes
-  (use-package flycheck-clojure
-    :config
-    (flycheck-clojure-setup))
+      (use-package flycheck-clojure
+        :after flycheck clojure-mode
+        :config
+        (flycheck-clojure-setup))
     #+end_src
 ** Latex
 *** AucTeX
     #+BEGIN_SRC emacs-lisp :tangle yes
       (use-package auctex
-        :defer t
+        :custom
+        (TeX-auto-save t)
+        (-parse-self t)
+        (TeX-syntactic-comment t)
+        ;; Synctex Support
+        (TeX-source-correlate-start-server nil)
+        ;; Don't insert line-break at inline math
+        (LaTeX-fill-break-at-separators nil)
+        (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")
+                                 ("qpdfview" "qpdfview %o#%(outpage)")))
+        (TeX-view-program-selection '((output-pdf "zathura")))
         :config
-        (setq TeX-auto-save t
-              TeX-parse-self t
-              TeX-syntactic-comment t
-              ;; Synctex support
-              TeX-source-correlate-start-server nil
-              ;; Don't insert line-break at inline math
-              LaTeX-fill-break-at-separators nil)
-        (setq TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")
-                                      ("qpdfview" "qpdfview %o#%(outpage)")))
-        (setq TeX-view-program-selection '((output-pdf "zathura")))
         (when latex-enable-auto-fill
           (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
         (when latex-enable-folding
@@ -1996,8 +1924,8 @@ of an Emacs server.
     #+END_SRC
 *** Autocomplete support
     #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package company-auctex
-    :defer t)
+      (use-package company-auctex
+        :after auctex company-mode)
     #+END_SRC
 ** Yaml
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2017,10 +1945,10 @@ highlighting and annotations.
            ("t" . pdf-annot-add-text-annotation)
            ("D" . pdf-annot-delete)
            ("C-s" . isearch-forward)))
-    :config
+    :custom
     ;; More fine-grained resizing (10%)
-    (setq pdf-view-resize-factor 1.1)
-
+    (pdf-view-resize-factor 1.1)
+    :config
     ;; Install pdf tools
     (pdf-tools-install))
 #+END_SRC
@@ -2057,16 +1985,14 @@ highlighting and annotations.
       :bind
       (:map org-mode-map
             ("M-n" . outline-next-visible-heading)
-            ("M-p" . outline-previous-visible-heading)))
-
-    (setq org-return-follows-link t)
-    (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
+            ("M-p" . outline-previous-visible-heading))
+      :custom
+      (org-return-follows-link t)
+      (org-agenda-diary-file "~/.org/diary.org")
+      :config
+      (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
   #+END_SRC
 
-*** Org Diary file
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-diary-file "~/.org/diary.org")
-#+END_SRC
 *** Variable Pitch Mode
 We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
 
@@ -2094,15 +2020,16 @@ We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
   (use-package password-store
     :after auth-source-pass
     :load-path "./elisp"
-    :config
-    (setq auth-source-backend '(password-store)))
+    :custom
+    (auth-source-backend '(password-store)))
 
   (use-package org-gcal
     :after '(auth-source-pass password-store)
+    :custom
+    (jethro/org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
+    ( org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
+    (jethro/org-gcal-directory "~/.org/gtd/calendars/")
     :config
-    (setq jethro/org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
-    (setq org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
-    (setq jethro/org-gcal-directory "~/.org/gtd/calendars/")
     (defun jethro/get-gcal-file-location (loc)
       (concat (file-name-as-directory jethro/org-gcal-directory) loc))
     (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
@@ -2125,8 +2052,8 @@ Run org-gcal-fetch every 5 minutes to update the calendars.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
-    :config
-    (setq org-bullets-bullet-list '(" ")))
+    :custom
+    (org-bullets-bullet-list '(" ")))
 #+END_SRC
 ** Org Mode for GTD
 This subsection aims to extensively document my implementation of
@@ -2457,22 +2384,24 @@ This view is where I review the thingns I would like to do someday:
 **** Org-pomodoro
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-pomodoro
+    :after org
     :bind
     (:map org-agenda-mode-map
           (("I" . org-pomodoro)))
-    :config
-    (setq org-pomodoro-format "%s"))
+    :custom
+    (org-pomodoro-format "%s"))
 #+END_SRC
 ** Org Mode for Note taking
 *** Deft
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package deft
+    :after org
     :bind
     (("C-c n" . deft))
-    :config
-    (setq deft-default-extension "org")
-    (setq deft-directory "~/.org/deft/")
-    (setq deft-use-filename-as-title t))
+    :custom
+    (deft-default-extension "org")
+    (deft-directory "~/.org/deft/")
+    (deft-use-filename-as-title t))
 #+END_SRC
 *** Exporting Deft Notes
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2485,8 +2414,9 @@ This extension facilitates moving images from point A to point B. Use
 this to capture screenshots into deft.
  #+BEGIN_SRC emacs-lisp :tangle yes
    (use-package org-download
-     :config
-     (setq org-download-image-dir "./images"))
+     :after org
+     :custom
+     (org-download-image-dir "./images"))
  #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2526,8 +2456,8 @@ this to capture screenshots into deft.
 ** Org mode for Journalling
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-journal
-    :config
-    (setq org-journal-dir "~/.org/journal/"))
+    :custom
+    (org-journal-dir "~/.org/journal/"))
 #+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
@@ -2663,26 +2593,27 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-ref
     :after org
+    :custom
+    (org-ref-notes-directory "~/.org/papers/")
+    (org-ref-bibliography-notes "~/.org/papers/notes.org")
+    (org-ref-default-bibliography '("~/.org/papers/index.bib"))
+    (org-ref-pdf-directory "~/.org/papers/lib/")
+    (ivy-bibtex-bibliography "~/.org/papers/index.bib") ;; where your references are stored
+    (ivy-bibtex-library-path "~/.org/papers/lib/") ;; where your pdfs etc are stored
+    (ivy-bibtex-notes-path "~/.org/papers/notes.org") ;; where your notes are stored
+    (bibtex-completion-bibliography "~/.org/papers/index.bib") ;; writing completion
+    (bibtex-completion-notes-path "~/.org/papers/notes.org")
+    (bibtex-completion-library-path "~/.org/papers/lib/")
+    (bibtex-completion-pdf-symbol "⌘")
+    (bibtex-completion-notes-symbol "✎")
+    (bibtex-autokey-year-length 4)
+    (bibtex-autokey-name-year-separator "-")
+    (bibtex-autokey-year-title-separator "-")
+    (bibtex-autokey-titleword-separator "-")
+    (bibtex-autokey-titlewords 2)
+    (bibtex-autokey-titlewords-stretch 1)
+    (bibtex-autokey-titleword-length 5)
     :config
-    (setq org-ref-notes-directory "~/.org/papers/"
-          org-ref-bibliography-notes "~/.org/papers/notes.org"
-          org-ref-default-bibliography '("~/.org/papers/index.bib")
-          org-ref-pdf-directory "~/.org/papers/lib/")
-    (setq ivy-bibtex-bibliography "~/.org/papers/index.bib" ;; where your references are stored
-          ivy-bibtex-library-path "~/.org/papers/lib/" ;; where your pdfs etc are stored
-          ivy-bibtex-notes-path "~/.org/papers/notes.org" ;; where your notes are stored
-          bibtex-completion-bibliography "~/.org/papers/index.bib" ;; writing completion
-          bibtex-completion-notes-path "~/.org/papers/notes.org"
-          bibtex-completion-library-path "~/.org/papers/lib/")
-    (setq bibtex-completion-pdf-symbol "⌘")
-    (setq bibtex-completion-notes-symbol "✎")
-    (setq bibtex-autokey-year-length 4
-          bibtex-autokey-name-year-separator "-"
-          bibtex-autokey-year-title-separator "-"
-          bibtex-autokey-titleword-separator "-"
-          bibtex-autokey-titlewords 2
-          bibtex-autokey-titlewords-stretch 1
-          bibtex-autokey-titleword-length 5)
     (require 'org-ref-bibtex)
     (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body) 
     (require 'org-ref-url-utils)
@@ -2752,28 +2683,27 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     :bind (("C-x v =" . jethro/vc-diff)
            ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
     :config
-    (progn
-      (defun jethro/vc-diff (no-whitespace)
-        "Call `vc-diff' as usual if buffer is not modified.
+    (defun jethro/vc-diff (no-whitespace)
+      "Call `vc-diff' as usual if buffer is not modified.
   If the buffer is modified (yet to be saved), call `diff-buffer-with-file'.
   If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
-        (interactive "P")
-        (let* ((no-ws-switch '("-w"))
-               (vc-git-diff-switches (if no-whitespace
-                                         no-ws-switch
-                                       vc-git-diff-switches))
-               (vc-diff-switches (if no-whitespace
-                                     no-ws-switch
-                                   vc-diff-switches))
-               (diff-switches (if no-whitespace
-                                  no-ws-switch
-                                diff-switches))
-               ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
-               ;; of `vc-diff' stays nil.
-               current-prefix-arg)
-          (if (buffer-modified-p)
-              (diff-buffer-with-file (current-buffer))
-            (call-interactively #'vc-diff))))))
+      (interactive "P")
+      (let* ((no-ws-switch '("-w"))
+             (vc-git-diff-switches (if no-whitespace
+                                       no-ws-switch
+                                     vc-git-diff-switches))
+             (vc-diff-switches (if no-whitespace
+                                   no-ws-switch
+                                 vc-diff-switches))
+             (diff-switches (if no-whitespace
+                                no-ws-switch
+                              diff-switches))
+             ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
+             ;; of `vc-diff' stays nil.
+             current-prefix-arg)
+        (if (buffer-modified-p)
+            (diff-buffer-with-file (current-buffer))
+          (call-interactively #'vc-diff)))))
 #+END_SRC
 *** Smerge-mode
 Useful when handling git merge conflicts.
@@ -2782,15 +2712,14 @@ Useful when handling git merge conflicts.
   (use-package smerge-mode
     :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
-    (progn
-      (defun jethro/enable-smerge-maybe ()
-        "Auto-enable `smerge-mode' when merge conflict is detected."
-        (save-excursion
-          (goto-char (point-min))
-          (when (re-search-forward "^<<<<<<< " nil :noerror)
-            (smerge-mode 1))))
-      (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append))
-    :config 
+    (defun jethro/enable-smerge-maybe ()
+      "Auto-enable `smerge-mode' when merge conflict is detected."
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^<<<<<<< " nil :noerror)
+          (smerge-mode 1))))
+    (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append)
+    :config
     (defhydra jethro/hydra-smerge (:color pink
                                           :hint nil
                                           :pre (smerge-mode 1)
@@ -2831,10 +2760,10 @@ Useful when handling git merge conflicts.
             ("C-c g" . magit-status)
             ("s-G" . magit-blame)
             ("C-c G" . magit-blame))
-     :init
-     (add-hook 'magit-mode-hook 'hl-line-mode)
-     :config
-     (setq magit-auto-revert-mode nil))
+     :hook
+     (magit-mode . hl-line-mode)
+     :custom
+     (magit-auto-revert-mode nil))
  #+END_SRC
 *** Gists
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2843,21 +2772,15 @@ Useful when handling git merge conflicts.
 ** Projectile
 #+begin_src emacs-lisp :tangle yes
   (use-package projectile
-    :demand t
     :init
     (setq projectile-keymap-prefix (kbd "C-x p"))
+    :custom
+    (projectile-use-git-grep t)
+    (projectile-create-missing-test-files t)
+    (projectile-completion-system 'ivy)
+    (projectile-switch-project-action  #'projectile-commander)
     :config
     (projectile-global-mode)
-    (use-package counsel-projectile
-      :bind (("s-f" . counsel-projectile-find-file)
-             ("s-b" . counsel-projectile-switch-to-buffer)
-             ("C-c s" . counsel-projectile-rg)))
-    (setq projectile-use-git-grep t)
-    (setq projectile-create-missing-test-files t)
-    (setq projectile-completion-system 'ivy)
-
-    (setq projectile-switch-project-action
-          #'projectile-commander)
     (def-projectile-commander-method ?S
       "Run a search in the project"
       (counsel-projectile-rg))
@@ -2880,6 +2803,12 @@ Useful when handling git merge conflicts.
                     file (projectile-project-root)))
         (run-hooks 'projectile-find-file-hook)
         (cider-jack-in))))
+
+  (use-package counsel-projectile
+    :after counsel projectile
+    :bind (("s-f" . counsel-projectile-find-file)
+           ("s-b" . counsel-projectile-switch-to-buffer)
+           ("C-c s" . counsel-projectile-rg)))
 #+end_src
 *** Magithub
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -2899,20 +2828,22 @@ Search Stack Overflow
 #+begin_src emacs-lisp :tangle yes
   (use-package which-key
     :diminish which-key-mode
-    :init
-    (add-hook 'after-init-hook 'which-key-mode))
+    :hook
+    (after-init . which-key-mode))
 #+end_src
 ** Olivetti
 #+begin_src emacs-lisp :tangle yes
   (use-package olivetti
+    :hook
+    (text-mode . olivetti-mode)
     :bind (("C-c M o" . olivetti-mode)))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
 #+begin_src emacs-lisp :tangle yes
   (use-package bury-successful-compilation
-    :init
-    (add-hook 'after-init-hook 'bury-successful-compilation))
+    :hook
+    (after-init . bury-successful-compilation))
 #+end_src
 
 * Load Custom File
