@@ -682,17 +682,17 @@ Counsel contains ivy enhancements for commonly-used functions.
 *** smart-mode-line
 #+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line
-    :init
-    (add-hook 'after-init-hook 'sml/setup)
-    :config 
-    (setq sml/theme 'respectful)
-    (setq sml/name-width 44)
-    (setq sml/shorten-directory t)
-    (setq sml/shorten-modes nil)
-    (setq sml/mode-width 'full)
-    (setq sml/replacer-regexp-list
-          '(("^~/.org/" ":O:")
-            ("^~/\\.emacs\\.d/" ":ED:"))))
+    :hook
+    (after-init . sml/setup)
+    :custom
+    (sml/theme 'respectful)
+    (sml/name-width 44)
+    (sml/shorten-directory t)
+    (sml/shorten-modes nil)
+    (sml/mode-width 'full)
+    (sml/replacer-regexp-list
+     '(("^~/.org/" ":O:")
+       ("^~/\\.emacs\\.d/" ":ED:"))))
 #+end_src
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
