@@ -741,35 +741,35 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+end_src
 ** diff-hl
    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package diff-hl
-    :bind (("C-c h v" . jethro/hydra-diff-hl/body))
-    :init 
-    (defconst jethro/diff-hl-mode-hooks '(emacs-lisp-mode-hook
-                                          conf-space-mode-hook ;.tmux.conf
-                                          markdown-mode-hook
-                                          css-mode-hook
-                                          web-mode-hook
-                                          sh-mode-hook
-                                          python-mode-hook
-                                          yaml-mode-hook ;tmuxp yaml configs
-                                          c-mode-hook)
-      "List of hooks of major modes in which diff-hl-mode should be enabled.")
+     (use-package diff-hl
+       :bind (("C-c h v" . jethro/hydra-diff-hl/body))
+       :hook
+       (dired-mode . diff-hl-dired-mode)
+       :init
+       (defconst jethro/diff-hl-mode-hooks '(emacs-lisp-mode-hook
+                                             conf-space-mode-hook ;.tmux.conf
+                                             markdown-mode-hook
+                                             css-mode-hook
+                                             web-mode-hook
+                                             sh-mode-hook
+                                             python-mode-hook
+                                             yaml-mode-hook ;tmuxp yaml configs
+                                             c-mode-hook)
+         "List of hooks of major modes in which diff-hl-mode should be enabled.")
 
-    (dolist (hook jethro/diff-hl-mode-hooks)
-      (add-hook hook #'diff-hl-mode))
+       (dolist (hook jethro/diff-hl-mode-hooks)
+         (add-hook hook #'diff-hl-mode))
 
-    (defhydra jethro/hydra-diff-hl (:color red)
-      "diff-hl"
-      ("=" diff-hl-diff-goto-hunk "goto hunk")
-      ("<RET>" diff-hl-diff-goto-hunk "goto hunk")
-      ("u" diff-hl-revert-hunk "revert hunk")
-      ("[" diff-hl-previous-hunk "prev hunk")
-      ("p" diff-hl-previous-hunk "prev hunk")
-      ("]" diff-hl-next-hunk "next hunk")
-      ("n" diff-hl-next-hunk "next hunk") 
-      ("q" nil "cancel"))
-
-    (add-hook 'dired-mode-hook #'diff-hl-dired-mode))
+       (defhydra jethro/hydra-diff-hl (:color red)
+         "diff-hl"
+         ("=" diff-hl-diff-goto-hunk "goto hunk")
+         ("<RET>" diff-hl-diff-goto-hunk "goto hunk")
+         ("u" diff-hl-revert-hunk "revert hunk")
+         ("[" diff-hl-previous-hunk "prev hunk")
+         ("p" diff-hl-previous-hunk "prev hunk")
+         ("]" diff-hl-next-hunk "next hunk")
+         ("n" diff-hl-next-hunk "next hunk")
+         ("q" nil "cancel")))
    #+END_SRC
 * Moving Around
 ** Scroll Other Window
