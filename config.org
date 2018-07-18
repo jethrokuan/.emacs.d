@@ -84,8 +84,9 @@ and subdirectories when appropriate.
     (require 'recentf)
     (add-to-list 'recentf-exclude no-littering-var-directory)
     (add-to-list 'recentf-exclude no-littering-etc-directory)
-    (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+    :custom
+    (auto-save-file-name-transforms
+     `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
 
 ** Reloading Emacs Config
@@ -275,27 +276,6 @@ to provide my account credentials.
            ("<tab>" . org-next-link)
            ("<backtab>". org-previous-link)
            ("C-<return>" . browse-url-at-point))
-    :init
-    (progn
-      (setq notmuch-always-prompt-for-sender t)
-      (setq notmuch-archive-tags '("-inbox" "-unread"))
-      (setq notmuch-crypto-process-mime t)
-      (setq notmuch-hello-sections '(notmuch-hello-insert-saved-searches))
-      (setq notmuch-labeler-hide-known-labels t)
-      (setq notmuch-search-oldest-first nil)
-      (setq notmuch-draft-save-plaintext t))
-    (setq message-send-mail-function 'message-send-mail-with-sendmail
-          sendmail-program (executable-find "msmtp")
-          message-sendmail-envelope-from 'header
-          mail-envelope-from 'header
-          mail-specify-envelope-from t
-          mail-interactive t)
-    (setq notmuch-saved-searches '((:name "personal" :query "tag:inbox AND tag:personal")
-                                   (:name "unread" :query "tag:inbox AND tag:unread")
-                                   (:name "nushackers" :query "tag:inbox AND tag:nushackers")
-                                   (:name "nus" :query "tag:inbox AND tag:nus")
-                                   (:name "untagged" :query "tag:untagged")))
-
     :config
     (defun jethro/notmuch-toggle-read ()
       "toggle read status of message"
@@ -303,9 +283,27 @@ to provide my account credentials.
       (if (member "unread" (notmuch-search-get-tags))
           (notmuch-search-tag (list "-unread"))
         (notmuch-search-tag (list "+unread"))))
-    (progn
-      (setq notmuch-archive-tags '("-inbox" "-unread"))
-      (setq notmuch-message-headers '("To" "Cc" "Subject" "Date"))))
+    :custom
+    (message-send-mail-function 'message-send-mail-with-sendmail)
+    (sendmail-program (executable-find "msmtp"))
+    (message-sendmail-envelope-from 'header)
+    (mail-envelope-from 'header)
+    (mail-specify-envelope-from t)
+    (mail-interactive t)
+    (notmuch-always-prompt-for-sender t)
+    (notmuch-archive-tags '("-inbox" "-unread"))
+    (notmuch-crypto-process-mime t)
+    (notmuch-hello-sections '(notmuch-hello-insert-saved-searches))
+    (notmuch-labeler-hide-known-labels t)
+    (notmuch-search-oldest-first nil)
+    (notmuch-draft-save-plaintext t)
+    (notmuch-archive-tags '("-inbox" "-unread"))
+    (notmuch-message-headers '("To" "Cc" "Subject" "Date"))
+    (notmuch-saved-searches '((:name "personal" :query "tag:inbox AND tag:personal")
+                              (:name "unread" :query "tag:inbox AND tag:unread")
+                              (:name "nushackers" :query "tag:inbox AND tag:nushackers")
+                              (:name "nus" :query "tag:inbox AND tag:nus")
+                              (:name "untagged" :query "tag:untagged"))))
 #+END_SRC
 ** Org-mode Integration
 I use org-mode to manage everything. ~org-notmuch~ provides the
