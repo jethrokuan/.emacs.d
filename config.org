@@ -725,10 +725,10 @@ Counsel contains ivy enhancements for commonly-used functions.
    Give the working window more screen estate.
 
    #+begin_src emacs-lisp :tangle yes
-  (use-package golden-ratio
-    :diminish golden-ratio-mode
-    :init
-    (add-hook 'after-init-hook 'golden-ratio-mode))
+     (use-package golden-ratio
+       :diminish golden-ratio-mode
+       :hook
+       (after-init . golden-ratio-mode))
    #+end_src
 ** volatile-highlights
    Highlights recently copied/pasted text.
