@@ -1421,12 +1421,14 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Common Lisp
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package slime
+    :custom
+    (inferior-lisp-program "sbcl")
+    (slime-contribs '(slime-fancy)))
+
+  (use-package slime-company
+    :after slime
     :config
-    (setq inferior-lisp-program "sbcl")
-    (setq slime-contribs '(slime-fancy))
-    (use-package slime-company
-      :config
-      (slime-setup '(slime-company))))
+    (slime-setup '(slime-company)))
 #+END_SRC
 ** Emacs Lisp
 #+begin_src emacs-lisp :tangle yes
@@ -1468,40 +1470,47 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 *** Intero
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package intero
-    :init
-    (add-hook 'haskell-mode-hook 'intero-mode))
+    :hook
+    (haskell-mode . intero-mode))
 #+END_SRC
 ** Go
    #+begin_src emacs-lisp :tangle yes
      (use-package go-mode
        :mode ("\\.go\\'" . go-mode)
+       :hook
+       (go-mode . compilation-auto-quit-window)
+       (go-mode . (lambda ()
+                    (set (make-local-variable 'company-backends) '(company-go))
+                    (company-mode)))
+       (go-mode . (lambda ()
+                    (add-hook 'before-save-hook 'gofmt-before-save)
+                    (local-set-key (kbd "M-.") 'godef-jump)))
+       (go-mode . (lambda ()
+                    (unless (file-exists-p "Makefile")
+                      (set (make-local-variable 'compile-command)
+                           (let ((file (file-name-nondirectory buffer-file-name)))
+                             (format "go build %s"
+                                     file)))))))
+
+     (use-package go-dlv
+       :after go-mode)
+
+     (use-package golint
+       :after go-mode
        :config
-       (add-hook 'go-mode-hook 'compilation-auto-quit-window)
-       (add-hook 'go-mode-hook (lambda ()
-                                 (set (make-local-variable 'company-backends) '(company-go))
-                                 (company-mode)))
-       (add-hook 'go-mode-hook (lambda ()
-                                 (add-hook 'before-save-hook 'gofmt-before-save)
-                                 (local-set-key (kbd "M-.") 'godef-jump)))
-       (add-hook 'go-mode-hook
-                 (lambda ()
-                   (unless (file-exists-p "Makefile")
-                     (set (make-local-variable 'compile-command)
-                          (let ((file (file-name-nondirectory buffer-file-name)))
-                            (format "go build %s"
-                                    file))))))
-       (use-package go-dlv
-         :config (require 'go-dlv))
-       (use-package golint
-         :config
-         (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
-         (require 'golint))
-       (use-package gorepl-mode
-         :config (add-hook 'go-mode-hook #'gorepl-mode))
-       (use-package company-go
-         :config (add-hook 'go-mode-hook (lambda ()
-                                           (set (make-local-variable 'company-backends) '(company-go))
-                                           (company-mode)))))
+       (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
+       (require 'golint))
+
+     (use-package gorepl-mode
+       :after go-mode
+       :hook
+       (go-mode . gorepl-mode))
+
+     (use-package company-go
+       :after company go-mode
+       :hook
+       (go-mode . (lambda ()
+                    (set (make-local-variable 'company-backends) '(company-go)))))
    #+end_src
 ** C
 #+BEGIN_SRC emacs-lisp :tangle no
