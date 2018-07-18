@@ -1213,15 +1213,15 @@ respecting require-final-newline. Trimming only happens when saving.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ws-butler
     :diminish 'ws-butler-mode
-    :config
-    (add-hook 'prog-mode-hook 'ws-butler-mode))
+    :hook
+    (prog-mode . ws-butler-mode))
 #+END_SRC
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
        :bind (("C-c h f" . jethro/hydra-flycheck/body))
-       :init
-       (add-hook 'prog-mode-hook 'flycheck-mode)
+       :hook
+       (prog-mode . flycheck-mode)
        :config
        (defun jethro/adjust-flycheck-automatic-syntax-eagerness ()
          "Adjust how often we check for errors based on if there are any.
