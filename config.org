@@ -1017,8 +1017,8 @@ you to expand subdirectories in place, like a tree structure.
 ** easy-kill
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package easy-kill
-    :config
-    (global-set-key [remap kill-ring-save] 'easy-kill))
+    :bind*
+    (([remap kill-ring-save] . easy-kill)))
 #+END_SRC
 ** visual-regexp
 #+begin_src emacs-lisp :tangle yes
