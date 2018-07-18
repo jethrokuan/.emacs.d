@@ -1281,8 +1281,10 @@ respecting require-final-newline. Trimming only happens when saving.
    #+begin_src emacs-lisp :tangle yes
      (use-package yasnippet
        :diminish yas-global-mode yas-minor-mode
-       :init (add-hook 'after-init-hook 'yas-global-mode)
-       :config (setq yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
+       :hook
+       (after-init . yas-global-mode)
+       :custom
+       (yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
    #+end_src
 ** Autocompletions with Company
 #+begin_src emacs-lisp :tangle yes
