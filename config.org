@@ -1176,11 +1176,10 @@ Use this often, and in combination with multiple-cursors.
                 ("C-{" . sp-backward-barf-sexp)
                 ("C-M-<right>" . sp-backward-barf-sexp)
                 ("M-S" . sp-split-sexp))
-    :init
-    (add-hook 'after-init-hook 'smartparens-global-strict-mode)
+    :hook
+    (after-init . smartparens-global-strict-mode)
     :config
     (require 'smartparens-config)
-
     ;; Org-mode config
     (sp-with-modes 'org-mode
       (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
