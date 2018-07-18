@@ -2780,7 +2780,7 @@ Useful when handling git merge conflicts.
     (projectile-completion-system 'ivy)
     (projectile-switch-project-action  #'projectile-commander)
     :config
-    (projectile-global-mode)
+    (projectile-global-mode +1)
     (def-projectile-commander-method ?S
       "Run a search in the project"
       (counsel-projectile-rg))
