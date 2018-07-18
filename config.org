@@ -1270,10 +1270,12 @@ respecting require-final-newline. Trimming only happens when saving.
          ("p"  flycheck-previous-error                                   "Previous")
          ("<" flycheck-first-error                                      "First")
          (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-         ("q"  nil))
-       (use-package flycheck-pos-tip
-         :init
-         (add-hook 'flycheck-mode-hook 'flycheck-pos-tip-mode)))
+         ("q"  nil)))
+
+     (use-package flycheck-pos-tip
+       :after flycheck
+       :hook
+       (flycheck-mode . flycheck-pos-tip-mode))
    #+end_src
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
