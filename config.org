@@ -303,8 +303,14 @@ facility to capture email into a task.
   (use-package org-notmuch
     :ensure f
     :after org
+    :bind
+    (:map notmuch-show-mode-map
+          ("C" . jethro/org-capture-email))
     :config
-    (require 'org-notmuch))
+    (require 'org-notmuch)
+    (defun jethro/org-capture-email ()
+      (interactive)
+      (org-capture nil "e")))
 #+END_SRC
 * Appearance
 ** Font
@@ -2085,7 +2091,7 @@ inspiration when implementing GTD in org-mode.
             "* TODO %?")
            ("p" "paper" entry (file "~/.org/papers/papers.org")
             "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
-           ("e" "email" entry (file+headline "~/.org/gtd/projects.org" "Emails")
+           ("e" "email" entry (file+headline "~/.org/gtd/emails.org" "Emails")
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
            ("w" "Weekly Review" entry (file+olp+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))
@@ -2311,6 +2317,9 @@ This view is where I review the thingns I would like to do someday:
             (todo "TODO"
                   ((org-agenda-overriding-header "To Refile")
                    (org-agenda-files '("~/.org/gtd/inbox.org"))))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "Emails")
+                   (org-agenda-files '("~/.org/gtd/emails.org"))))
             (todo "NEXT"
                   ((org-agenda-overriding-header "In Progress")
                    (org-agenda-files '("~/.org/gtd/someday.org"
@@ -2319,9 +2328,12 @@ This view is where I review the thingns I would like to do someday:
                    ;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
                    ))
             (todo "TODO"
-                  ((org-agenda-overriding-header "Todo")
-                   (org-agenda-files '("~/.org/gtd/projects.org"
-                                       "~/.org/gtd/next.org"))
+                  ((org-agenda-overriding-header "Projects")
+                   (org-agenda-files '("~/.org/gtd/projects.org"))
+                   (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "One-off Tasks")
+                   (org-agenda-files '("~/.org/gtd/next.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
 
