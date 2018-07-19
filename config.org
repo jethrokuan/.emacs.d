@@ -2790,7 +2790,7 @@ Useful when handling git merge conflicts.
         (cider-jack-in))))
 
   (use-package counsel-projectile
-    :after counsel projectile
+    :after ivy projectile
     :bind (("s-f" . counsel-projectile-find-file)
            ("s-b" . counsel-projectile-switch-to-buffer)
            ("C-c s" . counsel-projectile-rg)))
