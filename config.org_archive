@@ -1,0 +1,367 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/jethro/.emacs.d/config.org
+
+
+* golden-ratio
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:00
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Visual Enhancements
+  :ARCHIVE_CATEGORY: config
+  :END:
+  Give the working window more screen estate.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package golden-ratio
+      :diminish golden-ratio-mode
+      :hook
+      (after-init . golden-ratio-mode))
+  #+end_src
+
+* Transcribing
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-minor-mode transcribe-mode
+    "A minor mode for transcription of audio."
+    :light "Transcribe mode"
+    :keymap (make-sparse-keymap))
+
+  (defun tag-word-or-region (text-begin text-end)
+    "Surround current word or region with given text."
+    (interactive "sStart tag: \nsEnd tag: ")
+    (let (pos1 pos2 bds)
+      (if (and transient-mark-mode mark-active)
+          (progn
+            (goto-char (region-end))
+            (insert text-end)
+            (goto-char (region-beginning))
+            (insert text-begin))
+        (progn
+          (setq bds (bounds-of-thing-at-point 'symbol))
+          (goto-char (cdr bds))
+          (insert text-end)
+          (goto-char (car bds))
+          (insert text-begin)))))
+
+  (require 'smartparens-config)
+  (sp-with-modes 'transcribe-mode
+    (sp-local-pair ">" "<")
+    (sp-local-pair "<" ">")
+    (sp-local-pair "°" "°")
+    (sp-local-pair "[" "]")
+    (sp-local-pair "((" "))")
+    (sp-local-pair "(" ")"))
+
+  (defhydra jethro/hydra-transcribe (:color blue :hint nil)
+    "
+  ^Command^
+  ^^-------------------------------------------------------------------------------
+  _._: Falling Intonation                   _d_: Softer Relative           
+  _,_: Continuing Intonation                _j_: Sharp Fall in Pitch       
+  _?_: Rising Intonation                    _k_: Sharp Rise in Pitch       
+  _/_: Weak Rising Intonation (¿)           _>_: Rapid Delivery            
+  _:_: Prolongation                         _<_: Slow Delivery             
+  _-_: Halt or Self Interruption
+  _u_: Stress or Emphasis
+  _c_: Increased Loudness
+  "
+    ("." (lambda () (interactive) (insert-char ?.)))
+    ("," (lambda () (interactive) (insert-char ?,)))
+    ("?" (lambda () (interactive) (insert-char ??)))
+    ("/" (lambda () (interactive) (insert-char ?¿)))
+    (":" (lambda () (interactive) (insert-char ?:)))
+    ("-" (lambda () (interactive) (insert-char ?-)))
+    ("u" (lambda () (interactive) (tag-word-or-region "_" "_")))
+    ("c" (lambda () (interactive) (upcase-dwim)))
+    ("d" (lambda () (interactive) (tag-word-or-region "°" "°")))
+    ("j" (lambda () (interactive) (insert-char ?↓)))
+    ("k" (lambda () (interactive) (insert-char ?↑)))
+    (">" (lambda () (interactive) (tag-word-or-region ">" "<")))
+    ("<" (lambda () (interactive) (tag-word-or-region "<" ">")))
+    ("[" (lambda () (interactive) (tag-word-or-region "[" "]"))) 
+    ("q" nil))
+
+  (key-chord-define transcribe-mode-map "kk" 'jethro/hydra-transcribe/body)
+#+END_SRC
+* writegood-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package writegood-mode)
+#+END_SR
+* Meghanada
+Meghanada is a new minor-mode (meghanada-mode) that aims at improving
+the editing experience for the Java. It works by using a combination
+of an Emacs server.
+
+- Gradle and Maven project support
+- No need build tool's plugin
+- Run build tool task
+- Compile your project
+- Syntax check and analyze java source (flycheck-meghanada)
+- Support Generic Types
+- Code completion with company-mode (company-meghanada)
+- Optimize import
+- Jump declaration
+- Run Junit test (include test runner)
+- Diagnostic reporting with flycheck (flycheck-meghanada)
+- Show symbol's type info with el-doc
+- Search references
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package meghanada
+    :bind
+    (:map meghanada-mode-map
+          ("C-S-t" . meghanada-switch-testcase)
+          ("M-RET" . meghanada-local-variable)
+          ("M-r" . meghanada-reference)
+          ("M-t" . meghanada-typeinfo))
+    :init
+    (add-hook 'java-mode-hook
+              (lambda ()
+                (google-set-c-style)
+                (google-make-newline-indent)
+                (meghanada-mode t)
+                (smartparens-mode t)
+                (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+    :config
+    (use-package realgud)
+    (setq indent-tabs-mode nil)
+    (setq tab-width 2)
+    (setq c-basic-offset 2)
+    (setq meghanada-server-remote-debug t)
+    (setq meghanada-javac-xlint "-Xlint:all,-processing")
+    (with-eval-after-load 'hydra
+      (defhydra jethro/hydra-meghanada (:hint nil :exit t)
+        "
+  ^Edit^                           ^Tast or Task^
+  ^^^^^^-------------------------------------------------------
+  _f_: meghanada-compile-file      _m_: meghanada-restart
+  _c_: meghanada-compile-project   _t_: meghanada-run-task
+  _o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
+  _s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
+  _v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
+  _i_: meghanada-import-all        _r_: meghanada-reference
+  _g_: magit-status                _T_: meghanada-typeinfo
+  _l_: helm-ls-git-ls
+  _q_: exit
+  "
+        ("f" meghanada-compile-file)
+        ("m" meghanada-restart)
+
+        ("c" meghanada-compile-project)
+        ("o" meghanada-optimize-import)
+        ("s" meghanada-switch-test-case)
+        ("v" meghanada-local-variable)
+        ("i" meghanada-import-all)
+
+        ("g" magit-status)
+        ("l" helm-ls-git-ls)
+
+        ("t" meghanada-run-task)
+        ("T" meghanada-typeinfo)
+        ("j" meghanada-run-junit-test-case)
+        ("J" meghanada-run-junit-class)
+        ("R" meghanada-run-junit-recent)
+        ("r" meghanada-reference)
+
+        ("q" exit)
+        ("z" nil "leave"))
+
+      (bind-key "C-c h m" 'jethro/hydra-meghanada/body meghanada-mode-map)) 
+    :commands
+    (meghanada-mode))
+#+END_SRC
+
+* SOS
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:02
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Miscellaneous
+  :ARCHIVE_CATEGORY: config
+  :END:
+Search Stack Overflow
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sos
+    :commands (sos))
+#+END_SRC
+
+
+* which-key
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:02
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Miscellaneous
+  :ARCHIVE_CATEGORY: config
+  :END:
+#+begin_src emacs-lisp :tangle yes
+  (use-package which-key
+    :diminish which-key-mode
+    :hook
+    (after-init . which-key-mode))
+#+end_src
+
+* Magithub
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:02
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Project Management/Projectile
+  :ARCHIVE_CATEGORY: config
+  :END:
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package magithub
+    :after magit
+    :config (magithub-feature-autoinject t))
+#+END_SRC
+
+* Org Mode for Reading papers
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:03
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Org-Mode
+  :ARCHIVE_CATEGORY: config
+  :END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-ref
+    :after org
+    :custom
+    (org-ref-notes-directory "~/.org/papers/")
+    (org-ref-bibliography-notes "~/.org/papers/notes.org")
+    (org-ref-default-bibliography '("~/.org/papers/index.bib"))
+    (org-ref-pdf-directory "~/.org/papers/lib/")
+    (ivy-bibtex-bibliography "~/.org/papers/index.bib") ;; where your references are stored
+    (ivy-bibtex-library-path "~/.org/papers/lib/") ;; where your pdfs etc are stored
+    (ivy-bibtex-notes-path "~/.org/papers/notes.org") ;; where your notes are stored
+    (bibtex-completion-bibliography "~/.org/papers/index.bib") ;; writing completion
+    (bibtex-completion-notes-path "~/.org/papers/notes.org")
+    (bibtex-completion-library-path "~/.org/papers/lib/")
+    (bibtex-completion-pdf-symbol "⌘")
+    (bibtex-completion-notes-symbol "✎")
+    (bibtex-autokey-year-length 4)
+    (bibtex-autokey-name-year-separator "-")
+    (bibtex-autokey-year-title-separator "-")
+    (bibtex-autokey-titleword-separator "-")
+    (bibtex-autokey-titlewords 2)
+    (bibtex-autokey-titlewords-stretch 1)
+    (bibtex-autokey-titleword-length 5)
+    :config
+    (require 'org-ref-bibtex)
+    (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body) 
+    (require 'org-ref-url-utils)
+    (require 'org-ref-arxiv))
+#+END_SRC
+** Trimming citation titles
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/trim-citation-title (title)
+    "Removes newlines and curly braces and truncates long titles."
+    (let* ((title (if (string-match-p "\n" title)
+                      (replace-regexp-in-string "\n[ ]*" " " (substring title 1 -1))
+                    title))
+           (len (length title))
+           (end (min len 75)))
+      (substring title 0 end)))
+#+END_SRC
+** Custom Arxiv Fetch Function
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/get-arxiv-paper ()
+    "Fetches Arxiv paper, and adds it to inbox."
+    (interactive)  
+    (require 'org-ref-arxiv)
+    (let* ((url (read-string "Arxiv:" (thing-at-point 'url)))
+           (pos 0)
+           (bibfile (car org-ref-default-bibliography))
+           (pdfdir org-ref-pdf-directory)
+           (regexp "\\w+\\.\\w+$")
+           (match (progn
+                    (string-match regexp url pos)
+                    (match-string 0 url))))
+      (arxiv-get-pdf-add-bibtex-entry match bibfile pdfdir)
+      (save-window-excursion
+        (find-file bibfile)
+        (org-capture nil "p"))))
+
+  (bind-key "C-x \\" 'jethro/get-arxiv-paper)
+
+#+END_SRC
+** Custom Agenda View
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq jethro/org-agenda-papers-view
+        `("p" "Papers" 
+          ((todo "NEXT"
+                 ((org-agenda-overriding-header "In Progress")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           (todo "TODO"
+                 ((org-agenda-overriding-header "To Read")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           (todo "DONE"
+                 ((org-agenda-overriding-header "To Read")
+                  (org-agenda-files '("~/.org/papers/papers.org"))))
+           nil)))
+#+END_SRC
+
+* dumb-jump
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:07
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Moving Around
+  :ARCHIVE_CATEGORY: config
+  :END:
+Use it to jump to function definitions. Requires no external
+dependencies.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package dumb-jump
+    :bind (("M-g o" . dumb-jump-go-other-window)
+           ("M-g j" . dumb-jump-go)
+           ("M-g i" . dumb-jump-go-prompt)
+           ("M-g x" . dumb-jump-go-prefer-external)
+           ("M-g z" . dumb-jump-go-prefer-external-other-window))
+    :custom
+    (dumb-jump-selector 'ivy))
+#+end_src
+
+* Keychord
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:08
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Moving Around
+  :ARCHIVE_CATEGORY: config
+  :END:
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package key-chord
+      :config
+      (key-chord-mode 1))
+  #+END_SRC
+
+* Thick modeline bar
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:09
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Visual Enhancements/Modeline
+  :ARCHIVE_CATEGORY: config
+  :END:
+#+BEGIN_SRC emacs-lisp :tangle no
+  (custom-set-faces
+   '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
+#+END_SRC
+
+* Recentf
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:09
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Better Defaults
+  :ARCHIVE_CATEGORY: config
+  :END:
+
+When I'm using Emacs via =emacsclient=, my recent files don't get
+saved because I never ever quit Emacs. Instead, now I run the function
+every 5 minutes. Inhibit recentf from printing messages into the
+minibuffer.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'recentf)
+  (run-at-time (* 5 60) nil
+         (lambda ()
+     (let ((inhibit-message t))
+       (recentf-save-list))))
+#+END_SRC
+

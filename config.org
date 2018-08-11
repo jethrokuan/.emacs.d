@@ -154,21 +154,6 @@ Type over a selected region, instead of deleting before typing.
   (delete-selection-mode 1)
 #+end_src
 
-** Recentf
-
-When I'm using Emacs via =emacsclient=, my recent files don't get
-saved because I never ever quit Emacs. Instead, now I run the function
-every 5 minutes. Inhibit recentf from printing messages into the
-minibuffer.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'recentf)
-  (run-at-time (* 5 60) nil
-         (lambda ()
-     (let ((inhibit-message t))
-       (recentf-save-list))))
-#+END_SRC
-
 ** Editing Preferences
 
 Emacs uses double-spaces by default. Use single spaces instead:
@@ -670,11 +655,6 @@ Counsel contains ivy enhancements for commonly-used functions.
   (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
 ** Modeline
-*** Thick modeline bar
-#+BEGIN_SRC emacs-lisp :tangle no
-  (custom-set-faces
-   '(mode-line ((t (:background "#2B2B2B" :foreground "#DCDCCC" :box (:line-width 4 :color "#2B2B2B"))))))
-#+END_SRC
 *** smart-mode-line
 #+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line
@@ -716,15 +696,6 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+begin_src emacs-lisp :tangle yes
   (show-paren-mode 1)
   (setq show-paren-delay 0)
-   #+end_src
-** golden-ratio
-   Give the working window more screen estate.
-
-   #+begin_src emacs-lisp :tangle yes
-     (use-package golden-ratio
-       :diminish golden-ratio-mode
-       :hook
-       (after-init . golden-ratio-mode))
    #+end_src
 ** volatile-highlights
    Highlights recently copied/pasted text.
@@ -835,12 +806,6 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'after-init-hook 'sow-mode)
    #+END_SRC
-** Keychord
-   #+BEGIN_SRC emacs-lisp :tangle yes
-     (use-package key-chord
-       :config
-       (key-chord-mode 1))
-   #+END_SRC
 ** Eyebrowse
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package eyebrowse
@@ -879,20 +844,17 @@ Use avy to move between visible text.
     :custom
     (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 #+end_src
-** dumb-jump
-Use it to jump to function definitions. Requires no external
-dependencies.
+** smart-jump
+This packages tries to smartly go to definition leveraging several
+methods to do so.
 
-#+begin_src emacs-lisp :tangle yes
-  (use-package dumb-jump
-    :bind (("M-g o" . dumb-jump-go-other-window)
-           ("M-g j" . dumb-jump-go)
-           ("M-g i" . dumb-jump-go-prompt)
-           ("M-g x" . dumb-jump-go-prefer-external)
-           ("M-g z" . dumb-jump-go-prefer-external-other-window))
-    :custom
-    (dumb-jump-selector 'ivy))
-#+end_src
+If one method fails, this package will go on to the next one,
+eventually falling back to dumb-jump.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package smart-jump
+    :config
+    (smart-jump-setup-default-registers))
+#+END_SRC
 ** Dired
 *** Requiring =dired=
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1992,6 +1954,16 @@ We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
                        'org-meta-line
                        'org-document-info-keyword))))
  #+END_SRC
+
+Other org-mode ricing configuration:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-startup-indented t
+        org-pretty-entities t
+        org-fontify-whole-heading-line t
+        org-fontify-done-headline t
+        org-fontify-quote-and-verse-blocks t)
+#+END_SRC
 *** Org Gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'auth-source-pass)
@@ -2574,84 +2546,6 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
                                           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
                                            (?p "Export to PDF" jethro/org-multicol-to-pdf))))
 #+end_src
-** Org Mode for Reading papers
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-ref
-    :after org
-    :custom
-    (org-ref-notes-directory "~/.org/papers/")
-    (org-ref-bibliography-notes "~/.org/papers/notes.org")
-    (org-ref-default-bibliography '("~/.org/papers/index.bib"))
-    (org-ref-pdf-directory "~/.org/papers/lib/")
-    (ivy-bibtex-bibliography "~/.org/papers/index.bib") ;; where your references are stored
-    (ivy-bibtex-library-path "~/.org/papers/lib/") ;; where your pdfs etc are stored
-    (ivy-bibtex-notes-path "~/.org/papers/notes.org") ;; where your notes are stored
-    (bibtex-completion-bibliography "~/.org/papers/index.bib") ;; writing completion
-    (bibtex-completion-notes-path "~/.org/papers/notes.org")
-    (bibtex-completion-library-path "~/.org/papers/lib/")
-    (bibtex-completion-pdf-symbol "⌘")
-    (bibtex-completion-notes-symbol "✎")
-    (bibtex-autokey-year-length 4)
-    (bibtex-autokey-name-year-separator "-")
-    (bibtex-autokey-year-title-separator "-")
-    (bibtex-autokey-titleword-separator "-")
-    (bibtex-autokey-titlewords 2)
-    (bibtex-autokey-titlewords-stretch 1)
-    (bibtex-autokey-titleword-length 5)
-    :config
-    (require 'org-ref-bibtex)
-    (key-chord-define-global "jj" 'org-ref-bibtex-hydra/body) 
-    (require 'org-ref-url-utils)
-    (require 'org-ref-arxiv))
-#+END_SRC
-*** Trimming citation titles
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/trim-citation-title (title)
-    "Removes newlines and curly braces and truncates long titles."
-    (let* ((title (if (string-match-p "\n" title)
-                      (replace-regexp-in-string "\n[ ]*" " " (substring title 1 -1))
-                    title))
-           (len (length title))
-           (end (min len 75)))
-      (substring title 0 end)))
-#+END_SRC
-*** Custom Arxiv Fetch Function
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/get-arxiv-paper ()
-    "Fetches Arxiv paper, and adds it to inbox."
-    (interactive)  
-    (require 'org-ref-arxiv)
-    (let* ((url (read-string "Arxiv:" (thing-at-point 'url)))
-           (pos 0)
-           (bibfile (car org-ref-default-bibliography))
-           (pdfdir org-ref-pdf-directory)
-           (regexp "\\w+\\.\\w+$")
-           (match (progn
-                    (string-match regexp url pos)
-                    (match-string 0 url))))
-      (arxiv-get-pdf-add-bibtex-entry match bibfile pdfdir)
-      (save-window-excursion
-        (find-file bibfile)
-        (org-capture nil "p"))))
-
-  (bind-key "C-x \\" 'jethro/get-arxiv-paper)
-
-#+END_SRC
-*** Custom Agenda View
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq jethro/org-agenda-papers-view
-        `("p" "Papers" 
-          ((todo "NEXT"
-                 ((org-agenda-overriding-header "In Progress")
-                  (org-agenda-files '("~/.org/papers/papers.org"))))
-           (todo "TODO"
-                 ((org-agenda-overriding-header "To Read")
-                  (org-agenda-files '("~/.org/papers/papers.org"))))
-           (todo "DONE"
-                 ((org-agenda-overriding-header "To Read")
-                  (org-agenda-files '("~/.org/papers/papers.org"))))
-           nil)))
-#+END_SRC
 ** Putting it all together
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-custom-commands 
@@ -2795,27 +2689,7 @@ Useful when handling git merge conflicts.
            ("s-b" . counsel-projectile-switch-to-buffer)
            ("C-c s" . counsel-projectile-rg)))
 #+end_src
-*** Magithub
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package magithub
-    :after magit
-    :config (magithub-feature-autoinject t))
-#+END_SRC
 * Miscellaneous
-** SOS
-Search Stack Overflow
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package sos
-    :commands (sos))
-#+END_SRC
-
-** which-key
-#+begin_src emacs-lisp :tangle yes
-  (use-package which-key
-    :diminish which-key-mode
-    :hook
-    (after-init . which-key-mode))
-#+end_src
 ** Olivetti
 #+begin_src emacs-lisp :tangle yes
   (use-package olivetti
@@ -2830,7 +2704,10 @@ Closes compile buffer if there are no errors.
     :hook
     (after-init . bury-successful-compilation))
 #+end_src
-
+** Stack Exchange
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sx)
+#+END_SRC
 * Load Custom File
 Custom file should take precedence.
 #+BEGIN_SRC emacs-lisp :tangle yes
