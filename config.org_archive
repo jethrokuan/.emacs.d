@@ -365,3 +365,69 @@ minibuffer.
        (recentf-save-list))))
 #+END_SRC
 
+
+* starring elfeed articles
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-08-11 Sat 10:15
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Reading feeds with elfeed
+  :ARCHIVE_CATEGORY: config
+  :END:
+Based on http://matt.hackinghistory.ca/2015/11/22/elfeed/.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  ;; add a star
+  (defun jethro/elfeed-star ()
+    "Apply starred to all selected entries."
+    (interactive )
+    (let* ((entries (elfeed-search-selected))
+           (tag (intern "starred")))
+
+      (cl-loop for entry in entries do (elfeed-tag entry tag))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  ;; remove a start
+  (defun jethro/elfeed-unstar ()
+    "Remove starred tag from all selected entries."
+    (interactive )
+    (let* ((entries (elfeed-search-selected))
+           (tag (intern "starred")))
+
+      (cl-loop for entry in entries do (elfeed-untag entry tag))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  ;; face for starred articles
+  (defface elfeed-search-starred-title-face
+    '((t :foreground "#FFDA46"))
+    "Marks a starred Elfeed entry.")
+
+  (push '(starred elfeed-search-starred-title-face) elfeed-search-face-alist)
+
+  (defalias 'elfeed-toggle-star
+    (elfeed-expose #'elfeed-search-toggle-all 'starred))
+
+  (eval-after-load 'elfeed-search
+    '(define-key elfeed-search-mode-map (kbd "m") 'elfeed-toggle-star))
+#+END_SRC
+
+* Reloading Emacs Config
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-08-11 Sat 10:23
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Better Defaults
+:ARCHIVE_CATEGORY: config
+:END:
+
+I want an easy way to reload my configuration when I change it. I bind
+it to =<f11>=.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/reload-init ()
+    "Reloads the config file."
+    (interactive)
+    (load-file "~/.emacs.d/init.el"))
+
+  (bind-key "<f11>" 'jethro/reload-init)
+#+END_SRC
+
