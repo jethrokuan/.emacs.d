@@ -1805,6 +1805,7 @@ npm install -g tern
 *** AucTeX
     #+BEGIN_SRC emacs-lisp :tangle yes
       (use-package auctex
+        :after latex
         :custom
         (TeX-auto-save t)
         (TeX-parse-self t)
@@ -1813,8 +1814,7 @@ npm install -g tern
         (TeX-source-correlate-start-server nil)
         ;; Don't insert line-break at inline math
         (LaTeX-fill-break-at-separators nil)
-        (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")
-                                 ("qpdfview" "qpdfview %o#%(outpage)")))
+        (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")))
         (TeX-view-program-selection '((output-pdf "zathura")))
         :config
         (when latex-enable-auto-fill
@@ -1919,6 +1919,7 @@ We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
                        'org-link
                        'org-block
                        'org-table
+                       'org-verbatim
                        'org-block-begin-line
                        'org-block-end-line
                        'org-meta-line
@@ -1929,6 +1930,7 @@ Other org-mode ricing configuration:
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-startup-indented t
+        org-hide-emphasis-markers t
         org-pretty-entities t)
 #+END_SRC
 *** Org Gcal

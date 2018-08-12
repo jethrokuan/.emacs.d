@@ -3,16 +3,16 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(LaTeX-fill-break-at-separators nil t)
- '(TeX-auto-save t t)
- '(TeX-parse-self t t)
- '(TeX-source-correlate-start-server nil t)
+ '(LaTeX-fill-break-at-separators nil)
+ '(TeX-auto-save t)
+ '(TeX-parse-self t)
+ '(TeX-source-correlate-start-server nil)
  '(TeX-syntactic-comment t t)
  '(TeX-view-program-list
    (quote
     (("zathura" "zathura --page=%(outpage) %o")
-     ("qpdfview" "qpdfview %o#%(outpage)"))) t)
- '(TeX-view-program-selection (quote ((output-pdf "zathura"))) t)
+     ("qpdfview" "qpdfview %o#%(outpage)"))))
+ '(TeX-view-program-selection (quote ((output-pdf "zathura"))))
  '(aggressive-indent-excluded-modes
    (quote
     (bibtex-mode cider-repl-mode coffee-mode comint-mode conf-mode Custom-mode diff-mode doc-view-mode dos-mode erc-mode jabber-chat-mode haml-mode intero-mode haskell-mode interative-haskell-mode haskell-interactive-mode image-mode makefile-mode makefile-gmake-mode minibuffer-inactive-mode netcmd-mode python-mode sass-mode slim-mode special-mode shell-mode snippet-mode eshell-mode tabulated-list-mode term-mode TeX-output-mode text-mode yaml-mode)))
@@ -114,6 +114,14 @@
  '(projectile-switch-project-action (quote projectile-commander))
  '(projectile-use-git-grep t)
  '(rmh-elfeed-org-files (quote ("~/.org/deft/feeds.org")))
+ '(safe-local-variable-values
+   (quote
+    ((org-download-image-dir . "./images/ai/")
+     (org-download-image-dir . "./images/nlp/")
+     (org-download-image-dir . "./images/operating_systems/")
+     (org-download-image-dir . "./images/software-engineering/")
+     (org-download-image-dir . "./images/spark/")
+     (org-download-image-dir . "./images/data_viz/"))))
  '(scss-compile-at-save nil)
  '(sendmail-program "/run/current-system/sw/bin/msmtp")
  '(shackle-rules
@@ -149,4 +157,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(variable-pitch ((t (:background "#F1F1F1" :foreground "#616161" :family "ETBembo")))))
+ '(org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
+ '(org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
+ '(org-headline-done ((t (:foreground "#171717" :strike-through t))))
+ '(org-level-1 ((t (:foreground "#090909" :weight bold :height 1.3))))
+ '(org-level-2 ((t (:foreground "#090909" :weight normal :height 1.2))))
+ '(org-level-3 ((t (:foreground "#090909" :weight normal :height 1.1))))
+ '(variable-pitch ((t (:family "ETBembo")))))
