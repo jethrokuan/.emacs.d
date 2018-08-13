@@ -1900,6 +1900,7 @@ highlighting and annotations.
       (org-level-1 ((t (:foreground "#090909" :weight bold :height 1.3))))
       (org-level-2 ((t (:foreground "#090909" :weight normal :height 1.2))))
       (org-level-3 ((t (:foreground "#090909" :weight normal :height 1.1))))
+      (org-image-actual-width '(600))
       :config
       (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
   #+END_SRC
@@ -2341,6 +2342,13 @@ this to capture screenshots into deft.
  #+BEGIN_SRC emacs-lisp :tangle yes
    (use-package org-download
      :after org
+     :bind
+     (:map org-mode-map
+           (("s-Y" . org-download-screenshot)
+            ("s-y" . org-download-yank)))
+     :config
+     (when (memq window-system '(mac ns))
+       (setq org-download-screenshot-method "screencapture -i %s"))
      :custom
      (org-download-image-dir "./images"))
  #+END_SRC
@@ -2665,7 +2673,9 @@ Useful when handling git merge conflicts.
   (use-package olivetti
     :hook
     (text-mode . olivetti-mode)
-    :bind (("C-c M o" . olivetti-mode)))
+    :bind (("C-c M o" . olivetti-mode))
+    :custom
+    (olivetti-body-width 80))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
