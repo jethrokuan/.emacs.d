@@ -263,7 +263,10 @@ to provide my account credentials.
     (sendmail-program (executable-find "msmtp"))
     (message-sendmail-envelope-from 'header)
     (mail-envelope-from 'header)
-    (mail-specify-envelope-from t)
+    (mail-specify-envelope-from 't)
+    (mail-envelope-from 'header)
+    (message-sendmail-envelope-from 'header)
+    (mail-specify-envelope-from nil)
     (mail-interactive t)
     (notmuch-always-prompt-for-sender t)
     (notmuch-archive-tags '("-inbox" "-unread"))
@@ -1807,7 +1810,8 @@ npm install -g tern
 *** AucTeX
     #+BEGIN_SRC emacs-lisp :tangle yes
       (use-package auctex
-        :after latex
+        :defer t
+        :mode ("\\.tex\\'" . latex-mode)
         :custom
         (TeX-auto-save t)
         (TeX-parse-self t)
@@ -1816,13 +1820,17 @@ npm install -g tern
         (TeX-source-correlate-start-server nil)
         ;; Don't insert line-break at inline math
         (LaTeX-fill-break-at-separators nil)
-        (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")))
-        (TeX-view-program-selection '((output-pdf "zathura")))
+        (TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")
+                                 ("zathura" "zathura --page=%(outpage) %o")))
+        (TeX-view-program-selection '((output-pdf "pdf-tools")
+                                      (output-pdf "zathura")))
         :config
-        (when latex-enable-auto-fill
-          (add-hook 'LaTeX-mode-hook 'latex/auto-fill-mode))
-        (when latex-enable-folding
-          (add-hook 'LaTeX-mode-hook 'TeX-fold-mode))
+        (add-hook 'LaTeX-mode-hook
+                  (lambda ()
+                    (company-mode)
+                    (setq TeX-PDF-mode t)
+                    (setq TeX-source-correlate-method 'synctex)
+                    (setq TeX-source-correlate-start-server t)))
         (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
         (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
         (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
@@ -2696,5 +2704,5 @@ Closes compile buffer if there are no errors.
 * Load Custom File
 Custom file should take precedence.
 #+BEGIN_SRC emacs-lisp :tangle yes
-(load custom-file)
+  (load custom-file)
 #+END_SRC

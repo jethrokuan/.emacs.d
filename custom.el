@@ -8,10 +8,7 @@
  '(TeX-parse-self t)
  '(TeX-source-correlate-start-server nil)
  '(TeX-syntactic-comment t t)
- '(TeX-view-program-list
-   (quote
-    (("zathura" "zathura --page=%(outpage) %o")
-     ("qpdfview" "qpdfview %o#%(outpage)"))))
+ '(TeX-view-program-list (quote (("zathura" "zathura --page=%(outpage) %o"))))
  '(TeX-view-program-selection (quote ((output-pdf "zathura"))))
  '(aggressive-indent-excluded-modes
    (quote
@@ -99,7 +96,9 @@
  '(notmuch-search-oldest-first nil)
  '(nrepl-hide-special-buffers t)
  '(nrepl-log-messages t)
+ '(olivetti-body-width 80)
  '(org-agenda-diary-file "~/.org/diary.org")
+ '(org-babel-load-languages (quote ((emacs-lisp . t) (python . t))))
  '(org-bullets-bullet-list (quote (" ")))
  '(org-download-image-dir "./images")
  '(org-journal-dir "~/.org/journal/")
@@ -107,7 +106,7 @@
  '(org-return-follows-link t)
  '(package-selected-packages
    (quote
-    (sx zenburn-theme yapfify yaml-mode ws-butler writegood-mode which-key wgrep web-mode volatile-highlights visual-regexp use-package tide tao-theme sphinx-doc sos smartparens smart-mode-line smart-jump slime-company skewer-mode shm shackle scss-mode rust-mode rjsx-mode rg rainbow-mode rainbow-delimiters pytest py-isort peep-dired paradox ox-ioslide org-ref org-pomodoro org-plus-contrib org-journal org-gcal org-download org-bullets olivetti notmuch no-littering nix-mode meghanada magit lsp-ui lsp-python lsp-java js2-refactor js-doc ivy-bibtex isend-mode intero interleave indium iedit ibuffer-projectile highlight-indent-guides groovy-mode gradle-mode gorepl-mode google-c-style golint go-dlv gist flycheck-pos-tip flycheck-color-mode-line flycheck-clojure flx fish-mode eyebrowse expand-region eww-lnum esup esh-autosuggest ensime emmet-mode elfeed-org easy-kill dockerfile-mode docker direnv dired-subtree dired-ranger dired-narrow diminish diff-hl deft crux counsel-projectile company-tern company-quickhelp company-lsp company-go company-auctex company-anaconda color-identifiers-mode clj-refactor bury-successful-compilation beacon avy autodisass-java-bytecode alchemist aggressive-indent adoc-mode)))
+    (latex tex-site sx zenburn-theme yapfify yaml-mode ws-butler writegood-mode which-key wgrep web-mode volatile-highlights visual-regexp use-package tide tao-theme sphinx-doc sos smartparens smart-mode-line smart-jump slime-company skewer-mode shm shackle scss-mode rust-mode rjsx-mode rg rainbow-mode rainbow-delimiters pytest py-isort peep-dired paradox ox-ioslide org-ref org-pomodoro org-plus-contrib org-journal org-gcal org-download org-bullets olivetti notmuch no-littering nix-mode meghanada magit lsp-ui lsp-python lsp-java js2-refactor js-doc ivy-bibtex isend-mode intero interleave indium iedit ibuffer-projectile highlight-indent-guides groovy-mode gradle-mode gorepl-mode google-c-style golint go-dlv gist flycheck-pos-tip flycheck-color-mode-line flycheck-clojure flx fish-mode eyebrowse expand-region eww-lnum esup esh-autosuggest ensime emmet-mode elfeed-org easy-kill dockerfile-mode docker direnv dired-subtree dired-ranger dired-narrow diminish diff-hl deft crux counsel-projectile company-tern company-quickhelp company-lsp company-go company-auctex company-anaconda color-identifiers-mode clj-refactor bury-successful-compilation beacon avy autodisass-java-bytecode alchemist aggressive-indent adoc-mode)))
  '(pdf-view-resize-factor 1.1)
  '(projectile-completion-system (quote ivy))
  '(projectile-create-missing-test-files t)
@@ -116,7 +115,8 @@
  '(rmh-elfeed-org-files (quote ("~/.org/deft/feeds.org")))
  '(safe-local-variable-values
    (quote
-    ((org-download-image-dir . "./images/ai/")
+    ((org-download-image-dir . "./images/computer_vision/")
+     (org-download-image-dir . "./images/ai/")
      (org-download-image-dir . "./images/nlp/")
      (org-download-image-dir . "./images/operating_systems/")
      (org-download-image-dir . "./images/software-engineering/")
@@ -160,6 +160,7 @@
  '(org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
  '(org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
  '(org-headline-done ((t (:foreground "#171717" :strike-through t))))
+ '(org-image-actual-width (quote (600)))
  '(org-level-1 ((t (:foreground "#090909" :weight bold :height 1.3))))
  '(org-level-2 ((t (:foreground "#090909" :weight normal :height 1.2))))
  '(org-level-3 ((t (:foreground "#090909" :weight normal :height 1.1))))
