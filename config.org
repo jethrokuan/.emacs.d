@@ -2361,8 +2361,10 @@ this to capture screenshots into deft.
      :config
      (when (memq window-system '(mac ns))
        (setq org-download-screenshot-method "screencapture -i %s"))
-     :custom
-     (org-download-image-dir "./images"))
+     (add-hook 'org-mode-hook
+               (lambda ()
+                 (when (buffer-file-name)
+                   (setq-local org-download-image-dir (format "./images/%s" (file-name-base buffer-file-name)))))))
  #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes

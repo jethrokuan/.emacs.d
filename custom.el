@@ -3,13 +3,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(LaTeX-fill-break-at-separators nil)
- '(TeX-auto-save t)
- '(TeX-parse-self t)
- '(TeX-source-correlate-start-server nil)
+ '(LaTeX-fill-break-at-separators nil t)
+ '(TeX-auto-save t t)
+ '(TeX-parse-self t t)
+ '(TeX-source-correlate-start-server nil t)
  '(TeX-syntactic-comment t t)
- '(TeX-view-program-list (quote (("zathura" "zathura --page=%(outpage) %o"))))
- '(TeX-view-program-selection (quote ((output-pdf "zathura"))))
+ '(TeX-view-program-list (quote (("zathura" "zathura --page=%(outpage) %o"))) t)
+ '(TeX-view-program-selection (quote ((output-pdf "zathura"))) t)
  '(aggressive-indent-excluded-modes
    (quote
     (bibtex-mode cider-repl-mode coffee-mode comint-mode conf-mode Custom-mode diff-mode doc-view-mode dos-mode erc-mode jabber-chat-mode haml-mode intero-mode haskell-mode interative-haskell-mode haskell-interactive-mode image-mode makefile-mode makefile-gmake-mode minibuffer-inactive-mode netcmd-mode python-mode sass-mode slim-mode special-mode shell-mode snippet-mode eshell-mode tabulated-list-mode term-mode TeX-output-mode text-mode yaml-mode)))
@@ -77,8 +77,10 @@
  '(markdown-fontify-code-blocks-natively t)
  '(markdown-indent-on-enter (quote indent-and-new-item))
  '(markdown-live-preview-delete-export (quote delete-on-destroy))
+ '(message-kill-buffer-on-exit t)
  '(message-send-mail-function (quote message-send-mail-with-sendmail))
  '(message-sendmail-envelope-from (quote header))
+ '(message-sendmail-f-is-evil nil)
  '(notmuch-always-prompt-for-sender t)
  '(notmuch-archive-tags (quote ("-inbox" "-unread")))
  '(notmuch-crypto-process-mime t)
@@ -115,7 +117,8 @@
  '(rmh-elfeed-org-files (quote ("~/.org/deft/feeds.org")))
  '(safe-local-variable-values
    (quote
-    ((org-download-image-dir . "./images/computer_vision/")
+    ((org-download-image-dir . "./images/linear_algebra/")
+     (org-download-image-dir . "./images/computer_vision/")
      (org-download-image-dir . "./images/ai/")
      (org-download-image-dir . "./images/nlp/")
      (org-download-image-dir . "./images/operating_systems/")
