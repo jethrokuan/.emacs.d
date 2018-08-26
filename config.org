@@ -1957,10 +1957,10 @@ Other org-mode ricing configuration:
     (auth-source-backend '(password-store)))
 
   (use-package org-gcal
-    :after '(auth-source-pass password-store)
+    :after (auth-source-pass password-store)
     :custom
-    (jethro/org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
-    ( org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
+    (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
+    (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
     (jethro/org-gcal-directory "~/.org/gtd/calendars/")
     :config
     (defun jethro/get-gcal-file-location (loc)
