@@ -2520,44 +2520,31 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     3
     "Column count for multicolumn export.")
 
-  (defun jethro/org-multicol-to-latex (async subtreep visible-only body-only)
-    (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name))
-          (col-count jethro/org-multicol-latex-column-count))
-      (with-temp-buffer
-        (insert "#+LATEX_CLASS: latex-notes\n")
-        (insert contents)
-        (goto-char (point-min))
-        (org-next-visible-heading 1)
-        (insert
-         (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
-        (goto-char (point-max))
-        (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-        (org-export-to-file 'latex (format "%s.tex" buffer-name)
-          async subtreep visible-only body-only nil))))
+  (defmacro jethro/-org-multicol (action)
+    `(lambda (async subtreep visible-only body-only)
+       (let ((contents (buffer-string))
+             (buffer-name (file-name-sans-extension buffer-file-name))
+             (col-count jethro/org-multicol-latex-column-count))
+         (with-temp-buffer
+           (insert "#+LATEX_CLASS: latex-notes\n")
+           (insert contents)
+           (goto-char (point-min))
+           (org-next-visible-heading 1)
+           (insert
+            (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
+           (goto-char (point-max))
+           (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+           (org-export-to-file 'latex (format "%s.tex" buffer-name)
+             async subtreep visible-only body-only ,action)))))
 
-  (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
-    (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name))
-          (col-count jethro/org-multicol-latex-column-count))
-      (with-temp-buffer
-        (insert "#+LATEX_CLASS: latex-notes\n")
-        (insert contents)
-        (goto-char (point-min))
-        (org-next-visible-heading 1)
-        (insert
-         (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
-        (goto-char (point-max))
-        (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-        (org-export-to-file 'latex (format "%s.tex" buffer-name)
-          async subtreep visible-only body-only nil
-          (lambda (file) (org-latex-compile file))))))
+  (setq jethro/org-multicol-to-latex (jethro/-org-multicol nil)
+        jethro/org-multicol-to-pdf (jethro/-org-multicol (lambda (file) (org-latex-compile file))))
 
   (org-export-define-derived-backend 'latex-notes 'latex
-                                     :menu-entry
-                                     '(?L "Export to LaTeX notes"
-                                          ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
-                                           (?p "Export to PDF" jethro/org-multicol-to-pdf))))
+    :menu-entry
+    '(?L "Export to LaTeX notes"
+         ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
+          (?p "Export to PDF" jethro/org-multicol-to-pdf))))
 #+end_src
 ** Putting it all together
 #+BEGIN_SRC emacs-lisp :tangle yes
