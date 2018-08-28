@@ -2490,6 +2490,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     \\usepackage{booktabs}
     \\usepackage{enumitem}
     \\usepackage[compact]{titlesec}
+    \\renewcommand\\maketitle{}
     \\titlespacing{\\section}{0pt}{*2}{*0}
     \\titlespacing{\\subsection}{0pt}{*2}{*0}
     \\titlespacing{\\subsubsection}{0pt}{*2}{*0}
@@ -2515,15 +2516,21 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
            ("\\paragraph{%s}" . "\\paragraph*{%s}")
            ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
+  (defvar-local jethro/org-multicol-latex-column-count
+    3
+    "Column count for multicolumn export.")
+
   (defun jethro/org-multicol-to-latex (async subtreep visible-only body-only)
     (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name)))
+          (buffer-name (file-name-sans-extension buffer-file-name))
+          (col-count jethro/org-multicol-latex-column-count))
       (with-temp-buffer
         (insert "#+LATEX_CLASS: latex-notes\n")
         (insert contents)
         (goto-char (point-min))
         (org-next-visible-heading 1)
-        (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+        (insert
+         (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
         (goto-char (point-max))
         (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
         (org-export-to-file 'latex (format "%s.tex" buffer-name)
@@ -2531,13 +2538,15 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 
   (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
     (let ((contents (buffer-string))
-          (buffer-name (file-name-sans-extension buffer-file-name)))
+          (buffer-name (file-name-sans-extension buffer-file-name))
+          (col-count jethro/org-multicol-latex-column-count))
       (with-temp-buffer
         (insert "#+LATEX_CLASS: latex-notes\n")
         (insert contents)
         (goto-char (point-min))
         (org-next-visible-heading 1)
-        (insert "#+BEGIN_EXPORT latex\n\\begin{multicols*}{4}\n#+END_EXPORT\n")
+        (insert
+         (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
         (goto-char (point-max))
         (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
         (org-export-to-file 'latex (format "%s.tex" buffer-name)
