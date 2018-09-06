@@ -1323,7 +1323,9 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   (use-package lsp-mode
     :config
     (require 'lsp-imenu)
-    (add-hook 'lsp-after-open-hook 'lsp-enable-imenu))
+    (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+    :custom
+    (lsp-message-project-root-warning t))
 
   (use-package lsp-ui
     :after lsp-mode
