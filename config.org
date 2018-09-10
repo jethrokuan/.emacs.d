@@ -253,6 +253,7 @@ to provide my account credentials.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
+    :commands notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
     :if notmuch-command
     :bind (("<f2>" . notmuch)
@@ -1208,14 +1209,13 @@ respecting require-final-newline. Trimming only happens when saving.
 ** Autocompletions with Company
 #+begin_src emacs-lisp :tangle yes
   (use-package company
+    :defer 3
     :diminish company-mode
     :bind (:map company-active-map
                 ("M-n" . nil)
                 ("M-p" . nil)
                 ("C-n" . company-select-next)
                 ("C-p" . company-select-previous))
-    :hook
-    (after-init . global-company-mode)
     :custom
     (company-dabbrev-ignore-case nil)
     (company-dabbrev-code-ignore-case nil)
@@ -1232,7 +1232,8 @@ respecting require-final-newline. Trimming only happens when saving.
         (append (if (consp backend) backend (list backend))
                 '(:with company-yasnippet))))
 
-    (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends)))
+    (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+    (global-company-mode +1))
 
   (use-package company-quickhelp
     :after company
@@ -1343,6 +1344,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Common Lisp
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package slime
+    :commands slime
     :custom
     (inferior-lisp-program "sbcl")
     (slime-contribs '(slime-fancy)))
@@ -1614,7 +1616,12 @@ npm install -g tern
 #+end_src
 *** Indium
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package indium)
+  (use-package indium
+    :after js2-mode
+    :bind (:map js2-mode-map
+                ("C-c C-l" . indium-eval-buffer))
+    :hook
+    ((js2-mode . indium-interaction-mode)))
 #+END_SRC
 *** Flycheck
 #+begin_src emacs-lisp :tangle yes
@@ -1671,6 +1678,7 @@ npm install -g tern
     (setq-local web-mode-enable-auto-quoting nil))
 
   (use-package rjsx-mode
+    :after js2-mode
     :init
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
     (add-to-list 'auto-mode-alist '("\\.react.js\\'" . rjsx-mode))
@@ -1839,6 +1847,7 @@ npm install -g tern
         (TeX-view-program-selection '((output-pdf "pdf-tools")
                                       (output-pdf "zathura")))
         :config
+        (setq-default TeX-engine 'luatex)
         (add-hook 'LaTeX-mode-hook
                   (lambda ()
                     (company-mode)
@@ -1881,7 +1890,8 @@ highlighting and annotations.
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package ensime)
+  (use-package ensime
+    :commands ensime ensime-mode)
 #+END_SRC
 
 * Org-Mode
@@ -1973,6 +1983,7 @@ Other org-mode ricing configuration:
 
   (use-package org-gcal
     :after (auth-source-pass password-store)
+    :defer 5
     :custom
     (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
     (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
