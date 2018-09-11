@@ -2422,6 +2422,7 @@ this to capture screenshots into deft.
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
 #+begin_src emacs-lisp :tangle yes
   (use-package ox-latex
+    :defer 3
     :after org
     :ensure f
     :config
