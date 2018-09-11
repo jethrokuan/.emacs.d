@@ -126,7 +126,9 @@ branches.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (diminish 'auto-revert-mode)
-  (global-auto-revert-mode 1)
+  (add-hook 'after-init-hook (lambda ()
+                               (global-auto-revert-mode +1)))
+
 #+END_SRC
 
 ** Custom file
@@ -253,9 +255,10 @@ to provide my account credentials.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
+    :defer t
     :commands notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
-    :if notmuch-command
+    :if (executable-find "notmuch")
     :bind (("<f2>" . notmuch)
            :map notmuch-search-mode-map
            ("t" . jethro/notmuch-toggle-read)
@@ -347,12 +350,14 @@ Remove the useless toolbars and splash screens.
     :init
     (load-theme 'tao-yang t)
     :config
-    (use-package color-identifiers-mode))
+    (use-package color-identifiers-mode
+      :defer 3))
 #+END_SRC
 ** Rainbow-delimiters-mode
    We use rainbow delimiters to show imbalanced parenthesis.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rainbow-delimiters
+    :defer 5
     :ensure t 
     :init
     (add-hook 'after-init-hook 'rainbow-delimiters-mode)
@@ -365,82 +370,64 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
-* Eshell
+* Add PATH to shell
+Only if on Mac OSX.
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'eshell)
-#+END_SRC
-** Set default shell to bash
-Because fish doesn't play well with Emacs.
-#+begin_src emacs-lisp :tangle yes
-  (setq-default explicit-shell-file-name (executable-find "bash"))
-  (setq-default shell-file-name (executable-find "bash"))
-#+end_src
-** Add PATH to shell
-We only use this for Mac OS setups: this doesn't work with NixOS.
-
-#+begin_src emacs-lisp :tangle yes
   (use-package exec-path-from-shell
     :ensure f
     :if (memq window-system '(mac ns))
     :config
     (exec-path-from-shell-initialize))
-#+end_src
-** Eshell configuration
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'em-smart)
-
-  (setq eshell-scroll-to-bottom-on-input 'all
-        eshell-hist-ignoredups t
-        eshell-save-history-on-exit t
-        eshell-prefer-lisp-functions nil
-        eshell-destroy-buffer-when-process-dies t
-        eshell-glob-case-insensitive nil
-        eshell-error-if-no-glob nil
-        eshell-where-to-jump 'begin
-        eshell-review-quick-commands nil
-        eshell-smart-space-goes-to-end t)
 #+END_SRC
-** Fish-like auto-completion
+* Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package esh-autosuggest
-    :hook (eshell-mode . esh-autosuggest-mode))
-#+END_SRC
-** Open eshell in current/project directory
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/eshell-here ()
-    "Opens up a new shell in projectile root. If a prefix argument is
+  (use-package eshell
+    :commands eshell
+    :bind
+    (("C-x m" . jethro/eshell-here))
+    :config
+    (require 'em-smart)
+    (let ((bash (executable-find "bash")))
+      (setq-default explicit-shell-file-name bash)
+      (setq-default shell-file-name bash))
+    (use-package esh-autosuggest
+      :hook (eshell-mode . esh-autosuggest-mode))
+    (defun jethro/eshell-here ()
+      "Opens up a new shell in projectile root. If a prefix argument is
   passed, use the buffer's directory."
-    (interactive) 
-    (let* ((projectile-name (projectile-project-name))
-           (current-directory (car
-                               (last
-                                (split-string
-                                 (if (buffer-file-name)
-                                     (file-name-directory (buffer-file-name))
-                                   default-directory) "/" t)))))
-      (split-window-vertically)
-      (other-window 1)
-      (if (equal projectile-name "-")
-          (progn
+      (interactive)
+      (let* ((projectile-name (projectile-project-name))
+             (current-directory (car
+                                 (last
+                                  (split-string
+                                   (if (buffer-file-name)
+                                       (file-name-directory (buffer-file-name))
+                                     default-directory) "/" t)))))
+        (split-window-vertically)
+        (other-window 1)
+        (if (equal projectile-name "-")
+            (progn
+              (eshell "new")
+              (rename-buffer (concat "*eshell: " current-directory "*")))
+          (projectile-with-default-dir (projectile-project-root)
             (eshell "new")
-            (rename-buffer (concat "*eshell: " current-directory "*")))
-        (projectile-with-default-dir (projectile-project-root)
-          (eshell "new")
-          (rename-buffer (concat "*eshell: " projectile-name "*"))))))
+            (rename-buffer (concat "*eshell: " projectile-name "*"))))))
+    (defun eshell/x ()
+      (unless (one-window-p)
+        (delete-window))
+      (eshell/exit))
+    :custom
+    (eshell-scroll-to-bottom-on-input 'all)
+    (eshell-hist-ignoredups t)
+    (eshell-save-history-on-exit t)
+    (eshell-prefer-lisp-functions nil)
+    (eshell-destroy-buffer-when-process-dies t)
+    (eshell-glob-case-insensitive nil)
+    (eshell-error-if-no-glob nil)
+    (eshell-where-to-jump 'begin)
+    (eshell-review-quick-commands nil)
+    (eshell-smart-space-goes-to-end t))
 
-  (bind-key "C-x m" 'jethro/eshell-here)
-#+END_SRC
-** Exiting eshell
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun eshell/x ()
-    (unless (one-window-p)
-      (delete-window))
-    (eshell/exit))
-#+END_SRC
-** Isearch
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (bind-key "C-s" 'eshell-isearch-forward eshell-mode-map)
-  (bind-key "C-r" 'eshell-isearch-backward eshell-mode-map)
 #+END_SRC
 * Web Browsing with eww
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -533,7 +520,7 @@ We only use this for Mac OS setups: this doesn't work with NixOS.
 #+END_SRC
 * Core Utilities
 ** Hydra
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package hydra)
 #+end_src
 ** Ivy
@@ -616,7 +603,10 @@ Counsel contains ivy enhancements for commonly-used functions.
     file buffer.
 
     #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package wgrep)
+      (use-package wgrep
+        :commands
+        wgrep-change-to-wgrep-mode
+        ivy-wgrep-change-to-wgrep-mode)
     #+END_SRC
 *** rg
     #+BEGIN_SRC emacs-lisp :tangle yes
@@ -626,11 +616,13 @@ Counsel contains ivy enhancements for commonly-used functions.
 * Visual Enhancements
 ** Whitespace-mode
 #+begin_src emacs-lisp :tangle yes
-  (require 'whitespace)
-  (setq whitespace-line-column 80)
-  (setq whitespace-style '(face lines-tail))
-  (diminish 'whitespace-mode)
-  (add-hook 'prog-mode-hook 'whitespace-mode)
+  (use-package whitespace
+    :ensure f
+    :diminish whitespace-mode
+    :hook (prog-mode . whitespace-mode)
+    :custom
+    (whitespace-line-column 80)
+    (whitespace-style '(face lines-tail)))
 #+end_src
 ** Modeline
 *** smart-mode-line
@@ -687,6 +679,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 ** diff-hl
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package diff-hl
+       :defer 3
        :bind (("C-c h v" . jethro/hydra-diff-hl/body))
        :hook
        (dired-mode . diff-hl-dired-mode)
@@ -832,6 +825,7 @@ If one method fails, this package will go on to the next one,
 eventually falling back to dumb-jump.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package smart-jump
+    :defer 5
     :config
     (smart-jump-setup-default-registers))
 #+END_SRC
@@ -871,6 +865,7 @@ eventually falling back to dumb-jump.
 *** allow editing of permissions
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wdired
+    :commands wdired-mode wdired-change-to-wdired-mode
     :custom
     (wdired-allow-to-change-permissions t))
 #+END_SRC
@@ -1313,15 +1308,16 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package direnv
     :if (executable-find "direnv")
-    :hook
-    (after-init . direnv-mode)
     :custom
-    (direnv-always-show-summary t))
+    (direnv-always-show-summary t)
+    :config
+    (direnv-mode +1))
 #+END_SRC
 * Languages
 ** Language Servers
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package lsp-mode
+    :commands lsp-mode
     :config
     (require 'lsp-imenu)
     (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
@@ -1361,11 +1357,13 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Elixir
 *** elixir-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package elixir-mode)
+  (use-package elixir-mode
+    :mode "\\.ex[s]?\\'")
 #+END_SRC
 *** Alchemist
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package alchemist)
+  (use-package alchemist
+    :after elixir-mode)
 #+END_SRC
 ** Docker
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1378,6 +1376,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
+    :mode "\\.nix\\'"
     :config
     (add-hook 'nix-mode-hook (lambda ()
                                (aggressive-indent-mode -1))))
@@ -1482,20 +1481,6 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
   (use-package sphinx-doc
     :init
     (add-hook 'python-mode-hook 'sphinx-doc-mode))
-#+END_SRC
-*** Anaconda
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package anaconda-mode
-    :init
-    (add-hook 'python-mode-hook 'anaconda-mode)
-    (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
-#+END_SRC
-**** Company
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package company-anaconda
-    :config
-    (eval-after-load "company"
-      '(add-to-list 'company-backends '(company-anaconda))))
 #+END_SRC
 *** lsp-python
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1717,10 +1702,6 @@ npm install -g tern
     :hook
     (java-mode . lsp-java-enable))
 #+END_SRC
-*** Disassembling Java Code
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package autodisass-java-bytecode)
-#+END_SRC
 *** Groovy mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package groovy-mode
@@ -1729,14 +1710,14 @@ npm install -g tern
 ** Typescript
 *** typescript-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package typescript-mode)
+  (use-package typescript-mode
+    :mode "\\.ts\\'")
 #+END_SRC
 
 *** Tide
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package tide
     :after typescript-mode
-    :mode "\\.ts\\'"
     :hook
     (before-save . tide-format-before-save)
     (typescript-mode . (lambda ()
@@ -1973,17 +1954,16 @@ Other org-mode ricing configuration:
 #+END_SRC
 *** Org Gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'auth-source-pass)
-
   (use-package password-store
-    :after auth-source-pass
+    :defer 10
+    :init
+    (require 'auth-source-pass)
     :load-path "./elisp"
     :custom
     (auth-source-backend '(password-store)))
 
   (use-package org-gcal
     :after (auth-source-pass password-store)
-    :defer 5
     :custom
     (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
     (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
@@ -2394,38 +2374,43 @@ this to capture screenshots into deft.
  #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require'ox-publish)
-  (setq org-html-htmlize-output-type nil)
-  (setq org-html-head-include-default-style nil)
-  (setq org-publish-project-alist
-        '(("org-notes-assets"
-           :base-directory "~/.org/deft/css/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-           :publishing-directory "~/.org/deft/docs/css/"
-           :recursive t
-           :publishing-function org-publish-attachment
-           )
-          ("org-notes-images"
-           :base-directory "~/.org/deft/images/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-           :publishing-directory "~/.org/deft/docs/images/"
-           :recursive t
-           :publishing-function org-publish-attachment
-           )
-          ("org-notes"
-           :base-directory "~/.org/deft/"
-           :base-extension "org"
-           :publishing-directory "~/.org/deft/docs/"
-           :recursive t
-           :publishing-function org-html-publish-to-html
-           :headline-levels 4
-           :auto-sitemap t
-           :author "Jethro Kuan"
-           :email "jethrokuan95@gmail.com"
-           :sitemap-filename "index.org"
-           :sitemap-title "Jethro's Braindump"
-           :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
-          ("org" :components ("org-notes-assets" "org-notes-images"))))
+  (use-package ox-publish
+    :ensure f
+    :no-require t
+    :commands org-publish-all org-publish
+    :after org
+    :custom
+    (org-html-htmlize-output-type nil)
+    (org-html-head-include-default-style nil)
+    (org-publish-project-alist
+     '(("org-notes-assets"
+        :base-directory "~/.org/deft/css/"
+        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+        :publishing-directory "~/.org/deft/docs/css/"
+        :recursive t
+        :publishing-function org-publish-attachment
+        )
+       ("org-notes-images"
+        :base-directory "~/.org/deft/images/"
+        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+        :publishing-directory "~/.org/deft/docs/images/"
+        :recursive t
+        :publishing-function org-publish-attachment
+        )
+       ("org-notes"
+        :base-directory "~/.org/deft/"
+        :base-extension "org"
+        :publishing-directory "~/.org/deft/docs/"
+        :recursive t
+        :publishing-function org-html-publish-to-html
+        :headline-levels 4
+        :auto-sitemap t
+        :author "Jethro Kuan"
+        :email "jethrokuan95@gmail.com"
+        :sitemap-filename "index.org"
+        :sitemap-title "Jethro's Braindump"
+        :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
+       ("org" :components ("org-notes-assets" "org-notes-images")))))
 #+END_SRC
 ** Org mode for Journalling
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2436,17 +2421,22 @@ this to capture screenshots into deft.
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
 #+begin_src emacs-lisp :tangle yes
-  (setq org-latex-pdf-process
-        '("pdflatex -shell-escape -interaction nonstopmode %f"
-          "pdflatex -shell-escape -interaction nonstopmode %f"))
-  (require 'ox-latex)
-  (setq org-latex-default-table-environment "tabular")
-  (setq org-latex-tables-booktabs t)
-  (setq org-latex-listings 'minted)
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-  (setq org-latex-classes
-        '(("article"
-           "\\documentclass{article}
+  (use-package ox-latex
+    :after org
+    :ensure f
+    :config
+    (require 'ox-latex)
+    :custom
+    (org-latex-pdf-process
+     '("pdflatex -shell-escape -interaction nonstopmode %f"
+       "pdflatex -shell-escape -interaction nonstopmode %f"))
+    (org-latex-default-table-environment "tabular")
+    (org-latex-tables-booktabs t)
+    (org-latex-listings 'minted)
+    (org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    (org-latex-classes
+     '(("article"
+        "\\documentclass{article}
   \\usepackage[margin=1in]{geometry}
   \\usepackage{amsmath,amsthm,amssymb}
 
@@ -2462,13 +2452,13 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\renewcommand\\footrulewidth{0.4pt}
   \\setlength\\columnsep{10pt}
   \\setlength{\\columnseprule}{1pt}"
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
-          ("book"
-           "\\documentclass[10pt]{memoir}
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+       ("book"
+        "\\documentclass[10pt]{memoir}
                           \\usepackage{charter}
                           \\usepackage[T1]{fontenc}
                           \\usepackage{booktabs}
@@ -2488,14 +2478,14 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
                           \\title{}
                           [NO-DEFAULT-PACKAGES]
                           [NO-PACKAGES]"
-           ("\\chapter{%s}" . "\\chapter*{%s}")
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
-          ("latex-notes"
-           "\\documentclass[8pt]{article}
+        ("\\chapter{%s}" . "\\chapter*{%s}")
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+       ("latex-notes"
+        "\\documentclass[8pt]{article}
     \\usepackage[margin={0.1in,0.1in}, a4paper,landscape]{geometry}
     \\usepackage{hyperref}
     \\usepackage{amsmath}
@@ -2523,41 +2513,48 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     \\usemintedstyle[java]{bw}
     \\setminted[]{frame=none,fontsize=\\footnotesize,linenos=false}
     "
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+    :config
+    (defvar-local jethro/org-multicol-latex-column-count
+      3
+      "Column count for multicolumn export.")
 
-  (defvar-local jethro/org-multicol-latex-column-count
-    3
-    "Column count for multicolumn export.")
+    (defmacro jethro/-org-multicol (action)
+      `(lambda (async subtreep visible-only body-only)
+         (let ((contents (buffer-string))
+               (buffer-name (file-name-sans-extension buffer-file-name))
+               (col-count jethro/org-multicol-latex-column-count))
+           (with-temp-buffer
+             (insert "#+LATEX_CLASS: latex-notes\n")
+             (insert contents)
+             (goto-char (point-min))
+             (org-next-visible-heading 1)
+             (insert
+              (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
+             (goto-char (point-max))
+             (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+             (org-export-to-file 'latex (format "%s.tex" buffer-name)
+               async subtreep visible-only body-only ,action)))))
 
-  (defmacro jethro/-org-multicol (action)
-    `(lambda (async subtreep visible-only body-only)
-       (let ((contents (buffer-string))
-             (buffer-name (file-name-sans-extension buffer-file-name))
-             (col-count jethro/org-multicol-latex-column-count))
-         (with-temp-buffer
-           (insert "#+LATEX_CLASS: latex-notes\n")
-           (insert contents)
-           (goto-char (point-min))
-           (org-next-visible-heading 1)
-           (insert
-            (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
-           (goto-char (point-max))
-           (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-           (org-export-to-file 'latex (format "%s.tex" buffer-name)
-             async subtreep visible-only body-only ,action)))))
+    (setq jethro/org-multicol-to-latex (jethro/-org-multicol nil)
+          jethro/org-multicol-to-pdf (jethro/-org-multicol (lambda (file) (org-latex-compile file))))
 
-  (setq jethro/org-multicol-to-latex (jethro/-org-multicol nil)
-        jethro/org-multicol-to-pdf (jethro/-org-multicol (lambda (file) (org-latex-compile file))))
+    (org-export-define-derived-backend 'latex-notes 'latex
+      :menu-entry
+      '(?L "Export to LaTeX notes"
+           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
+            (?p "Export to PDF" jethro/org-multicol-to-pdf)))))
 
-  (org-export-define-derived-backend 'latex-notes 'latex
-    :menu-entry
-    '(?L "Export to LaTeX notes"
-         ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
-          (?p "Export to PDF" jethro/org-multicol-to-pdf))))
+
+
+
+
+
+
 #+end_src
 ** Putting it all together
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2660,7 +2657,8 @@ Useful when handling git merge conflicts.
  #+END_SRC
 *** Gists
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package gist)
+  (use-package gist
+    :defer 10)
 #+END_SRC
 ** Projectile
 #+begin_src emacs-lisp :tangle yes
