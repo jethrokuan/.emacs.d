@@ -1303,6 +1303,17 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 
   (bind-key "C-c h d" 'jethro/hydra-draw-box/body)
 #+END_SRC
+** dtrt-indent
+dtrt-indent guesses the indentation settings of files, and sets the
+buffer local variables accordingly. This makes it pleasant to edit
+corresponding text files.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dtrt-indent
+    :diminish t
+    :config
+    (dtrt-indent-mode +1))
+#+END_SRC
 * Direnv
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package direnv
