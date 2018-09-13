@@ -812,8 +812,7 @@ Use avy to move between visible text.
 #+begin_src emacs-lisp :tangle yes
   (use-package avy
     :bind*
-    (("C-'" . avy-goto-char)
-     ("C-," . avy-goto-char-2))
+    (("C-'" . avy-goto-char-timer))
     :custom
     (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 #+end_src
