@@ -648,6 +648,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (sml/shorten-directory t)
     (sml/shorten-modes nil)
     (sml/mode-width 'full)
+    (sml/no-confirm-load-theme t)
     (sml/replacer-regexp-list
      '(("^~/.org/" ":O:")
        ("^~/\\.emacs\\.d/" ":ED:")))
