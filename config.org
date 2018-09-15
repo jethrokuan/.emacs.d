@@ -2395,8 +2395,9 @@ this to capture screenshots into deft.
            (("s-Y" . org-download-screenshot)
             ("s-y" . org-download-yank)))
      :config
-     (when (memq window-system '(mac ns))
-       (setq org-download-screenshot-method "screencapture -i %s"))
+     (if (memq window-system '(mac ns))
+         (setq org-download-screenshot-method "screencapture -i %s")
+       (setq org-download-screenshot-method (format "%s -s" (executable-find "maim"))))
      (add-hook 'org-mode-hook
                (lambda ()
                  (when (buffer-file-name)
