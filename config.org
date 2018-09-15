@@ -257,7 +257,6 @@ to provide my account credentials.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
     :defer t
-    :commands notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
     :if (executable-find "notmuch")
     :bind (("<f2>" . notmuch)
@@ -307,16 +306,16 @@ facility to capture email into a task.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-notmuch
     :ensure f
-    :after org
+    :after org notmuch
     :bind
     (:map notmuch-show-mode-map
           ("C" . jethro/org-capture-email))
     :config
-    (require 'org-notmuch)
     (defun jethro/org-capture-email ()
       (interactive)
       (org-capture nil "e")))
 #+END_SRC
+
 * Appearance
 ** Font
 I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
