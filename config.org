@@ -358,10 +358,8 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rainbow-delimiters
     :defer 5
-    :ensure t 
-    :init
-    (add-hook 'after-init-hook 'rainbow-delimiters-mode)
     :config
+    (rainbow-delimiters-mode +1)
     (set-face-attribute 'rainbow-delimiters-unmatched-face nil
                         :foreground 'unspecified
                         :inherit 'error))
@@ -561,8 +559,6 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("M-<return>" . ivy-immediate-done)
      :map read-expression-map
      ("C-r" . counsel-expression-history))
-    :init
-    (add-hook 'after-init-hook 'ivy-mode)
     :custom
     (counsel-find-file-at-point t)
     (ivy-use-virtual-buffers t)
@@ -574,6 +570,7 @@ Counsel contains ivy enhancements for commonly-used functions.
        (swiper . ivy--regex-plus)
        (t . ivy--regex-fuzzy)))
     :config
+    (ivy-mode +1)
     (ivy-set-actions
      t
      '(("I" insert "insert")))
@@ -628,8 +625,6 @@ Counsel contains ivy enhancements for commonly-used functions.
 *** smart-mode-line
 #+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line
-    :hook
-    (after-init . sml/setup)
     :custom
     (sml/theme 'respectful)
     (sml/name-width 44)
@@ -638,7 +633,9 @@ Counsel contains ivy enhancements for commonly-used functions.
     (sml/mode-width 'full)
     (sml/replacer-regexp-list
      '(("^~/.org/" ":O:")
-       ("^~/\\.emacs\\.d/" ":ED:"))))
+       ("^~/\\.emacs\\.d/" ":ED:")))
+    :config
+    (sml/setup))
 #+end_src
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
@@ -655,11 +652,12 @@ Counsel contains ivy enhancements for commonly-used functions.
 
    #+begin_src emacs-lisp :tangle yes
      (use-package beacon
+       :defer 10
        :diminish beacon-mode
-       :hook
-       (after-init . beacon-mode)
        :custom
-       (beacon-push-mark 10))
+       (beacon-push-mark 10)
+       :config
+       (beacon-mode +1))
    #+end_src
 ** Show Matching parenthesis
    Always show matching parenthesis.
@@ -672,9 +670,10 @@ Counsel contains ivy enhancements for commonly-used functions.
 
    #+begin_src emacs-lisp :tangle yes
      (use-package volatile-highlights
+       :defer 5
        :diminish volatile-highlights-mode
-       :hook
-       (after-init . volatile-highlights-mode))
+       :config
+       (volatile-highlights-mode +1))
    #+end_src
 ** diff-hl
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -777,7 +776,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'after-init-hook 'sow-mode)
+     (sow-mode +1)
    #+END_SRC
 ** Eyebrowse
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -792,8 +791,8 @@ Counsel contains ivy enhancements for commonly-used functions.
                ("M-7" . eyebrowse-switch-to-window-config-7)
                ("M-8" . eyebrowse-switch-to-window-config-8)
                ("M-9" . eyebrowse-switch-to-window-config-9))
-       :hook
-       (after-init . eyebrowse-mode))
+       :config
+       (eyebrowse-mode +1))
    #+END_SRC
 ** Crux
 #+begin_src emacs-lisp :tangle yes
@@ -904,8 +903,6 @@ you to expand subdirectories in place, like a tree structure.
   (use-package shackle
     :diminish shackle-mode
     :if (not (bound-and-true-p disable-pkg-shackle))
-    :hook
-    (after-init . shackle-mode)
     :custom
     (shackle-rules 
      '((compilation-mode :select nil)
@@ -921,7 +918,9 @@ you to expand subdirectories in place, like a tree structure.
        ("*Calendar*" :select t :size 0.3 :align below)
        ("*info*" :select t :inhibit-window-quit t :same t)
        (magit-status-mode :select t :inhibit-window-quit t :same t)
-       (magit-log-mode :select t :inhibit-window-quit t :same t))))
+       (magit-log-mode :select t :inhibit-window-quit t :same t)))
+    :config
+    (shackle-mode +1))
 #+END_SRC
 ** occur
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1014,8 +1013,8 @@ Keep your text indented at all times. Remember to turn this off for indentation-
 #+begin_src emacs-lisp :tangle yes
   (use-package aggressive-indent
     :diminish aggressive-indent-mode
-    :hook
-    (after-init . global-aggressive-indent-mode)
+    :config
+    (global-aggressive-indent-mode +1)
     :custom
     (aggressive-indent-excluded-modes
      '(bibtex-mode
@@ -1090,10 +1089,9 @@ Use this often, and in combination with multiple-cursors.
                 ("C-{" . sp-backward-barf-sexp)
                 ("C-M-<right>" . sp-backward-barf-sexp)
                 ("M-S" . sp-split-sexp))
-    :hook
-    (after-init . smartparens-global-strict-mode)
     :config
     (require 'smartparens-config)
+    (smartparens-global-strict-mode +1)
     ;; Org-mode config
     (sp-with-modes 'org-mode
       (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
@@ -1195,8 +1193,8 @@ respecting require-final-newline. Trimming only happens when saving.
    #+begin_src emacs-lisp :tangle yes
      (use-package yasnippet
        :diminish yas-global-mode yas-minor-mode
-       :hook
-       (after-init . yas-global-mode)
+       :config
+       (yas-global-mode +1)
        :custom
        (yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
    #+end_src
@@ -2727,11 +2725,12 @@ Closes compile buffer if there are no errors.
 #+begin_src emacs-lisp :tangle yes
   (use-package bury-successful-compilation
     :hook
-    (after-init . bury-successful-compilation))
+    (prog-mode . bury-successful-compilation))
 #+end_src
 ** Stack Exchange
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package sx)
+  (use-package sx
+    :commands sx)
 #+END_SRC
 * Load Custom File
 Custom file should take precedence.
