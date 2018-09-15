@@ -478,12 +478,27 @@ Only if on Mac OSX.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed
     :bind
-    (:map elfeed-search-mode-map
-          ("S" . jethro/elfeed-db-save))
-    :custom
-    (shr-width 80)
-    (elfeed-db-directory "~/.elfeed")
-    :config
+    (("<f6>" . jethro/elfeed-load-db-and-open)
+     :map elfeed-search-mode-map
+     ("S" . jethro/elfeed-db-save)
+     ("q" . jethro/elfeed-save-db-and-bury))
+     :custom
+     (shr-width 80)
+     (elfeed-db-directory "~/.elfeed")
+     :config
+     (defun jethro/elfeed-load-db-and-open ()
+       "Wrapper to load the elfeed db from disk before opening"
+       (interactive)
+       (elfeed-db-load)
+       (elfeed)
+       (elfeed-search-update--force))
+
+     (defun jethro/elfeed-save-db-and-bury ()
+       "Wrapper to save the elfeed db to disk before burying buffer"
+       (interactive)
+       (elfeed-db-save)
+       (quit-window))
+
     (defun jethro/elfeed-db-save ()
       (interactive)
       (elfeed-db-save)
