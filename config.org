@@ -125,10 +125,11 @@ NOTE: This can be quite slow, when the changes are massive across
 branches.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (diminish 'auto-revert-mode)
-  (add-hook 'after-init-hook (lambda ()
-                               (global-auto-revert-mode +1)))
-
+  (use-package autorevert
+    :ensure f
+    :diminish t
+    :config
+    (global-auto-revert-mode +1))
 #+END_SRC
 
 ** Custom file
