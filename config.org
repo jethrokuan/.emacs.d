@@ -818,7 +818,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+END_SRC
 ** Crux
 #+begin_src emacs-lisp :tangle yes
-  (use-package crux 
+  (use-package crux
     :bind (("C-c o" . crux-open-with)
            ("C-c C" . crux-cleanup-buffer-or-region)
            ("C-c D" . crux-delete-file-and-buffer)
@@ -943,10 +943,6 @@ you to expand subdirectories in place, like a tree structure.
        (magit-log-mode :select t :inhibit-window-quit t :same t)))
     :config
     (shackle-mode +1))
-#+END_SRC
-** occur
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (bind-key "C-c C-o" 'occur)
 #+END_SRC
 * Editing Text
 ** easy-kill
