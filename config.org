@@ -638,23 +638,14 @@ Counsel contains ivy enhancements for commonly-used functions.
     (whitespace-line-column 80)
     (whitespace-style '(face lines-tail)))
 #+end_src
-** Modeline
-*** smart-mode-line
-#+begin_src emacs-lisp :tangle yes
-  (use-package smart-mode-line
-    :custom
-    (sml/theme 'respectful)
-    (sml/name-width 44)
-    (sml/shorten-directory t)
-    (sml/shorten-modes nil)
-    (sml/mode-width 'full)
-    (sml/no-confirm-load-theme t)
-    (sml/replacer-regexp-list
-     '(("^~/.org/" ":O:")
-       ("^~/\\.emacs\\.d/" ":ED:")))
+** Moody
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package moody
     :config
-    (sml/setup))
-#+end_src
+    (setq x-underline-at-descent-line t)
+    (moody-replace-mode-line-buffer-identification)
+    (moody-replace-vc-mode))
+#+END_SRC
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
   (with-eval-after-load 'hydra
