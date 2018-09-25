@@ -128,12 +128,13 @@ branches.
   (use-package autorevert
     :ensure f
     :diminish t
+    :hook
+    (dired-mode . auto-revert-mode)
     :config
     (global-auto-revert-mode +1)
     :custom
     (auto-revert-verbose nil))
 #+END_SRC
-
 ** Custom file
 
 Using the customize interface can be nice, but it tends to pollute
@@ -684,10 +685,6 @@ Counsel contains ivy enhancements for commonly-used functions.
        :config
        (volatile-highlights-mode +1))
    #+end_src
-** auto-revert in dired
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'dired-mode-hook 'auto-revert-mode)
-#+END_SRC
 ** diff-hl
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package diff-hl
