@@ -647,6 +647,12 @@ Counsel contains ivy enhancements for commonly-used functions.
     (moody-replace-mode-line-buffer-identification)
     (moody-replace-vc-mode))
 #+END_SRC
+** Minions
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package minions
+    :config
+    (minions-mode +1))
+#+END_SRC
 ** Zooming
 #+begin_src emacs-lisp :tangle yes
   (with-eval-after-load 'hydra
