@@ -297,11 +297,12 @@ to provide my account credentials.
     (notmuch-search-oldest-first nil)
     (notmuch-archive-tags '("-inbox" "-unread"))
     (notmuch-message-headers '("To" "Cc" "Subject" "Bcc"))
-    (notmuch-saved-searches '((:name "personal" :query "tag:inbox AND tag:personal")
-                              (:name "unread" :query "tag:inbox AND tag:unread")
-                              (:name "nushackers" :query "tag:inbox AND tag:nushackers")
-                              (:name "nus" :query "tag:inbox AND tag:nus")
-                              (:name "untagged" :query "tag:untagged"))))
+    (notmuch-saved-searches '((:name "unread" :query "tag:unread")
+                              (:name "to-me" :query "tag:to-me")
+                              (:name "sent" :query "tag:sent")
+                              (:name "personal" :query "tag:personal")
+                              (:name "nushackers" :query "tag:nushackers")
+                              (:name "nus" :query "tag:nus"))))
 #+END_SRC
 ** Org-mode Integration
 I use org-mode to manage everything. ~org-notmuch~ provides the
