@@ -279,6 +279,7 @@ to provide my account credentials.
           (notmuch-search-tag (list "-unread"))
         (notmuch-search-tag (list "+unread"))))
     :custom
+    (message-auto-save-directory "~/.mail/drafts/")
     (message-send-mail-function 'message-send-mail-with-sendmail)
     (sendmail-program (executable-find "msmtp"))
 
