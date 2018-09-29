@@ -259,7 +259,6 @@ to provide my account credentials.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package notmuch
-    :defer t
     :preface (setq-default notmuch-command (executable-find "notmuch"))
     :if (executable-find "notmuch")
     :bind (("<f2>" . notmuch)
