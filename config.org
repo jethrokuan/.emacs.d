@@ -368,10 +368,18 @@ Remove the useless toolbars and splash screens.
                         :foreground 'unspecified
                         :inherit 'error))
 #+END_SRC
+
+** Color-identifiers mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package color-identifiers-mode
+    :config
+    (color-identifiers-mode +1))
+#+END_SRC
 ** Remove blinking cursor
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
+
 * Add PATH to shell
 Only if on Mac OSX.
 #+BEGIN_SRC emacs-lisp :tangle yes
