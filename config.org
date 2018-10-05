@@ -1536,7 +1536,7 @@ corresponding text files.
     (isend-mode. isend-default-python-setup))
 #+END_SRC
 ** HTML
-*** Web-mode
+*** web-mode
     #+begin_src emacs-lisp :tangle yes
       (use-package web-mode
         :mode (("\\.html\\'" . web-mode)
@@ -1544,9 +1544,12 @@ corresponding text files.
                ("\\.mustache\\'" . web-mode)
                ("\\.jinja\\'" . web-mode)
                ("\\.njk\\'" . web-mode)
-               ("\\.php\\'" . web-mode))
+               ("\\.php\\'" . web-mode)
+               ("\\.js[x]?\\'" . web-mode))
         :custom
         (web-mode-enable-css-colorization t)
+        (web-mode-content-types-alist
+         '(("jsx" . "\\.js[x]?\\'")))
         :config
         (setq-default css-indent-offset 2
                       web-mode-markup-indent-offset 2
@@ -1580,31 +1583,16 @@ corresponding text files.
     #+end_src
 ** Javascript
 *** JS2-mode
-Here I also added =tern-mode=. This requires the tern executable:
-#+begin_src bash :tangle no
-npm install -g tern
-#+end_src
-
 #+begin_src emacs-lisp :tangle yes
   (use-package js2-mode
-    :mode ("\\.js\\'" . js2-mode)
+    :hook
+    (web-mode-hook . js2-minor-mode)
     :config
     (setq-default flycheck-disabled-checkers
                   (append flycheck-disabled-checkers
                           '(javascript-jshint)))
     :custom
     (js-switch-indent-offset 2))
-
-  (use-package tern
-    :after js2-mode
-    :diminish tern-mode
-    :hook
-    (js2-mode .tern-mode))
-
-  (use-package company-tern
-    :after company tern
-    :config
-    (add-to-list 'company-backends 'company-tern))
 #+end_src
 *** Indium
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1615,33 +1603,6 @@ npm install -g tern
     :hook
     ((js2-mode . indium-interaction-mode)))
 #+END_SRC
-*** Flycheck
-#+begin_src emacs-lisp :tangle yes
-  (require 'flycheck)
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (flycheck-add-mode 'javascript-eslint 'web-mode)
-#+end_src
-*** Skewer
-    #+begin_src emacs-lisp :tangle yes
-  (use-package skewer-mode  
-    :bind (:map skewer-mode-map
-                ("C-c C-k" . skewer-load-buffer))
-    :config
-    (add-hook 'js2-mode-hook 'skewer-mode))
-    #+end_src
-*** js-comint
-    #+begin_src emacs-lisp :tangle no
-      (use-package js-comint
-        :after js2-mode
-        :config
-        (add-hook 'js2-mode-hook
-                  (lambda ()
-                    (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
-                    (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
-                    (local-set-key (kbd "C-c b") 'js-send-buffer)
-                    (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
-                    (local-set-key (kbd "C-c l") 'js-load-file-and-go))))
-    #+end_src
 *** js-doc
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package js-doc
@@ -1654,46 +1615,19 @@ npm install -g tern
     (js-doc-url "http://www.jethrokuan.com/")
     (js-doc-license "MIT"))
 #+END_SRC
-*** JS2-refactor
-    #+begin_src emacs-lisp :tangle yes
-      (use-package js2-refactor
-        :after js2-mode
-        :hook
-        (js2-mode . js2-refactor-mode)
-        :config
-        (js2r-add-keybindings-with-prefix "C-c C-j"))
-    #+end_src
-*** React-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/setup-rjsx-mode ()  
-    (setq-local emmet-expand-jsx-className? t)
-    (setq-local web-mode-enable-auto-quoting nil))
 
-  (use-package rjsx-mode
-    :after js2-mode
-    :init
-    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("\\.react.js\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("\\index.android.js\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("\\index.ios.js\\'" . rjsx-mode))
-    (add-to-list 'magic-mode-alist '("/\\*\\* @jsx React\\.DOM \\*/" . rjsx-mode))
-    (add-to-list 'magic-mode-alist '("^import React" . rjsx-mode))
-    (add-hook 'rjsx-mode-hook 'jethro/setup-rjsx-mode)
-    (add-hook 'rjsx-mode-hook 'tern-mode)
-    (add-hook 'rjsx-mode-hook 'emmet-mode)
-    :config
-    (with-eval-after-load 'flycheck
-      (dolist (checker '(javascript-eslint javascript-standard))
-        (flycheck-add-mode checker 'rjsx-mode)))
-    (defun jethro/line-align-closing-bracket ()
-      "Workaround sgml-mode and align closing bracket with opening bracket"
-      (save-excursion
-        (beginning-of-line)
-        (when (looking-at-p "^ +\/?> *$")
-          (delete-char sgml-basic-offset))))
-    (advice-add #'js-jsx-indent-line
-                :after
-                #'jethro/line-align-closing-bracket))
+*** lsp-javascript-typescript
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package lsp-javascript-typescript
+    :hook
+    (js2-mode-hook . lsp-javascript-typescript-enable))
+#+END_SRC
+
+*** prettier
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package prettier-js
+    :hook
+    (js2-minor-mode . prettier-js-mode))
 #+END_SRC
 ** Java
 *** Google C Style
