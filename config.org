@@ -2666,8 +2666,3 @@ Closes compile buffer if there are no errors.
   (use-package sx
     :commands sx)
 #+END_SRC
-* Load Custom File
-Custom file should take precedence.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (load custom-file)
-#+END_SRC
