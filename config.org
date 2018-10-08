@@ -1242,6 +1242,15 @@ respecting require-final-newline. Trimming only happens when saving.
     (setenv "DICTIONARY" "en_GB")
     :hook
     (text-mode . flyspell-mode))
+
+  ;; FIXME: use flyspell-correct-wrapper once Nixpkgs is up-to-date
+  (use-package flyspell-correct
+    :bind
+    (:map flyspell-mode-map
+          (("C-;" . flyspell-correct-next))))
+
+  (use-package flyspell-correct-ivy
+    :after flyspell-correct)
 #+end_src
 ** Auto-fill-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
