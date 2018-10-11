@@ -2374,6 +2374,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     :custom
     (org-latex-pdf-process
      '("pdflatex -shell-escape -interaction nonstopmode %f"
+       "bibtex %b"
        "pdflatex -shell-escape -interaction nonstopmode %f"))
     (org-latex-default-table-environment "tabular")
     (org-latex-tables-booktabs t)
