@@ -558,7 +558,6 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("v" . counsel-describe-variable)
      ("l" . counsel-info-lookup-symbol)
      :map ivy-minibuffer-map
-     ("C-d" . ivy-dired)
      ("C-o" . ivy-occur)
      ("<return>" . ivy-alt-done)
      ("M-<return>" . ivy-immediate-done)
