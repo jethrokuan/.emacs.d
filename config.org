@@ -2233,7 +2233,8 @@ This view is where I review the thingns I would like to do someday:
             (todo "TODO"
                   ((org-agenda-overriding-header "Projects")
                    (org-agenda-files '("~/.org/gtd/projects.org"))
-                   (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)))
+                   ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
+                   ))
             (todo "TODO"
                   ((org-agenda-overriding-header "One-off Tasks")
                    (org-agenda-files '("~/.org/gtd/next.org"))
