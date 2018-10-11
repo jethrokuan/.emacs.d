@@ -2655,7 +2655,7 @@ Useful when handling git merge conflicts.
     (text-mode . olivetti-mode)
     :bind (("C-c M o" . olivetti-mode))
     :custom
-    (olivetti-body-width 80))
+    (olivetti-body-width 100))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
