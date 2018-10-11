@@ -431,3 +431,17 @@ it to =<f11>=.
   (bind-key "<f11>" 'jethro/reload-init)
 #+END_SRC
 
+
+* org-bullets
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-10-11 Thu 21:22
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Org-Mode/Setup
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package org-bullets
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '(" ")))
+#+END_SRC
