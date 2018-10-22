@@ -540,6 +540,8 @@ Flx is required for fuzzy-matching.
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
+    :hook
+    (after-init . ivy-mode)
     :diminish ivy-mode
     :bind
     (("C-c C-r" . ivy-resume)
@@ -575,7 +577,6 @@ Counsel contains ivy enhancements for commonly-used functions.
        (swiper . ivy--regex-plus)
        (t . ivy--regex-fuzzy)))
     :config
-    (ivy-mode +1)
     (ivy-set-actions
      t
      '(("I" insert "insert")))
