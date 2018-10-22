@@ -53,6 +53,16 @@ maintaining tidiness and performance.
   (setq use-package-always-demand (daemonp))
 #+END_SRC
 
+* Add PATH to shell
+Only if on Mac OSX.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package exec-path-from-shell
+    :ensure f
+    :if (memq window-system '(mac ns))
+    :config
+    (exec-path-from-shell-initialize))
+#+END_SRC
+
 * Better Defaults
 
 ** Function Redefinition
@@ -380,15 +390,6 @@ Remove the useless toolbars and splash screens.
   (blink-cursor-mode 0)
 #+END_SRC
 
-* Add PATH to shell
-Only if on Mac OSX.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package exec-path-from-shell
-    :ensure f
-    :if (memq window-system '(mac ns))
-    :config
-    (exec-path-from-shell-initialize))
-#+END_SRC
 * Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eshell
