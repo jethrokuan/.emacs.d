@@ -1068,6 +1068,8 @@ Use this often, and in combination with multiple-cursors.
 ** smartparens
 #+begin_src emacs-lisp :tangle yes
   (use-package smartparens
+    :hook
+    (after-init . smartparens-global-strict-mode)
     :bind (:map smartparens-mode-map
                 ("C-M-f" . sp-forward-sexp)
                 ("C-M-b" . sp-backward-sexp)
@@ -1090,7 +1092,6 @@ Use this often, and in combination with multiple-cursors.
                 ("M-S" . sp-split-sexp))
     :config
     (require 'smartparens-config)
-    (smartparens-global-strict-mode +1)
     ;; Org-mode config
     (sp-with-modes 'org-mode
       (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
