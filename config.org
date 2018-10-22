@@ -1036,6 +1036,7 @@ Keep your text indented at all times. Remember to turn this off for indentation-
        makefile-mode
        makefile-gmake-mode
        minibuffer-inactive-mode
+       nix-mode
        netcmd-mode
        python-mode
        sass-mode
@@ -1393,10 +1394,7 @@ corresponding text files.
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
-    :mode "\\.nix\\'"
-    :config
-    (add-hook 'nix-mode-hook (lambda ()
-                               (aggressive-indent-mode -1))))
+    :mode "\\.nix\\'")
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp :tangle yes
