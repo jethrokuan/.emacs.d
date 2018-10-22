@@ -1901,6 +1901,13 @@ Other org-mode ricing configuration:
         org-hide-emphasis-markers t
         org-pretty-entities t)
 #+END_SRC
+
+*** Helper Functions
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun org-archive-done-tasks ()
+    (interactive)
+    (org-map-entries 'org-archive-subtree "/DONE" 'file))
+#+END_SRC
 *** Org Gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package password-store
