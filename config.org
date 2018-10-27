@@ -2322,7 +2322,7 @@ this to capture screenshots into deft.
      (add-hook 'org-mode-hook
                (lambda ()
                  (when (buffer-file-name)
-                   (setq-local org-download-image-dir (format "./images/%s" (file-name-base buffer-file-name)))))))
+                   (setq-local org-download-image-dir (format "./images/%s" (replace-regexp-in-string " " "_" (downcase (file-name-base buffer-file-name)))))))))
  #+END_SRC
 *** Publishing
 #+BEGIN_SRC emacs-lisp :tangle yes
