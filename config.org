@@ -1861,7 +1861,7 @@ highlighting and annotations.
        '((emacs-lisp . t)
          (python . t)))
       :custom-face
-      (variable-pitch ((t (:family "iA Writer Duospace"))))
+      (variable-pitch ((t (:family "iA Writer Duospace" :height 0.9))))
       (org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
       (org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
       (org-headline-done ((t (:foreground "#171717" :strike-through t))))
