@@ -1860,6 +1860,7 @@ highlighting and annotations.
       (org-babel-load-languages
        '((emacs-lisp . t)
          (python . t)))
+      (org-use-speed-commands t)
       :custom-face
       (variable-pitch ((t (:family "iA Writer Duospace" :height 0.9))))
       (org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
