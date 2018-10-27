@@ -855,6 +855,13 @@ eventually falling back to dumb-jump.
     #+begin_src emacs-lisp :tangle yes
 (setq dired-listing-switches "-aBhl  --group-directories-first")
     #+end_src
+*** Enable dired-dwim
+This allows dired to copy/paste/move files over to the other directory
+in a separate window pane quickly.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq dired-dwim-target t)
+#+END_SRC
 *** Recursive Copying and Deleting
     #+begin_src emacs-lisp :tangle yes
   (setq dired-recursive-copies (quote always))
@@ -876,14 +883,6 @@ eventually falling back to dumb-jump.
   (use-package dired-narrow
     :bind (:map dired-mode-map
                 ("N" . dired-narrow-fuzzy)))
-    #+END_SRC
-*** dired-ranger
-    #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dired-ranger
-    :bind (:map dired-mode-map
-                ("C" . dired-ranger-copy)
-                ("P" . dired-ranger-paste)
-                ("M" . dired-ranger-move)))
     #+END_SRC
 *** dired-subtree
 The dired-subtree package (part of the magnificent dired hacks) allows
