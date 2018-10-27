@@ -837,20 +837,21 @@ eventually falling back to dumb-jump.
   (require 'dired)
 #+END_SRC
 *** Dired for Mac OSX
+Dired requires GNU ls output, so gls needs to be installed on OSX for
+it to work properly.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (let ((gls "/usr/local/bin/gls"))
     (if (file-exists-p gls)
         (setq insert-directory-program gls)))
 #+END_SRC
-*** trash files instead of deleting them
-    #+BEGIN_SRC emacs-lisp :tangle yes
+*** Trash files instead of deleting them
+Right now, I don't use a desktop manager that manages trash, so this
+option is not turned on.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
   (setq delete-by-moving-to-trash t)
     #+END_SRC
-*** find-dired
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'find-dired)
-  (setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld"))
-#+END_SRC
 *** Sort directories first
     #+begin_src emacs-lisp :tangle yes
 (setq dired-listing-switches "-aBhl  --group-directories-first")
@@ -867,10 +868,7 @@ in a separate window pane quickly.
   (setq dired-recursive-copies (quote always))
   (setq dired-recursive-deletes (quote top))
     #+end_src
-*** dired-jump from file
-    #+begin_src emacs-lisp :tangle yes
-  (require 'dired-x)
-    #+end_src
+
 *** allow editing of permissions
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package wdired
@@ -884,16 +882,7 @@ in a separate window pane quickly.
     :bind (:map dired-mode-map
                 ("N" . dired-narrow-fuzzy)))
     #+END_SRC
-*** dired-subtree
-The dired-subtree package (part of the magnificent dired hacks) allows
-you to expand subdirectories in place, like a tree structure.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dired-subtree
-    :bind
-    (:map dired-mode-map
-          ("i" . dired-subtree-insert)
-          (";" . dired-subtree-remove)))
-#+END_SRC
+
 ** ibuffer
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ibuffer

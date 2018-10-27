@@ -445,3 +445,20 @@ it to =<f11>=.
     :custom
     (org-bullets-bullet-list '(" ")))
 #+END_SRC
+
+* dired-subtree
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-10-27 Sat 14:32
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Moving Around/Dired
+:ARCHIVE_CATEGORY: config
+:END:
+The dired-subtree package (part of the magnificent dired hacks) allows
+you to expand subdirectories in place, like a tree structure.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dired-subtree
+    :bind
+    (:map dired-mode-map
+          ("i" . dired-subtree-insert)
+          (";" . dired-subtree-remove)))
+#+END_SRC
