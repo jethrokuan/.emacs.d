@@ -1422,11 +1422,14 @@ corresponding text files.
      (use-package go-dlv
        :after go-mode)
 
-     (use-package golint
-       :after go-mode
-       :config
-       (add-to-list 'load-path (concat (getenv "GOPATH")  "/src/github.com/golang/lint/misc/emacs"))
-       (require 'golint))
+     (defvar jethro/golint-path nil "Path to golint binary.")
+
+     (setq jethro/golint-path (concat (getenv "GOPATH") "/src/github.com/golang/lint/misc/emacs"))
+
+     (when (file-directory-p jethro/golint-path)
+       (use-package golint
+         :after go-mode
+         :load-path jethro/golint-path))
 
      (use-package gorepl-mode
        :after go-mode
