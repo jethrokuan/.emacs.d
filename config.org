@@ -699,7 +699,7 @@ Counsel contains ivy enhancements for commonly-used functions.
          "List of hooks of major modes in which diff-hl-mode should be enabled.")
 
        (dolist (hook jethro/diff-hl-mode-hooks)
-         (add-hook hook #'diff-hl-mode))
+         (add-hook hook #'diff-hl-flydiff-mode))
 
        (defhydra jethro/hydra-diff-hl (:color red)
          "diff-hl"
