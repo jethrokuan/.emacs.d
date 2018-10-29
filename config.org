@@ -1852,6 +1852,7 @@ highlighting and annotations.
        '((emacs-lisp . t)
          (python . t)))
       (org-use-speed-commands t)
+      (org-catch-invisible-edits 'show)
       :custom-face
       (variable-pitch ((t (:family "iA Writer Duospace" :height 0.9))))
       (org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
