@@ -29,6 +29,7 @@
  '(package-selected-packages
    (quote
     (prettier-js lsp-javascript-typescript yapfify yaml-mode ws-butler writegood-mode which-key wgrep web-mode volatile-highlights visual-regexp use-package tide tao-theme sx sphinx-doc smartparens smart-mode-line smart-jump slime-company skewer-mode shm shackle scss-mode rust-mode rg rainbow-mode rainbow-delimiters pytest py-isort peep-dired paradox ox-ioslide org-ref org-pomodoro org-plus-contrib org-journal org-gcal org-download org-bullets olivetti notmuch no-littering nix-mode moody minions meghanada magit lsp-ui lsp-python lsp-java js-doc ivy-bibtex isend-mode intero interleave indium iedit ibuffer-projectile highlight-indent-guides groovy-mode gradle-mode gorepl-mode google-c-style golint go-dlv gist flyspell-correct-ivy flycheck-pos-tip flycheck-color-mode-line flycheck-clojure flx fish-mode eyebrowse expand-region eww-lnum esup esh-autosuggest ensime emmet-mode elfeed-org easy-kill dtrt-indent dockerfile-mode docker direnv dired-subtree dired-ranger dired-narrow diminish diff-hl deft crux counsel-projectile company-tern company-quickhelp company-lsp company-go company-auctex company-anaconda color-identifiers-mode clj-refactor bury-successful-compilation beacon avy autodisass-java-bytecode alchemist aggressive-indent adoc-mode)))
+ '(safe-local-variable-values (quote ((jethro/org-multicol-latex-column-count . 3))))
  '(sendmail-program "/run/current-system/sw/bin/msmtp"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

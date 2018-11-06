@@ -2602,6 +2602,15 @@ Useful when handling git merge conflicts.
      :custom
      (magit-auto-revert-mode nil))
  #+END_SRC
+*** Git-link
+Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositories.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package git-link
+    :commands
+    (git-link git-link-commit git-link-homepage)
+    :custom
+    (git-link-use-commit t))
+#+END_SRC
 *** Gists
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package gist
