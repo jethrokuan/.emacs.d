@@ -1764,10 +1764,8 @@ corresponding text files.
         (TeX-source-correlate-start-server nil)
         ;; Don't insert line-break at inline math
         (LaTeX-fill-break-at-separators nil)
-        (TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")
-                                 ("zathura" "zathura --page=%(outpage) %o")))
-        (TeX-view-program-selection '((output-pdf "pdf-tools")
-                                      (output-pdf "zathura")))
+        (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")))
+        (TeX-view-program-selection '((output-pdf "zathura")))
         :config
         (setq-default TeX-engine 'luatex)
         (add-hook 'LaTeX-mode-hook
@@ -1789,26 +1787,6 @@ corresponding text files.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package yaml-mode
     :mode ("\\.yaml\\'" . yaml-mode))
-#+END_SRC
-** PDFs
-We use [[https://github.com/politza/pdf-tools][pdf-tools]] for PDF viewing, which has first class support for
-highlighting and annotations.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package pdf-tools
-    :mode (("\\.pdf\\'" . pdf-view-mode))
-    :bind
-    (:map pdf-view-mode-map
-          (("h" . pdf-annot-add-highlight-markup-annotation)
-           ("t" . pdf-annot-add-text-annotation)
-           ("D" . pdf-annot-delete)
-           ("C-s" . isearch-forward)))
-    :custom
-    ;; More fine-grained resizing (10%)
-    (pdf-view-resize-factor 1.1)
-    :config
-    ;; Install pdf tools
-    (pdf-tools-install))
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp :tangle yes

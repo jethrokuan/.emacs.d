@@ -462,3 +462,30 @@ you to expand subdirectories in place, like a tree structure.
           ("i" . dired-subtree-insert)
           (";" . dired-subtree-remove)))
 #+END_SRC
+
+* PDFs
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-11-20 Tue 13:23
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages
+:ARCHIVE_CATEGORY: config
+:END:
+We use [[https://github.com/politza/pdf-tools][pdf-tools]] for PDF viewing, which has first class support for
+highlighting and annotations.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package pdf-tools
+    :mode (("\\.pdf\\'" . pdf-view-mode))
+    :bind
+    (:map pdf-view-mode-map
+          (("h" . pdf-annot-add-highlight-markup-annotation)
+           ("t" . pdf-annot-add-text-annotation)
+           ("D" . pdf-annot-delete)
+           ("C-s" . isearch-forward)))
+    :custom
+    ;; More fine-grained resizing (10%)
+    (pdf-view-resize-factor 1.1)
+    :config
+    ;; Install pdf tools
+    (pdf-tools-install))
+#+END_SRC
