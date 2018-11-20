@@ -802,7 +802,6 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package crux
     :bind (("C-c o" . crux-open-with)
-           ("C-c C" . crux-cleanup-buffer-or-region)
            ("C-c D" . crux-delete-file-and-buffer)
            ("C-a" . crux-move-beginning-of-line)
            ("M-o" . crux-smart-open-line)
@@ -1974,6 +1973,8 @@ inspiration when implementing GTD in org-mode.
             "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
            ("e" "email" entry (file+headline "~/.org/gtd/emails.org" "Emails")
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
+           ("l" "link" entry (file "~/.org/gtd/inbox.org")
+            "* TODO %(org-cliplink-capture)" :immediate-finish t)
            ("w" "Weekly Review" entry (file+olp+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))
            ("s" "Snippet" entry (file "~/.org/deft/capture.org")
@@ -2259,6 +2260,21 @@ This view is where I review the thingns I would like to do someday:
     (org-pomodoro-format "%s"))
 #+END_SRC
 ** Org Mode for Note taking
+*** org-cliplink
+ A simple command that takes a URL from the clipboard and inserts an
+ org-mode link with a title of a page found by the URL into the
+ current buffer.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-cliplink
+    :bind
+    ("C-c C" . 'jethro/org-capture-link)
+    :config
+    (defun jethro/org-capture-link ()
+      "Captures a link, and stores it in inbox."
+      (interactive)
+      (org-capture nil "l")))
+#+END_SRC
 *** Deft
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package deft
