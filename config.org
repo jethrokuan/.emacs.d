@@ -1869,7 +1869,7 @@ Other org-mode ricing configuration:
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-startup-indented t
         org-hide-emphasis-markers t
-        org-pretty-entities t)
+        org-pretty-entities nil)
 #+END_SRC
 
 *** Helper Functions
