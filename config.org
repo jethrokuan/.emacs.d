@@ -1233,11 +1233,10 @@ respecting require-final-newline. Trimming only happens when saving.
     :hook
     (text-mode . flyspell-mode))
 
-  ;; FIXME: use flyspell-correct-wrapper once Nixpkgs is up-to-date
   (use-package flyspell-correct
     :bind
     (:map flyspell-mode-map
-          (("C-;" . flyspell-correct-next))))
+          (("C-;" . flyspell-correct-wrapper))))
 
   (use-package flyspell-correct-ivy
     :after flyspell-correct)
