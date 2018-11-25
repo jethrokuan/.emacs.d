@@ -1231,7 +1231,10 @@ respecting require-final-newline. Trimming only happens when saving.
     :init
     (setenv "DICTIONARY" "en_GB")
     :hook
-    (text-mode . flyspell-mode))
+    (text-mode . flyspell-mode)
+    (prog-mode . flyspell-prog-mode)
+    :custom
+    (flyspell-abbrev-p t))
 
   (use-package flyspell-correct
     :bind
