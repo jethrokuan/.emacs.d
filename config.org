@@ -497,30 +497,19 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed-org
     :after elfeed
+    :bind
+    (:map elfeed-show-mode-map
+          ("C" . jethro/org-capture-elfeed-link))
+    (:map elfeed-search-mode-map
+          ("C" . jethro/org-capture-elfeed-link))
     :config
+    (require 'elfeed-link)
     (elfeed-org)
+    (defun jethro/org-capture-elfeed-link ()
+      (interactive)
+      (org-capture nil "z"))
     :custom
     (rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
-#+END_SRC
-** syncing elfeed database
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/elfeed-load-db-and-open ()
-    "Wrapper to load the elfeed db from disk before opening"
-    (interactive)
-    (elfeed-db-load)
-    (elfeed)
-    (elfeed-search-update--force))
-
-  (defun jethro/elfeed-save-db-and-bury ()
-    "Wrapper to save the elfeed db to disk before burying buffer"
-    (interactive)
-    (elfeed-db-save)
-    (quit-window))
-
-  (bind-key "<f6>" 'jethro/elfeed-load-db-and-open)
-
-  (eval-after-load 'elfeed-search
-    '(define-key elfeed-search-mode-map (kbd "q") 'jethro/elfeed-save-db-and-bury))
 #+END_SRC
 * Core Utilities
 ** Hydra
@@ -1977,6 +1966,8 @@ inspiration when implementing GTD in org-mode.
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
            ("l" "link" entry (file "~/.org/gtd/inbox.org")
             "* TODO %(org-cliplink-capture)" :immediate-finish t)
+           ("z" "elfeed-link" entry (file "~/.org/gtd/inbox.org")
+            "* TODO %a\n" :immediate-finish t)
            ("w" "Weekly Review" entry (file+olp+datetree "~/.org/gtd/reviews.org")
             (file "~/.org/gtd/templates/weekly_review.org"))
            ("s" "Snippet" entry (file "~/.org/deft/capture.org")

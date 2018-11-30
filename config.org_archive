@@ -489,3 +489,30 @@ highlighting and annotations.
     ;; Install pdf tools
     (pdf-tools-install))
 #+END_SRC
+
+* syncing elfeed database
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-11-30 Fri 22:57
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Reading feeds with elfeed
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/elfeed-load-db-and-open ()
+    "Wrapper to load the elfeed db from disk before opening"
+    (interactive)
+    (elfeed-db-load)
+    (elfeed)
+    (elfeed-search-update--force))
+
+  (defun jethro/elfeed-save-db-and-bury ()
+    "Wrapper to save the elfeed db to disk before burying buffer"
+    (interactive)
+    (elfeed-db-save)
+    (quit-window))
+
+  (bind-key "<f6>" 'jethro/elfeed-load-db-and-open)
+
+  (eval-after-load 'elfeed-search
+    '(define-key elfeed-search-mode-map (kbd "q") 'jethro/elfeed-save-db-and-bury))
+#+END_SRC
