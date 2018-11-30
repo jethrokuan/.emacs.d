@@ -389,7 +389,15 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
+** hl-todo
+Simple minor mode that highlights the todo keywords.
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package hl-todo
+    :defer 5
+    :config
+    (global-hl-todo-mode))
+#+END_SRC
 * Eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eshell
