@@ -1839,6 +1839,7 @@ corresponding text files.
       (org-level-3 ((t (:height 1.1))))
       (org-image-actual-width (/ (display-pixel-width) 2))
       :config
+      (require 'org-habit)
       (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
   #+END_SRC
 
