@@ -448,6 +448,10 @@ Simple minor mode that highlights the todo keywords.
     (eshell-smart-space-goes-to-end t))
 
 #+END_SRC
+* libvterm
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package vterm)
+#+END_SRC
 * Web Browsing with eww
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eww
