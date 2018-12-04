@@ -2032,15 +2032,31 @@ inspiration when implementing GTD in org-mode.
    (setq jethro/org-agenda-inbox-view
          `("i" "Inbox" todo ""
            ((org-agenda-files '("~/.org/gtd/inbox.org")))))
+
+   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-inbox-view)
  #+END_SRC
 
-**** Org Aenda Someday View
-This view is where I review the thingns I would like to do someday:
+**** Org Agenda Someday View
+This view is where I review the things I would like to do someday:
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq jethro/org-agenda-someday-view
         `("s" "Someday" todo ""
           ((org-agenda-files '("~/.org/gtd/someday.org")))))
+
+  (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-someday-view)
 #+END_SRC
+
+**** Org Agenda Reading view
+This view is where I see items I have queued up in my reading list.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq jethro/org-agenda-reading-view
+        `("r" "Reading" todo ""
+          ((org-agenda-files '("~/.org/gtd/reading.org")))))
+
+  (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-reading-view)
+#+END_SRC
+
 **** Org TODO Keywords
  | keyword   | meaning                                                                      |
  |-----------+------------------------------------------------------------------------------|
@@ -2104,6 +2120,7 @@ This view is where I review the thingns I would like to do someday:
    (setq org-refile-allow-creating-parent-nodes 'confirm)
    (setq org-refile-targets '(("next.org" :level . 0)
                               ("someday.org" :level . 0)
+                              ("reading.org" :level . 1)
                               ("projects.org" :maxlevel . 1)))
  #+END_SRC
 
@@ -2168,31 +2185,6 @@ This view is where I review the thingns I would like to do someday:
    (define-key org-agenda-mode-map "R" 'org-agenda-refile)
    (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
  #+END_SRC
-
-****** TODO add advice
- #+BEGIN_SRC emacs-lisp :tangle no
-   (defvar jethro/new-project-template
-     "
-       ,*Project Purpose/Principles*:
-
-       ,*Project Outcome*:
-       "
-     "Project template, inserted when a new project is created")
-
-   (defvar jethro/is-new-project nil
-     "Boolean indicating whether it's during the creation of a new project")
-
-   (defun jethro/refile-new-child-advice (orig-fun parent-target child)
-     (let ((res (funcall orig-fun parent-target child)))
-       (save-excursion
-         (find-file (nth 1 parent-target))
-         (goto-char (org-find-exact-headline-in-buffer child))
-         (org-add-note)
-         )
-       res))
-
-   (advice-add 'org-refile-new-child :around #'jethro/refile-new-child-advice)
- #+END_SRC
 **** Clocking in
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun jethro/set-todo-state-next ()
@@ -2206,6 +2198,7 @@ This view is where I review the thingns I would like to do someday:
  #+BEGIN_SRC emacs-lisp :tangle yes
    (setq org-agenda-block-separator nil)
    (setq org-agenda-start-with-log-mode t)
+
    (setq jethro/org-agenda-todo-view
          `(" " "Agenda"
            ((agenda ""
@@ -2234,6 +2227,8 @@ This view is where I review the thingns I would like to do someday:
                    (org-agenda-files '("~/.org/gtd/next.org"))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
+
+   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-todo-view)
 
    (defun jethro/org-agenda-skip-all-siblings-but-first ()
      "Skip all but the first non-done entry."
@@ -2512,15 +2507,6 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 
 
 #+end_src
-** Putting it all together
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-custom-commands 
-        `(,jethro/org-agenda-inbox-view
-          ,jethro/org-agenda-someday-view
-          ,jethro/org-agenda-todo-view
-          ;; ,jethro/org-agenda-papers-view ;; archived
-          ))
-#+END_SRC
 * Project Management
 ** Version Control
 *** vc
