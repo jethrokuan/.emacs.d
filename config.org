@@ -1118,9 +1118,8 @@ respecting require-final-newline. Trimming only happens when saving.
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
        :bind (("C-c h f" . jethro/hydra-flycheck/body))
-       :hook
-       (prog-mode . flycheck-mode)
        :config
+       (global-flycheck-mode +1)
        (defun jethro/adjust-flycheck-automatic-syntax-eagerness ()
          "Adjust how often we check for errors based on if there are any.
      This lets us fix any errors as quickly as possible, but in a
@@ -1175,6 +1174,20 @@ respecting require-final-newline. Trimming only happens when saving.
        :hook
        (flycheck-mode . flycheck-pos-tip-mode))
    #+end_src
+*** Proselint
+By default proselint doesn't support org-mode, which is where I write
+the bulk of my text, so I'm redefining the checker here.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (flycheck-define-checker proselint
+    "A linter for prose."
+    :command ("proselint" source-inplace)
+    :error-patterns
+    ((warning line-start (file-name) ":" line ":" column ": "
+              (id (one-or-more (not (any " "))))
+              (message) line-end))
+    :modes (text-mode markdown-mode gfm-mode org-mode))
+#+END_SRC
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
      (use-package yasnippet
