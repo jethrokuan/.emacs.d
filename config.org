@@ -2347,7 +2347,7 @@ This view is where I see items I have queued up in my reading list.
     (("C-c n" . deft))
     :custom
     (deft-default-extension "org")
-    (deft-directory "~/.org/deft/")
+    (deft-directory "~/.org/braindump/org")
     (deft-use-filename-as-title t))
 #+END_SRC
 *** Exporting Deft Notes
