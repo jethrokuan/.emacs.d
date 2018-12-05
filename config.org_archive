@@ -516,3 +516,50 @@ highlighting and annotations.
   (eval-after-load 'elfeed-search
     '(define-key elfeed-search-mode-map (kbd "q") 'jethro/elfeed-save-db-and-bury))
 #+END_SRC
+
+* Publishing
+:PROPERTIES:
+:ARCHIVE_TIME: 2018-12-05 Wed 21:39
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Org-Mode/Org Mode for Note taking
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ox-publish
+    :ensure f
+    :no-require t
+    :commands org-publish-all org-publish
+    :after org
+    :custom
+    (org-html-htmlize-output-type nil)
+    (org-html-head-include-default-style nil)
+    (org-publish-project-alist
+     '(("org-notes-assets"
+        :base-directory "~/.org/deft/css/"
+        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+        :publishing-directory "~/.org/deft/docs/css/"
+        :recursive t
+        :publishing-function org-publish-attachment
+        )
+       ("org-notes-images"
+        :base-directory "~/.org/deft/images/"
+        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+        :publishing-directory "~/.org/deft/docs/images/"
+        :recursive t
+        :publishing-function org-publish-attachment
+        )
+       ("org-notes"
+        :base-directory "~/.org/deft/"
+        :base-extension "org"
+        :publishing-directory "~/.org/deft/docs/"
+        :recursive t
+        :publishing-function org-html-publish-to-html
+        :headline-levels 4
+        :auto-sitemap t
+        :author "Jethro Kuan"
+        :email "jethrokuan95@gmail.com"
+        :sitemap-filename "index.org"
+        :sitemap-title "Jethro's Braindump"
+        :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
+       ("org" :components ("org-notes-assets" "org-notes-images")))))
+#+END_SRC
