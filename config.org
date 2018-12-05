@@ -1183,14 +1183,15 @@ By default proselint doesn't support org-mode, which is where I write
 the bulk of my text, so I'm redefining the checker here.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'flycheck)
   (flycheck-define-checker proselint
-    "A linter for prose."
-    :command ("proselint" source-inplace)
-    :error-patterns
-    ((warning line-start (file-name) ":" line ":" column ": "
-              (id (one-or-more (not (any " "))))
-              (message) line-end))
-    :modes (text-mode markdown-mode gfm-mode org-mode))
+                           "A linter for prose."
+                           :command ("proselint" source-inplace)
+                           :error-patterns
+                           ((warning line-start (file-name) ":" line ":" column ": "
+                                     (id (one-or-more (not (any " "))))
+                                     (message) line-end))
+                           :modes (text-mode markdown-mode gfm-mode org-mode))
 #+END_SRC
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
@@ -1808,7 +1809,56 @@ corresponding text files.
   (use-package ensime
     :commands ensime ensime-mode)
 #+END_SRC
+** Ocaml
+Ocaml is somewhat of a special snowflake in my setup. A lot of the
+required elisp libraries are only available in the nix-shell. This
+mean I have to launch a separate emacs instance that is setup
+perfectly for that Ocaml project.
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun in-nix-shell-p ()
+    (string-equal (getenv "IN_NIX_SHELL") "1"))
+
+  (use-package tuareg
+    :mode (("\\.ml[ilpy]?\\'" . tuareg-mode)
+           ("\\.eliomi?\\'"   . tuareg-mode))
+    :config
+    (let ((ocamlinit (getenv "OCAMLINIT")))
+      (when (and ocamlinit
+                 (in-nix-shell-p))
+        (setq tuareg-opam                nil
+              org-babel-ocaml-command    (format "ocaml -init %s"       ocamlinit)
+              tuareg-interactive-program (format "ocaml -init %s"       ocamlinit)
+              utop-command               (format "utop -emacs -init %s" ocamlinit))))
+    :custom
+    (tuareg-indent-align-with-first-arg . nil))
+
+  (setq jethro/merlin-site-elisp (getenv "MERLIN_SITE_LISP"))
+  (setq jethro/utop-site-elisp (getenv "UTOP_SITE_LISP"))
+  (setq jethro/ocp-site-elisp (getenv "OCP_INDENT_SITE_LISP"))
+
+  (use-package merlin
+    :if (and jethro/merlin-site-elisp
+             (in-nix-shell-p))
+    :load-path jethro/merlin-site-elisp
+    :hook
+    (tuareg-mode . merlin-mode)
+    (merlin-mode . company-mode)
+    :custom
+    (merlin-command "ocamlmerlin"))
+
+  (use-package utop
+    :if (and jethro/utop-site-elisp
+             (in-nix-shell-p))
+    :load-path jethro/utop-site-elisp
+    :hook
+    (tuareg-mode . utop-minor-mode))
+
+  (use-package ocp-indent
+    :if (and jethro/ocp-site-elisp
+             (in-nix-shell-p))
+    :load-path jethro/ocp-site-elisp)
+#+END_SRC
 * Org-Mode
 ** Setup
   I use =org-plus-contrib=, which contains several contrib plugins,
