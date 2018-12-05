@@ -2370,51 +2370,30 @@ this to capture screenshots into deft.
      (if (memq window-system '(mac ns))
          (setq org-download-screenshot-method "screencapture -i %s")
        (setq org-download-screenshot-method "maim -s %s"))
-     (add-hook 'org-mode-hook
-               (lambda ()
-                 (when (buffer-file-name)
-                   (setq-local org-download-image-dir (format "./images/%s" (replace-regexp-in-string " " "_" (downcase (file-name-base buffer-file-name)))))))))
+     (defun my-org-download-method (link)
+       "This is a helper function for org-download.
+   It creates a folder in the root directory (~/.org/img/) named after the
+   org filename (sans extension) and puts all images from that file in there.
+   Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0bc532770e9533b4fc549438/init.el#L701"
+       (let ((filename
+              (file-name-nondirectory
+               (car (url-path-and-query
+                     (url-generic-parse-url link)))))
+             ;; Create folder name with current buffer name, and place in root dir
+             (dirname (concat "./images/"
+                              (replace-regexp-in-string " " "_" (downcase (file-name-base buffer-file-name))))))
+
+         ;; Add timestamp to filename
+         (setq filename-with-timestamp (format "%s%s.%s"
+                                               (file-name-sans-extension filename)
+                                               (format-time-string org-download-timestamp)
+                                               (file-name-extension filename)))
+         ;; Create folder if necessary
+         (unless (file-exists-p dirname)
+           (make-directory dirname))
+         (expand-file-name filename-with-timestamp dirname)))
+     (setq org-download-method 'my-org-download-method))
  #+END_SRC
-*** Publishing
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package ox-publish
-    :ensure f
-    :no-require t
-    :commands org-publish-all org-publish
-    :after org
-    :custom
-    (org-html-htmlize-output-type nil)
-    (org-html-head-include-default-style nil)
-    (org-publish-project-alist
-     '(("org-notes-assets"
-        :base-directory "~/.org/deft/css/"
-        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-        :publishing-directory "~/.org/deft/docs/css/"
-        :recursive t
-        :publishing-function org-publish-attachment
-        )
-       ("org-notes-images"
-        :base-directory "~/.org/deft/images/"
-        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-        :publishing-directory "~/.org/deft/docs/images/"
-        :recursive t
-        :publishing-function org-publish-attachment
-        )
-       ("org-notes"
-        :base-directory "~/.org/deft/"
-        :base-extension "org"
-        :publishing-directory "~/.org/deft/docs/"
-        :recursive t
-        :publishing-function org-html-publish-to-html
-        :headline-levels 4
-        :auto-sitemap t
-        :author "Jethro Kuan"
-        :email "jethrokuan95@gmail.com"
-        :sitemap-filename "index.org"
-        :sitemap-title "Jethro's Braindump"
-        :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
-       ("org" :components ("org-notes-assets" "org-notes-images")))))
-#+END_SRC
 ** Org Mode for Journalling
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package org-journal
@@ -2426,7 +2405,7 @@ I use ox-hugo.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ox-hugo
-    :after ox)
+    :after org)
   (use-package ox-hugo-auto-export
     :after ox-hugo)
 #+END_SRC
