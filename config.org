@@ -1836,6 +1836,12 @@ perfectly for that Ocaml project.
   (setq jethro/merlin-site-elisp (getenv "MERLIN_SITE_LISP"))
   (setq jethro/utop-site-elisp (getenv "UTOP_SITE_LISP"))
   (setq jethro/ocp-site-elisp (getenv "OCP_INDENT_SITE_LISP"))
+  (setq jethro/dune-site-elisp (getenv "DUNE_SITE_LISP"))
+
+  (use-package dune
+    :if (and jethro/dune-site-elisp
+             (in-nix-shell-p))
+    :load-path jethro/dune-site-elisp)
 
   (use-package merlin
     :if (and jethro/merlin-site-elisp
