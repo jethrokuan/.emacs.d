@@ -2706,7 +2706,11 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
   (use-package olivetti
     :hook
     (text-mode . olivetti-mode)
-    :bind (("C-c M o" . olivetti-mode))
+    :bind (("C-c M o" . olivetti-mode)
+           :map
+           olivetti-mode-map
+           ("C-c [" . nil)
+           ("C-c ]" . nil))
     :custom
     (olivetti-body-width 100))
 #+end_src
