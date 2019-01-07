@@ -2729,21 +2729,27 @@ Closes compile buffer if there are no errors.
 ** Citations with ox-hugo and org-ref
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'org-ref)
+  (require 'org-ref-ivy)
 
-  (bind-key "C-c [" 'org-ref-ivy-insert-cite-link org-mode-map)
+  (require 'parse-time)
 
   (defun html-to-bibtex-read (url)
     "Read URL content and return title, author, and year fields."
+    (interactive)
     (let (fields)
       (with-current-buffer
           (url-retrieve-synchronously url t t)
         (goto-char (point-min))
-        (when (re-search-forward "<[a-z].+ class=\\(.?+date.[^>]*\\)>\\([[:ascii:]]*?\\)</[a-z].+>" nil t)
-          (let ((string (match-string 2)))
-            (when (string-match "\\([0-9]\\{4\\}\\)" string)
-              (push (cons :year (match-string 1 string)) fields))))
+        (when (re-search-forward "<meta property=\"[[:ascii:]]*?:?published_time\" content=\"\\([0-9][0-9][0-9][0-9]\\)-\\(.+\\)\"\s?/?>" nil t)
+          (push (cons :year (match-string 1)) fields))
+        (when (not (assoc :year fields))
+          (goto-char (point-min))
+          (when (re-search-forward "<[a-z].+ class=\\(.?+date.[^>]*\\)>\\([[:ascii:]]*?\\)</[a-z].+>" nil t)
+            (let ((string (match-string 2)))
+              (when (string-match "\\([0-9]\\{4\\}\\)" string)
+                (push (cons :year (match-string 1 string)) fields)))))
         (goto-char (point-min))
-        (when (re-search-forward "<meta name=\"author\" content=\"\\(.+\\)\"\s?/?>" nil t)
+        (when (re-search-forward "<meta name=\"[[:ascii:]]*?:?author\" content=\"\\(.+\\)\"\s?/?>" nil t)
           (push (cons :author (match-string 1)) fields))
         (goto-char (point-min))
         (when (re-search-forward "<title>\\([[:ascii:][:nonascii:]]*?\\|.+\\)</title>" nil t)
