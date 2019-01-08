@@ -2435,8 +2435,6 @@ I use ox-hugo.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ox-hugo
     :after org)
-  (use-package ox-hugo-auto-export
-    :after ox-hugo)
 #+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
