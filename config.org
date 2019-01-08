@@ -1884,6 +1884,10 @@ perfectly for that Ocaml project.
              (in-nix-shell-p))
     :load-path jethro/ocp-site-elisp)
 #+END_SRC
+** R
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ess)
+#+END_SRC
 * Org-Mode
 ** Setup
   I use =org-plus-contrib=, which contains several contrib plugins,
