@@ -10,9 +10,28 @@ email: =jethrokuan95@gmail.com=.
 Notes:
 1. I use a Dvorak 60% keyboard, so some of the keybindings may not be
    suitable for you.
-2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around that.
+2. I use [[http://www.nongnu.org/ratpoison/][Ratpoison]], and many of my keybindings are designed around
+   that.
 
-** About the Author
+** Why Emacs?
+
+I've used vim for slightly under 5 years, and have switched to emacs
+since Aug 2016, when I first started dabbling with Clojure. I've stuck
+to Emacs for the following reasons:
+
+1. Emacs is flexible. Emacs Lisp makes it a joy to extend, attracting
+   a large community of lisp hackers. Case in point: [[https://sites.google.com/site/steveyegge2/tour-de-babel][Amazon's Customer
+   Service application Mailman was built in Emacs Lisp]].
+2. Emacs provides a uniform interface. Everything is text, everything
+   is in a buffer. Keyboard movements work everywhere, no surprises.
+3. Emacs has everything you need. It has a web browser (eww), irc
+   client (erc/irc), email client (mu4e/notmuch/gnus), file browser
+   (dired) and many more. I've found little need for applications
+   outside of Emacs, other than Firefox.
+4. Emacs has [[https://orgmode.org/][org-mode]]. This gorgeous piece of software has proven to
+   be indispensable.
+
+* About the Author
 
 I'm currently a Computer Science undergraduate at the National
 University of Singapore. My configuration centers around my daily
@@ -30,7 +49,7 @@ Emacs usage, which involves:
         user-mail-address "jethrokuan95@gmail.com")
 #+end_src
 
-** Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
+* Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
