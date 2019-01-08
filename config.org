@@ -653,7 +653,10 @@ Counsel contains ivy enhancements for commonly-used functions.
     :config
     (setq x-underline-at-descent-line t)
     (moody-replace-mode-line-buffer-identification)
-    (moody-replace-vc-mode))
+    (moody-replace-vc-mode)
+    :custom-face
+    (mode-line ((t
+                 (:height 1.0 :box nil :foreground "#292617" :background "#ECE9E0")))))
 #+END_SRC
 ** Minions
 #+BEGIN_SRC emacs-lisp :tangle yes
