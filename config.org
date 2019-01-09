@@ -355,7 +355,7 @@ I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternat
 Office Code Pro and the Powerline font families.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq default-frame-alist '((font . "Iosevka-16")))
+  (setq default-frame-alist '((font . "Iosevka-14")))
 #+END_SRC
 
 ** Removing UI Cruft
