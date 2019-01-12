@@ -1496,12 +1496,6 @@ corresponding text files.
     (lambda ()
       (setq python-remove-cwd-from-path t)))
 #+END_SRC
-*** Sphinx Docs
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package sphinx-doc
-    :init
-    (add-hook 'python-mode-hook 'sphinx-doc-mode))
-#+END_SRC
 *** lsp-python
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package lsp-python
@@ -1547,6 +1541,17 @@ corresponding text files.
           ("C-M-e" . isend-send-defun))
     :hook
     (isend-mode. isend-default-python-setup))
+#+END_SRC
+*** Pyment
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package buftra
+    :load-path "./elisp")
+
+  (use-package py-pyment
+    :load-path "./elisp"
+    :hook (python-mode . py-pyment-mode)
+    :custom
+    (py-pyment-options '("--output" "google")))
 #+END_SRC
 ** HTML
 *** web-mode

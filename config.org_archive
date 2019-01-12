@@ -563,3 +563,16 @@ highlighting and annotations.
         :style "<link rel=\"stylesheet\" href=\"https://unpkg.com/sakura.css/css/sakura.css\" type=\"text/css\">")
        ("org" :components ("org-notes-assets" "org-notes-images")))))
 #+END_SRC
+
+* Sphinx Docs
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-01-10 Thu 23:27
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages/Python
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package sphinx-doc
+    :init
+    (add-hook 'python-mode-hook 'sphinx-doc-mode))
+#+END_SRC
