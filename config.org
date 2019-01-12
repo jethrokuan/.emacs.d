@@ -2657,6 +2657,14 @@ Useful when handling git merge conflicts.
      :custom
      (magit-auto-revert-mode nil))
  #+END_SRC
+**** Magit-todo
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package magit-todos
+    :commands (magit-todos-mode)
+    :hook (magit-mode . magit-todos-mode)
+    :custom
+    (magit-todo-require-colon nil))
+#+END_SRC
 *** Git-link
 Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositories.
 #+BEGIN_SRC emacs-lisp :tangle yes
