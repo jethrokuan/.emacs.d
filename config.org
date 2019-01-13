@@ -1927,7 +1927,7 @@ perfectly for that Ocaml project.
       (org-image-actual-width (/ (display-pixel-width) 2))
       :config
       (require 'org-habit)
-      (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC")))
+      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle yes")))
   #+END_SRC
 
 *** Variable Pitch Mode
