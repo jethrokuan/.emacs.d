@@ -1396,7 +1396,15 @@ corresponding text files.
 ** Nix
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
-    :mode "\\.nix\\'")
+    :mode "\\.nix\\'"
+    :custom
+    (nix-indent-function #'nix-indent-line))
+
+  (use-package nix-update
+    :after nix-mode
+    :bind
+    (:map nix-mode-map
+          ("C-. u" . nix-update)))
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp :tangle yes
