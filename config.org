@@ -1927,6 +1927,7 @@ perfectly for that Ocaml project.
       (org-image-actual-width (/ (display-pixel-width) 2))
       :config
       (require 'org-habit)
+      (require 'org-tempo)
       (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle yes")))
   #+END_SRC
 
