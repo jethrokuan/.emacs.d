@@ -1338,9 +1338,8 @@ corresponding text files.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package lsp-mode
     :commands lsp-mode
-    :config
-    (require 'lsp-imenu)
-    (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+    :hook
+    (lsp-after-open-hook . lsp-enable-imenu)
     :custom
     (lsp-message-project-root-warning t))
 
