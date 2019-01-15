@@ -1993,9 +1993,9 @@ Other org-mode ricing configuration:
                                 ("linuxnus.org_r7v0mr9m4h4u9rjpf2chimo61o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_private.org")))))
 #+END_SRC
 **** Run on Timer
-Run org-gcal-fetch every 5 minutes to update the calendars.
+Run org-gcal-fetch every hour to update the calendars.
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (run-at-time (* 5 60) nil
+  (run-at-time (* 60 60) nil
                (lambda ()
                  (let ((inhibit-message t))
                    (org-gcal-refresh-token)
