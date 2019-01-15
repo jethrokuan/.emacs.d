@@ -1755,7 +1755,6 @@ C/C++/Objective-C.
     (typescript-mode . (lambda ()
                          (tide-setup)
                          (flycheck-mode +1)
-                         (eldoc-mode +1)
                          (tide-hl-identifier-mode +1)
                          (company-mode +1))))
 #+END_SRC
@@ -1796,7 +1795,6 @@ C/C++/Objective-C.
                ("\\.cljs\\'" . clojurescript-mode)
                ("\\.cljs\\.hl\\'" . clojurescript-mode))
         :hook
-        (clojure-mode . eldoc-mode)
         (clojure-mode . subword-mode)
         (clojure-mode . cider-mode))
     #+end_src
