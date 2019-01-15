@@ -1,3 +1,6 @@
 [submodule "snippets"]
 	path = snippets
 	url = git@github.com:jethrokuan/snippets.git
+[submodule "elisp/reformatter.el"]
+	path = elisp/reformatter.el
+	url = https://github.com/purcell/reformatter.el.git

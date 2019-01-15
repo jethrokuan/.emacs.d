@@ -1463,19 +1463,13 @@ corresponding text files.
        (go-mode . (lambda ()
                     (set (make-local-variable 'company-backends) '(company-go)))))
    #+end_src
-** C
-#+BEGIN_SRC emacs-lisp :tangle no
-  (defun jethro/compile-c () 
-    (unless (file-exists-p "Makefile")
-      (set (make-local-variable 'compile-command)
-           (let ((file (file-name-nondirectory buffer-file-name)))
-             (format "cc -Wall %s -o %s --std=c99"
-                     file
-                     (file-name-sans-extension file))))))
-
-  (add-hook 'c-mode-hook jethro/compile-c)
-#+END_SRC
 ** C++
+
+The setup here depends on a few items:
+
+1. We use [[https://clang.llvm.org/][Clang]] for our tooling infrastructure
+2.  We use ~clang-format~, with [[https://github.com/purcell/reformatter.el][reformatter.el]]
+
 *** C++ compile function
 #+begin_src emacs-lisp :tangle yes
   (add-hook 'c++-mode-hook
@@ -1487,6 +1481,26 @@ corresponding text files.
                                file
                                (file-name-sans-extension file)))))))
 #+end_src
+
+*** Clang-formatter
+#+begin_src emacs-lisp :tangle yes
+  (use-package reformatter
+    :load-path "./elisp/reformatter.el")
+
+  (defvar clang-format-command
+    "clang-format"
+    "name of executable to format c/c++ files.")
+
+  (use-package clang-format
+    :if (executable-find "clang-format")
+    :ensure f
+    :no-require t  
+    :after reformatter
+    :config
+    (reformatter-define clang-format
+      :program clang-format-command))
+#+end_src
+
 ** Fish
    #+begin_src emacs-lisp :tangle yes
      (use-package fish-mode
