@@ -1356,6 +1356,16 @@ corresponding text files.
     :config
     (add-to-list 'company-backends 'company-lsp))
 #+END_SRC
+
+** Semantic
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package stickyfunc-enhance
+    :after semantic
+    :config
+    (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode))
+#+end_src
+
 ** Common Lisp
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package slime
@@ -1469,6 +1479,14 @@ The setup here depends on a few items:
 1. We use [[https://clang.llvm.org/][Clang]] for our tooling infrastructure
 2.  We use ~clang-format~, with [[https://github.com/purcell/reformatter.el][reformatter.el]]
 
+*** cc-mode
+#+begin_src emacs-lisp :tangle yes
+  (use-package cc-mode
+    :ensure nil
+    :hook
+    (c-mode . lsp-mode)
+    (c++-mode . lsp-mode))
+#+end_src
 *** C++ compile function
 #+begin_src emacs-lisp :tangle yes
   (add-hook 'c++-mode-hook
@@ -1481,7 +1499,11 @@ The setup here depends on a few items:
                                (file-name-sans-extension file)))))))
 #+end_src
 
-*** Clang-formatter
+*** Clang-format
+
+~clang-format~ ships with the clang-family of tools. Here we use
+the reformatter macro to integrate ~clang-format~.
+
 #+begin_src emacs-lisp :tangle yes
   (use-package reformatter
     :load-path "./elisp/reformatter.el")
@@ -1499,6 +1521,36 @@ The setup here depends on a few items:
     (reformatter-define clang-format
       :program clang-format-command))
 #+end_src
+
+*** Cquery
+[[https://github.com/cquery-project/cquery][cquery]] is a highly-scalable, low-latency language server for
+C/C++/Objective-C.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package cquery
+    :after lsp-mode
+    :custom
+    (cquery-executable (executable-find "cquery")))
+#+end_src
+
+*** Semantic-mode
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package semantic
+    :ensure nil
+    :hook
+    (c-mode . semantic-mode)
+    (c++-mode . semantic-mode))
+
+  (use-package srefactor
+    :after semantic
+    :bind
+    (:map c-mode-map
+          ("M-RET" . srefactor-refactor-at-point)
+          :map c++-mode-map
+          ("M-RET" . srefactor-refactor-at-point)))
+#+end_src
+
 
 ** Fish
    #+begin_src emacs-lisp :tangle yes
