@@ -571,7 +571,6 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("C-x B" . ivy-switch-buffer-other-window)
      ("C-x k" . kill-buffer)
      ("C-x C-f" . counsel-find-file)
-     ("C-x j" . counsel-dired-jump)
      ("C-x l" . counsel-locate)
      ("C-c j" . counsel-git)
      ("C-c f" . counsel-recentf)
@@ -602,6 +601,15 @@ Counsel contains ivy enhancements for commonly-used functions.
      '(("I" insert "insert")))
     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
    #+end_src
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package counsel-fd
+    :after counsel
+    :load-path "./elisp/counsel-fd/"
+    :bind
+    (("C-x j" . counsel-fd-dired-jump)
+     ("C-x f" . counsel-fd-file-jump)))
+#+end_src
 *** Swiper
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package swiper
