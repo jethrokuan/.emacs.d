@@ -2932,3 +2932,9 @@ Closes compile buffer if there are no errors.
                  ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                  (nil . "${author}, *${title}* (${year}).")))
 #+END_SRC
+** pdf-tools
+#+begin_src emacs-lisp :tangle yes
+  (use-package pdf-tools
+    :config
+    (pdf-tools-install))
+#+end_src
