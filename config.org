@@ -2811,8 +2811,6 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
 ** Olivetti
 #+begin_src emacs-lisp :tangle yes
   (use-package olivetti
-    :hook
-    (text-mode . olivetti-mode)
     :bind (("C-c M o" . olivetti-mode)
            :map
            olivetti-mode-map
