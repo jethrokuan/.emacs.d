@@ -1221,7 +1221,7 @@ the bulk of my text, so I'm redefining the checker here.
     (company-dabbrev-ignore-case nil)
     (company-dabbrev-code-ignore-case nil)
     (company-dabbrev-downcase nil)
-    (company-idle-delay 0)
+    (company-idle-delay 0.5)
     (company-minimum-prefix-length 2)
     (company-require-match nil)
     (company-begin-commands '(self-insert-command))
