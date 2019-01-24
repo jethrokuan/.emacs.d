@@ -296,6 +296,7 @@ to provide my account credentials.
            ("r" . notmuch-search-reply-to-thread)
            ("R" . notmuch-search-reply-to-thread-sender)
            :map notmuch-show-mode-map
+           ("l" . jethro/notmuch-show-jump-to-latest)
            ("<tab>" . org-next-link)
            ("<backtab>". org-previous-link)
            ("C-<return>" . browse-url-at-point))
@@ -306,6 +307,20 @@ to provide my account credentials.
       (if (member "unread" (notmuch-search-get-tags))
           (notmuch-search-tag (list "-unread"))
         (notmuch-search-tag (list "+unread"))))
+    (defun jethro/notmuch-show-jump-to-latest ()
+      "Jump to the message in the current thread with the latest
+  timestamp."
+      (interactive)
+      (let ((timestamp 0)
+            latest)
+        (notmuch-show-mapc
+         (lambda () (let ((ts (notmuch-show-get-prop :timestamp)))
+                      (when (> ts timestamp)
+                        (setq timestamp ts
+                              latest (point))))))
+        (if latest
+            (goto-char latest)
+          (error "Cannot find latest message."))))
     :custom
     (message-auto-save-directory "~/.mail/drafts/")
     (message-send-mail-function 'message-send-mail-with-sendmail)
