@@ -1491,6 +1491,10 @@ The setup here depends on a few items:
 #+begin_src emacs-lisp :tangle yes
   (use-package cc-mode
     :ensure nil
+    :mode
+    ("\\.c\\'" . c-mode)
+    ("\\.cpp\\'" . c++-mode)
+    ("\\.h\\'" . c++-mode)
     :hook
     (c-mode . lsp-mode)
     (c++-mode . lsp-mode))
@@ -1535,10 +1539,10 @@ the reformatter macro to integrate ~clang-format~.
 C/C++/Objective-C.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package cquery
+  (use-package ccls
     :after lsp-mode
     :custom
-    (cquery-executable (executable-find "cquery")))
+    (ccls-executable "ccls"))
 #+end_src
 
 *** Semantic-mode
