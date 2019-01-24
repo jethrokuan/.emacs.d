@@ -1268,7 +1268,6 @@ the bulk of my text, so I'm redefining the checker here.
     (setenv "DICTIONARY" "en_GB")
     :hook
     (text-mode . flyspell-mode)
-    (prog-mode . flyspell-prog-mode)
     :custom
     (flyspell-abbrev-p t))
 
