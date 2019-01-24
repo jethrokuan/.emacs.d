@@ -18,7 +18,7 @@ INITIAL-DIRECTORY, if non-nil, is used as the root directory for search."
     (ivy-read "Directory: "
               (split-string
                (shell-command-to-string
-                (concat counsel-fd-command "--type d --exclude *.git"))
+                (concat counsel-fd-command "--type d --exclude '*.git'"))
                "\n" t)
               :initial-input initial-input
               :action (lambda (d) (dired-jump nil (expand-file-name d)))
@@ -39,7 +39,7 @@ INITIAL-DIRECTORY, if non-nil, is used as the root directory for search."
     (ivy-read "Directory: "
               (split-string
                (shell-command-to-string
-                (concat counsel-fd-command "--type f --exclude *.git"))
+                (concat counsel-fd-command "--type f --exclude '*.git'"))
                "\n" t)
               :initial-input initial-input
               :action (lambda (d) (dired-jump nil (expand-file-name d)))
