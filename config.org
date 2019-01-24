@@ -2079,9 +2079,7 @@ Other org-mode ricing configuration:
       (concat (file-name-as-directory jethro/org-gcal-directory) loc))
     (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
                                 ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
-                                ("wing.nus@gmail.com" . ,(jethro/get-gcal-file-location "wing.org"))
-                                ("linuxnus.org_f1e8c6kcuuj0k1elmhh9vboo5c@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_public.org"))
-                                ("linuxnus.org_r7v0mr9m4h4u9rjpf2chimo61o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "nushackers_private.org")))))
+                                ("15rmvcq9uehc0e4ccorj5hbm8o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "6101.org")))))
 #+END_SRC
 **** Run on Timer
 Run org-gcal-fetch every hour to update the calendars.
