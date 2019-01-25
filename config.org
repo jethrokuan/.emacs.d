@@ -1331,6 +1331,8 @@ the bulk of my text, so I'm redefining the checker here.
 ** Auto-fill-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'text-mode-hook 'auto-fill-mode)
+  (add-hook 'message-mode-hook (lambda ()
+                                 (auto-fill-mode -1)))
   (diminish 'auto-fill-mode)
 #+END_SRC
 ** Hippie Expand
@@ -2883,6 +2885,7 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
            olivetti-mode-map
            ("C-c [" . nil)
            ("C-c ]" . nil))
+    :hook (message-mode . olivetti-mode)
     :custom
     (olivetti-body-width 100))
 #+end_src
