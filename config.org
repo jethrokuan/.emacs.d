@@ -346,7 +346,7 @@ to provide my account credentials.
                               (:name "personal" :query "tag:personal")
                               (:name "nushackers" :query "tag:nushackers")
                               (:name "nus" :query "tag:nus")
-                              (:name "drafts" :query "tag:drafts"))))
+                              (:name "drafts" :query "tag:draft"))))
 #+END_SRC
 ** Org-mode Integration
 I use org-mode to manage everything. ~org-notmuch~ provides the
