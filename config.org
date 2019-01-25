@@ -1999,6 +1999,7 @@ perfectly for that Ocaml project.
             ("M-n" . outline-next-visible-heading)
             ("M-p" . outline-previous-visible-heading))
       :custom
+      (org-src-window-setup 'current-window)
       (org-return-follows-link t)
       (org-agenda-diary-file "~/.org/diary.org")
       (org-babel-load-languages
