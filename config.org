@@ -960,6 +960,55 @@ in a separate window pane quickly.
     :config
     (shackle-mode +1))
 #+END_SRC
+** Display-buffer-alist
+#+begin_src emacs-lisp :tangle yes
+  (progn
+    ;; `window.el'
+    ;; `display-buffer-alist' determines how and where buffers are displayed:
+    (bind-key "C-c w" #'window-toggle-side-windows)
+    (setq display-buffer-alist
+          ;; Help and stuff at the right
+          `((,(rx string-start (or "*Apropos"
+                                   "*Backtrace"
+                                   "*Compile-Log*"
+                                   "*Ledger Report"
+                                   "*Man"
+                                   "*Process List*"
+                                   "*Python"
+                                   "*R:"
+                                   "*Warnings*"
+                                   "*WoMan"
+                                   "*compilation"
+                                   "*eglot help"
+                                   (and (0+ anything) ".pdf")
+                                   (and (1+ not-newline) " output*"))) ; AUCTeX
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . right)
+             (reusable-frames . nil)
+             (window-width . 80)
+             (window-height . 0.45))
+            ;; Side window on bottom:
+            (,(rx string-start (or "*Calendar"
+                                   "*ert"
+                                   "*Reconcile"))
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . bottom)
+             (reusable-frames . nil))
+            ;; Right side, below the inferior buffer
+            (,(rx string-start (or "*help"
+                                   "R_x11"))
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . right)
+             (slot . 1)
+             (window-width . 80)
+             (reusable-frames . nil))
+            ;; Open shell in a single window
+            (,(rx string-start (or "*Annotate "
+                                   "*edit-indirect"
+                                   "*shell"))
+             (display-buffer-reuse-window display-buffer-same-window)
+             (reusable-frames . nil)))))
+#+end_src
 * Editing Text
 ** easy-kill
 #+BEGIN_SRC emacs-lisp :tangle yes
