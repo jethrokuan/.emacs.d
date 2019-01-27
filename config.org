@@ -1606,9 +1606,10 @@ C/C++/Objective-C.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package ccls
+    :if (executable-find "ccls")
     :after lsp-mode
     :custom
-    (ccls-executable "ccls"))
+    (ccls-executable (executable-find "ccls")))
 #+end_src
 
 *** Semantic-mode
@@ -2804,7 +2805,10 @@ Useful when handling git merge conflicts.
      :hook
      (magit-mode . hl-line-mode)
      :custom
-     (magit-auto-revert-mode nil))
+     (magit-auto-revert-mode nil)
+     :config
+     (magit-define-popup-switch 'magit-log-popup
+       ?m "Omit merge commits" "--no-merges"))
  #+END_SRC
 **** Magit-todos
 #+BEGIN_SRC emacs-lisp :tangle no
