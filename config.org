@@ -1597,7 +1597,8 @@ the reformatter macro to integrate ~clang-format~.
     :after reformatter
     :config
     (reformatter-define clang-format
-      :program clang-format-command))
+      :program clang-format-command)
+    (add-hook 'c++-mode-hook 'clang-format-on-save-mode))
 #+end_src
 
 *** Cquery
