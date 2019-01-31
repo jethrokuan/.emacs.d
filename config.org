@@ -118,20 +118,6 @@ and subdirectories when appropriate.
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
 
-** Reloading Emacs Config
-
-I want an easy way to reload my configuration when I change it. I bind
-it to =<f11>=.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/reload-init ()
-    "Reloads the config file."
-    (interactive)
-    (load-file "~/.emacs.d/init.el"))
-
-  (bind-key "<f11>" 'jethro/reload-init)
-#+END_SRC
-
 ** Emacs GC settings
 
 Reduce the frequency of garbage collection by making it happen on each
@@ -243,25 +229,6 @@ and hence I turn it off.
   (bind-key "C-c !" 'jethro/nuke-all-buffers)
 #+end_src
 
-*** compile with =<f9>=
-
-#+begin_src emacs-lisp :tangle yes
-  (defun jethro/compile ()
-    (interactive)
-    (setq-local compilation-read-command nil)
-    (call-interactively 'compile))
-
-  (bind-key "<f9>" 'jethro/compile)
-#+end_src
-
-** Auto-saving on focus out
-
-Auto save all open buffers, when Emacs loses focus.
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'focus-out-hook
-            (lambda () (save-some-buffers t)))
-#+END_SRC
-
 ** goto-addr
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package goto-addr
@@ -275,6 +242,7 @@ Auto save all open buffers, when Emacs loses focus.
     :commands (goto-address-prog-mode
                goto-address-mode))
 #+END_SRC
+
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
@@ -397,10 +365,7 @@ Remove the useless toolbars and splash screens.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package tao-theme
     :init
-    (load-theme 'tao-yang t)
-    :config
-    (use-package color-identifiers-mode
-      :defer 3))
+    (load-theme 'tao-yang t))
 #+END_SRC
 ** Rainbow-delimiters-mode
    We use rainbow delimiters to show imbalanced parenthesis.
@@ -414,16 +379,11 @@ Remove the useless toolbars and splash screens.
                         :inherit 'error))
 #+END_SRC
 
-** Color-identifiers mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package color-identifiers-mode
-    :config
-    (color-identifiers-mode +1))
-#+END_SRC
 ** Remove blinking cursor
 #+BEGIN_SRC emacs-lisp :tangle yes
   (blink-cursor-mode 0)
 #+END_SRC
+
 ** hl-todo
 Simple minor mode that highlights the todo keywords.
 
@@ -433,60 +393,13 @@ Simple minor mode that highlights the todo keywords.
     :config
     (global-hl-todo-mode))
 #+END_SRC
-* Eshell
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package eshell
-    :commands eshell
-    :bind
-    (("C-x m" . jethro/eshell-here))
-    :config
-    (require 'em-smart)
-    (let ((bash (executable-find "bash")))
-      (setq-default explicit-shell-file-name bash)
-      (setq-default shell-file-name bash))
-    (use-package esh-autosuggest
-      :hook (eshell-mode . esh-autosuggest-mode))
-    (defun jethro/eshell-here ()
-      "Opens up a new shell in projectile root. If a prefix argument is
-  passed, use the buffer's directory."
-      (interactive)
-      (let* ((projectile-name (projectile-project-name))
-             (current-directory (car
-                                 (last
-                                  (split-string
-                                   (if (buffer-file-name)
-                                       (file-name-directory (buffer-file-name))
-                                     default-directory) "/" t)))))
-        (split-window-vertically)
-        (other-window 1)
-        (if (equal projectile-name "-")
-            (progn
-              (eshell "new")
-              (rename-buffer (concat "*eshell: " current-directory "*")))
-          (projectile-with-default-dir (projectile-project-root)
-            (eshell "new")
-            (rename-buffer (concat "*eshell: " projectile-name "*"))))))
-    (defun eshell/x ()
-      (unless (one-window-p)
-        (delete-window))
-      (eshell/exit))
-    :custom
-    (eshell-scroll-to-bottom-on-input 'all)
-    (eshell-hist-ignoredups t)
-    (eshell-save-history-on-exit t)
-    (eshell-prefer-lisp-functions nil)
-    (eshell-destroy-buffer-when-process-dies t)
-    (eshell-glob-case-insensitive nil)
-    (eshell-error-if-no-glob nil)
-    (eshell-where-to-jump 'begin)
-    (eshell-review-quick-commands nil)
-    (eshell-smart-space-goes-to-end t))
 
-#+END_SRC
 * libvterm
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'vterm)
+  (bind-key "C-x m" 'vterm)
 #+END_SRC
+
 * Web Browsing with eww
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package eww
@@ -532,6 +445,7 @@ Simple minor mode that highlights the todo keywords.
                 ("f" . eww-lnum-follow)
                 ("U" . eww-lnum-universal)))
 #+END_SRC
+
 * Reading feeds with elfeed
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package elfeed
@@ -559,10 +473,6 @@ Simple minor mode that highlights the todo keywords.
     (rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
 #+END_SRC
 * Core Utilities
-** Hydra
-#+begin_src emacs-lisp :tangle no
-  (use-package hydra)
-#+end_src
 ** Ivy
 Ivy is generic completion frontend for Emacs. Ivy is more efficient,
 simpler and more customizable.
@@ -605,7 +515,6 @@ Counsel contains ivy enhancements for commonly-used functions.
     (counsel-find-file-at-point t)
     (ivy-use-virtual-buffers t)
     (ivy-display-style 'fancy)
-    (ivy-initial-inputs-alist nil)
     (ivy-use-selectable-prompt t)
     (ivy-re-builders-alist
      '((ivy-switch-buffer . ivy--regex-plus)
@@ -710,6 +619,7 @@ Counsel contains ivy enhancements for commonly-used functions.
        :config
        (beacon-mode +1))
    #+end_src
+
 ** Show Matching parenthesis
    Always show matching parenthesis.
    #+begin_src emacs-lisp :tangle yes
@@ -878,10 +788,6 @@ eventually falling back to dumb-jump.
     (smart-jump-setup-default-registers))
 #+END_SRC
 ** Dired
-*** Requiring =dired=
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'dired)
-#+END_SRC
 *** Dired for Mac OSX
 Dired requires GNU ls output, so gls needs to be installed on OSX for
 it to work properly.
@@ -891,13 +797,6 @@ it to work properly.
     (if (file-exists-p gls)
         (setq insert-directory-program gls)))
 #+END_SRC
-*** Trash files instead of deleting them
-Right now, I don't use a desktop manager that manages trash, so this
-option is not turned on.
-
-    #+BEGIN_SRC emacs-lisp :tangle no
-  (setq delete-by-moving-to-trash t)
-    #+END_SRC
 *** Sort directories first
     #+begin_src emacs-lisp :tangle yes
 (setq dired-listing-switches "-aBhl  --group-directories-first")
@@ -922,6 +821,7 @@ in a separate window pane quickly.
     :custom
     (wdired-allow-to-change-permissions t))
 #+END_SRC
+
 *** dired-narrow
     #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package dired-narrow
@@ -960,55 +860,7 @@ in a separate window pane quickly.
     :config
     (shackle-mode +1))
 #+END_SRC
-** Display-buffer-alist
-#+begin_src emacs-lisp :tangle yes
-  (progn
-    ;; `window.el'
-    ;; `display-buffer-alist' determines how and where buffers are displayed:
-    (bind-key "C-c w" #'window-toggle-side-windows)
-    (setq display-buffer-alist
-          ;; Help and stuff at the right
-          `((,(rx string-start (or "*Apropos"
-                                   "*Backtrace"
-                                   "*Compile-Log*"
-                                   "*Ledger Report"
-                                   "*Man"
-                                   "*Process List*"
-                                   "*Python"
-                                   "*R:"
-                                   "*Warnings*"
-                                   "*WoMan"
-                                   "*compilation"
-                                   "*eglot help"
-                                   (and (0+ anything) ".pdf")
-                                   (and (1+ not-newline) " output*"))) ; AUCTeX
-             (display-buffer-reuse-window display-buffer-in-side-window)
-             (side . right)
-             (reusable-frames . nil)
-             (window-width . 80)
-             (window-height . 0.45))
-            ;; Side window on bottom:
-            (,(rx string-start (or "*Calendar"
-                                   "*ert"
-                                   "*Reconcile"))
-             (display-buffer-reuse-window display-buffer-in-side-window)
-             (side . bottom)
-             (reusable-frames . nil))
-            ;; Right side, below the inferior buffer
-            (,(rx string-start (or "*help"
-                                   "R_x11"))
-             (display-buffer-reuse-window display-buffer-in-side-window)
-             (side . right)
-             (slot . 1)
-             (window-width . 80)
-             (reusable-frames . nil))
-            ;; Open shell in a single window
-            (,(rx string-start (or "*Annotate "
-                                   "*edit-indirect"
-                                   "*shell"))
-             (display-buffer-reuse-window display-buffer-same-window)
-             (reusable-frames . nil)))))
-#+end_src
+
 * Editing Text
 ** easy-kill
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1019,78 +871,9 @@ in a separate window pane quickly.
 ** visual-regexp
 #+begin_src emacs-lisp :tangle yes
   (use-package visual-regexp
-    :bind (("C-M-%" . vr/query-replace)
+    :bind (("M-q" . vr/query-replace)
            ("C-c m" . vr/mc-mark)))
 #+end_src
-** Align Regexp
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (defun jethro/align-repeat (start end regexp &optional justify-right after)
-    "Repeat alignment with respect to the given regular expression.
-  If JUSTIFY-RIGHT is non nil justify to the right instead of the
-  left. If AFTER is non-nil, add whitespace to the left instead of
-  the right."
-    (interactive "r\nsAlign regexp: ")
-    (let* ((ws-regexp (if (string-empty-p regexp)
-                          "\\(\\s-+\\)"
-                        "\\(\\s-*\\)"))
-           (complete-regexp (if after
-                                (concat regexp ws-regexp)
-                              (concat ws-regexp regexp)))
-           (group (if justify-right -1 1)))
-      (message "%S" complete-regexp)
-      (align-regexp start end complete-regexp group 1 t)))
-
-  ;; Modified answer from http://emacs.stackexchange.com/questions/47/align-vertical-columns-of-numbers-on-the-decimal-point
-  (defun jethro/align-repeat-decimal (start end)
-    "Align a table of numbers on decimal points and dollar signs (both optional)"
-    (interactive "r")
-    (require 'align)
-    (align-region start end nil
-                  '((nil (regexp . "\\([\t ]*\\)\\$?\\([\t ]+[0-9]+\\)\\.?")
-                         (repeat . t)
-                         (group 1 2)
-                         (spacing 1 1)
-                         (justify nil t)))
-                  nil))
-
-  (defmacro jethro/create-align-repeat-x (name regexp &optional justify-right default-after)
-    (let ((new-func (intern (concat "jethro/align-repeat-" name))))
-      `(defun ,new-func (start end switch)
-         (interactive "r\nP")
-         (let ((after (not (eq (if switch t nil) (if ,default-after t nil)))))
-           (jethro/align-repeat start end ,regexp ,justify-right after)))))
-
-  (jethro/create-align-repeat-x "comma" "," nil t)
-  (jethro/create-align-repeat-x "semicolon" ";" nil t)
-  (jethro/create-align-repeat-x "colon" ":" nil t)
-  (jethro/create-align-repeat-x "equal" "=")
-  (jethro/create-align-repeat-x "math-oper" "[+\\-*/]")
-  (jethro/create-align-repeat-x "ampersand" "&")
-  (jethro/create-align-repeat-x "bar" "|")
-  (jethro/create-align-repeat-x "left-paren" "(")
-  (jethro/create-align-repeat-x "right-paren" ")" t)
-  (jethro/create-align-repeat-x "backslash" "\\\\")
-
-  (defvar align-regexp-map nil "keymap for `align-regexp'")
-
-  (setq align-regexp-map (make-sparse-keymap))
-  (define-key align-regexp-map (kbd "&") 'jethro/align-repeat-ampersand)
-  (define-key align-regexp-map (kbd "(") 'jethro/align-repeat-left-paren)
-  (define-key align-regexp-map (kbd ")") 'jethro/align-repeat-right-paren)
-  (define-key align-regexp-map (kbd ",") 'jethro/align-repeat-comma)
-  (define-key align-regexp-map (kbd ".") 'jethro/align-repeat-decimal)
-  (define-key align-regexp-map (kbd ":") 'jethro/align-repeat-colon)
-  (define-key align-regexp-map (kbd ";") 'jethro/align-repeat-semicolon)
-  (define-key align-regexp-map (kbd "=") 'jethro/align-repeat-equal)
-  (define-key align-regexp-map (kbd "\\") 'jethro/align-repeat-backslash)
-  (define-key align-regexp-map (kbd "a") 'align)
-  (define-key align-regexp-map (kbd "c") 'align-current)
-  (define-key align-regexp-map (kbd "m") 'jethro/align-repeat-math-oper)
-  (define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
-  (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
-
-  (bind-key "C-x a" 'align-regexp-map)
-#+END_SRC
 ** aggressive-indent
 Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
 #+begin_src emacs-lisp :tangle yes
@@ -1102,6 +885,8 @@ Keep your text indented at all times. Remember to turn this off for indentation-
     (aggressive-indent-excluded-modes
      '(bibtex-mode
        cider-repl-mode
+       c-mode
+       c++-mode     
        coffee-mode
        comint-mode
        conf-mode
@@ -1162,7 +947,7 @@ Use this often, and in combination with multiple-cursors.
                 ("C-M-d" . sp-down-sexp)
                 ("C-M-p" . sp-backward-down-sexp)
                 ("C-M-n" . sp-up-sexp)
-                ("M-s" . sp-splice-sexp)
+                ("C-M-s" . sp-splice-sexp)
                 ("C-M-<up>" . sp-splice-sexp-killing-backward)
                 ("C-M-<down>" . sp-splice-sexp-killing-forward)
                 ("C-M-r" . sp-splice-sexp-killing-around)
@@ -1253,15 +1038,19 @@ By default proselint doesn't support org-mode, which is where I write
 the bulk of my text, so I'm redefining the checker here.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'flycheck)
-  (flycheck-define-checker proselint
-                           "A linter for prose."
-                           :command ("proselint" source-inplace)
-                           :error-patterns
-                           ((warning line-start (file-name) ":" line ":" column ": "
-                                     (id (one-or-more (not (any " "))))
-                                     (message) line-end))
-                           :modes (text-mode markdown-mode gfm-mode org-mode))
+  (use-package flycheck-proselint
+    :no-require t
+    :ensure f
+    :after flycheck
+    :config
+    (flycheck-define-checker proselint
+      "A linter for prose."
+      :command ("proselint" source-inplace)
+      :error-patterns
+      ((warning line-start (file-name) ":" line ":" column ": "
+                (id (one-or-more (not (any " "))))
+                (message) line-end))
+      :modes (text-mode markdown-mode gfm-mode org-mode)))
 #+END_SRC
 ** Templating with Yasnippet
    #+begin_src emacs-lisp :tangle yes
@@ -1308,6 +1097,7 @@ the bulk of my text, so I'm redefining the checker here.
     :hook
     (company-mode . company-quickhelp-mode))
 #+end_src
+
 ** Spellcheck with Flyspell
 #+begin_src emacs-lisp :tangle yes
   (use-package flyspell 
@@ -1387,6 +1177,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
 
   (bind-key "C-c h d" 'jethro/hydra-draw-box/body)
 #+END_SRC
+
 ** dtrt-indent
 dtrt-indent guesses the indentation settings of files, and sets the
 buffer local variables accordingly. This makes it pleasant to edit
@@ -1403,7 +1194,7 @@ corresponding text files.
   (use-package direnv
     :if (executable-find "direnv")
     :custom
-    (direnv-always-show-summary t)
+    (direnv-always-show-summary nil)
     :config
     (direnv-mode +1))
 #+END_SRC
@@ -1430,15 +1221,6 @@ corresponding text files.
     :config
     (add-to-list 'company-backends 'company-lsp))
 #+END_SRC
-
-** Semantic
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package stickyfunc-enhance
-    :after semantic
-    :config
-    (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode))
-#+end_src
 
 ** Common Lisp
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1501,6 +1283,7 @@ corresponding text files.
 *** Intero
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package intero
+    :after haskell-mode
     :hook
     (haskell-mode . intero-mode))
 #+END_SRC
@@ -1561,6 +1344,7 @@ The setup here depends on a few items:
     ("\\.c\\'" . c-mode)
     ("\\.cpp\\'" . c++-mode)
     ("\\.h\\'" . c++-mode)
+    ("\\.hpp\\'" . c++-mode)
     :hook
     (c-mode . lsp-mode)
     (c++-mode . lsp-mode))
@@ -1601,9 +1385,9 @@ the reformatter macro to integrate ~clang-format~.
     (add-hook 'c++-mode-hook 'clang-format-on-save-mode))
 #+end_src
 
-*** Cquery
+*** ccls
 [[https://github.com/cquery-project/cquery][cquery]] is a highly-scalable, low-latency language server for
-C/C++/Objective-C.
+C/C++/Objective-C. ccls is an upgraded fork of cquery.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package ccls
@@ -1612,25 +1396,6 @@ C/C++/Objective-C.
     :custom
     (ccls-executable (executable-find "ccls")))
 #+end_src
-
-*** Semantic-mode
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package semantic
-    :ensure nil
-    :hook
-    (c-mode . semantic-mode)
-    (c++-mode . semantic-mode))
-
-  (use-package srefactor
-    :after semantic
-    :bind
-    (:map c-mode-map
-          ("M-RET" . srefactor-refactor-at-point)
-          :map c++-mode-map
-          ("M-RET" . srefactor-refactor-at-point)))
-#+end_src
-
 
 ** Fish
    #+begin_src emacs-lisp :tangle yes
@@ -1664,7 +1429,9 @@ C/C++/Objective-C.
 #+END_SRC
 *** yapfify
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package yapfify)
+  (use-package yapfify
+    :commands
+    (yapfify-buffer))
 #+END_SRC
 *** pytest
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1681,6 +1448,7 @@ C/C++/Objective-C.
 *** Highlight Indent Guides
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package highlight-indent-guides
+    :defer 10
     :hook
     (python-mode . highlight-indent-guides-mode)
     :custom
@@ -2908,7 +2676,11 @@ Closes compile buffer if there are no errors.
 #+END_SRC
 ** Citations with ox-hugo and org-ref
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package org-ref
+    :after org)
+
   (use-package ox-hugo-org-ref-overrides
+    :after org org-ref ox-hugo
     :load-path "./elisp/ox-hugo-org-ref/")
 #+END_SRC
 ** pdf-tools

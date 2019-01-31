@@ -576,3 +576,318 @@ highlighting and annotations.
     :init
     (add-hook 'python-mode-hook 'sphinx-doc-mode))
 #+END_SRC
+
+* Reloading Emacs Config
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:20
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Better Defaults
+:ARCHIVE_CATEGORY: config
+:END:
+
+I want an easy way to reload my configuration when I change it. I bind
+it to =<f11>=.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/reload-init ()
+    "Reloads the config file."
+    (interactive)
+    (load-file "~/.emacs.d/init.el"))
+
+  (bind-key "<f11>" 'jethro/reload-init)
+#+END_SRC
+
+
+* Auto-saving on focus out
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:22
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Better Defaults
+:ARCHIVE_CATEGORY: config
+:END:
+
+Auto save all open buffers, when Emacs loses focus.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'focus-out-hook
+            (lambda () (save-some-buffers t)))
+#+END_SRC
+
+
+* Color-identifiers mode
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:25
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Appearance
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package color-identifiers-mode
+    :config
+    (color-identifiers-mode +1))
+#+END_SRC
+
+* Eshell
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:26
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package eshell
+    :commands eshell
+    :bind
+    (("C-x m" . jethro/eshell-here))
+    :config
+    (require 'em-smart)
+    (let ((bash (executable-find "bash")))
+      (setq-default explicit-shell-file-name bash)
+      (setq-default shell-file-name bash))
+    (use-package esh-autosuggest
+      :hook (eshell-mode . esh-autosuggest-mode))
+    (defun jethro/eshell-here ()
+      "Opens up a new shell in projectile root. If a prefix argument is
+  passed, use the buffer's directory."
+      (interactive)
+      (let* ((projectile-name (projectile-project-name))
+             (current-directory (car
+                                 (last
+                                  (split-string
+                                   (if (buffer-file-name)
+                                       (file-name-directory (buffer-file-name))
+                                     default-directory) "/" t)))))
+        (split-window-vertically)
+        (other-window 1)
+        (if (equal projectile-name "-")
+            (progn
+              (eshell "new")
+              (rename-buffer (concat "*eshell: " current-directory "*")))
+          (projectile-with-default-dir (projectile-project-root)
+            (eshell "new")
+            (rename-buffer (concat "*eshell: " projectile-name "*"))))))
+    (defun eshell/x ()
+      (unless (one-window-p)
+        (delete-window))
+      (eshell/exit))
+    :custom
+    (eshell-scroll-to-bottom-on-input 'all)
+    (eshell-hist-ignoredups t)
+    (eshell-save-history-on-exit t)
+    (eshell-prefer-lisp-functions nil)
+    (eshell-destroy-buffer-when-process-dies t)
+    (eshell-glob-case-insensitive nil)
+    (eshell-error-if-no-glob nil)
+    (eshell-where-to-jump 'begin)
+    (eshell-review-quick-commands nil)
+    (eshell-smart-space-goes-to-end t))
+
+#+END_SRC
+
+* Hydra
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:28
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Core Utilities
+:ARCHIVE_CATEGORY: config
+:END:
+#+begin_src emacs-lisp :tangle no
+  (use-package hydra)
+#+end_src
+
+* Requiring =dired=
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:31
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Moving Around/Dired
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'dired)
+#+END_SRC
+
+* Trash files instead of deleting them
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:31
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Moving Around/Dired
+:ARCHIVE_CATEGORY: config
+:END:
+Right now, I don't use a desktop manager that manages trash, so this
+option is not turned on.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+  (setq delete-by-moving-to-trash t)
+    #+END_SRC
+
+* Display-buffer-alist
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:32
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Moving Around
+:ARCHIVE_CATEGORY: config
+:END:
+#+begin_src emacs-lisp :tangle yes
+  (progn
+    ;; `window.el'
+    ;; `display-buffer-alist' determines how and where buffers are displayed:
+    (bind-key "C-c w" #'window-toggle-side-windows)
+    (setq display-buffer-alist
+          ;; Help and stuff at the right
+          `((,(rx string-start (or "*Apropos"
+                                   "*Backtrace"
+                                   "*Compile-Log*"
+                                   "*Ledger Report"
+                                   "*Man"
+                                   "*Process List*"
+                                   "*Python"
+                                   "*R:"
+                                   "*Warnings*"
+                                   "*WoMan"
+                                   "*compilation"
+                                   "*eglot help"
+                                   (and (0+ anything) ".pdf")
+                                   (and (1+ not-newline) " output*"))) ; AUCTeX
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . right)
+             (reusable-frames . nil)
+             (window-width . 80)
+             (window-height . 0.45))
+            ;; Side window on bottom:
+            (,(rx string-start (or "*Calendar"
+                                   "*ert"
+                                   "*Reconcile"))
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . bottom)
+             (reusable-frames . nil))
+            ;; Right side, below the inferior buffer
+            (,(rx string-start (or "*help"
+                                   "R_x11"))
+             (display-buffer-reuse-window display-buffer-in-side-window)
+             (side . right)
+             (slot . 1)
+             (window-width . 80)
+             (reusable-frames . nil))
+            ;; Open shell in a single window
+            (,(rx string-start (or "*Annotate "
+                                   "*edit-indirect"
+                                   "*shell"))
+             (display-buffer-reuse-window display-buffer-same-window)
+             (reusable-frames . nil)))))
+#+end_src
+
+* Align Regexp
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:33
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Editing Text
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun jethro/align-repeat (start end regexp &optional justify-right after)
+    "Repeat alignment with respect to the given regular expression.
+  If JUSTIFY-RIGHT is non nil justify to the right instead of the
+  left. If AFTER is non-nil, add whitespace to the left instead of
+  the right."
+    (interactive "r\nsAlign regexp: ")
+    (let* ((ws-regexp (if (string-empty-p regexp)
+                          "\\(\\s-+\\)"
+                        "\\(\\s-*\\)"))
+           (complete-regexp (if after
+                                (concat regexp ws-regexp)
+                              (concat ws-regexp regexp)))
+           (group (if justify-right -1 1)))
+      (message "%S" complete-regexp)
+      (align-regexp start end complete-regexp group 1 t)))
+
+  ;; Modified answer from http://emacs.stackexchange.com/questions/47/align-vertical-columns-of-numbers-on-the-decimal-point
+  (defun jethro/align-repeat-decimal (start end)
+    "Align a table of numbers on decimal points and dollar signs (both optional)"
+    (interactive "r")
+    (require 'align)
+    (align-region start end nil
+                  '((nil (regexp . "\\([\t ]*\\)\\$?\\([\t ]+[0-9]+\\)\\.?")
+                         (repeat . t)
+                         (group 1 2)
+                         (spacing 1 1)
+                         (justify nil t)))
+                  nil))
+
+  (defmacro jethro/create-align-repeat-x (name regexp &optional justify-right default-after)
+    (let ((new-func (intern (concat "jethro/align-repeat-" name))))
+      `(defun ,new-func (start end switch)
+         (interactive "r\nP")
+         (let ((after (not (eq (if switch t nil) (if ,default-after t nil)))))
+           (jethro/align-repeat start end ,regexp ,justify-right after)))))
+
+  (jethro/create-align-repeat-x "comma" "," nil t)
+  (jethro/create-align-repeat-x "semicolon" ";" nil t)
+  (jethro/create-align-repeat-x "colon" ":" nil t)
+  (jethro/create-align-repeat-x "equal" "=")
+  (jethro/create-align-repeat-x "math-oper" "[+\\-*/]")
+  (jethro/create-align-repeat-x "ampersand" "&")
+  (jethro/create-align-repeat-x "bar" "|")
+  (jethro/create-align-repeat-x "left-paren" "(")
+  (jethro/create-align-repeat-x "right-paren" ")" t)
+  (jethro/create-align-repeat-x "backslash" "\\\\")
+
+  (defvar align-regexp-map nil "keymap for `align-regexp'")
+
+  (setq align-regexp-map (make-sparse-keymap))
+  (define-key align-regexp-map (kbd "&") 'jethro/align-repeat-ampersand)
+  (define-key align-regexp-map (kbd "(") 'jethro/align-repeat-left-paren)
+  (define-key align-regexp-map (kbd ")") 'jethro/align-repeat-right-paren)
+  (define-key align-regexp-map (kbd ",") 'jethro/align-repeat-comma)
+  (define-key align-regexp-map (kbd ".") 'jethro/align-repeat-decimal)
+  (define-key align-regexp-map (kbd ":") 'jethro/align-repeat-colon)
+  (define-key align-regexp-map (kbd ";") 'jethro/align-repeat-semicolon)
+  (define-key align-regexp-map (kbd "=") 'jethro/align-repeat-equal)
+  (define-key align-regexp-map (kbd "\\") 'jethro/align-repeat-backslash)
+  (define-key align-regexp-map (kbd "a") 'align)
+  (define-key align-regexp-map (kbd "c") 'align-current)
+  (define-key align-regexp-map (kbd "m") 'jethro/align-repeat-math-oper)
+  (define-key align-regexp-map (kbd "r") 'jethro/align-repeat)
+  (define-key align-regexp-map (kbd "|") 'jethro/align-repeat-bar)
+
+  (bind-key "C-x a" 'align-regexp-map)
+#+END_SRC
+
+* Semantic
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:39
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages
+:ARCHIVE_CATEGORY: config
+:END:
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package stickyfunc-enhance
+    :after semantic
+    :config
+    (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode))
+#+end_src
+
+
+* Semantic-mode
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-01 Fri 07:40
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages/C++
+:ARCHIVE_CATEGORY: config
+:END:
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package semantic
+    :ensure nil
+    :hook
+    (c-mode . semantic-mode)
+    (c++-mode . semantic-mode))
+
+  (use-package srefactor
+    :after semantic
+    :bind
+    (:map c-mode-map
+          ("M-RET" . srefactor-refactor-at-point)
+          :map c++-mode-map
+          ("M-RET" . srefactor-refactor-at-point)))
+#+end_src
+
+
