@@ -143,7 +143,6 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
                     ;; this is an html link that has an anchor to jump back to,
                     ;; and links to the entry in the bibliography. Also contains
                     ;; a tooltip.
-
                     (format "<sup id=\"%s\"><a href=\"#%s\" title=\"%s\">%s</a></sup>"
                             ;; this makes an anchor to return to
 			                      (md5 key)
@@ -152,7 +151,7 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
                             ;; a simple formatted string, but the default has
                             ;; too much html stuff in it, and this needs to be
                             ;; cleaned of quotes and stuff,
-			                      (let ((org-ref-bibliography-files (org-ref-find-bibliography))
+                            (let ((org-ref-bibliography-files (org-ref-find-bibliography))
 				                          (file) (entry) (bibtex-entry) (entry-type) (format)
 				                          (org-ref-bibliography-entry-format
 				                           '(("article" . "%a, %t, %j, v(%n), %p (%y).")
@@ -185,14 +184,15 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
 				                            (bibtex-narrow-to-entry)
 				                            (setq entry (buffer-string)))))
 			                        (replace-regexp-in-string "\"" "" (htmlize-escape-or-link entry)))
-			                      (let ((org-ref-bibliography-files (org-ref-find-bibliography))
+                            (let ((org-ref-bibliography-files (org-ref-find-bibliography))
 				                          (file) (entry) (bibtex-entry) (entry-type) (format)
 				                          (org-ref-bibliography-entry-format
-				                           '(("article" . "(%A, %y)")
-				                             ("book" . "(%A, %y)")
-				                             ("techreport" . "(%A, %y)")
-				                             ("proceedings" . "(%A, %y)")
-				                             ("inproceedings" . "(%A, %y)"))))
+				                           '(("article" . "(%2a, %y)")
+				                             ("book" . "(%2a, %y)")
+				                             ("techreport" . "(%2a, %y)")
+				                             ("proceedings" . "(%2a, %y)")
+				                             ("inproceedings" . "(%2a, %y)")
+                                     ("misc" . "(%2a, %y)"))))
 			                        (setq file (catch 'result
 					                                 (cl-loop for file in org-ref-bibliography-files do
 						                                        (if (org-ref-key-in-file-p key (file-truename file))
