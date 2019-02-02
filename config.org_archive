@@ -891,3 +891,37 @@ option is not turned on.
 #+end_src
 
 
+
+* Custom Commands
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-02 Sat 18:54
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Better Defaults
+:ARCHIVE_CATEGORY: config
+:END:
+
+** Nuke all buffers with =C-c !=
+
+#+begin_src emacs-lisp
+  (defun jethro/nuke-all-buffers ()
+    (interactive)
+    (dolist 'kill-buffer (buffer-list))
+    (delete-other-windows))
+
+  (bind-key "C-c !" 'jethro/nuke-all-buffers)
+#+end_src
+
+
+* lsp-javascript-typescript
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-02-02 Sat 19:10
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages/Javascript
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-javascript-typescript
+    :hook
+    (js2-mode-hook . lsp-javascript-typescript-enable))
+#+END_SRC
+

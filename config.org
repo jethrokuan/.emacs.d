@@ -1,4 +1,6 @@
 #+TITLE: Jethro's Emacs Configuration
+#+PROPERTY: header-args :tangle yes
+
 * Introduction
 
 This document is a constant work-in-progress, and will contain the
@@ -44,7 +46,7 @@ Emacs usage, which involves:
 5. RSS (elfeed + elfeed-org)
 6. Getting Things Done (org-mode)
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setq user-full-name "Jethro Kuan"
         user-mail-address "jethrokuan95@gmail.com")
 #+end_src
@@ -54,26 +56,30 @@ Emacs usage, which involves:
 Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (unless (and (package-installed-p 'use-package)
-               (package-installed-p 'diminish))
-    (package-refresh-contents)
-    (package-install 'use-package)
-    (package-install 'diminish))
+#+BEGIN_SRC emacs-lisp
+  (eval-when-compile
+    (require 'package)
+    (if (memq window-system '(mac ns))
+        (progn
+          (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+          (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
+      (setq package-archives nil))
+    (package-initialize)
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package)))
 
   (require 'use-package)
-  (require 'diminish)
-  (require 'bind-key)
-
   (setq use-package-always-ensure t)
 
   ;; Always demand if daemon-mode
   (setq use-package-always-demand (daemonp))
+
 #+END_SRC
 
 * Add PATH to shell
 Only if on Mac OSX.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package exec-path-from-shell
     :ensure f
     :if (memq window-system '(mac ns))
@@ -94,7 +100,7 @@ ad-handle-definition: `tramp-read-passwd' got redefined
 
 To suppress these warnings, we accept these redefinitions:
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq ad-redefinition-action 'accept)
 #+END_SRC
 
@@ -106,7 +112,7 @@ variables to put files in either =no-littering-etc-directory=
 (defaulting to ~/.emacs.d/var/), and by using descriptive file names
 and subdirectories when appropriate. 
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package no-littering
     :config
     (require 'recentf)
@@ -123,7 +129,7 @@ Reduce the frequency of garbage collection by making it happen on each
 50MB of allocated data (the default is on every 0.76MB). Also, warn
 when opening large files.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq gc-cons-threshold 50000000)
   (setq large-file-warning-threshold 100000000)
 #+END_SRC
@@ -138,7 +144,7 @@ change, the buffers reflect the latest editions as well.
 NOTE: This can be quite slow, when the changes are massive across
 branches.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package autorevert
     :ensure f
     :diminish t
@@ -154,7 +160,7 @@ branches.
 Using the customize interface can be nice, but it tends to pollute
 =init.el=. Move all customizations to a separate file.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq custom-file "~/.emacs.d/custom.el")
 #+END_SRC
 
@@ -162,7 +168,7 @@ Using the customize interface can be nice, but it tends to pollute
 
 y/n is easier to type than yes/no
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
@@ -170,7 +176,7 @@ y/n is easier to type than yes/no
 
 Type over a selected region, instead of deleting before typing.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (delete-selection-mode 1)
 #+end_src
 
@@ -178,13 +184,13 @@ Type over a selected region, instead of deleting before typing.
 
 Emacs uses double-spaces by default. Use single spaces instead:
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setq sentence-end-double-space nil)
 #+end_src
 
 Also, use 2 spaces for tabs. Death to tabs!
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setq-default tab-width 2)
   (setq-default js-indent-level 2)
   (setq-default indent-tabs-mode nil)
@@ -195,7 +201,7 @@ Also, use 2 spaces for tabs. Death to tabs!
 Don't wrap lines for coding. Create a hook that enables wrapping, for
 text-modes like org-mode and markdown-mode.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setq-default truncate-lines t)
 
   (defun jethro/truncate-lines-hook ()
@@ -211,25 +217,12 @@ of the language server stuff that facilitates auto-completion, among
 other things. Since I use the emacs daemon, I won't face these issues,
 and hence I turn it off.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq create-lockfiles nil)
 #+END_SRC
 
-** Custom Commands
-
-*** Nuke all buffers with =C-c !=
-
-#+begin_src emacs-lisp :tangle yes
-  (defun jethro/nuke-all-buffers ()
-    (interactive)
-    (mapcar 'kill-buffer (buffer-list))
-    (delete-other-windows))
-
-  (bind-key "C-c !" 'jethro/nuke-all-buffers)
-#+end_src
-
 ** goto-addr
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package goto-addr
     :hook ((compilation-mode . goto-address-mode)
            (prog-mode . goto-address-prog-mode)
@@ -248,7 +241,7 @@ the least likely candidate for buffer selection. I bind this to ~C-z~
 which is the default keybinding for suspending a frame, which I don't
 use.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (bind-key "C-z" 'bury-buffer)
 #+end_src
 
@@ -263,7 +256,7 @@ to provide my account credentials.
 
 [[https://github.com/jethrokuan/dotfiles/tree/master/mbsync][mbsync configuration]]
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package notmuch
     :preface (setq-default notmuch-command (executable-find "notmuch"))
     :if (executable-find "notmuch")
@@ -329,7 +322,7 @@ to provide my account credentials.
 I use org-mode to manage everything. ~org-notmuch~ provides the
 facility to capture email into a task.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package org-notmuch
     :ensure f
     :after org notmuch
@@ -347,14 +340,14 @@ facility to capture email into a task.
 I use [[https://github.com/be5invis/Iosevka][Iosevka]]. Other good free alternatives include Source Code Pro,
 Office Code Pro and the Powerline font families.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq default-frame-alist '((font . "Iosevka-14")))
 #+END_SRC
 
 ** Removing UI Cruft
 Remove the useless toolbars and splash screens.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (tooltip-mode -1)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
@@ -371,14 +364,14 @@ Remove the useless toolbars and splash screens.
        (load-theme 'zenburn t))
  #+END_SRC
 *** Tao-theme
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package tao-theme
     :init
     (load-theme 'tao-yang t))
 #+END_SRC
 ** Rainbow-delimiters-mode
    We use rainbow delimiters to show imbalanced parenthesis.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
     :defer 5
     :config
@@ -389,14 +382,14 @@ Remove the useless toolbars and splash screens.
 #+END_SRC
 
 ** Remove blinking cursor
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (blink-cursor-mode 0)
 #+END_SRC
 
 ** hl-todo
 Simple minor mode that highlights the todo keywords.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package hl-todo
     :defer 5
     :config
@@ -404,13 +397,13 @@ Simple minor mode that highlights the todo keywords.
 #+END_SRC
 
 * libvterm
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (require 'vterm)
   (bind-key "C-x m" 'vterm)
 #+END_SRC
 
 * Web Browsing with eww
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package eww
     :bind
     (:map eww-mode-map
@@ -456,7 +449,7 @@ Simple minor mode that highlights the todo keywords.
 #+END_SRC
 
 * Reading feeds with elfeed
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package elfeed
     :bind
     (("<f6>" . elfeed))
@@ -464,7 +457,7 @@ Simple minor mode that highlights the todo keywords.
     (shr-width 80))
 #+END_SRC
 ** elfeed-org
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package elfeed-org
     :after elfeed
     :bind
@@ -487,12 +480,12 @@ simpler and more customizable.
 ** flx
 Flx is required for fuzzy-matching.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package flx)
 #+end_src
 ** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package counsel
     :hook
     (after-init . ivy-mode)
@@ -518,7 +511,7 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("<return>" . ivy-alt-done)
      ("M-<return>" . ivy-immediate-done)
      :map read-expression-map
-     ("C-r" . counsel-expression-history))
+     ("C-r" . counsel-minibuffer-history))
     :custom
     (counsel-find-file-at-point t)
     (ivy-use-virtual-buffers t)
@@ -535,7 +528,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
    #+end_src
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package counsel-fd
     :after counsel
     :load-path "./elisp/counsel-fd/"
@@ -544,7 +537,7 @@ Counsel contains ivy enhancements for commonly-used functions.
      ("C-x f" . counsel-fd-file-jump)))
 #+end_src
 ** Swiper
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package swiper
     :bind
     (("C-s" . swiper)
@@ -566,19 +559,19 @@ Counsel contains ivy enhancements for commonly-used functions.
     wgrep allows you to edit a grep buffer and apply those changes to the
     file buffer.
 
-    #+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp
       (use-package wgrep
         :commands
         wgrep-change-to-wgrep-mode
         ivy-wgrep-change-to-wgrep-mode)
     #+END_SRC
 ** rg
-    #+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp
   (use-package rg
     :bind* (("M-s" . rg)))
     #+END_SRC
 * Hydras
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package hydra
     :config
     (defhydra jethro/hydra-zoom ()
@@ -590,7 +583,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+end_src
 * Visual Enhancements
 ** Whitespace-mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package whitespace
     :ensure f
     :diminish whitespace-mode
@@ -600,7 +593,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (whitespace-style '(face lines-tail)))
 #+end_src
 ** Moody
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package moody
     :config
     (setq x-underline-at-descent-line t)
@@ -611,7 +604,7 @@ Counsel contains ivy enhancements for commonly-used functions.
                  (:height 1.0 :box nil :foreground "#292617" :background "#ECE9E0")))))
 #+END_SRC
 ** Minions
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package minions
     :config
     (minions-mode +1))
@@ -619,7 +612,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 ** beacon
    Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
 
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp
      (use-package beacon
        :defer 10
        :diminish beacon-mode
@@ -631,14 +624,14 @@ Counsel contains ivy enhancements for commonly-used functions.
 
 ** Show Matching parenthesis
    Always show matching parenthesis.
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp
   (show-paren-mode 1)
   (setq show-paren-delay 0)
    #+end_src
 ** volatile-highlights
    Highlights recently copied/pasted text.
 
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp
      (use-package volatile-highlights
        :defer 5
        :diminish volatile-highlights-mode
@@ -646,7 +639,7 @@ Counsel contains ivy enhancements for commonly-used functions.
        (volatile-highlights-mode +1))
    #+end_src
 ** diff-hl
-   #+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp
      (use-package diff-hl
        :defer 3
   
@@ -690,7 +683,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    This minor mode changes the binding of scroll-other-window based on
    the active major mode.
 
-   #+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp
      (defvar-local sow-scroll-up-command nil)
 
      (defvar-local sow-scroll-down-command nil)
@@ -752,11 +745,11 @@ Counsel contains ivy enhancements for commonly-used functions.
                        'pdf-view-scroll-down-or-previous-page)))
    #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp
      (sow-mode +1)
    #+END_SRC
 ** Eyebrowse
-   #+BEGIN_SRC emacs-lisp :tangle yes
+   #+BEGIN_SRC emacs-lisp
      (use-package eyebrowse
        :bind* (("M-0" . eyebrowse-switch-to-window-config-0)
                ("M-1" . eyebrowse-switch-to-window-config-1)
@@ -772,7 +765,7 @@ Counsel contains ivy enhancements for commonly-used functions.
        (eyebrowse-mode +1))
    #+END_SRC
 ** Crux
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package crux
     :bind (("C-c o" . crux-open-with)
            ("C-c D" . crux-delete-file-and-buffer)
@@ -784,7 +777,7 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+end_src
 ** avy
 Use avy to move between visible text.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package avy
     :bind*
     (("C-'" . avy-goto-char-timer))
@@ -797,7 +790,7 @@ methods to do so.
 
 If one method fails, this package will go on to the next one,
 eventually falling back to dumb-jump.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package smart-jump
     :defer 5
     :config
@@ -808,30 +801,30 @@ eventually falling back to dumb-jump.
 Dired requires GNU ls output, so gls needs to be installed on OSX for
 it to work properly.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (let ((gls "/usr/local/bin/gls"))
     (if (file-exists-p gls)
         (setq insert-directory-program gls)))
 #+END_SRC
 *** Sort directories first
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp
 (setq dired-listing-switches "-aBhl  --group-directories-first")
     #+end_src
 *** Enable dired-dwim
 This allows dired to copy/paste/move files over to the other directory
 in a separate window pane quickly.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq dired-dwim-target t)
 #+END_SRC
 *** Recursive Copying and Deleting
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp
   (setq dired-recursive-copies (quote always))
   (setq dired-recursive-deletes (quote top))
     #+end_src
 
 *** allow editing of permissions
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package wdired
     :commands wdired-mode wdired-change-to-wdired-mode
     :custom
@@ -839,21 +832,21 @@ in a separate window pane quickly.
 #+END_SRC
 
 *** dired-narrow
-    #+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp
   (use-package dired-narrow
     :bind (:map dired-mode-map
                 ("N" . dired-narrow-fuzzy)))
     #+END_SRC
 
 ** ibuffer
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package ibuffer
     :bind (([remap list-buffers] . ibuffer))
     :custom
     (ibuffer-expert t))
 #+END_SRC
 ** shackle
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package shackle
     :diminish shackle-mode
     :if (not (bound-and-true-p disable-pkg-shackle))
@@ -879,20 +872,20 @@ in a separate window pane quickly.
 
 * Editing Text
 ** easy-kill
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package easy-kill
     :bind*
     (([remap kill-ring-save] . easy-kill)))
 #+END_SRC
 ** visual-regexp
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package visual-regexp
     :bind (("M-q" . vr/query-replace)
            ("C-c m" . vr/mc-mark)))
 #+end_src
 ** aggressive-indent
 Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package aggressive-indent
     :diminish aggressive-indent-mode
     :config
@@ -938,7 +931,7 @@ Keep your text indented at all times. Remember to turn this off for indentation-
 #+end_src
 ** multiple-cursors
 A port of Sublime Text's multiple-cursors functionality.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package multiple-cursors
     :bind (("C-M-c" . mc/edit-lines)
            ("C->" . mc/mark-next-like-this)
@@ -947,12 +940,12 @@ A port of Sublime Text's multiple-cursors functionality.
 #+end_src
 ** expand-region
 Use this often, and in combination with multiple-cursors.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package expand-region
     :bind (("C-=" . er/expand-region)))
 #+end_src
 ** smartparens
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package smartparens
     :hook
     (after-init . smartparens-global-strict-mode)
@@ -995,7 +988,7 @@ Use this often, and in combination with multiple-cursors.
                (eq 32 (char-after me))))))
 #+end_src
 ** zap-up-to-char
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp
      (autoload 'zap-up-to-char "misc"
        "Kill up to, but not including ARGth occurrence of CHAR.
 
@@ -1008,14 +1001,14 @@ Use this often, and in combination with multiple-cursors.
 Only lines touched get trimmed. If the white space at end of buffer is
 changed, then blank lines at the end of buffer are truncated
 respecting require-final-newline. Trimming only happens when saving.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package ws-butler
     :diminish 'ws-butler-mode
     :hook
     (prog-mode . ws-butler-mode))
 #+END_SRC
 ** Linting with Flycheck
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package flycheck
        :config
        (global-flycheck-mode +1)
@@ -1059,7 +1052,7 @@ respecting require-final-newline. Trimming only happens when saving.
 By default proselint doesn't support org-mode, which is where I write
 the bulk of my text, so I'm redefining the checker here.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package flycheck-proselint
     :no-require t
     :ensure f
@@ -1075,7 +1068,7 @@ the bulk of my text, so I'm redefining the checker here.
       :modes (text-mode markdown-mode gfm-mode org-mode)))
 #+END_SRC
 ** Templating with Yasnippet
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package yasnippet
        :diminish yas-global-mode yas-minor-mode
        :config
@@ -1084,7 +1077,7 @@ the bulk of my text, so I'm redefining the checker here.
        (yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
    #+end_src
 ** Autocompletions with Company
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package company
     :defer 3
     :diminish company-mode
@@ -1121,7 +1114,7 @@ the bulk of my text, so I'm redefining the checker here.
 #+end_src
 
 ** Spellcheck with Flyspell
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package flyspell 
     :ensure f
     :diminish flyspell-mode
@@ -1141,14 +1134,14 @@ the bulk of my text, so I'm redefining the checker here.
     :after flyspell-correct)
 #+end_src
 ** Auto-fill-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (add-hook 'text-mode-hook 'auto-fill-mode)
   (add-hook 'message-mode-hook (lambda ()
                                  (auto-fill-mode -1)))
   (diminish 'auto-fill-mode)
 #+END_SRC
 ** Hippie Expand
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (bind-key "M-/" 'hippie-expand)
 
   (setq hippie-expand-try-functions-list
@@ -1166,7 +1159,7 @@ the bulk of my text, so I'm redefining the checker here.
 #+END_SRC
 ** Fill and unfill paragraphs
 Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-single-key.html.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defun endless/fill-or-unfill ()
     "Like `fill-paragraph', but unfill if used twice."
     (interactive)
@@ -1181,7 +1174,7 @@ Stolen from http://endlessparentheses.com/fill-and-unfill-paragraphs-with-a-sing
                   #'endless/fill-or-unfill)
 #+END_SRC
 ** Keyboard hydra
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defhydra jethro/hydra-draw-box (:color pink)
     "Draw box with IBM single line box characters (ESC to Quit)."
     ("ESC" nil :color blue) ;; Esc to exit.
@@ -1205,14 +1198,14 @@ dtrt-indent guesses the indentation settings of files, and sets the
 buffer local variables accordingly. This makes it pleasant to edit
 corresponding text files.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package dtrt-indent
     :diminish t
     :config
     (dtrt-indent-mode +1))
 #+END_SRC
 * Direnv
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package direnv
     :if (executable-find "direnv")
     :custom
@@ -1222,7 +1215,7 @@ corresponding text files.
 #+END_SRC
 * Languages
 ** Language Servers
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package lsp-mode
     :commands lsp-mode
     :hook
@@ -1245,7 +1238,7 @@ corresponding text files.
 #+END_SRC
 
 ** Common Lisp
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package slime
     :commands slime
     :custom
@@ -1258,22 +1251,22 @@ corresponding text files.
     (slime-setup '(slime-company)))
 #+END_SRC
 ** Emacs Lisp
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 #+end_src
 ** Elixir
 *** elixir-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package elixir-mode
     :mode "\\.ex[s]?\\'")
 #+END_SRC
 *** Alchemist
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package alchemist
     :after elixir-mode)
 #+END_SRC
 ** Docker
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package docker
     :commands docker-mode)
 
@@ -1281,7 +1274,7 @@ corresponding text files.
     :mode "Dockerfile\\'")
 #+END_SRC
 ** Nix
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package nix-mode
     :mode "\\.nix\\'"
     :custom
@@ -1294,7 +1287,7 @@ corresponding text files.
           ("C-. u" . nix-update)))
 #+END_SRC
 ** Haskell
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package haskell-mode
     :mode ("\\.hs\\'" . haskell-mode)
     :init
@@ -1303,14 +1296,14 @@ corresponding text files.
                 (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks"))))
 #+END_SRC
 *** Intero
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package intero
     :after haskell-mode
     :hook
     (haskell-mode . intero-mode))
 #+END_SRC
 ** Go
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package go-mode
        :mode ("\\.go\\'" . go-mode)
        :hook
@@ -1331,9 +1324,10 @@ corresponding text files.
      (use-package go-dlv
        :after go-mode)
 
-     (defvar jethro/golint-path nil "Path to golint binary.")
+     (defvar jethro/golint-path "" "Path to golint binary.")
 
-     (setq jethro/golint-path (concat (getenv "GOPATH") "/src/github.com/golang/lint/misc/emacs"))
+     (when (getenv "GOPATH")
+       (setq jethro/golint-path (concat (getenv "GOPATH") "/src/github.com/golang/lint/misc/emacs")))
 
      (when (file-directory-p jethro/golint-path)
        (use-package golint
@@ -1359,7 +1353,7 @@ The setup here depends on a few items:
 2.  We use ~clang-format~, with [[https://github.com/purcell/reformatter.el][reformatter.el]]
 
 *** cc-mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package cc-mode
     :ensure nil
     :mode
@@ -1372,7 +1366,7 @@ The setup here depends on a few items:
     (c++-mode . lsp-mode))
 #+end_src
 *** C++ compile function
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (add-hook 'c++-mode-hook
             (lambda ()
               (unless (file-exists-p "Makefile")
@@ -1388,7 +1382,7 @@ The setup here depends on a few items:
 ~clang-format~ ships with the clang-family of tools. Here we use
 the reformatter macro to integrate ~clang-format~.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package reformatter
     :load-path "./elisp/reformatter.el")
 
@@ -1411,7 +1405,7 @@ the reformatter macro to integrate ~clang-format~.
 [[https://github.com/cquery-project/cquery][cquery]] is a highly-scalable, low-latency language server for
 C/C++/Objective-C. ccls is an upgraded fork of cquery.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package ccls
     :if (executable-find "ccls")
     :after lsp-mode
@@ -1420,43 +1414,43 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
 #+end_src
 
 ** Fish
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package fish-mode
        :mode ("\\.fish\\'" . fish-mode))
    #+end_src
 ** Rust
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
 (use-package rust-mode
   :mode ("\\.rs\\'" . rust-mode))
    #+end_src
 ** Python
 *** Python Path
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (eval-after-load "python-mode"
     (lambda ()
       (setq python-remove-cwd-from-path t)))
 #+END_SRC
 *** lsp-python
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package lsp-python
     :after lsp-mode company-lsp
     :hook
     (python-mode . lsp-python-enable))
 #+END_SRC
 *** isort
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package py-isort
     :commands
     (py-isort-buffer py-isort-region))
 #+END_SRC
 *** yapfify
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package yapfify
     :commands
     (yapfify-buffer))
 #+END_SRC
 *** pytest
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package pytest
     :bind (:map python-mode-map
                 ("C-c a" . pytest-all)
@@ -1468,7 +1462,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
                 ("C-c p ." . pytest-pdb-one)))
 #+END_SRC
 *** Highlight Indent Guides
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package highlight-indent-guides
     :defer 10
     :hook
@@ -1477,7 +1471,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     (highlight-indent-guides-method 'character))
 #+END_SRC
 *** Isend-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package isend-mode
     :bind
     (:map isend-mode-map
@@ -1486,7 +1480,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     (isend-mode. isend-default-python-setup))
 #+END_SRC
 *** Pyment
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package buftra
     :load-path "./elisp")
 
@@ -1498,7 +1492,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
 #+END_SRC
 ** HTML
 *** web-mode
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package web-mode
         :mode (("\\.html\\'" . web-mode)
                ("\\.html\\.erb\\'" . web-mode)
@@ -1519,7 +1513,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
                       web-mode-attr-indent-offset 2))
     #+end_src
 *** Emmet-mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package emmet-mode
     :diminish emmet-mode
     :hook
@@ -1528,7 +1522,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
 #+end_src
 ** CSS
 *** Rainbow-mode
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package rainbow-mode
         :diminish rainbow-mode
         :hook
@@ -1536,7 +1530,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
         (scss-mode . rainbow-mode))
     #+end_src
 *** SCSS-mode
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package scss-mode
         :mode "\\.scss\\'" 
         :custom
@@ -1544,7 +1538,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     #+end_src
 ** Javascript
 *** JS2-mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package js2-mode
     :hook
     (web-mode-hook . js2-minor-mode)
@@ -1556,7 +1550,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     (js-switch-indent-offset 2))
 #+end_src
 *** Indium
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package indium
     :after js2-mode
     :bind (:map js2-mode-map
@@ -1565,8 +1559,9 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     ((js2-mode . indium-interaction-mode)))
 #+END_SRC
 *** js-doc
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package js-doc
+    :after js2-mode
     :bind (:map js2-mode-map
                 ("C-c i" . js-doc-insert-function-doc)
                 ("@" . js-doc-insert-tag))
@@ -1577,47 +1572,40 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     (js-doc-license "MIT"))
 #+END_SRC
 
-*** lsp-javascript-typescript
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package lsp-javascript-typescript
-    :hook
-    (js2-mode-hook . lsp-javascript-typescript-enable))
-#+END_SRC
-
 *** prettier
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package prettier-js
     :hook
     (js2-minor-mode . prettier-js-mode))
 #+END_SRC
 ** Java
 *** Google C Style
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package google-c-style
     :commands
     (google-set-c-style))
 #+END_SRC
 *** Java LSP Setup
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package lsp-java
     :after lsp-mode
     :hook
     (java-mode . lsp-java-enable))
 #+END_SRC
 *** Groovy mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package groovy-mode
     :mode ("\\.gradle\\'" . groovy-mode))
 #+END_SRC
 ** Typescript
 *** typescript-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package typescript-mode
     :mode "\\.ts\\'")
 #+END_SRC
 
 *** Tide
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package tide
     :after typescript-mode
     :hook
@@ -1629,7 +1617,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
                          (company-mode +1))))
 #+END_SRC
 ** JSON
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package json-mode
        :mode "\\.json\\'"
        :hook
@@ -1638,7 +1626,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
                       (setq js-indent-level 2))))
    #+end_src
 ** Markdown
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp 
      (use-package markdown-mode
        :mode ("\\.md\\'" . markdown-mode)
        :commands (markdown-mode gfm-mode)
@@ -1651,13 +1639,13 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
        (markdown-live-preview-delete-export 'delete-on-destroy))
    #+end_src
 ** AsciiDoc
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package adoc-mode
     :mode ("\\.adoc\\'" . adoc-mode))
 #+END_SRC
 ** Clojure
 *** Clojure-mode
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package clojure-mode
         :mode (("\\.clj\\'" . clojure-mode)
                ("\\.boot\\'" . clojure-mode)
@@ -1669,7 +1657,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
         (clojure-mode . cider-mode))
     #+end_src
 *** Cider
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package cider
         :after clojure-mode
         :hook
@@ -1691,7 +1679,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
         (cider-repl-toggle-pretty-printing))
     #+end_src
 *** clj-refactor
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package clj-refactor
         :after clojure-mode cider
         :defines cljr-add-keybindings-with-prefix
@@ -1703,7 +1691,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
         (cljr-add-keybindings-with-prefix "C-c C-j"))
     #+end_src
 *** Squiggly-clojure
-    #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp 
       (use-package flycheck-clojure
         :after flycheck clojure-mode
         :config
@@ -1711,7 +1699,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     #+end_src
 ** Latex
 *** AucTeX
-    #+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp 
       (use-package auctex
         :defer t
         :mode ("\\.tex\\'" . latex-mode)
@@ -1738,17 +1726,17 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
         (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
     #+END_SRC
 *** Autocomplete support
-    #+BEGIN_SRC emacs-lisp :tangle yes
+    #+BEGIN_SRC emacs-lisp 
       (use-package company-auctex
         :after auctex company-mode)
     #+END_SRC
 ** Yaml
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package yaml-mode
     :mode ("\\.yaml\\'" . yaml-mode))
 #+END_SRC
 ** Scala
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package ensime
     :commands ensime ensime-mode)
 #+END_SRC
@@ -1758,7 +1746,7 @@ required elisp libraries are only available in the nix-shell. This
 mean I have to launch a separate emacs instance that is setup
 perfectly for that Ocaml project.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defun in-nix-shell-p ()
     (string-equal (getenv "IN_NIX_SHELL") "1"))
 
@@ -1775,6 +1763,11 @@ perfectly for that Ocaml project.
               utop-command               (format "utop -emacs -init %s" ocamlinit))))
     :custom
     (tuareg-indent-align-with-first-arg . nil))
+
+  (defvar jethro/merlin-site-elisp nil "Site lisp directory for Merlin.")
+  (defvar jethro/utop-site-elisp  nil "Site lisp directory for utop.")
+  (defvar jethro/ocp-site-elisp nil "Site lisp directory for ocp-indent.")
+  (defvar jethro/dune-site-elisp nil "Site lisp directory for dune.")
 
   (setq jethro/merlin-site-elisp (getenv "MERLIN_SITE_LISP"))
   (setq jethro/utop-site-elisp (getenv "UTOP_SITE_LISP"))
@@ -1809,7 +1802,7 @@ perfectly for that Ocaml project.
     :load-path jethro/ocp-site-elisp)
 #+END_SRC
 ** R
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package ess)
 #+END_SRC
 * Org-Mode
@@ -1828,7 +1821,7 @@ perfectly for that Ocaml project.
     (package-initialize))
   #+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle yes
+  #+BEGIN_SRC emacs-lisp 
     (use-package org
       :ensure org-plus-contrib
       :mode ("\\.org\\'" . org-mode)
@@ -1862,13 +1855,13 @@ perfectly for that Ocaml project.
       :config
       (require 'org-habit)
       (require 'org-tempo)
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle yes")))
+      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp ")))
   #+END_SRC
 
 *** Variable Pitch Mode
 We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (add-hook 'org-mode-hook
              '(lambda ()
                 (setq line-spacing 0.2) ;; Add more line padding for readability
@@ -1889,20 +1882,20 @@ We use a font that's easier on the eyes for long blocks of text. (ET Bembo)
 
 Other org-mode ricing configuration:
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (setq org-startup-indented t
         org-hide-emphasis-markers t
         org-pretty-entities nil)
 #+END_SRC
 
 *** Helper Functions
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defun org-archive-done-tasks ()
     (interactive)
     (org-map-entries 'org-archive-subtree "/DONE" 'file))
 #+END_SRC
 *** Org Gcal
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package password-store
     :defer 10
     :init
@@ -1926,7 +1919,7 @@ Other org-mode ricing configuration:
 #+END_SRC
 **** Run on Timer
 Run org-gcal-fetch every hour to update the calendars.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (run-at-time (* 60 60) nil
                (lambda ()
                  (let ((inhibit-message t))
@@ -1977,7 +1970,7 @@ Other references include:
  | next        | This contains one-off tasks that don't belong to projects.                                                                |
  | projects    | This contains the list of projects, and their corresponding todo items                                                    |
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (require 'find-lisp)
    (setq jethro/org-agenda-directory "~/.org/gtd/")
    (setq org-agenda-files
@@ -1989,7 +1982,7 @@ Other references include:
  =org-capture=. The capture template is kept simple, to minimize
  friction in capturing new items as they pop up.
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (setq org-capture-templates
          `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
             "* TODO %?")
@@ -2038,7 +2031,7 @@ Other references include:
 **** Org Agenda Inbox View
  This view is where I see all my inbox items: it is a simple list of
  captured items in =inbox.org=.
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (require 'org-agenda)
    (setq jethro/org-agenda-inbox-view
          `("i" "Inbox" todo ""
@@ -2049,7 +2042,7 @@ Other references include:
 
 **** Org Agenda Someday View
 This view is where I review the things I would like to do someday:
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (setq jethro/org-agenda-someday-view
         `("s" "Someday" todo ""
           ((org-agenda-files '("~/.org/gtd/someday.org")))))
@@ -2060,7 +2053,7 @@ This view is where I review the things I would like to do someday:
 **** Org Agenda Reading view
 This view is where I see items I have queued up in my reading list.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (setq jethro/org-agenda-reading-view
         `("r" "Reading" todo ""
           ((org-agenda-files '("~/.org/gtd/reading.org")))))
@@ -2084,7 +2077,7 @@ This view is where I see items I have queued up in my reading list.
  an item transitions to these states. Note that the triggers only
  happen with "slow" state transitions, i.e. =C-c C-t=.
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (setq org-todo-keywords
          '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
            (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
@@ -2096,7 +2089,7 @@ This view is where I see items I have queued up in my reading list.
 **** The Process
 ***** Step 1: Clarifying
 ****** Tags
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (setq org-tag-alist (quote (("@errand" . ?e)
                                ("@office" . ?o)
                                ("@home" . ?h)
@@ -2124,7 +2117,7 @@ This view is where I see items I have queued up in my reading list.
  stronger, I'd create a dedicated buffer with a template each time a
  project is created.
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    ;; https://github.com/syl20bnr/spacemacs/issues/3094
    (setq org-refile-use-outline-path 'file
          org-outline-path-complete-in-steps nil)
@@ -2135,7 +2128,7 @@ This view is where I see items I have queued up in my reading list.
                               ("projects.org" :maxlevel . 1)))
  #+END_SRC
 
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (defvar jethro/org-agenda-bulk-process-key ?f
      "Default key for bulk processing inbox items.")
 
@@ -2197,7 +2190,7 @@ This view is where I see items I have queued up in my reading list.
    (define-key org-agenda-mode-map "c" 'jethro/org-inbox-capture)
  #+END_SRC
 **** Clocking in
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defun jethro/set-todo-state-next ()
     "Visit each parent task and change NEXT states to TODO"
     (org-todo "NEXT"))
@@ -2206,7 +2199,7 @@ This view is where I see items I have queued up in my reading list.
 #+END_SRC
 *** Stage 3: Reviewing
 **** Custom agenda Commands
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (setq org-agenda-block-separator nil)
    (setq org-agenda-start-with-log-mode t)
 
@@ -2266,12 +2259,12 @@ This view is where I see items I have queued up in my reading list.
    (bind-key "<f1>" 'jethro/switch-to-agenda)
  #+END_SRC
 **** Column View
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
 #+END_SRC
 *** Stage 4: Doing
 **** Org-pomodoro
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package org-pomodoro
     :after org
     :bind
@@ -2286,7 +2279,7 @@ This view is where I see items I have queued up in my reading list.
  org-mode link with a title of a page found by the URL into the
  current buffer.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package org-cliplink
     :bind
     ("C-c C" . 'jethro/org-capture-link)
@@ -2297,7 +2290,7 @@ This view is where I see items I have queued up in my reading list.
       (org-capture nil "l")))
 #+END_SRC
 *** Deft
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package deft
     :after org
     :bind
@@ -2308,7 +2301,7 @@ This view is where I see items I have queued up in my reading list.
     (deft-use-filename-as-title t))
 #+END_SRC
 *** Exporting Deft Notes
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (defun jethro/org-export-deft-file (file)
     (interactive)
     (org-html-export-to-html t t))
@@ -2316,7 +2309,7 @@ This view is where I see items I have queued up in my reading list.
 *** Org Download
 This extension facilitates moving images from point A to point B. Use
 this to capture screenshots into deft.
- #+BEGIN_SRC emacs-lisp :tangle yes
+ #+BEGIN_SRC emacs-lisp 
    (use-package org-download
      :after org
      :bind
@@ -2352,7 +2345,7 @@ this to capture screenshots into deft.
      (setq org-download-method 'my-org-download-method))
  #+END_SRC
 ** Org Mode for Journalling
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package org-journal
     :custom
     (org-journal-dir "~/.org/journal/"))
@@ -2360,7 +2353,7 @@ this to capture screenshots into deft.
 ** Org Mode for Blogging
 I use ox-hugo.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package ox-hugo
     :after org
     :custom
@@ -2372,13 +2365,11 @@ I use ox-hugo.
 #+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
   (use-package ox-latex
-    :defer 3
     :after org
     :ensure f
     :config
-    (require 'ox-latex)
     :custom
     (org-latex-pdf-process
      '("pdflatex -shell-escape -interaction nonstopmode %f"
@@ -2477,43 +2468,31 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
       3
       "Column count for multicolumn export.")
 
-    (defmacro jethro/-org-multicol (action)
-      `(lambda (async subtreep visible-only body-only)
-         (let ((contents (buffer-string))
-               (buffer-name (file-name-sans-extension buffer-file-name))
-               (col-count jethro/org-multicol-latex-column-count))
-           (with-temp-buffer
-             (insert "#+LATEX_CLASS: latex-notes\n")
-             (insert contents)
-             (goto-char (point-min))
-             (org-next-visible-heading 1)
-             (insert
-              (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
-             (goto-char (point-max))
-             (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
-             (org-export-to-file 'latex (format "%s.tex" buffer-name)
-               async subtreep visible-only body-only ,action)))))
-
-    (setq jethro/org-multicol-to-latex (jethro/-org-multicol nil)
-          jethro/org-multicol-to-pdf (jethro/-org-multicol (lambda (file) (org-latex-compile file))))
+    (defun jethro/org-multicol-to-pdf (async subtreep visible-only body-only)
+      (let ((contents (buffer-string))
+            (buffer-name (file-name-sans-extension buffer-file-name))
+            (col-count jethro/org-multicol-latex-column-count))
+        (with-temp-buffer
+          (insert "#+LATEX_CLASS: latex-notes\n")
+          (insert contents)
+          (goto-char (point-min))
+          (org-next-visible-heading 1)
+          (insert
+           (format "#+BEGIN_EXPORT latex\n\\begin{multicols*}{%s}\n#+END_EXPORT\n" col-count))
+          (goto-char (point-max))
+          (insert "#+BEGIN_EXPORT latex\n\\end{multicols*}\n#+END_EXPORT")
+          (org-export-to-file 'latex (format "%s.tex" buffer-name)
+            async subtreep visible-only body-only nil (lambda (file) (org-latex-compile file))))))
 
     (org-export-define-derived-backend 'latex-notes 'latex
       :menu-entry
       '(?L "Export to LaTeX notes"
-           ((?l "Export to LaTeX" jethro/org-multicol-to-latex)
-            (?p "Export to PDF" jethro/org-multicol-to-pdf)))))
-
-
-
-
-
-
-
+           ((?p "Export to PDF" jethro/org-multicol-to-pdf)))))
 #+end_src
 * Project Management
 ** Version Control
 *** vc
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package vc
     :bind (("C-x v =" . jethro/vc-diff)
            ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
@@ -2543,7 +2522,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
 *** Smerge-mode
 Useful when handling git merge conflicts.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp 
   (use-package smerge-mode
     :bind (("C-c h s" . jethro/hydra-smerge/body))
     :init
@@ -2573,14 +2552,14 @@ Useful when handling git merge conflicts.
       ("n" smerge-next)
       ("p" smerge-prev)
       ("b" smerge-keep-base)
-      ("u" smerge-keep-mine)
-      ("l" smerge-keep-other)
+      ("u" smerge-keep-upper)
+      ("l" smerge-keep-lower)
       ("a" smerge-keep-all)
       ("RET" smerge-keep-current)
       ("\C-m" smerge-keep-current)
-      ("<" smerge-diff-base-mine)
-      ("=" smerge-diff-mine-other)
-      (">" smerge-diff-base-other)
+      ("<" smerge-diff-base-upper)
+      ("=" smerge-diff-upper-lower)
+      (">" smerge-diff-base-lower)
       ("R" smerge-refine)
       ("E" smerge-ediff)
       ("C" smerge-combine-with-next)
@@ -2589,12 +2568,12 @@ Useful when handling git merge conflicts.
       ("q" nil "cancel" :color blue)))
 #+end_src
 *** Magit
- #+begin_src emacs-lisp :tangle yes
+ #+begin_src emacs-lisp
    (use-package magit
      :bind (("s-g" . magit-status)
             ("C-c g" . magit-status)
-            ("s-G" . magit-blame)
-            ("C-c G" . magit-blame))
+            ("s-G" . magit-blame-addition)
+            ("C-c G" . magit-blame-addition))
      :hook
      (magit-mode . hl-line-mode)
      :custom
@@ -2620,7 +2599,7 @@ Useful when handling git merge conflicts.
 
 *** Git-link
 Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositories.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package git-link
     :commands
     (git-link git-link-commit git-link-homepage)
@@ -2628,22 +2607,21 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
     (git-link-use-commit t))
 #+END_SRC
 *** Gists
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package gist
     :defer 10)
 #+END_SRC
 ** Projectile
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package projectile
-    :init
-    (setq projectile-keymap-prefix (kbd "C-x p"))
     :custom
     (projectile-use-git-grep t)
     (projectile-create-missing-test-files t)
     (projectile-completion-system 'ivy)
     (projectile-switch-project-action  #'projectile-commander)
     :config
-    (projectile-global-mode +1)
+    (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
+    (projectile-mode +1)
     (def-projectile-commander-method ?S
       "Run a search in the project"
       (counsel-projectile-rg))
@@ -2655,17 +2633,7 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
       (projectile-dired))
     (def-projectile-commander-method ?g
       "Show magit status."
-      (magit-status))
-    (def-projectile-commander-method ?j
-      "Jack-in."
-      (let* ((opts (projectile-current-project-files))
-             (file (ivy-read
-                    "Find file: " 
-                    opts)))
-        (find-file (expand-file-name
-                    file (projectile-project-root)))
-        (run-hooks 'projectile-find-file-hook)
-        (cider-jack-in))))
+      (magit-status)))
 
   (use-package counsel-projectile
     :after ivy projectile
@@ -2675,7 +2643,7 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
 #+end_src
 * Miscellaneous
 ** Olivetti
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package olivetti
     :bind (("C-c M o" . olivetti-mode)
            :map
@@ -2688,18 +2656,18 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package bury-successful-compilation
     :hook
     (prog-mode . bury-successful-compilation))
 #+end_src
 ** Stack Exchange
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package sx
     :commands sx)
 #+END_SRC
 ** Citations with ox-hugo and org-ref
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (use-package org-ref
     :after org)
 
@@ -2708,7 +2676,7 @@ Closes compile buffer if there are no errors.
     :load-path "./elisp/ox-hugo-org-ref/")
 #+END_SRC
 ** pdf-tools
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package pdf-tools
     :config
     (pdf-tools-install))
