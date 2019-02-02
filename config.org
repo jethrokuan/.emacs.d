@@ -61,10 +61,9 @@ maintaining tidiness and performance.
     (package-install 'use-package)
     (package-install 'diminish))
 
-  (eval-when-compile
-    (require 'use-package)
-    (require 'diminish)
-    (require 'bind-key))
+  (require 'use-package)
+  (require 'diminish)
+  (require 'bind-key)
 
   (setq use-package-always-ensure t)
 
@@ -242,6 +241,16 @@ and hence I turn it off.
     :commands (goto-address-prog-mode
                goto-address-mode))
 #+END_SRC
+
+** Bury buffers
+This puts the buffer at the end of the list for all buffers, making it
+the least likely candidate for buffer selection. I bind this to ~C-z~
+which is the default keybinding for suspending a frame, which I don't
+use.
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-key "C-z" 'bury-buffer)
+#+end_src
 
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
@@ -472,17 +481,16 @@ Simple minor mode that highlights the todo keywords.
     :custom
     (rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
 #+END_SRC
-* Core Utilities
-** Ivy
+* Ivy
 Ivy is generic completion frontend for Emacs. Ivy is more efficient,
 simpler and more customizable.
-*** flx
+** flx
 Flx is required for fuzzy-matching.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package flx)
 #+end_src
-*** Counsel
+** Counsel
 Counsel contains ivy enhancements for commonly-used functions.
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel
@@ -535,7 +543,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (("C-x j" . counsel-fd-dired-jump)
      ("C-x f" . counsel-fd-file-jump)))
 #+end_src
-*** Swiper
+** Swiper
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package swiper
     :bind
@@ -554,7 +562,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (counsel-grep-base-command
      "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
 #+END_SRC
-*** wgrep
+** wgrep
     wgrep allows you to edit a grep buffer and apply those changes to the
     file buffer.
 
@@ -564,11 +572,22 @@ Counsel contains ivy enhancements for commonly-used functions.
         wgrep-change-to-wgrep-mode
         ivy-wgrep-change-to-wgrep-mode)
     #+END_SRC
-*** rg
+** rg
     #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package rg
     :bind* (("M-s" . rg)))
     #+END_SRC
+* Hydras
+#+begin_src emacs-lisp :tangle yes
+  (use-package hydra
+    :config
+    (defhydra jethro/hydra-zoom ()
+      "zoom"
+      ("i" text-scale-increase "in")
+      ("o" text-scale-decrease "out"))
+
+    (bind-key "C-c h z" 'jethro/hydra-zoom/body))
+#+end_src
 * Visual Enhancements
 ** Whitespace-mode
 #+begin_src emacs-lisp :tangle yes
@@ -597,16 +616,6 @@ Counsel contains ivy enhancements for commonly-used functions.
     :config
     (minions-mode +1))
 #+END_SRC
-** Zooming
-#+begin_src emacs-lisp :tangle yes
-  (with-eval-after-load 'hydra
-    (defhydra jethro/hydra-zoom ()
-      "zoom"
-      ("i" text-scale-increase "in")
-      ("o" text-scale-decrease "out"))
-
-    (bind-key "C-c h z" 'jethro/hydra-zoom/body))
-#+end_src
 ** beacon
    Beacon makes sure you don't lose track of your cursor when jumping around a buffer.
 
@@ -640,7 +649,7 @@ Counsel contains ivy enhancements for commonly-used functions.
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package diff-hl
        :defer 3
-       :bind (("C-c h v" . jethro/hydra-diff-hl/body))
+  
        :hook
        (dired-mode . diff-hl-dired-mode)
        :init
@@ -656,8 +665,13 @@ Counsel contains ivy enhancements for commonly-used functions.
          "List of hooks of major modes in which diff-hl-mode should be enabled.")
 
        (dolist (hook jethro/diff-hl-mode-hooks)
-         (add-hook hook #'diff-hl-flydiff-mode))
+         (add-hook hook #'diff-hl-flydiff-mode)))
 
+     (use-package diff-hl-hydra
+       :ensure f
+       :after hydra
+       :no-require t
+       :config
        (defhydra jethro/hydra-diff-hl (:color red)
          "diff-hl"
          ("=" diff-hl-diff-goto-hunk "goto hunk")
@@ -667,7 +681,9 @@ Counsel contains ivy enhancements for commonly-used functions.
          ("p" diff-hl-previous-hunk "prev hunk")
          ("]" diff-hl-next-hunk "next hunk")
          ("n" diff-hl-next-hunk "next hunk")
-         ("q" nil "cancel")))
+         ("q" nil "cancel"))
+
+       (bind-key "C-c h v" #'jethro/hydra-diff-hl/body))
    #+END_SRC
 * Moving Around
 ** Scroll Other Window
@@ -1001,7 +1017,6 @@ respecting require-final-newline. Trimming only happens when saving.
 ** Linting with Flycheck
    #+begin_src emacs-lisp :tangle yes
      (use-package flycheck
-       :bind (("C-c h f" . jethro/hydra-flycheck/body))
        :config
        (global-flycheck-mode +1)
 
@@ -1014,8 +1029,13 @@ respecting require-final-newline. Trimming only happens when saving.
        (setq flycheck-executable-find
              (lambda (cmd)
                (direnv-update-environment default-directory)
-               (executable-find cmd)))
+               (executable-find cmd))))
 
+     (use-package flycheck-hydra
+       :ensure f
+       :no-require t
+       :after flycheck hydra
+       :config
        (defhydra jethro/hydra-flycheck
          (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
                :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
@@ -1026,7 +1046,9 @@ respecting require-final-newline. Trimming only happens when saving.
          ("p"  flycheck-previous-error                                   "Previous")
          ("<" flycheck-first-error                                      "First")
          (">"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-         ("q"  nil)))
+         ("q"  nil))
+
+       (bind-key "C-c h f" #'jethro/hydra-flycheck/body))
 
      (use-package flycheck-pos-tip
        :after flycheck
@@ -1932,6 +1954,10 @@ inspiration when implementing GTD in org-mode.
  additional customizations that make it more similar to the ideal
  system that David Allen speaks about.
 
+Other references include:
+
+- [[http://howardism.org/Technical/Emacs/getting-boxes-done.html][Getting Boxes Done]]
+
 *** Organizing Your Life Into Org-mode Files
  Bernt Hansen uses separate files as logical groups, such as a
  separation between work and life. This may suit your purpose, but this
@@ -2342,9 +2368,7 @@ I use ox-hugo.
 
   (use-package ox-hugo-auto-export
     :ensure f
-    :after ox-hugo
-    :custom
-    (org-hugo-auto-export-on-save t))
+    :after ox-hugo)
 #+END_SRC
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
