@@ -57,17 +57,17 @@ Use-package allows for isolation of package configuration, while
 maintaining tidiness and performance.
 
 #+BEGIN_SRC emacs-lisp
-  (eval-when-compile
-    (require 'package)
-    (if (memq window-system '(mac ns))
-        (progn
-          (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-          (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
-      (setq package-archives nil))
-    (package-initialize)
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package)))
+  (require 'package)
+  (if (memq window-system '(mac ns))
+      (progn
+        (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+        (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
+    (setq package-archives nil))
+
+  (package-initialize)
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
 
   (require 'use-package)
   (setq use-package-always-ensure t)
@@ -536,6 +536,7 @@ Counsel contains ivy enhancements for commonly-used functions.
     (("C-x j" . counsel-fd-dired-jump)
      ("C-x f" . counsel-fd-file-jump)))
 #+end_src
+
 ** Swiper
 #+BEGIN_SRC emacs-lisp
   (use-package swiper
@@ -570,6 +571,13 @@ Counsel contains ivy enhancements for commonly-used functions.
   (use-package rg
     :bind* (("M-s" . rg)))
     #+END_SRC
+** ivy-prescient
+#+begin_src emacs-lisp 
+  (use-package ivy-prescient
+    :after ivy
+    :config
+    (ivy-prescient-mode +1))
+#+end_src
 * Hydras
 #+begin_src emacs-lisp
   (use-package hydra
@@ -1053,19 +1061,7 @@ By default proselint doesn't support org-mode, which is where I write
 the bulk of my text, so I'm redefining the checker here.
 
 #+BEGIN_SRC emacs-lisp 
-  (use-package flycheck-proselint
-    :no-require t
-    :ensure f
-    :after flycheck
-    :config
-    (flycheck-define-checker proselint
-      "A linter for prose."
-      :command ("proselint" source-inplace)
-      :error-patterns
-      ((warning line-start (file-name) ":" line ":" column ": "
-                (id (one-or-more (not (any " "))))
-                (message) line-end))
-      :modes (text-mode markdown-mode gfm-mode org-mode)))
+  (flycheck-add-mode 'proselint 'org-mode)
 #+END_SRC
 ** Templating with Yasnippet
    #+begin_src emacs-lisp 
@@ -1111,6 +1107,11 @@ the bulk of my text, so I'm redefining the checker here.
                 ("M-h" . company-quickhelp-manual-begin))
     :hook
     (company-mode . company-quickhelp-mode))
+
+  (use-package company-prescient
+    :after company
+    :config
+    (company-prescient-mode +1))
 #+end_src
 
 ** Spellcheck with Flyspell
@@ -1323,16 +1324,6 @@ corresponding text files.
 
      (use-package go-dlv
        :after go-mode)
-
-     (defvar jethro/golint-path "" "Path to golint binary.")
-
-     (when (getenv "GOPATH")
-       (setq jethro/golint-path (concat (getenv "GOPATH") "/src/github.com/golang/lint/misc/emacs")))
-
-     (when (file-directory-p jethro/golint-path)
-       (use-package golint
-         :after go-mode
-         :load-path jethro/golint-path))
 
      (use-package gorepl-mode
        :after go-mode
