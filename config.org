@@ -2584,7 +2584,7 @@ Useful when handling git merge conflicts.
     (magit-todos-require-colon t))
 #+END_SRC
 **** Forge
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package forge)
 #+END_SRC
 
