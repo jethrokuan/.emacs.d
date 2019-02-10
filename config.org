@@ -2363,9 +2363,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     :config
     :custom
     (org-latex-pdf-process
-     '("pdflatex -shell-escape -interaction nonstopmode %f"
-       "bibtex %b"
-       "pdflatex -shell-escape -interaction nonstopmode %f"))
+     (list "latexmk -shell-escape -bibtex -f -pdf %f"
+           "latexmk -shell-escape -bibtex -f -pdf %f"))
     (org-latex-default-table-environment "tabular")
     (org-latex-tables-booktabs t)
     (org-latex-listings 'minted)
@@ -2376,18 +2375,12 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\usepackage[margin=1in]{geometry}
   \\usepackage{amsmath,amsthm,amssymb}
 
-  \\newcommand{\\N}{\\mathbb{N}}
-  \\newcommand{\\Z}{\\mathbb{Z}}
-
+  \\usepackage{booktabs}
   \\usepackage{hyperref}
   \\usepackage{minted}
   \\usepackage{tabularx}
   \\usepackage{parskip}
-  \\linespread{1.1}
-  \\renewcommand\\headrulewidth{0.4pt}
-  \\renewcommand\\footrulewidth{0.4pt}
-  \\setlength\\columnsep{10pt}
-  \\setlength{\\columnseprule}{1pt}"
+  \\linespread{1.1}"
         ("\\section{%s}" . "\\section*{%s}")
         ("\\subsection{%s}" . "\\subsection*{%s}")
         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
