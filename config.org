@@ -2638,6 +2638,19 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
     :custom
     (olivetti-body-width 100))
 #+end_src
+** [[https://github.com/larstvei/Focus][Focus-mode]]
+Focus provides focus-mode that dims the text of surrounding sections,
+similar to iA Writer's Focus Mode.
+
+#+begin_src emacs-lisp
+  (use-package focus
+    :hook
+    (text-mode . focus-mode)
+    (prog-mode . focus-mode)
+    :custom
+    (focus-mode-to-thing
+     '((prog-mode . defun) (text-mode . paragraph))))
+#+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
 #+begin_src emacs-lisp
