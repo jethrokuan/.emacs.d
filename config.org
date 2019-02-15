@@ -1218,16 +1218,21 @@ corresponding text files.
 ** Language Servers
 #+BEGIN_SRC emacs-lisp 
   (use-package lsp-mode
-    :commands lsp-mode
+    :commands lsp
     :hook
     (lsp-after-open-hook . lsp-enable-imenu)
     :custom
-    (lsp-message-project-root-warning t))
+    (lsp-message-project-root-warning t)
+    :config
+    (require 'lsp-clients)
+    (add-hook 'python-mode-hook #'lsp)
+    (add-hook 'c++-mode-hook #'lsp))
 
   (use-package lsp-ui
     :after lsp-mode
-    :init
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode)
+    :commands lsp-ui-mode
+    :hook
+    (lsp-mode . lsp-ui-mode)
     :config
     (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
     (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
@@ -1420,13 +1425,6 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
   (eval-after-load "python-mode"
     (lambda ()
       (setq python-remove-cwd-from-path t)))
-#+END_SRC
-*** lsp-python
-#+BEGIN_SRC emacs-lisp 
-  (use-package lsp-python
-    :after lsp-mode company-lsp
-    :hook
-    (python-mode . lsp-python-enable))
 #+END_SRC
 *** isort
 #+BEGIN_SRC emacs-lisp 
