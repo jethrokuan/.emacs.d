@@ -1843,10 +1843,23 @@ perfectly for that Ocaml project.
       (org-level-2 ((t (:height 1.2))))
       (org-level-3 ((t (:height 1.1))))
       (org-image-actual-width (/ (display-pixel-width) 2))
+      :custom
+      (org-structure-template-alist '(("a" . "export ascii")
+                                      ("c" . "center")
+                                      ("C" . "comment")
+                                      ("e" . "example")
+                                      ("E" . "export")
+                                      ("h" . "export html")
+                                      ("l" . "export latex")
+                                      ("q" . "quote")
+                                      ("s" . "src")
+                                      ("v" . "verse")
+                                      ("el" . "src emacs-lisp ")
+                                      ("d" . "definition")
+                                      ("t" . "theorem")))
       :config
       (require 'org-habit)
-      (require 'org-tempo)
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp ")))
+      (require 'org-tempo))
   #+END_SRC
 
 *** Variable Pitch Mode
@@ -2374,6 +2387,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
         "\\documentclass{article}
   \\usepackage[margin=1in]{geometry}
   \\usepackage{amsmath,amsthm,amssymb}
+  \\newtheorem{definition}{Definition}
+  \\newtheorem{theorem}{Theorem}
 
   \\usepackage{booktabs}
   \\usepackage{hyperref}
