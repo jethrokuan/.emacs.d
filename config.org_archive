@@ -925,3 +925,23 @@ option is not turned on.
     (js2-mode-hook . lsp-javascript-typescript-enable))
 #+END_SRC
 
+
+* [[https://github.com/larstvei/Focus][Focus-mode]]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-02-19 Tue 13:46
+  :ARCHIVE_FILE: ~/.emacs.d/config.org
+  :ARCHIVE_OLPATH: Miscellaneous
+  :ARCHIVE_CATEGORY: config
+  :END:
+Focus provides focus-mode that dims the text of surrounding sections,
+similar to iA Writer's Focus Mode.
+
+#+begin_src emacs-lisp
+  (use-package focus
+    :hook
+    (text-mode . focus-mode)
+    (prog-mode . focus-mode)
+    :custom
+    (focus-mode-to-thing
+     '((prog-mode . defun) (text-mode . paragraph))))
+#+end_src

@@ -1226,7 +1226,8 @@ corresponding text files.
     :config
     (require 'lsp-clients)
     (add-hook 'python-mode-hook #'lsp)
-    (add-hook 'c++-mode-hook #'lsp))
+    (add-hook 'c++-mode-hook #'lsp)
+    (add-hook 'c-mode-hook #'lsp))
 
   (use-package lsp-ui
     :after lsp-mode
@@ -1356,10 +1357,7 @@ The setup here depends on a few items:
     ("\\.c\\'" . c-mode)
     ("\\.cpp\\'" . c++-mode)
     ("\\.h\\'" . c++-mode)
-    ("\\.hpp\\'" . c++-mode)
-    :hook
-    (c-mode . lsp-mode)
-    (c++-mode . lsp-mode))
+    ("\\.hpp\\'" . c++-mode))
 #+end_src
 *** C++ compile function
 #+begin_src emacs-lisp 
@@ -2650,19 +2648,6 @@ Git-link creates URLs for files and commits in Github/Bitbucket/Gitlab repositor
     :hook (message-mode . olivetti-mode)
     :custom
     (olivetti-body-width 100))
-#+end_src
-** [[https://github.com/larstvei/Focus][Focus-mode]]
-Focus provides focus-mode that dims the text of surrounding sections,
-similar to iA Writer's Focus Mode.
-
-#+begin_src emacs-lisp
-  (use-package focus
-    :hook
-    (text-mode . focus-mode)
-    (prog-mode . focus-mode)
-    :custom
-    (focus-mode-to-thing
-     '((prog-mode . defun) (text-mode . paragraph))))
 #+end_src
 ** bury-successful-compilation
 Closes compile buffer if there are no errors.
