@@ -1223,7 +1223,7 @@ corresponding text files.
     (lsp-after-open-hook . lsp-enable-imenu)
     :custom
     (lsp-message-project-root-warning t)
-    :config
+    :init
     (require 'lsp-clients)
     (add-hook 'python-mode-hook #'lsp)
     (add-hook 'c++-mode-hook #'lsp)
