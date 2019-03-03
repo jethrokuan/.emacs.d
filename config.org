@@ -2215,6 +2215,15 @@ This view is where I see items I have queued up in my reading list.
 
   (add-hook 'org-clock-in-hook 'jethro/set-todo-state-next 'append)
 #+END_SRC
+
+#+begin_src emacs-lisp 
+  (use-package org-clock-convenience
+    :bind (:map org-agenda-mode-map
+                ("<S-up>" . org-clock-convenience-timestamp-up)
+                ("<S-down>" . org-clock-convenience-timestamp-down)
+                ("o" . org-clock-convenience-fill-gap)
+                ("e" . org-clock-convenience-fill-gap-both)))
+#+end_src
 *** Stage 3: Reviewing
 **** Custom agenda Commands
  #+BEGIN_SRC emacs-lisp 
