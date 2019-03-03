@@ -250,6 +250,11 @@ use.
   (use-package all-the-icons)
 #+end_src
 
+** Automatic chmod +x
+#+begin_src emacs-lisp
+  (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+#+end_src
+
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
@@ -1863,7 +1868,7 @@ perfectly for that Ocaml project.
                                       ("q" . "quote")
                                       ("s" . "src")
                                       ("v" . "verse")
-                                      ("el" . "src emacs-lisp ")
+                                      ("el" . "src emacs-lisp")
                                       ("d" . "definition")
                                       ("t" . "theorem")))
       :config
