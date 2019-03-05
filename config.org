@@ -245,6 +245,11 @@ use.
   (bind-key "C-z" 'bury-buffer)
 #+end_src
 
+** Icons
+#+begin_src emacs-lisp
+  (use-package all-the-icons)
+#+end_src
+
 * Email
 Managing email in emacs is not so simple. Thankfully, I use NixOS, which
 provides a reproducible environment for my email setup. You can see it
@@ -334,6 +339,24 @@ facility to capture email into a task.
       (interactive)
       (org-capture nil "e")))
 #+END_SRC
+** notmuch async polling
+#+begin_src emacs-lisp
+  (use-package async
+    :config
+    (run-at-time (* 60 60) nil
+                 (async-start
+                  (lambda ()
+                    (require 'notmuch)
+                    (notmuch-poll)))))
+#+end_src
+** Modeline
+#+begin_src emacs-lisp
+  (use-package notmuch-unread
+    :after all-the-icons
+    :load-path "./elisp/notmuch-unread/"
+    :hook
+    (after-init . notmuch-unread-mode))
+#+end_src
 
 * Appearance
 ** Font
