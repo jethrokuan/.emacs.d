@@ -339,16 +339,6 @@ facility to capture email into a task.
       (interactive)
       (org-capture nil "e")))
 #+END_SRC
-** notmuch async polling
-#+begin_src emacs-lisp
-  (use-package async
-    :config
-    (run-at-time (* 60 60) nil
-                 (async-start
-                  (lambda ()
-                    (require 'notmuch)
-                    (notmuch-poll)))))
-#+end_src
 ** Modeline
 #+begin_src emacs-lisp
   (use-package notmuch-unread

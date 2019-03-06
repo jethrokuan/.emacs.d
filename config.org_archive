@@ -945,3 +945,20 @@ similar to iA Writer's Focus Mode.
     (focus-mode-to-thing
      '((prog-mode . defun) (text-mode . paragraph))))
 #+end_src
+
+* notmuch async polling
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-03-06 Wed 09:55
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Email
+:ARCHIVE_CATEGORY: config
+:END:
+#+begin_src emacs-lisp
+  (use-package async
+    :config
+    (run-at-time (* 60 60) nil
+                 (async-start
+                  (lambda ()
+                    (require 'notmuch)
+                    (notmuch-poll)))))
+#+end_src
