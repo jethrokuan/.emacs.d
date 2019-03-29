@@ -1403,7 +1403,6 @@ the reformatter macro to integrate ~clang-format~.
     "name of executable to format c/c++ files.")
 
   (use-package clang-format
-    :if (executable-find "clang-format")
     :ensure f
     :no-require t  
     :after reformatter
@@ -1419,10 +1418,9 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
 
 #+begin_src emacs-lisp 
   (use-package ccls
-    :if (executable-find "ccls")
     :after lsp-mode
     :custom
-    (ccls-executable (executable-find "ccls")))
+    (ccls-executable "ccls"))
 #+end_src
 
 ** Fish
