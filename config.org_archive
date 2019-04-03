@@ -962,3 +962,14 @@ similar to iA Writer's Focus Mode.
                     (require 'notmuch)
                     (notmuch-poll)))))
 #+end_src
+
+* visual-regexp
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-04-03 Wed 09:56
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Editing Text
+:ARCHIVE_CATEGORY: config
+:END:
+#+begin_src emacs-lisp
+
+#+end_src
