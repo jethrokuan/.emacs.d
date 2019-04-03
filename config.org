@@ -1576,12 +1576,6 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     (js2-minor-mode . prettier-js-mode))
 #+END_SRC
 ** Java
-*** Google C Style
-#+BEGIN_SRC emacs-lisp 
-  (use-package google-c-style
-    :commands
-    (google-set-c-style))
-#+END_SRC
 *** Java LSP Setup
 #+BEGIN_SRC emacs-lisp 
   (use-package lsp-java
@@ -2675,11 +2669,6 @@ Closes compile buffer if there are no errors.
     :hook
     (prog-mode . bury-successful-compilation))
 #+end_src
-** Stack Exchange
-#+BEGIN_SRC emacs-lisp
-  (use-package sx
-    :commands sx)
-#+END_SRC
 ** Citations with ox-hugo and org-ref
 #+BEGIN_SRC emacs-lisp
   (use-package org-ref

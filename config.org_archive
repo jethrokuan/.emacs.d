@@ -973,3 +973,28 @@ similar to iA Writer's Focus Mode.
 #+begin_src emacs-lisp
 
 #+end_src
+
+* Google C Style
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-04-03 Wed 09:57
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages/Java
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp 
+  (use-package google-c-style
+    :commands
+    (google-set-c-style))
+#+END_SRC
+
+* Stack Exchange
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-04-03 Wed 09:58
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Miscellaneous
+:ARCHIVE_CATEGORY: config
+:END:
+#+BEGIN_SRC emacs-lisp
+  (use-package sx
+    :commands sx)
+#+END_SRC
