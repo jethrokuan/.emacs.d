@@ -1293,11 +1293,23 @@ corresponding text files.
     :mode "Dockerfile\\'")
 #+END_SRC
 ** Nix
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (use-package nix-mode
-    :mode "\\.nix\\'"
+    :mode ("\\.nix\\'" "\\.nix.in\\'")
     :custom
     (nix-indent-function #'nix-indent-line))
+
+  (use-package nix-drv-mode
+    :ensure nix-mode
+    :mode "\\.drv\\'")
+
+  (use-package nix-shell
+    :ensure nix-mode
+    :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+
+  (use-package nix-repl
+    :ensure nix-mode
+    :commands (nix-repl))
 
   (use-package nix-update
     :after nix-mode
