@@ -559,8 +559,8 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+BEGIN_SRC emacs-lisp
   (use-package swiper
     :bind
-    (("C-s" . swiper)
-     ("C-r" . swiper)
+    (("C-s" . swiper-isearch)
+     ("C-r" . swiper-isearch)
      ("C-c C-s" . counsel-grep-or-swiper)
      :map swiper-map
      ("M-q" . swiper-query-replace)
