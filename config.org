@@ -903,6 +903,11 @@ in a separate window pane quickly.
     :bind*
     (([remap kill-ring-save] . easy-kill)))
 #+END_SRC
+** visual-regexp
+#+begin_src emacs-lisp
+  (use-package visual-regexp
+    :bind (("C-c m" . vr/mc-mark)))
+#+end_src
 ** aggressive-indent
 Keep your text indented at all times. Remember to turn this off for indentation-dependent languages like Python and Haml.
 #+begin_src emacs-lisp
