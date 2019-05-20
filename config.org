@@ -2269,6 +2269,7 @@ Useful when handling git merge conflicts.
      (magit-mode . hl-line-mode)
      :custom
      (magit-auto-revert-mode nil)
+     (magit-log-arguments '("-n100" "--graph" "--decorate"))
      :config
      (magit-define-popup-switch 'magit-log-popup
        ?m "Omit merge commits" "--no-merges"))
