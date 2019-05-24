@@ -192,7 +192,8 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
 				                             ("techreport" . "(%2a, %y)")
 				                             ("proceedings" . "(%2a, %y)")
 				                             ("inproceedings" . "(%2a, %y)")
-                                     ("misc" . "(%2a, %y)"))))
+                                     ("misc" . "(%2a, %y)")))
+                                  (reftex-cite-punctuation '(", " " \\& " " et al.")))
 			                        (setq file (catch 'result
 					                                 (cl-loop for file in org-ref-bibliography-files do
 						                                        (if (org-ref-key-in-file-p key (file-truename file))
