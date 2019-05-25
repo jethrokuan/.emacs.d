@@ -197,10 +197,10 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
                                                 (bibtex-narrow-to-entry)
                                                 (setq entry (buffer-string))))
                                             entry))))
-                      (format "<sup id=\"%s\"><a href=\"#%s\" title=\"%s\">%s</a></sup>"
+                      (format "<a id=\"%s\" href=\"#%s\" title=\"%s\">%s</a>"
                               (md5 key) key title author-year)
                       ))
-                  (s-split "," keyword) "<sup>,</sup>"))
+                  (s-split "," keyword) "<a>, </a>"))
       ;; for  pandoc we generate pandoc citations
       ((eq format 'pandoc)
        (cond
