@@ -1671,20 +1671,16 @@ Other references include:
 
  #+BEGIN_SRC emacs-lisp 
    (setq org-capture-templates
-         `(("i" "inbox" entry (file "~/.org/gtd/inbox.org")
+         `(("i" "inbox" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
             "* TODO %?")
-           ("p" "paper" entry (file "~/.org/papers/papers.org")
-            "* TODO %(jethro/trim-citation-title \"%:title\")\n%a" :immediate-finish t)
-           ("e" "email" entry (file+headline "~/.org/gtd/emails.org" "Emails")
+           ("e" "email" entry (file+headline ,(concat jethro/org-agenda-directory "emails.org") "Emails")
             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
-           ("l" "link" entry (file "~/.org/gtd/inbox.org")
+           ("l" "link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
             "* TODO %(org-cliplink-capture)" :immediate-finish t)
-           ("z" "elfeed-link" entry (file "~/.org/gtd/inbox.org")
+           ("z" "elfeed-link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
             "* TODO %a\n" :immediate-finish t)
-           ("w" "Weekly Review" entry (file+olp+datetree "~/.org/gtd/reviews.org")
-            (file "~/.org/gtd/templates/weekly_review.org"))
-           ("s" "Snippet" entry (file "~/.org/deft/capture.org")
-            "* Snippet %<%Y-%m-%d %H:%M>\n%?")))
+           ("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
+            (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org")))))
  #+END_SRC
 *** Stage 2: Processing
  During predetermined times of each day, process the inbox, each item
