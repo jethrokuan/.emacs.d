@@ -1418,3 +1418,39 @@ perfectly for that Ocaml project.
     :commands (gist-list gist-region)
     :defer 10)
 #+END_SRC
+
+* Org Agenda Inbox View
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-06-30 Sun 19:43
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Org-Mode/Org Mode for GTD/Stage 2: Processing
+:ARCHIVE_CATEGORY: config
+:END:
+ This view is where I see all my inbox items: it is a simple list of
+ captured items in =inbox.org=.
+ #+BEGIN_SRC emacs-lisp 
+   (require 'org-agenda)
+   (setq jethro/org-agenda-inbox-view
+         `("i" "Inbox" todo ""
+           ((org-agenda-files '("~/.org/gtd/inbox.org")))))
+
+   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-inbox-view)
+ #+END_SRC
+
+
+* Org Agenda Someday View
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-06-30 Sun 19:43
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Org-Mode/Org Mode for GTD/Stage 2: Processing
+:ARCHIVE_CATEGORY: config
+:END:
+This view is where I review the things I would like to do someday:
+#+BEGIN_SRC emacs-lisp 
+  (setq jethro/org-agenda-someday-view
+        `("s" "Someday" todo ""
+          ((org-agenda-files '("~/.org/gtd/someday.org")))))
+
+  (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-someday-view)
+#+END_SRC
+

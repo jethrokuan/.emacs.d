@@ -361,13 +361,13 @@ Office Code Pro and the Powerline font families.
 Remove the useless toolbars and splash screens.
 
 #+begin_src emacs-lisp
-  (when (fboundp tooltip-mode)
+  (when (fboundp 'tooltip-mode)
     (tooltip-mode -1))
-  (when (fboundp tool-bar-mode)
+  (when (fboundp 'tool-bar-mode)
     (tool-bar-mode -1))
-  (when (fboundp menu-bar-mode)
+  (when (fboundp 'menu-bar-mode)
     (menu-bar-mode -1))
-  (when (fboundp scroll-bar-mode)
+  (when (fboundp 'scroll-bar-mode)
     (scroll-bar-mode -1))
   (setq inhibit-splash-screen t)
   (setq inhibit-startup-message t)
@@ -1715,35 +1715,13 @@ Other references include:
  2. *Processing of inbox is more regular.* Keeping inbox zero at all
     times should be a goal, but not a priority.
 
-**** Org Agenda Inbox View
- This view is where I see all my inbox items: it is a simple list of
- captured items in =inbox.org=.
- #+BEGIN_SRC emacs-lisp 
-   (require 'org-agenda)
-   (setq jethro/org-agenda-inbox-view
-         `("i" "Inbox" todo ""
-           ((org-agenda-files '("~/.org/gtd/inbox.org")))))
-
-   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-inbox-view)
- #+END_SRC
-
-**** Org Agenda Someday View
-This view is where I review the things I would like to do someday:
-#+BEGIN_SRC emacs-lisp 
-  (setq jethro/org-agenda-someday-view
-        `("s" "Someday" todo ""
-          ((org-agenda-files '("~/.org/gtd/someday.org")))))
-
-  (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-someday-view)
-#+END_SRC
-
 **** Org Agenda Reading view
 This view is where I see items I have queued up in my reading list.
 
 #+BEGIN_SRC emacs-lisp 
   (setq jethro/org-agenda-reading-view
         `("r" "Reading" todo ""
-          ((org-agenda-files '("~/.org/gtd/reading.org")))))
+          ((org-agenda-files '(,(concat jethro/org-agenda-directory "reading.org"))))))
 
   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-reading-view)
 #+END_SRC
@@ -1906,25 +1884,25 @@ This view is where I see items I have queued up in my reading list.
                      (org-deadline-warning-days 365)))
             (todo "TODO"
                   ((org-agenda-overriding-header "To Refile")
-                   (org-agenda-files '("~/.org/gtd/inbox.org"))))
+                   (org-agenda-files '(,(concat jethro/org-agenda-directory "inbox.org")))))
             (todo "TODO"
                   ((org-agenda-overriding-header "Emails")
-                   (org-agenda-files '("~/.org/gtd/emails.org"))))
+                   (org-agenda-files '(,(concat jethro/org-agenda-directory "emails.org")))))
             (todo "NEXT"
                   ((org-agenda-overriding-header "In Progress")
-                   (org-agenda-files '("~/.org/gtd/someday.org"
-                                       "~/.org/gtd/projects.org"
-                                       "~/.org/gtd/next.org"))
+                   (org-agenda-files '(,(concat jethro/org-agenda-directory "someday.org")
+                                       ,(concat jethro/org-agenda-directory "projects.org")
+                                       ,(concat jethro/org-agenda-directory "next.org")))
                    ;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
                    ))
             (todo "TODO"
                   ((org-agenda-overriding-header "Projects")
-                   (org-agenda-files '("~/.org/gtd/projects.org"))
+                   (org-agenda-files '(,(concat jethro/org-agenda-directory "projects.org")))
                    ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                    ))
             (todo "TODO"
                   ((org-agenda-overriding-header "One-off Tasks")
-                   (org-agenda-files '("~/.org/gtd/next.org"))
+                   (org-agenda-files '(,(concat jethro/org-agenda-directory "next.org")))
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
             nil)))
 
