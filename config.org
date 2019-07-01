@@ -812,7 +812,8 @@ Keep your text indented at all times. Remember to turn this off for indentation-
        term-mode
        TeX-output-mode
        text-mode
-       yaml-mode)))
+       yaml-mode
+       scala-mode)))
 #+end_src
 ** multiple-cursors
 A port of Sublime Text's multiple-cursors functionality.
