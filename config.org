@@ -2037,11 +2037,8 @@ I use ox-hugo.
     :after org
     :custom
     (org-hugo-auto-set-lastmod t))
-
-  (use-package ox-hugo-auto-export
-    :ensure f
-    :after ox-hugo)
 #+END_SRC
+
 ** Exporting PDFs
 I use export to LaTeX through ox-latex, using xelatex for a nicer export template.
 #+begin_src emacs-lisp 
