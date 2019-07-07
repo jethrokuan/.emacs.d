@@ -365,11 +365,11 @@ Remove the useless toolbars and splash screens.
     (tooltip-mode -1))
   (when (fboundp 'tool-bar-mode)
     (tool-bar-mode -1))
-  (when (fboundp 'menu-bar-mode)
-    (menu-bar-mode -1))
-  (when (fboundp 'scroll-bar-mode)
-    (scroll-bar-mode -1))
-  (setq inhibit-splash-screen t)
+(when (fboundp 'menu-bar-mode)
+  (menu-bar-mode -1))
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
+(setq inhibit-splash-screen t)
   (setq inhibit-startup-message t)
 #+end_src
 
@@ -382,7 +382,7 @@ Remove the useless toolbars and splash screens.
 #+END_SRC
 
 ** Rainbow-delimiters-mode
-   We use rainbow delimiters to show imbalanced parenthesis.
+We use rainbow delimiters to show imbalanced parenthesis.
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
     :defer 5
@@ -473,24 +473,22 @@ Counsel contains ivy enhancements for commonly-used functions.
     (ivy-display-style 'fancy)
     (ivy-use-selectable-prompt t)
     (ivy-re-builders-alist
-     '((ivy-switch-buffer . ivy--regex-plus)
-       (swiper . ivy--regex-plus)
-       (t . ivy--regex-fuzzy)))
+     '((t . ivy--regex-plus)))
     :config
     (ivy-set-actions
      t
      '(("I" insert "insert")))
     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
-   #+end_src
+    #+end_src
 
 #+begin_src emacs-lisp
-  (use-package counsel-fd
-    :after counsel
-    :if (executable-find "notmuch")
-    :load-path "./elisp/counsel-fd/"
-    :bind
-    (("C-x j" . counsel-fd-dired-jump)
-     ("C-x f" . counsel-fd-file-jump)))
+(use-package counsel-fd
+  :after counsel
+  :if (executable-find "notmuch")
+  :load-path "./elisp/counsel-fd/"
+  :bind
+  (("C-x j" . counsel-fd-dired-jump)
+   ("C-x f" . counsel-fd-file-jump)))
 #+end_src
 
 ** Swiper
@@ -513,10 +511,10 @@ Counsel contains ivy enhancements for commonly-used functions.
 #+END_SRC
 
 ** wgrep
-    wgrep allows you to edit a grep buffer and apply those changes to the
-    file buffer.
+wgrep allows you to edit a grep buffer and apply those changes to the
+file buffer.
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
       (use-package wgrep
         :commands
         wgrep-change-to-wgrep-mode
