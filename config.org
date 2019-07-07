@@ -1484,6 +1484,12 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
 #+BEGIN_SRC emacs-lisp 
   (use-package ess)
 #+END_SRC
+** Polymode
+#+begin_src emacs-lisp
+  (use-package polymode)
+
+  (use-package poly-org)
+#+end_src
 * Org-Mode
 ** Setup
   I use =org-plus-contrib=, which contains several contrib plugins,
