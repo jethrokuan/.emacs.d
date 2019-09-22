@@ -1454,3 +1454,16 @@ This view is where I review the things I would like to do someday:
   (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-someday-view)
 #+END_SRC
 
+
+* Polymode
+:PROPERTIES:
+:ARCHIVE_TIME: 2019-09-22 Sun 14:39
+:ARCHIVE_FILE: ~/.emacs.d/config.org
+:ARCHIVE_OLPATH: Languages
+:ARCHIVE_CATEGORY: config
+:END:
+#+begin_src emacs-lisp
+  (use-package polymode)
+
+  (use-package poly-org)
+#+end_src
