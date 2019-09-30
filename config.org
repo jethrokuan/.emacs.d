@@ -2013,7 +2013,7 @@ this to capture screenshots into deft.
      :config
      (if (memq window-system '(mac ns))
          (setq org-download-screenshot-method "screencapture -i %s")
-       (setq org-download-screenshot-method "maim -s %s"))
+       (setq org-download-screenshot-method "gnome-screenshot -a -f %s"))
      (defun my-org-download-method (link)
        "This is a helper function for org-download.
    It creates a folder in the root directory (~/.org/img/) named after the
