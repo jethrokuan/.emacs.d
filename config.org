@@ -1828,7 +1828,7 @@ This view is where I see items I have queued up in my reading list.
      (org-with-wide-buffer
       (org-agenda-set-tags)
       (org-agenda-priority)
-      (jethro/my-org-agenda-set-effort)
+      (call-interactively 'jethro/my-org-agenda-set-effort)
       (org-agenda-refile nil nil t)))
 
    (defun jethro/bulk-process-entries ()
