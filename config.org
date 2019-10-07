@@ -1252,12 +1252,12 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
     :commands
     (py-isort-buffer py-isort-region))
 #+END_SRC
-*** yapfify
-#+BEGIN_SRC emacs-lisp 
-  (use-package yapfify
-    :commands
-    (yapfify-buffer))
-#+END_SRC
+*** blacken
+#+begin_src emacs-lisp
+  (use-package blacken
+    :hook
+    (python-mode . blacken-mode))
+#+end_src
 *** pytest
 #+BEGIN_SRC emacs-lisp 
   (use-package pytest
