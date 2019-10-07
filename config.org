@@ -723,6 +723,13 @@ in a separate window pane quickly.
                 ("N" . dired-narrow-fuzzy)))
 #+END_SRC
 
+*** dired-git-info
+#+begin_src emacs-lisp
+  (use-package dired-git-info
+    :ensure t
+    :bind (:map dired-mode-map
+                (")" . dired-git-info-mode)))
+#+end_src
 ** ibuffer
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer
