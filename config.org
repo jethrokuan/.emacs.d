@@ -64,9 +64,11 @@ maintaining tidiness and performance.
 
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package))
+    (package-install 'use-package)
+    (package-install 'diminish))
 
   (require 'use-package)
+  (require 'diminish)
   (setq use-package-always-ensure t)
 
   ;; Always demand if daemon-mode
