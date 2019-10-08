@@ -1,6 +1,11 @@
 #+TITLE: Jethro's Emacs Configuration
 #+PROPERTY: header-args :tangle yes
 
+* Lexical Binding
+  #+BEGIN_SRC emacs-lisp
+    ;;;; -*- lexical-binding: t -*-
+  #+END_SRC
+
 * Introduction
 
 This document is a constant work-in-progress, and will contain the
