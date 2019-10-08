@@ -37,7 +37,6 @@ to Emacs for the following reasons:
    outside of Emacs, other than Firefox.
 4. Emacs has [[https://orgmode.org/][org-mode]]. This gorgeous piece of software has proven to
    be indispensable.
-
 * About the Author
 
 I'm currently a Computer Science undergraduate at the National
@@ -55,7 +54,6 @@ Emacs usage, which involves:
   (setq user-full-name "Jethro Kuan"
         user-mail-address "jethrokuan95@gmail.com")
 #+end_src
-
 * Preinit: [[https://github.com/jwiegley/use-package/issues/70][use-package]]
 
 Use-package allows for isolation of package configuration, while
@@ -555,6 +553,11 @@ Counsel contains ivy enhancements for commonly-used functions.
   :bind
   (("C-x j" . counsel-fd-dired-jump)
    ("C-x f" . counsel-fd-file-jump)))
+#+end_src
+** Amx
+#+begin_src emacs-lisp
+  (use-package amx
+    :after ivy)
 #+end_src
 
 ** Swiper
