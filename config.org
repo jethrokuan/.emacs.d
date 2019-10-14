@@ -1463,7 +1463,7 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
   (use-package lsp-java
     :after lsp-mode
     :hook
-    (java-mode . lsp-java-enable))
+    (java-mode . lsp))
 #+END_SRC
 ** Typescript
 *** typescript-mode
