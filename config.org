@@ -2147,9 +2147,48 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     (org-latex-default-table-environment "tabular")
     (org-latex-tables-booktabs t)
     (org-latex-listings 'minted)
+    (org-latex-hyperref-template "\\hypersetup{colorlinks=true,allcolors=.,urlcolor=blue}")
+    (org-beamer-frame-default-options "allowframebreaks")
     (org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
     (org-latex-classes
-     '(("article"
+     '(("beamer"
+        "\\documentclass[12pt]{beamer}
+
+  % \\includeonlyframes{current}
+
+  \\mode<beamer>{\\usetheme[sectionpage=none, subsectionpage=progressbar, progressbar=foot, numbering=fraction]{metropolis}}
+
+  \\setbeamertemplate{footline}{%
+    \\begin{beamercolorbox}[wd=\\textwidth, sep=1.5ex]{footline}% <- default 3ex
+      \\usebeamerfont{page number in head/foot}%
+      \\usebeamertemplate*{frame footer}
+      \\hfill%
+      \\usebeamertemplate*{frame numbering}
+    \\end{beamercolorbox}%
+  }
+  \\makeatother
+
+  \\makeatletter
+  \\setbeamertemplate{headline}{
+    \\begin{beamercolorbox}{upper separation line head}
+    \\end{beamercolorbox}
+    \\begin{beamercolorbox}{section in head/foot}
+      \\vskip2pt\\insertsectionnavigationhorizontal{\\paperwidth}{}{}\\vskip2pt
+    \\end{beamercolorbox}
+    \\begin{beamercolorbox}{lower separation line head}
+    \\end{beamercolorbox}
+  }
+  \\makeatother
+  \\setbeamercolor{section in head/foot}{fg=normal text.bg, bg=structure.fg}
+
+  \\setbeamertemplate{itemize items}[square]
+  "
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+       ("article"
         "\\documentclass{article}
   \\usepackage[margin=1in]{geometry}
   \\usepackage{amsmath,amsthm,amssymb}
@@ -2162,33 +2201,6 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\usepackage{tabularx}
   \\usepackage{parskip}
   \\linespread{1.1}"
-        ("\\section{%s}" . "\\section*{%s}")
-        ("\\subsection{%s}" . "\\subsection*{%s}")
-        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-        ("\\paragraph{%s}" . "\\paragraph*{%s}")
-        ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
-       ("book"
-        "\\documentclass[10pt]{memoir}
-                          \\usepackage{charter}
-                          \\usepackage[T1]{fontenc}
-                          \\usepackage{booktabs}
-                          \\usepackage{amsmath}
-                          \\usepackage{minted}
-                          \\usemintedstyle{borland}
-                          \\usepackage{color}
-                          \\usepackage{epigraph}
-                          \\usepackage{enumitem}
-                          \\setlist{nosep}
-                          \\setlength\\epigraphwidth{13cm}
-                          \\setlength\\epigraphrule{0pt}
-                          \\usepackage{fontspec}
-                          \\usepackage{graphicx}
-                          \\usepackage{hyperref}
-                          \\hypersetup {colorlinks = true, allcolors = red}
-                          \\title{}
-                          [NO-DEFAULT-PACKAGES]
-                          [NO-PACKAGES]"
-        ("\\chapter{%s}" . "\\chapter*{%s}")
         ("\\section{%s}" . "\\section*{%s}")
         ("\\subsection{%s}" . "\\subsection*{%s}")
         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
