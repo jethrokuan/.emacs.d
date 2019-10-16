@@ -1593,7 +1593,9 @@ C/C++/Objective-C. ccls is an upgraded fork of cquery.
       (org-agenda-diary-file "~/.org/diary.org")
       (org-babel-load-languages
        '((emacs-lisp . t)
-         (python . t)))
+         (python . t)
+         (dot . t)))
+      (org-confirm-babel-evaluate nil)
       (org-use-speed-commands t)
       (org-catch-invisible-edits 'show)
       :custom-face
@@ -2147,8 +2149,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     (org-latex-default-table-environment "tabular")
     (org-latex-tables-booktabs t)
     (org-latex-listings 'minted)
+    (org-latex-minted-options '(("linenos" "true") ("breaklines" "true")))
     (org-latex-hyperref-template "\\hypersetup{colorlinks=true,allcolors=.,urlcolor=blue}")
-    (org-beamer-frame-default-options "allowframebreaks")
     (org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
     (org-latex-classes
      '(("beamer"
@@ -2182,6 +2184,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\setbeamercolor{section in head/foot}{fg=normal text.bg, bg=structure.fg}
 
   \\setbeamertemplate{itemize items}[square]
+  \\usepackage{minted}
+  \\setminted{fontsize=\\footnotesize}
   "
         ("\\section{%s}" . "\\section*{%s}")
         ("\\subsection{%s}" . "\\subsection*{%s}")
