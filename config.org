@@ -2210,6 +2210,17 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
         ("\\paragraph{%s}" . "\\paragraph*{%s}")
         ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+       ("socreport"
+        "\\documentclass[fyp]{socreport}
+  \\usepackage{fullpage}
+  \\usepackage{xcolor}
+  \\usepackage{color}
+    "
+        ("\\chapter{%s}" . "\\chapter*{%s}")
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}"))
        ("latex-notes"
         "\\documentclass[8pt]{article}
     \\usepackage[margin={0.1in,0.1in}, a4paper,landscape]{geometry}
