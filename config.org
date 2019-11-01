@@ -2212,6 +2212,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
         ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
        ("socreport"
         "\\documentclass[fyp]{socreport}
+  \\usepackage[sort, numbers]{natbib}
   \\usepackage{fullpage}
   \\usepackage{xcolor}
   \\usepackage{color}
