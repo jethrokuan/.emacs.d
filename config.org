@@ -2143,6 +2143,7 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
     :ensure f
     :config
     :custom
+    (org-latex-prefer-user-labels t)
     (org-latex-pdf-process
      (list "latexmk -shell-escape -bibtex -f -pdf %f"
            "latexmk -shell-escape -bibtex -f -pdf %f"))
@@ -2216,6 +2217,8 @@ I use export to LaTeX through ox-latex, using xelatex for a nicer export templat
   \\usepackage{fullpage}
   \\usepackage{xcolor}
   \\usepackage{color}
+  \\usepackage{tabularx}
+  \\usepackage{booktabs}
     "
         ("\\chapter{%s}" . "\\chapter*{%s}")
         ("\\section{%s}" . "\\section*{%s}")
