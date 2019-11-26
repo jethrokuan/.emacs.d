@@ -1,4 +1,11 @@
+;;; counsel-fd.el --- Counsel fd commands
+
+;;; Commentary:
+;; 
+
 (require 'counsel)
+
+;;; Code:
 
 (defvar counsel-fd-command "fd --hidden --color never "
   "Base command for fd.")
@@ -46,3 +53,7 @@ INITIAL-DIRECTORY, if non-nil, is used as the root directory for search."
               :caller 'counsel-fd-file-jump)))
 
 (provide 'counsel-fd)
+
+(provide 'counsel-fd)
+
+;;; counsel-fd.el ends here

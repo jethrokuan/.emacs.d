@@ -14,3 +14,4 @@ config.el
 /secrets.el
 eclipse.jdt.ls/
 /custom.el
+/straight/
