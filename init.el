@@ -159,12 +159,6 @@ timestamp."
     (interactive)
     (org-capture nil "e")))
 
-(use-package notmuch-unread
-  :after all-the-icons
-  :load-path "./elisp/notmuch-unread/"
-  :hook
-  (after-init . notmuch-unread-mode))
-
 (setq default-frame-alist '((font . "Iosevka-14")))
 
 (when (fboundp 'tooltip-mode)
@@ -183,7 +177,6 @@ timestamp."
   (load-theme 'tao-yang t))
 
 (use-package rainbow-delimiters
-  :defer 5
   :hook
   (prog-mode . rainbow-delimiters-mode)
   :config
@@ -255,7 +248,6 @@ FACE defaults to inheriting from default and highlight."
 (blink-cursor-mode 0)
 
 (use-package hl-todo
-  :defer 5
   :config
   (global-hl-todo-mode))
 
@@ -385,7 +377,6 @@ FACE defaults to inheriting from default and highlight."
   (minions-mode +1))
 
 (use-package beacon
-  :defer 10
   :diminish beacon-mode
   :custom
   (beacon-push-mark 10)
@@ -396,13 +387,11 @@ FACE defaults to inheriting from default and highlight."
 (setq show-paren-delay 0)
 
 (use-package volatile-highlights
-  :defer 5
   :diminish volatile-highlights-mode
   :config
   (volatile-highlights-mode +1))
 
 (use-package diff-hl
-  :defer 3
   :hook
   (dired-mode . diff-hl-dired-mode)
   :init
@@ -468,7 +457,6 @@ FACE defaults to inheriting from default and highlight."
   (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 
 (use-package smart-jump
-  :defer 5
   :config
   (smart-jump-setup-default-registers))
 
@@ -683,7 +671,6 @@ FACE defaults to inheriting from default and highlight."
   (yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
 
 (use-package company
-  :defer 3
   :diminish company-mode
   :bind (:map company-active-map
               ("M-n" . nil)
@@ -859,22 +846,6 @@ FACE defaults to inheriting from default and highlight."
                              file
                              (file-name-sans-extension file)))))))
 
-(use-package reformatter
-  :load-path "./elisp/reformatter.el")
-
-(defvar clang-format-command
-  "clang-format"
-  "name of executable to format c/c++ files.")
-
-(use-package clang-format
-  :straight nil
-  :no-require t
-  :after reformatter
-  :config
-  (reformatter-define clang-format
-    :program clang-format-command)
-  (add-hook 'c++-mode-hook 'clang-format-on-save-mode))
-
 (use-package ccls
   :after lsp-mode
   :custom
@@ -909,7 +880,6 @@ FACE defaults to inheriting from default and highlight."
               ("C-c p ." . pytest-pdb-one)))
 
 (use-package highlight-indent-guides
-  :defer 10
   :hook
   (python-mode . highlight-indent-guides-mode)
   :custom
@@ -1030,7 +1000,6 @@ FACE defaults to inheriting from default and highlight."
   :mode ("\\.adoc\\'" . adoc-mode))
 
 (use-package auctex
-  :defer t
   :mode ("\\.tex\\'" . latex-mode)
   :custom
   (TeX-auto-save t)
@@ -1143,32 +1112,27 @@ FACE defaults to inheriting from default and highlight."
   (interactive)
   (org-map-entries 'org-archive-subtree "/DONE" 'file))
 
-(use-package password-store
-  :defer 10
-  :init
-  (require 'auth-source-pass)
-  :load-path "./elisp"
-  :custom
-  (auth-source-backend '(password-store)))
+(use-package password-store)
 
-(use-package org-gcal
-  :after (auth-source-pass password-store)
-  :custom
-  (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
-  (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
-  (jethro/org-gcal-directory "~/.org/gtd/calendars/")
-  :config
-  (defun jethro/get-gcal-file-location (loc)
-    (concat (file-name-as-directory jethro/org-gcal-directory) loc))
-  (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
-                              ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
-                              ("15rmvcq9uehc0e4ccorj5hbm8o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "6101.org")))))
+;; (use-package org-gcal
+;;   :custom
+;;   (require 'password-store)
+;;   (require 'auth-source-pass)
+;;   (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
+;;   (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
+;;   (jethro/org-gcal-directory "~/.org/gtd/calendars/")
+;;   :config
+;;   (defun jethro/get-gcal-file-location (loc)
+;;     (concat (file-name-as-directory jethro/org-gcal-directory) loc))
+;;   (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
+;;                               ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
+;;                               ("15rmvcq9uehc0e4ccorj5hbm8o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "6101.org")))))
 
-(run-at-time (* 60 60) nil
-             (lambda ()
-               (let ((inhibit-message t))
-                 (org-gcal-refresh-token)
-                 (org-gcal-fetch))))
+;; (run-at-time (* 60 60) nil
+;;              (lambda ()
+;;                (let ((inhibit-message t))
+;;                  (org-gcal-refresh-token)
+;;                  (org-gcal-fetch))))
 
 (require 'find-lisp)
 (setq jethro/org-agenda-directory "~/.org/gtd/")
