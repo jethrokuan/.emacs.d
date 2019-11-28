@@ -1362,15 +1362,33 @@ FACE defaults to inheriting from default and highlight."
 (use-package deft
   :after org
   :bind
-  (("C-c n" . deft))
+  ("C-c n d" . deft)
+  ("C-c n l" . jethro/get-linked-files)
   :custom
   (deft-default-extension "org")
   (deft-directory "~/.org/braindump/org")
-  (deft-use-filename-as-title t))
-
-(defun jethro/org-export-deft-file (file)
-  (interactive)
-  (org-html-export-to-html t t))
+  (deft-use-filename-as-title t)
+  :config
+  (setq zettel-indicator "§")
+  (defun org-insert-zettel (file-name)
+    "Finds a file, inserts it as a link with the base file name as the link name, and adds the zd-link-indicator I use to the front."
+    (interactive (list (completing-read "File: " (deft-find-all-files-no-prefix))))
+    (org-insert-link nil (concat "file:" (file-name-base file-name) "." (file-name-extension file-name)) (concat zettel-indicator (file-name-base file-name))))
+  (defun jethro/get-linked-files ()
+    "Show links to this file."
+    (interactive)
+    (let* ((search-term (file-name-nondirectory buffer-file-name))
+           (files deft-all-files)
+	         (tnames (mapcar #'file-truename files)))
+      (multi-occur
+       (mapcar (lambda (x)
+	               (with-current-buffer
+		                 (or (get-file-buffer x) (find-file-noselect x))
+		               (widen)
+		               (current-buffer)))
+	             files)
+       search-term
+       3))))
 
 (use-package org-download
   :after org
