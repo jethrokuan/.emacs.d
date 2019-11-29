@@ -1364,6 +1364,7 @@ FACE defaults to inheriting from default and highlight."
   :bind
   ("C-c n d" . deft)
   ("C-c n l" . jethro/get-linked-files)
+  ("C-c n i" . org-insert-zettel)
   :custom
   (deft-default-extension "org")
   (deft-directory "~/.org/braindump/org")
