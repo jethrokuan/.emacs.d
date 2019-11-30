@@ -23,7 +23,6 @@
       user-mail-address "jethrokuan95@gmail.com")
 
 (use-package exec-path-from-shell
-  :if (memq window-system '(mac ns))
   :config
   (exec-path-from-shell-initialize))
 
@@ -185,7 +184,7 @@ timestamp."
                       :foreground 'unspecified
                       :inherit 'error))
 
-;;; -*- lexical-binding: t; -*-
+
 ;; From https://with-emacs.com/posts/editing/show-matching-lines-when-parentheses-go-off-screen/
 ;; we will call `blink-matching-open` ourselves...
 (remove-hook 'post-self-insert-hook
@@ -1146,8 +1145,6 @@ FACE defaults to inheriting from default and highlight."
          "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
         ("l" "link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
          "* TODO %(org-cliplink-capture)" :immediate-finish t)
-        ("z" "elfeed-link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
-         "* TODO %a\n" :immediate-finish t)
         ("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
          (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org")))))
 
@@ -1366,6 +1363,7 @@ FACE defaults to inheriting from default and highlight."
   ("C-c n l" . jethro/get-linked-files)
   ("C-c n i" . org-insert-zettel)
   :custom
+  (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory "~/.org/braindump/org")
   (deft-use-filename-as-title t)
