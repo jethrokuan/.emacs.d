@@ -1369,6 +1369,14 @@ FACE defaults to inheriting from default and highlight."
   (deft-use-filename-as-title t)
   :config
   (setq zettel-indicator "§")
+  (defun jethro/deft-insert-boilerplate ()
+    (interactive)
+    (when (= (buffer-size (current-buffer)) 0)
+      (let ((title (s-join " " (-map #'capitalize (split-string (file-name-sans-extension (buffer-name)) "_")))))
+        (insert "#+SETUPFILE:./hugo_setup.org\n")
+        (insert "#+TITLE: ")
+        (insert title)
+        (goto-char (point-max)))))
   (defun org-insert-zettel (file-name)
     "Finds a file, inserts it as a link with the base file name as the link name, and adds the zd-link-indicator I use to the front."
     (interactive (list (completing-read "File: " (deft-find-all-files-no-prefix))))
