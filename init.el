@@ -1104,7 +1104,7 @@ FACE defaults to inheriting from default and highlight."
                     'org-document-info-keyword))))
 
 (setq org-startup-indented t
-      org-hide-emphasis-markers t
+      org-hide-emphasis-markers nil
       org-pretty-entities nil)
 
 (defun org-archive-done-tasks ()
