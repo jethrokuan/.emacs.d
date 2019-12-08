@@ -288,7 +288,7 @@ FACE defaults to inheriting from default and highlight."
     (interactive)
     (org-capture nil "z"))
   :custom
-  (rmh-elfeed-org-files '("~/.org/deft/feeds.org")))
+  (rmh-elfeed-org-files '("~/.org/braindump/org/feeds.org")))
 
 (use-package counsel
   :hook
@@ -468,7 +468,7 @@ FACE defaults to inheriting from default and highlight."
          ("s-o" . crux-smart-open-line-above)))
 
 (use-package avy
-  :bind*
+  :bind
   (("C-'" . avy-goto-char-timer))
   :custom
   (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
@@ -793,12 +793,6 @@ FACE defaults to inheriting from default and highlight."
 
 (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 
-(use-package elixir-mode
-  :mode "\\.ex[s]?\\'")
-
-(use-package alchemist
-  :after elixir-mode)
-
 (use-package docker
   :commands docker-mode)
 
@@ -815,18 +809,6 @@ FACE defaults to inheriting from default and highlight."
   :bind
   (:map nix-mode-map
         ("C-. u" . nix-update)))
-
-(use-package haskell-mode
-  :mode ("\\.hs\\'" . haskell-mode)
-  :init
-  (add-hook 'haskell-mode-hook
-            (lambda ()
-              (setq compile-command "stack build --fast --test --bench --no-run-tests --no-run-benchmarks"))))
-
-(use-package intero
-  :after haskell-mode
-  :hook
-  (haskell-mode . intero-mode))
 
 (use-package cc-mode
   :ensure nil
@@ -884,13 +866,6 @@ FACE defaults to inheriting from default and highlight."
   :custom
   (highlight-indent-guides-method 'character))
 
-(use-package isend-mode
-  :bind
-  (:map isend-mode-map
-        ("C-M-e" . isend-send-defun))
-  :hook
-  (isend-mode. isend-default-python-setup))
-
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
          ("\\.html\\.erb\\'" . web-mode)
@@ -944,38 +919,9 @@ FACE defaults to inheriting from default and highlight."
   :hook
   ((js2-mode . indium-interaction-mode)))
 
-(use-package js-doc
-  :after js2-mode
-  :bind (:map js2-mode-map
-              ("C-c i" . js-doc-insert-function-doc)
-              ("@" . js-doc-insert-tag))
-  :custom
-  (js-doc-mail-address "jethrokuan95@gmail.com")
-  (js-doc-author (format "Jethro Kuan <%s>" js-doc-mail-address))
-  (js-doc-url "http://www.jethrokuan.com/")
-  (js-doc-license "MIT"))
-
 (use-package prettier-js
   :hook
   (js2-minor-mode . prettier-js-mode))
-
-(use-package lsp-java
-  :after lsp-mode
-  :hook
-  (java-mode . lsp))
-
-(use-package typescript-mode
-  :mode "\\.ts\\'")
-
-(use-package tide
-  :after typescript-mode
-  :hook
-  (before-save . tide-format-before-save)
-  (typescript-mode . (lambda ()
-                       (tide-setup)
-                       (flycheck-mode +1)
-                       (tide-hl-identifier-mode +1)
-                       (company-mode +1))))
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -994,9 +940,6 @@ FACE defaults to inheriting from default and highlight."
   (markdown-indent-on-enter 'indent-and-new-item)
   (markdown-asymmetric-header t)
   (markdown-live-preview-delete-export 'delete-on-destroy))
-
-(use-package adoc-mode
-  :mode ("\\.adoc\\'" . adoc-mode))
 
 (use-package auctex
   :mode ("\\.tex\\'" . latex-mode)
@@ -1028,14 +971,9 @@ FACE defaults to inheriting from default and highlight."
 (use-package yaml-mode
   :mode ("\\.yaml\\'" . yaml-mode))
 
-(use-package ensime
-  :commands ensime ensime-mode)
-
 (use-package ess)
 
 (straight-use-package 'org-plus-contrib)
-
-(require 'org)
 
 (use-package org
   :mode ("\\.org\\'" . org-mode)
@@ -1086,6 +1024,8 @@ FACE defaults to inheriting from default and highlight."
   (require 'org-habit)
   (require 'org-tempo))
 
+(require 'org)
+
 (add-hook 'org-mode-hook
           '(lambda ()
              (setq line-spacing 0.2) ;; Add more line padding for readability
@@ -1110,28 +1050,6 @@ FACE defaults to inheriting from default and highlight."
 (defun org-archive-done-tasks ()
   (interactive)
   (org-map-entries 'org-archive-subtree "/DONE" 'file))
-
-(use-package password-store)
-
-;; (use-package org-gcal
-;;   :custom
-;;   (require 'password-store)
-;;   (require 'auth-source-pass)
-;;   (org-gcal-client-id "1025518578318-g5llmkeftf20ct2s7j0b4pmu7tr6am1r.apps.googleusercontent.com")
-;;   (org-gcal-client-secret `,(auth-source-pass-get 'secret "gmail/org-gcal"))
-;;   (jethro/org-gcal-directory "~/.org/gtd/calendars/")
-;;   :config
-;;   (defun jethro/get-gcal-file-location (loc)
-;;     (concat (file-name-as-directory jethro/org-gcal-directory) loc))
-;;   (setq org-gcal-file-alist `(("jethrokuan95@gmail.com" . ,(jethro/get-gcal-file-location "personal.org"))
-;;                               ("62ad47vpojb2uqb53hpnqsuv5o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "school.org"))
-;;                               ("15rmvcq9uehc0e4ccorj5hbm8o@group.calendar.google.com" . ,(jethro/get-gcal-file-location "6101.org")))))
-
-;; (run-at-time (* 60 60) nil
-;;              (lambda ()
-;;                (let ((inhibit-message t))
-;;                  (org-gcal-refresh-token)
-;;                  (org-gcal-fetch))))
 
 (require 'find-lisp)
 (setq jethro/org-agenda-directory "~/.org/gtd/")
@@ -1206,14 +1124,14 @@ FACE defaults to inheriting from default and highlight."
          (inhibit-read-only t)
          newhead)
     (org-with-remote-undo buffer
-      (with-current-buffer buffer
-        (widen)
-        (goto-char pos)
-        (org-show-context 'agenda)
-        (funcall-interactively 'org-set-effort nil jethro/org-current-effort)
-        (end-of-line 1)
-        (setq newhead (org-get-heading)))
-      (org-agenda-change-all-lines newhead hdmarker))))
+                          (with-current-buffer buffer
+                            (widen)
+                            (goto-char pos)
+                            (org-show-context 'agenda)
+                            (funcall-interactively 'org-set-effort nil jethro/org-current-effort)
+                            (end-of-line 1)
+                            (setq newhead (org-get-heading)))
+                          (org-agenda-change-all-lines newhead hdmarker))))
 
 (defun jethro/org-agenda-process-inbox-item ()
   "Process a single item in the org-agenda."
@@ -1251,8 +1169,6 @@ FACE defaults to inheriting from default and highlight."
                            skipped))
                  (if (not org-agenda-persistent-marks) "" " (kept marked)")))
     ))
-
-
 
 (defun jethro/org-inbox-capture ()
   (interactive)
@@ -1692,9 +1608,10 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (projectile-create-missing-test-files t)
   (projectile-completion-system 'ivy)
   (projectile-switch-project-action  #'projectile-commander)
+  :hook
+  (after-init . projectile-mode)
   :config
   (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
-  (projectile-mode +1)
   (def-projectile-commander-method ?S
     "Run a search in the project"
     (counsel-projectile-rg))
@@ -1737,7 +1654,3 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                  ("unpublished" . "${author}, *${title}* (${year}). Unpublished manuscript.")
                  ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                  (nil . "${author}, *${title}* (${year})."))))
-
-(use-package pdf-tools
-  :config
-  (pdf-tools-install))
