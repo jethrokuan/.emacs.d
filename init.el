@@ -19,6 +19,9 @@
 (straight-use-package 'use-package)
 (straight-use-package 'diminish)
 
+(use-package use-package-company
+  :straight (use-package-company :host github :repo "akirak/use-package-company"))
+
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
@@ -68,6 +71,21 @@
   (setq truncate-lines nil))
 
 (add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
+
+;; Emoji setup
+(defun --set-emoji-font (frame)
+  "Adjust the font settings of FRAME so Emacs can display emoji properly."
+  (if (eq system-type 'darwin)
+      ;; For NS/Cocoa
+      (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji") frame 'prepend)
+    ;; For Linux
+    (set-fontset-font t 'symbol (font-spec :family "Symbola") frame 'prepend)))
+
+;; For when Emacs is started in GUI mode:
+(--set-emoji-font nil)
+;; Hook for when a frame is created with emacsclient
+;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
+(add-hook 'after-make-frame-functions '--set-emoji-font)
 
 (setq create-lockfiles nil)
 
@@ -621,6 +639,13 @@ FACE defaults to inheriting from default and highlight."
   :hook
   (prog-mode . ws-butler-mode))
 
+(use-package direnv
+  :if (executable-find "direnv")
+  :custom
+  (direnv-always-show-summary nil)
+  :config
+  (direnv-mode +1))
+
 (use-package flycheck
   :config
   (global-flycheck-mode +1)
@@ -671,29 +696,23 @@ FACE defaults to inheriting from default and highlight."
 
 (use-package company
   :diminish company-mode
-  :bind (:map company-active-map
-              ("M-n" . nil)
-              ("M-p" . nil)
-              ("C-n" . company-select-next)
-              ("C-p" . company-select-previous))
+  :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
+  :commands company-abort
+  :bind (("M-/" . company-complete)
+         ("<backtab>" . company-yasnippet)
+         :map company-active-map
+         ("M-n" . nil)
+         ("M-p" . nil)
+         ("C-n" . company-select-next)
+         ("C-p" . company-select-previous))
   :custom
-  (company-dabbrev-ignore-case nil)
-  (company-dabbrev-code-ignore-case nil)
   (company-dabbrev-downcase nil)
-  (company-idle-delay 0.5)
-  (company-minimum-prefix-length 2)
+  (company-idle-delay 0)
   (company-require-match nil)
-  (company-begin-commands '(self-insert-command))
-  (company-transformers '(company-sort-by-occurrence))
-  :config
-  (defun company-mode/backend-with-yas (backend)
-    (if (and (listp backend) (member 'company-yasnippet backend))
-        backend
-      (append (if (consp backend) backend (list backend))
-              '(:with company-yasnippet))))
-
-  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-  (global-company-mode +1))
+  (company-minimum-prefix-length 0)
+  (company-tooltip-align-annotations t)
+  :hook
+  (after-init . global-company-mode))
 
 (use-package company-quickhelp
   :after company
@@ -701,6 +720,10 @@ FACE defaults to inheriting from default and highlight."
               ("M-h" . company-quickhelp-manual-begin))
   :hook
   (company-mode . company-quickhelp-mode))
+
+(use-package company-emoji
+  :after company
+  :company text-mode)
 
 (use-package flyspell
   :straight nil
@@ -725,21 +748,6 @@ FACE defaults to inheriting from default and highlight."
                                (auto-fill-mode -1)))
 (diminish 'auto-fill-mode)
 
-(bind-key "M-/" 'hippie-expand)
-
-(setq hippie-expand-try-functions-list
-      '(yas-hippie-try-expand
-        try-expand-all-abbrevs
-        try-complete-file-name-partially
-        try-complete-file-name
-        try-expand-dabbrev
-        try-expand-dabbrev-from-kill
-        try-expand-dabbrev-all-buffers
-        try-expand-list
-        try-expand-line
-        try-complete-lisp-symbol-partially
-        try-complete-lisp-symbol))
-
 (defun endless/fill-or-unfill ()
   "Like `fill-paragraph', but unfill if used twice."
   (interactive)
@@ -757,13 +765,6 @@ FACE defaults to inheriting from default and highlight."
   :diminish t
   :config
   (dtrt-indent-mode +1))
-
-(use-package direnv
-  :if (executable-find "direnv")
-  :custom
-  (direnv-always-show-summary nil)
-  :config
-  (direnv-mode +1))
 
 (use-package lsp-mode
   :commands lsp
@@ -787,9 +788,8 @@ FACE defaults to inheriting from default and highlight."
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
 (use-package company-lsp
-  :after company lsp-mode
-  :config
-  (add-to-list 'company-backends 'company-lsp))
+  :after (company lsp)
+  :company lsp-mode)
 
 (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 
