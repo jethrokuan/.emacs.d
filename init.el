@@ -709,7 +709,7 @@ FACE defaults to inheriting from default and highlight."
   (company-dabbrev-downcase nil)
   (company-idle-delay 0)
   (company-require-match nil)
-  (company-minimum-prefix-length 0)
+  (company-minimum-prefix-length 2)
   (company-tooltip-align-annotations t)
   :hook
   (after-init . global-company-mode))
