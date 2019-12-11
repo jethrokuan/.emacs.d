@@ -1651,7 +1651,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :after org)
 
 (use-package org-ref-ox-hugo
-  :straight (:host github :repo "jethrokuan/org-ref-ox-hugo")
+  :straight (:host github :repo "jethrokuan/org-ref-ox-hugo" :branch "custom/overrides")
   :after org org-ref ox-hugo
   :config
   (add-to-list 'org-ref-formatted-citation-formats
