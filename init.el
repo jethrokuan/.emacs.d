@@ -1073,7 +1073,7 @@ FACE defaults to inheriting from default and highlight."
         ("l" "link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
          "* TODO %(org-cliplink-capture)" :immediate-finish t)
         ("c" "org-protocol-capture" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
-         "* [[%:link][%:description]]\n\n %i" :immediate-finish t)
+         "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
         ("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
          (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org")))))
 
@@ -1290,6 +1290,7 @@ FACE defaults to inheriting from default and highlight."
   ("C-c n l" . jethro/get-linked-files)
   ("C-c n i" . org-insert-zettel)
   :custom
+  (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory "~/.org/braindump/org")
