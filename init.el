@@ -707,7 +707,7 @@ FACE defaults to inheriting from default and highlight."
   :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
   :commands company-abort
   :bind (("M-/" . company-complete)
-         ("<backtab>" . company-yasnippet)
+         ("C-/" . company-yasnippet)
          :map company-active-map
          ("M-n" . nil)
          ("M-p" . nil)
@@ -715,7 +715,7 @@ FACE defaults to inheriting from default and highlight."
          ("C-p" . company-select-previous))
   :custom
   (company-dabbrev-downcase nil)
-  (company-idle-delay 0)
+  (company-idle-delay 0.5)
   (company-require-match nil)
   (company-minimum-prefix-length 2)
   (company-tooltip-align-annotations t)
