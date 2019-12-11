@@ -1,0 +1,30 @@
+* Setting Up
+
+** Org-protocol
+
+Create a desktop application in `~/.local/share/applications/org-protocol.desktop`:
+
+#+begin_src text
+  [Desktop Entry]
+  Name=org-protocol
+  Exec=emacsclient %u
+  Type=Application
+  Terminal=false
+  Categories=System;
+  MimeType=x-scheme-handler/org-protocol;
+#+end_src
+
+And reload:
+
+#+begin_src bash
+  update-desktop-database ~/.local/share/applications/
+#+end_src
+
+Create a bookmarklet to save links:
+
+#+begin_src text
+  javascript:location.href = 'org-protocol://capture?template=c&url='+ 
+          encodeURIComponent(location.href) + '&title=' +
+          encodeURIComponent(document.title) + '&body=' +
+          encodeURIComponent(window.getSelection())
+#+end_src

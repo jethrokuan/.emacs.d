@@ -1064,6 +1064,7 @@ FACE defaults to inheriting from default and highlight."
 (setq org-agenda-files
       (find-lisp-find-files jethro/org-agenda-directory "\.org$"))
 
+(require 'org-protocol)
 (setq org-capture-templates
       `(("i" "inbox" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
          "* TODO %?")
@@ -1071,6 +1072,8 @@ FACE defaults to inheriting from default and highlight."
          "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
         ("l" "link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
          "* TODO %(org-cliplink-capture)" :immediate-finish t)
+        ("c" "org-protocol-capture" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
+         "* [[%:link][%:description]]\n\n %i" :immediate-finish t)
         ("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
          (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org")))))
 
