@@ -1605,9 +1605,11 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (transient-append-suffix 'magit-log "a"
     '("w" "Wip" magit-wip-log-current))
   (magit-define-popup-switch 'magit-log-popup
-    ?m "Omit merge commits" "--no-merges")
+                             ?m "Omit merge commits" "--no-merges")
   (transient-append-suffix 'magit-log "-A"
     '("-m" "Omit merge commits" "--no-merges")))
+
+(use-package forge)
 
 (use-package git-link
   :commands
