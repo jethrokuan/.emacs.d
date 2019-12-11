@@ -387,14 +387,15 @@ FACE defaults to inheriting from default and highlight."
   (whitespace-line-column 80)
   (whitespace-style '(face lines-tail)))
 
-(use-package moody
-  :config
-  (setq x-underline-at-descent-line t)
-  (moody-replace-mode-line-buffer-identification)
-  (moody-replace-vc-mode)
-  :custom-face
-  (mode-line ((t
-               (:height 1.0 :box nil :foreground "#292617" :background "#ECE9E0")))))
+(when (not (jethro/phone-p))
+  (use-package moody
+    :config
+    (setq x-underline-at-descent-line t)
+    (moody-replace-mode-line-buffer-identification)
+    (moody-replace-vc-mode)
+    :custom-face
+    (mode-line ((t
+                 (:height 1.0 :box nil :foreground "#292617" :background "#ECE9E0"))))))
 
 (use-package minions
   :config
