@@ -25,6 +25,10 @@
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
+(defun jethro/phone-p ()
+  (and (equal (system-name) "localhost")
+       (not (equal user-login-name "jethro"))))
+
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
@@ -42,6 +46,9 @@
 
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
+
+(when (jethro/phone-p)
+  (use-package xclip :config (xclip-mode 1)))
 
 (use-package autorevert
   :straight nil
@@ -82,12 +89,12 @@
     (set-fontset-font t 'symbol (font-spec :family "Symbola") frame 'prepend)))
 
 ;; For when Emacs is started in GUI mode:
-(--set-emoji-font nil)
-;; Hook for when a frame is created with emacsclient
-;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
-(add-hook 'after-make-frame-functions '--set-emoji-font)
+(when (not (jethro/phone-p))
+  (--set-emoji-font nil)
+  (add-hook 'after-make-frame-functions '--set-emoji-font))
 
 (setq create-lockfiles nil)
+(setq browse-url-browser-function 'browse-url-xdg-open)
 
 (use-package goto-addr
   :hook ((compilation-mode . goto-address-mode)
@@ -1352,6 +1359,7 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   (org-journal-dir "~/.org/journal/"))
 
 (use-package ox-hugo
+  :if (executable-find "hugo")
   :after org
   :custom
   (org-hugo-auto-set-lastmod t))
