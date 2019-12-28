@@ -1323,6 +1323,7 @@ FACE defaults to inheriting from default and highlight."
 
 (use-package org-download
   :after org
+  :straight (:host github :repo "jethrokuan/org-download")
   :bind
   (:map org-mode-map
         (("s-Y" . org-download-screenshot)
