@@ -1666,3 +1666,13 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                  ("unpublished" . "${author}, *${title}* (${year}). Unpublished manuscript.")
                  ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                  (nil . "${author}, *${title}* (${year})."))))
+
+(use-package password-store)
+
+(use-package mathpix.el
+  :after password-store
+  :straight (:host github :repo "jethrokuan/mathpix.el")
+  :custom ((mathpix-app-id (password-store-get "mathpix/app-id"))
+           (mathpix-app-key (password-store-get "mathpix/app-key")))
+  :bind
+  ("C-x m" . mathpix-screenshot))
