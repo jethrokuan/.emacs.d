@@ -123,7 +123,9 @@
          ("l" . jethro/notmuch-show-jump-to-latest)
          ("<tab>" . org-next-link)
          ("<backtab>". org-previous-link)
-         ("C-<return>" . browse-url-at-point))
+         ("C-<return>" . browse-url-at-point)
+         :map notmuch-show-mode-map
+         ("C" . jethro/org-capture-email))
   :config
   (defun jethro/notmuch-toggle-read ()
     "toggle read status of message"
@@ -170,14 +172,7 @@ timestamp."
                             (:name "personal" :query "tag:personal")
                             (:name "nushackers" :query "tag:nushackers")
                             (:name "nus" :query "tag:nus")
-                            (:name "drafts" :query "tag:draft"))))
-
-(use-package org-notmuch
-  :straight nil
-  :after org notmuch
-  :bind
-  (:map notmuch-show-mode-map
-        ("C" . jethro/org-capture-email))
+                            (:name "drafts" :query "tag:draft")))
   :config
   (defun jethro/org-capture-email ()
     (interactive)
@@ -1030,7 +1025,8 @@ FACE defaults to inheriting from default and highlight."
                                   ("t" . "theorem")))
   :config
   (require 'org-habit)
-  (require 'org-tempo))
+  (require 'org-tempo)
+  (require 'ol-notmuch))
 
 (require 'org)
 
