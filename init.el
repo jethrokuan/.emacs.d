@@ -756,7 +756,9 @@ FACE defaults to inheriting from default and highlight."
         (("C-;" . flyspell-correct-wrapper))))
 
 (use-package flyspell-correct-ivy
-  :after flyspell-correct)
+  :after flyspell-correct
+  :custom
+  (flyspell-correct-interface #'flyspell-correct-ivy))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
@@ -1059,9 +1061,11 @@ FACE defaults to inheriting from default and highlight."
                     'org-meta-line
                     'org-document-info-keyword))))
 
-(setq org-startup-indented t
+(setq org-startup-indented nil
+      org-hide-leading-stars nil
       org-hide-emphasis-markers nil
-      org-pretty-entities nil)
+      org-pretty-entities nil
+      org-adapt-indentation nil)
 
 (defun org-archive-done-tasks ()
   (interactive)
