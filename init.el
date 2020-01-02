@@ -1014,6 +1014,7 @@ FACE defaults to inheriting from default and highlight."
   (org-confirm-babel-evaluate nil)
   (org-use-speed-commands t)
   (org-catch-invisible-edits 'show)
+  (org-preview-latex-image-directory "/tmp/ltximg/")
   :custom-face
   (variable-pitch ((t (:family "iA Writer Duospace" :height 0.9))))
   (org-document-title ((t (:weight bold :height 1.5))))
