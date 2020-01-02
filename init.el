@@ -1377,6 +1377,8 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :custom
   (org-journal-dir "~/.org/journal/"))
 
+(use-package org-noter)
+
 (use-package ox-hugo
   :if (executable-find "hugo")
   :after org
@@ -1693,3 +1695,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
            (mathpix-app-key (password-store-get "mathpix/app-key")))
   :bind
   ("C-x m" . mathpix-screenshot))
+
+
+(use-package pdf-tools
+  :config
+  (pdf-tools-install))
