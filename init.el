@@ -1306,7 +1306,7 @@ FACE defaults to inheriting from default and highlight."
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
-  (deft-directory "~/.org/braindump/org")
+  (deft-directory "~/.org/braindump/org/")
   (deft-use-filename-as-title t)
   :config
   (setq zettel-indicator "§")
