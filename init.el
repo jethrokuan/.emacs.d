@@ -1702,3 +1702,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package pdf-tools
   :config
   (pdf-tools-install))
+
+(use-package org-remembrance
+  :straight (:host github :repo "jethrokuan/org-remembrance")
+  :bind (:map org-mode-map
+              ("C-r" . org-remembrance-update-results)))
