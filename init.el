@@ -1707,3 +1707,10 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :straight (:host github :repo "jethrokuan/org-remembrance")
   :bind (:map org-mode-map
               ("C-r" . org-remembrance-update-results)))
+
+(use-package org-gcal
+  :custom
+  (org-gcal-client-id (password-store-get "gmail/org-gcal-client"))
+  (org-gcal-client-secret (password-store-get "gmail/org-gcal"))
+  (org-gcal-file-alist '(("jethrokuan95@gmail.com" . "~/.org/gtd/calendars/personal.org")
+                         ("dckbhpq9bq13m03llerl09slgo@group.calendar.google.com" . "~/.org/gtd/calendars/lab.org"))))
