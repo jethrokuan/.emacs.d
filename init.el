@@ -201,59 +201,6 @@ timestamp."
                       :foreground 'unspecified
                       :inherit 'error))
 
-
-;; From https://with-emacs.com/posts/editing/show-matching-lines-when-parentheses-go-off-screen/
-;; we will call `blink-matching-open` ourselves...
-(remove-hook 'post-self-insert-hook
-             #'blink-paren-post-self-insert-function)
-;; this still needs to be set for `blink-matching-open` to work
-(setq blink-matching-paren 'show)
-
-(let ((ov nil)) ; keep track of the overlay
-  (advice-add
-   #'show-paren-function
-   :after
-   (defun show-paren--off-screen+ (&rest _args)
-     "Display matching line for off-screen paren."
-     (when (overlayp ov)
-       (delete-overlay ov))
-     ;; check if it's appropriate to show match info,
-     ;; see `blink-paren-post-self-insert-function'
-     (when (and (overlay-buffer show-paren--overlay)
-                (not (or cursor-in-echo-area
-                         executing-kbd-macro
-                         noninteractive
-                         (minibufferp)
-                         this-command))
-                (and (not (bobp))
-                     (memq (char-syntax (char-before)) '(?\) ?\$)))
-                (= 1 (logand 1 (- (point)
-                                  (save-excursion
-                                    (forward-char -1)
-                                    (skip-syntax-backward "/\\")
-                                    (point))))))
-       ;; rebind `minibuffer-message' called by
-       ;; `blink-matching-open' to handle the overlay display
-       (cl-letf (((symbol-function #'minibuffer-message)
-                  (lambda (msg &rest args)
-                    (let ((msg (apply #'format-message msg args)))
-                      (setq ov (display-line-overlay+
-                                (window-start) msg ))))))
-         (blink-matching-open))))))
-
-(defun display-line-overlay+ (pos str &optional face)
-  "Display line at POS as STR with FACE.
-
-FACE defaults to inheriting from default and highlight."
-  (let ((ol (save-excursion
-              (goto-char pos)
-              (make-overlay (line-beginning-position)
-                            (line-end-position)))))
-    (overlay-put ol 'display str)
-    (overlay-put ol 'face
-                 (or face '(:inherit default :inherit highlight)))
-    ol))
-
 (setq show-paren-style 'paren
       show-paren-delay 0.03
       show-paren-highlight-openparen t
@@ -268,8 +215,6 @@ FACE defaults to inheriting from default and highlight."
   (global-hl-todo-mode))
 
 (use-package counsel
-  :hook
-  (after-init . ivy-mode)
   :diminish ivy-mode
   :bind
   (("C-c C-r" . ivy-resume)
@@ -303,7 +248,8 @@ FACE defaults to inheriting from default and highlight."
   (ivy-set-actions
    t
    '(("I" insert "insert")))
-  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
+  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
+  (ivy-mode +1))
 
 (use-package ivy-posframe
   :after ivy
@@ -341,9 +287,8 @@ FACE defaults to inheriting from default and highlight."
 
 (use-package counsel-projectile
   :after ivy projectile
-  :bind (("s-f" . counsel-projectile-find-file)
-         ("s-b" . counsel-projectile-switch-to-buffer)
-         ("C-c s" . counsel-projectile-rg)))
+  :config
+  (counsel-projectile-mode))
 
 (use-package wgrep
   :commands
@@ -446,12 +391,6 @@ FACE defaults to inheriting from default and highlight."
          ("M-D" . crux-duplicate-and-comment-current-line-or-region)
          ("s-o" . crux-smart-open-line-above)))
 
-(use-package avy
-  :bind
-  (("C-'" . avy-goto-char-timer))
-  :custom
-  (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
-
 (let ((gls (executable-find "gls")))
   (when gls
     (setq insert-directory-program gls)))
@@ -469,9 +408,8 @@ FACE defaults to inheriting from default and highlight."
   (wdired-allow-to-change-permissions t))
 
 (use-package dired-narrow
-  :commands dired-narrow dired-narrow-fuzzy
   :bind (:map dired-mode-map
-              ("N" . dired-narrow-fuzzy)))
+              ("/" . dired-narrow-fuzzy)))
 
 (use-package easy-kill
   :bind*
@@ -531,8 +469,6 @@ FACE defaults to inheriting from default and highlight."
   :bind (("C-=" . er/expand-region)))
 
 (use-package smartparens
-  :hook
-  (after-init . smartparens-global-strict-mode)
   :bind (:map smartparens-mode-map
               ("C-M-f" . sp-forward-sexp)
               ("C-M-b" . sp-backward-sexp)
@@ -569,7 +505,8 @@ FACE defaults to inheriting from default and highlight."
     (or (and (= (line-beginning-position) mb)
              (eq 32 (char-after (1+ mb))))
         (and (= (1+ (line-beginning-position)) me)
-             (eq 32 (char-after me))))))
+             (eq 32 (char-after me)))))
+  (smartparens-global-strict-mode +1))
 
 (autoload 'zap-up-to-char "misc"
   "Kill up to, but not including ARGth occurrence of CHAR.
@@ -759,8 +696,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (company-require-match nil)
   (company-minimum-prefix-length 2)
   (company-tooltip-align-annotations t)
-  :hook
-  (after-init . global-company-mode))
+  :config
+  (global-company-mode +1))
 
 (use-package company-quickhelp
   :after company
@@ -776,22 +713,12 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package flyspell
   :straight nil
   :diminish flyspell-mode
-  :init
-  (setenv "DICTIONARY" "en_GB")
   :hook
   (text-mode . flyspell-mode)
   :custom
-  (flyspell-abbrev-p t))
-
-(use-package flyspell-correct
-  :bind
-  (:map flyspell-mode-map
-        (("C-;" . flyspell-correct-wrapper))))
-
-(use-package flyspell-correct-ivy
-  :after flyspell-correct
-  :custom
-  (flyspell-correct-interface #'flyspell-correct-ivy))
+  (flyspell-abbrev-p t)
+  (ispell-program-name "hunspell")
+  (ispell-dictionary "en_US"))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
@@ -847,17 +774,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (use-package dockerfile-mode
   :mode "Dockerfile\\'")
-
-(use-package nix-mode
-  :mode ("\\.nix\\'" "\\.nix.in\\'")
-  :custom
-  (nix-indent-function #'nix-indent-line))
-
-(use-package nix-update
-  :after nix-mode
-  :bind
-  (:map nix-mode-map
-        ("C-. u" . nix-update)))
 
 (use-package cc-mode
   :ensure nil
