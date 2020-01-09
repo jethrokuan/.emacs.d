@@ -47,9 +47,6 @@
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
 
-(when (jethro/phone-p)
-  (use-package xclip :config (xclip-mode 1)))
-
 (use-package autorevert
   :straight nil
   :diminish t
@@ -270,28 +267,6 @@ FACE defaults to inheriting from default and highlight."
   :config
   (global-hl-todo-mode))
 
-(use-package elfeed
-  :bind
-  (("<f6>" . elfeed))
-  :custom
-  (shr-width 80))
-
-(use-package elfeed-org
-  :after elfeed
-  :bind
-  (:map elfeed-show-mode-map
-        ("C" . jethro/org-capture-elfeed-link))
-  (:map elfeed-search-mode-map
-        ("C" . jethro/org-capture-elfeed-link))
-  :config
-  (require 'elfeed-link)
-  (elfeed-org)
-  (defun jethro/org-capture-elfeed-link ()
-    (interactive)
-    (org-capture nil "z"))
-  :custom
-  (rmh-elfeed-org-files '("~/.org/braindump/org/feeds.org")))
-
 (use-package counsel
   :hook
   (after-init . ivy-mode)
@@ -342,31 +317,33 @@ FACE defaults to inheriting from default and highlight."
   :config
   (ivy-posframe-mode +1))
 
-(use-package counsel-fd
-  :straight (:host github :repo "jethrokuan/counsel-fd")
-  :after counsel
-  :bind
-  (("C-x j" . counsel-fd-dired-jump)
-   ("C-x f" . counsel-fd-file-jump)))
-
-(use-package amx
-  :after ivy)
-
-(use-package swiper
-  :bind
-  (("C-s" . swiper-isearch)
-   ("C-r" . swiper-isearch)
-   ("C-c C-s" . counsel-grep-or-swiper)
-   :map swiper-map
-   ("M-q" . swiper-query-replace)
-   ("C-l". swiper-recenter-top-bottom)
-   ("C-'" . swiper-avy))
+(use-package projectile
   :custom
-  (counsel-grep-swiper-limit 20000)
-  (counsel-rg-base-command
-   "rg -i -M 120 --no-heading --line-number --color never %s .")
-  (counsel-grep-base-command
-   "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
+  (projectile-use-git-grep t)
+  (projectile-create-missing-test-files t)
+  (projectile-completion-system 'ivy)
+  (projectile-switch-project-action  #'projectile-commander)
+  :config
+  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
+  (projectile-mode +1)
+  (def-projectile-commander-method ?S
+    "Run a search in the project"
+    (counsel-projectile-rg))
+  (def-projectile-commander-method ?s
+    "Open a *eshell* buffer for the project."
+    (projectile-run-eshell))
+  (def-projectile-commander-method ?d
+    "Open project root in dired."
+    (projectile-dired))
+  (def-projectile-commander-method ?g
+    "Show magit status."
+    (magit-status)))
+
+(use-package counsel-projectile
+  :after ivy projectile
+  :bind (("s-f" . counsel-projectile-find-file)
+         ("s-b" . counsel-projectile-switch-to-buffer)
+         ("C-c s" . counsel-projectile-rg)))
 
 (use-package wgrep
   :commands
@@ -404,9 +381,6 @@ FACE defaults to inheriting from default and highlight."
   (beacon-push-mark 10)
   :config
   (beacon-mode +1))
-
-(show-paren-mode 1)
-(setq show-paren-delay 0)
 
 (use-package volatile-highlights
   :diminish volatile-highlights-mode
@@ -478,13 +452,9 @@ FACE defaults to inheriting from default and highlight."
   :custom
   (avy-keys '(?h ?t ?n ?s ?m ?w ?v ?z)))
 
-(use-package smart-jump
-  :config
-  (smart-jump-setup-default-registers))
-
-(let ((gls "/usr/local/bin/gls"))
-  (if (file-exists-p gls)
-      (setq insert-directory-program gls)))
+(let ((gls (executable-find "gls")))
+  (when gls
+    (setq insert-directory-program gls)))
 
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 
@@ -499,39 +469,9 @@ FACE defaults to inheriting from default and highlight."
   (wdired-allow-to-change-permissions t))
 
 (use-package dired-narrow
+  :commands dired-narrow dired-narrow-fuzzy
   :bind (:map dired-mode-map
               ("N" . dired-narrow-fuzzy)))
-
-(use-package dired-git-info
-  :bind (:map dired-mode-map
-              (")" . dired-git-info-mode)))
-
-(use-package ibuffer
-  :bind (([remap list-buffers] . ibuffer))
-  :custom
-  (ibuffer-expert t))
-
-(use-package shackle
-  :diminish shackle-mode
-  :if (not (bound-and-true-p disable-pkg-shackle))
-  :custom
-  (shackle-rules
-   '((compilation-mode :select nil)
-     ("*undo-tree*" :size 0.25 :align right)
-     ("*eshell*" :select t :size 0.3 :align t)
-     ("*Shell Command Output*" :select nil)
-     ("\\*Async Shell.*\\*" :regexp t :ignore t)
-     (occur-mode :select nil :align t)
-     ("*Help*" :select t :inhibit-window-quit t :other t)
-     ("*Completions*" :size 0.3 :align t)
-     ("*Messages*" :select nil :inhibit-window-quit t :other t)
-     ("\\*[Wo]*Man.*\\*" :regexp t :select t :inhibit-window-quit t :other t)
-     ("*Calendar*" :select t :size 0.3 :align below)
-     ("*info*" :select t :inhibit-window-quit t :same t)
-     (magit-status-mode :select t :inhibit-window-quit t :same t)
-     (magit-log-mode :select t :inhibit-window-quit t :same t)))
-  :config
-  (shackle-mode +1))
 
 (use-package easy-kill
   :bind*
@@ -643,6 +583,109 @@ FACE defaults to inheriting from default and highlight."
   :diminish 'ws-butler-mode
   :hook
   (prog-mode . ws-butler-mode))
+
+(use-package vc
+  :bind (("C-x v =" . jethro/vc-diff)
+         ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
+  :config
+  (defun jethro/vc-diff (no-whitespace)
+    "Call `vc-diff' as usual if buffer is not modified.
+If the buffer is modified (yet to be saved), call `diff-buffer-with-file'.
+If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
+    (interactive "P")
+    (let* ((no-ws-switch '("-w"))
+           (vc-git-diff-switches (if no-whitespace
+                                     no-ws-switch
+                                   vc-git-diff-switches))
+           (vc-diff-switches (if no-whitespace
+                                 no-ws-switch
+                               vc-diff-switches))
+           (diff-switches (if no-whitespace
+                              no-ws-switch
+                            diff-switches))
+           ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
+           ;; of `vc-diff' stays nil.
+           current-prefix-arg)
+      (if (buffer-modified-p)
+          (diff-buffer-with-file (current-buffer))
+        (call-interactively #'vc-diff)))))
+
+(use-package smerge-mode
+  :bind (("C-c h s" . jethro/hydra-smerge/body))
+  :init
+  (defun jethro/enable-smerge-maybe ()
+    "Auto-enable `smerge-mode' when merge conflict is detected."
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^<<<<<<< " nil :noerror)
+        (smerge-mode 1))))
+  (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append)
+  :config
+  (defhydra jethro/hydra-smerge (:color pink
+                                        :hint nil
+                                        :pre (smerge-mode 1)
+                                        ;; Disable `smerge-mode' when quitting hydra if
+                                        ;; no merge conflicts remain.
+                                        :post (smerge-auto-leave))
+    "
+   ^Move^       ^Keep^               ^Diff^                 ^Other^
+   ^^-----------^^-------------------^^---------------------^^-------
+   _n_ext       _b_ase               _<_: upper/base        _C_ombine
+   _p_rev       _u_pper              _=_: upper/lower       _r_esolve
+   ^^           _l_ower              _>_: base/lower        _k_ill current
+   ^^           _a_ll                _R_efine
+   ^^           _RET_: current       _E_diff
+   "
+    ("n" smerge-next)
+    ("p" smerge-prev)
+    ("b" smerge-keep-base)
+    ("u" smerge-keep-upper)
+    ("l" smerge-keep-lower)
+    ("a" smerge-keep-all)
+    ("RET" smerge-keep-current)
+    ("\C-m" smerge-keep-current)
+    ("<" smerge-diff-base-upper)
+    ("=" smerge-diff-upper-lower)
+    (">" smerge-diff-base-lower)
+    ("R" smerge-refine)
+    ("E" smerge-ediff)
+    ("C" smerge-combine-with-next)
+    ("r" smerge-resolve)
+    ("k" smerge-kill-current)
+    ("q" nil "cancel" :color blue)))
+
+(use-package magit
+  :straight (magit :type git
+                   :files ("lisp/magit*.el" "lisp/git*.el"
+                           "Documentation/magit.texi" "Documentation/AUTHORS.md"
+                           "COPYING" (:exclude "lisp/magit-popup.el"))
+                   :host github :repo "magit/magit")
+  :bind (("s-g" . magit-status)
+         ("C-c g" . magit-status)
+         ("s-G" . magit-blame-addition)
+         ("C-c G" . magit-blame-addition))
+  :hook
+  (magit-mode . hl-line-mode)
+  :custom
+  (magit-auto-revert-mode nil)
+  (magit-log-arguments '("-n100" "--graph" "--decorate"))
+  :config
+  (transient-append-suffix 'magit-log "a"
+    '("w" "Wip" magit-wip-log-current))
+  (magit-define-popup-switch 'magit-log-popup
+                             ?m "Omit merge commits" "--no-merges")
+  (transient-append-suffix 'magit-log "-A"
+    '("-m" "Omit merge commits" "--no-merges")))
+
+(use-package git-link
+  :commands
+  (git-link git-link-commit git-link-homepage)
+  :custom
+  (git-link-use-commit t))
+
+(use-package bury-successful-compilation
+  :hook
+  (prog-mode . bury-successful-compilation))
 
 (use-package direnv
   :if (executable-find "direnv")
@@ -902,11 +945,6 @@ FACE defaults to inheriting from default and highlight."
   :hook
   (css-mode . rainbow-mode)
   (scss-mode . rainbow-mode))
-
-(use-package scss-mode
-  :mode "\\.scss\\'"
-  :custom
-  (scss-compile-at-save nil))
 
 (use-package js2-mode
   :hook
@@ -1523,139 +1561,6 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
     '(?L "Export to LaTeX notes"
          ((?p "Export to PDF" jethro/org-multicol-to-pdf)))))
 
-(use-package vc
-  :bind (("C-x v =" . jethro/vc-diff)
-         ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
-  :config
-  (defun jethro/vc-diff (no-whitespace)
-    "Call `vc-diff' as usual if buffer is not modified.
-If the buffer is modified (yet to be saved), call `diff-buffer-with-file'.
-If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
-    (interactive "P")
-    (let* ((no-ws-switch '("-w"))
-           (vc-git-diff-switches (if no-whitespace
-                                     no-ws-switch
-                                   vc-git-diff-switches))
-           (vc-diff-switches (if no-whitespace
-                                 no-ws-switch
-                               vc-diff-switches))
-           (diff-switches (if no-whitespace
-                              no-ws-switch
-                            diff-switches))
-           ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
-           ;; of `vc-diff' stays nil.
-           current-prefix-arg)
-      (if (buffer-modified-p)
-          (diff-buffer-with-file (current-buffer))
-        (call-interactively #'vc-diff)))))
-
-(use-package smerge-mode
-  :bind (("C-c h s" . jethro/hydra-smerge/body))
-  :init
-  (defun jethro/enable-smerge-maybe ()
-    "Auto-enable `smerge-mode' when merge conflict is detected."
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward "^<<<<<<< " nil :noerror)
-        (smerge-mode 1))))
-  (add-hook 'find-file-hook #'jethro/enable-smerge-maybe :append)
-  :config
-  (defhydra jethro/hydra-smerge (:color pink
-                                        :hint nil
-                                        :pre (smerge-mode 1)
-                                        ;; Disable `smerge-mode' when quitting hydra if
-                                        ;; no merge conflicts remain.
-                                        :post (smerge-auto-leave))
-    "
-   ^Move^       ^Keep^               ^Diff^                 ^Other^
-   ^^-----------^^-------------------^^---------------------^^-------
-   _n_ext       _b_ase               _<_: upper/base        _C_ombine
-   _p_rev       _u_pper              _=_: upper/lower       _r_esolve
-   ^^           _l_ower              _>_: base/lower        _k_ill current
-   ^^           _a_ll                _R_efine
-   ^^           _RET_: current       _E_diff
-   "
-    ("n" smerge-next)
-    ("p" smerge-prev)
-    ("b" smerge-keep-base)
-    ("u" smerge-keep-upper)
-    ("l" smerge-keep-lower)
-    ("a" smerge-keep-all)
-    ("RET" smerge-keep-current)
-    ("\C-m" smerge-keep-current)
-    ("<" smerge-diff-base-upper)
-    ("=" smerge-diff-upper-lower)
-    (">" smerge-diff-base-lower)
-    ("R" smerge-refine)
-    ("E" smerge-ediff)
-    ("C" smerge-combine-with-next)
-    ("r" smerge-resolve)
-    ("k" smerge-kill-current)
-    ("q" nil "cancel" :color blue)))
-
-(use-package magit
-  :straight (magit :type git
-                   :files ("lisp/magit*.el" "lisp/git*.el"
-                           "Documentation/magit.texi" "Documentation/AUTHORS.md"
-                           "COPYING" (:exclude "lisp/magit-popup.el"))
-                   :host github :repo "magit/magit")
-  :bind (("s-g" . magit-status)
-         ("C-c g" . magit-status)
-         ("s-G" . magit-blame-addition)
-         ("C-c G" . magit-blame-addition))
-  :hook
-  (magit-mode . hl-line-mode)
-  :custom
-  (magit-auto-revert-mode nil)
-  (magit-log-arguments '("-n100" "--graph" "--decorate"))
-  :config
-  (transient-append-suffix 'magit-log "a"
-    '("w" "Wip" magit-wip-log-current))
-  (magit-define-popup-switch 'magit-log-popup
-                             ?m "Omit merge commits" "--no-merges")
-  (transient-append-suffix 'magit-log "-A"
-    '("-m" "Omit merge commits" "--no-merges")))
-
-(use-package forge)
-
-(use-package git-link
-  :commands
-  (git-link git-link-commit git-link-homepage)
-  :custom
-  (git-link-use-commit t))
-
-(use-package projectile
-  :custom
-  (projectile-use-git-grep t)
-  (projectile-create-missing-test-files t)
-  (projectile-completion-system 'ivy)
-  (projectile-switch-project-action  #'projectile-commander)
-  :config
-  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
-  (projectile-mode +1)
-  (def-projectile-commander-method ?S
-    "Run a search in the project"
-    (counsel-projectile-rg))
-  (def-projectile-commander-method ?s
-    "Open a *eshell* buffer for the project."
-    (projectile-run-eshell))
-  (def-projectile-commander-method ?d
-    "Open project root in dired."
-    (projectile-dired))
-  (def-projectile-commander-method ?g
-    "Show magit status."
-    (magit-status)))
-
-(use-package counsel-projectile
-  :after ivy projectile
-  :bind (("s-f" . counsel-projectile-find-file)
-         ("s-b" . counsel-projectile-switch-to-buffer)
-         ("C-c s" . counsel-projectile-rg)))
-
-(use-package bury-successful-compilation
-  :hook
-  (prog-mode . bury-successful-compilation))
-
 (use-package org-ref
   :after org)
 
@@ -1686,19 +1591,13 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :bind
   ("C-x m" . mathpix-screenshot))
 
-
 (use-package pdf-tools
   :config
   (pdf-tools-install))
-
-(use-package org-remembrance
-  :straight (:host github :repo "jethrokuan/org-remembrance")
-  :bind (:map org-mode-map
-              ("C-r" . org-remembrance-update-results)))
 
 (use-package org-gcal
   :custom
   (org-gcal-client-id (password-store-get "gmail/org-gcal-client"))
   (org-gcal-client-secret (password-store-get "gmail/org-gcal"))
-  (org-gcal-file-alist '(("jethrokuan95@gmail.com" . "~/.org/gtd/calendars/personal.org")
-                         ("dckbhpq9bq13m03llerl09slgo@group.calendar.google.com" . "~/.org/gtd/calendars/lab.org"))))
+  (org-gcal-fetch-file-alist '(("jethrokuan95@gmail.com" . "~/.org/gtd/calendars/personal.org")
+                               ("dckbhpq9bq13m03llerl09slgo@group.calendar.google.com" . "~/.org/gtd/calendars/lab.org"))))
