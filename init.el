@@ -105,6 +105,7 @@
              goto-address-mode))
 
 (bind-key "C-z" 'bury-buffer)
+(bind-key "C-S-s" 'isearch-forward-symbol-at-point)
 
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
@@ -489,6 +490,8 @@ timestamp."
               ("C-{" . sp-backward-barf-sexp)
               ("C-M-<right>" . sp-backward-barf-sexp)
               ("M-S" . sp-split-sexp))
+  :init
+  (smartparens-global-strict-mode +1)
   :config
   (require 'smartparens-config)
   ;; Org-mode config
@@ -505,8 +508,7 @@ timestamp."
     (or (and (= (line-beginning-position) mb)
              (eq 32 (char-after (1+ mb))))
         (and (= (1+ (line-beginning-position)) me)
-             (eq 32 (char-after me)))))
-  (smartparens-global-strict-mode +1))
+             (eq 32 (char-after me))))))
 
 (autoload 'zap-up-to-char "misc"
   "Kill up to, but not including ARGth occurrence of CHAR.
@@ -696,7 +698,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (company-require-match nil)
   (company-minimum-prefix-length 2)
   (company-tooltip-align-annotations t)
-  :config
+  :init
   (global-company-mode +1))
 
 (use-package company-quickhelp
@@ -717,8 +719,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (text-mode . flyspell-mode)
   :custom
   (flyspell-abbrev-p t)
-  (ispell-program-name "hunspell")
-  (ispell-dictionary "en_US"))
+  (ispell-program-name "aspell")
+  (ispell-dictionary "en_GB"))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
