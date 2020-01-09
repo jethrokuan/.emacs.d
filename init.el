@@ -394,16 +394,6 @@ FACE defaults to inheriting from default and highlight."
   (whitespace-line-column 80)
   (whitespace-style '(face lines-tail)))
 
-(when (not (jethro/phone-p))
-  (use-package moody
-    :config
-    (setq x-underline-at-descent-line t)
-    (moody-replace-mode-line-buffer-identification)
-    (moody-replace-vc-mode)
-    :custom-face
-    (mode-line ((t
-                 (:height 1.0 :box nil :foreground "#292617" :background "#ECE9E0"))))))
-
 (use-package minions
   :config
   (minions-mode +1))
@@ -787,17 +777,14 @@ FACE defaults to inheriting from default and highlight."
   :commands lsp
   :hook
   (lsp-after-open-hook . lsp-enable-imenu)
+  (python-mode . lsp)
+  (c++-mode . lsp)
+  (c-mode . lsp)
   :custom
-  (lsp-message-project-root-warning t)
-  :init
-  (require 'lsp-clients)
-  (add-hook 'python-mode-hook #'lsp)
-  (add-hook 'c++-mode-hook #'lsp)
-  (add-hook 'c-mode-hook #'lsp))
+  (lsp-message-project-root-warning t))
 
 (use-package lsp-ui
   :after lsp-mode
-  :commands lsp-ui-mode
   :hook
   (lsp-mode . lsp-ui-mode)
   :config
@@ -807,6 +794,8 @@ FACE defaults to inheriting from default and highlight."
 (use-package company-lsp
   :after (company lsp)
   :company lsp-mode)
+
+(use-package dap-mode)
 
 (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 
@@ -1148,14 +1137,14 @@ FACE defaults to inheriting from default and highlight."
          (inhibit-read-only t)
          newhead)
     (org-with-remote-undo buffer
-                          (with-current-buffer buffer
-                            (widen)
-                            (goto-char pos)
-                            (org-show-context 'agenda)
-                            (funcall-interactively 'org-set-effort nil jethro/org-current-effort)
-                            (end-of-line 1)
-                            (setq newhead (org-get-heading)))
-                          (org-agenda-change-all-lines newhead hdmarker))))
+      (with-current-buffer buffer
+        (widen)
+        (goto-char pos)
+        (org-show-context 'agenda)
+        (funcall-interactively 'org-set-effort nil jethro/org-current-effort)
+        (end-of-line 1)
+        (setq newhead (org-get-heading)))
+      (org-agenda-change-all-lines newhead hdmarker))))
 
 (defun jethro/org-agenda-process-inbox-item ()
   "Process a single item in the org-agenda."
@@ -1641,10 +1630,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (projectile-create-missing-test-files t)
   (projectile-completion-system 'ivy)
   (projectile-switch-project-action  #'projectile-commander)
-  :hook
-  (after-init . projectile-mode)
   :config
   (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
+  (projectile-mode +1)
   (def-projectile-commander-method ?S
     "Run a search in the project"
     (counsel-projectile-rg))
