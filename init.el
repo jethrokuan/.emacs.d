@@ -76,20 +76,7 @@
 
 (add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
 
-;; Emoji setup
-(defun --set-emoji-font (frame)
-  "Adjust the font settings of FRAME so Emacs can display emoji properly."
-  (if (eq system-type 'darwin)
-      ;; For NS/Cocoa
-      (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji") frame 'prepend)
-    ;; For Linux
-    (set-fontset-font t 'symbol (font-spec :family "Symbola") frame 'prepend)))
-
 ;; For when Emacs is started in GUI mode:
-(when (not (jethro/phone-p))
-  (--set-emoji-font nil)
-  (add-hook 'after-make-frame-functions '--set-emoji-font))
-
 (setq create-lockfiles nil)
 (setq browse-url-browser-function 'browse-url-xdg-open)
 
@@ -707,10 +694,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
               ("M-h" . company-quickhelp-manual-begin))
   :hook
   (company-mode . company-quickhelp-mode))
-
-(use-package company-emoji
-  :after company
-  :company text-mode)
 
 (use-package flyspell
   :straight nil
