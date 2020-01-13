@@ -182,9 +182,9 @@ timestamp."
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
 
-(use-package tao-theme
+(use-package doom-themes
   :init
-  (load-theme 'tao-yang t))
+  (load-theme 'doom-challenger-deep t))
 
 (use-package rainbow-delimiters
   :hook
