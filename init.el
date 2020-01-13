@@ -350,20 +350,6 @@ timestamp."
 
   (bind-key "C-c h v" #'jethro/hydra-diff-hl/body))
 
-(use-package eyebrowse
-  :bind* (("M-0" . eyebrowse-switch-to-window-config-0)
-          ("M-1" . eyebrowse-switch-to-window-config-1)
-          ("M-2" . eyebrowse-switch-to-window-config-2)
-          ("M-3" . eyebrowse-switch-to-window-config-3)
-          ("M-4" . eyebrowse-switch-to-window-config-4)
-          ("M-5" . eyebrowse-switch-to-window-config-5)
-          ("M-6" . eyebrowse-switch-to-window-config-6)
-          ("M-7" . eyebrowse-switch-to-window-config-7)
-          ("M-8" . eyebrowse-switch-to-window-config-8)
-          ("M-9" . eyebrowse-switch-to-window-config-9))
-  :config
-  (eyebrowse-mode +1))
-
 (use-package crux
   :bind (("C-c o" . crux-open-with)
          ("C-c D" . crux-delete-file-and-buffer)
