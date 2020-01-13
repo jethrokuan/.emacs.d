@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 (setq exwm-workspace-number 6)
+(defun jethro/exwm-rename-buffer-to-title () (exwm-workspace-rename-buffer exwm-title))
+(add-hook 'exwm-update-title-hook 'jethro/exwm-rename-buffer-to-title)
 (add-hook 'exwm-update-class-hook
           (defun my-exwm-update-class-hook ()
             (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
@@ -17,6 +19,8 @@
 (setq exwm-workspace-show-all-buffers t
       exwm-layout-show-all-buffers t)
 
+(push ?\s-  exwm-input-prefix-keys)
+
 (display-battery-mode 1)
 (display-time-mode 1)
 
@@ -32,8 +36,10 @@
   (call-process "urxvtc"))
 
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
-(exwm-input-set-key (kbd "C-c C-p") #'ivy-pass)
+(exwm-input-set-key (kbd "s-p") #'ivy-pass)
 (exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
+(exwm-input-set-key (kbd "s-f") #'counsel-find-file)
+(exwm-input-set-key (kbd "s-F") #'counsel-locate)
 
 (add-hook 'exwm-manage-finish-hook
           (lambda ()
