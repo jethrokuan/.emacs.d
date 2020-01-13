@@ -1481,7 +1481,8 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
 (use-package mathpix.el
   :after password-store
   :straight (:host github :repo "jethrokuan/mathpix.el")
-  :custom ((mathpix-app-id (password-store-get "mathpix/app-id"))
+  :custom ((mathpix-screenshot-method "maim -s %s")
+           (mathpix-app-id (password-store-get "mathpix/app-id"))
            (mathpix-app-key (password-store-get "mathpix/app-key")))
   :bind
   ("C-x m" . mathpix-screenshot))
