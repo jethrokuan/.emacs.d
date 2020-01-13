@@ -239,18 +239,6 @@ timestamp."
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
   (ivy-mode +1))
 
-(use-package ivy-posframe
-  :after ivy
-  :custom
-  (ivy-posframe-parameters '((left-fringe . 0)
-                             (right-fringe . 0)
-                             (internal-border-width . 1)))
-  (ivy-posframe-display-functions-alist
-   '((swiper-isearch  . nil)
-     (t               . ivy-posframe-display-at-frame-center)))
-  :config
-  (ivy-posframe-mode +1))
-
 (use-package projectile
   :custom
   (projectile-use-git-grep t)
