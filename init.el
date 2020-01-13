@@ -19,6 +19,11 @@
 (straight-use-package 'use-package)
 (straight-use-package 'diminish)
 
+(add-to-list 'load-path "~/.emacs.d/elisp")
+
+(when (featurep 'exwm)
+  (require 'exwm-config))
+
 (use-package use-package-company
   :straight (use-package-company :host github :repo "akirak/use-package-company"))
 
@@ -1471,6 +1476,7 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
                  (nil . "${author}, *${title}* (${year})."))))
 
 (use-package password-store)
+(use-package ivy-pass)
 
 (use-package mathpix.el
   :after password-store
