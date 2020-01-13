@@ -41,6 +41,12 @@
                        (string= exwm-class-name "URxvt"))
               (exwm-input-set-local-simulation-keys '(([?\C-c ?\C-c] . ?\C-c))))))
 
+(use-package pulseaudio-control
+  :config
+  (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") #'pulseaudio-control-increase-volume)
+  (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") #'pulseaudio-control-decrease-volume)
+  (exwm-input-set-key (kbd "<XF86AudioMute>") #'pulseaudio-control-toggle-current-sink-mute))
+
 (exwm-enable)
 
 (provide 'exwm-config)
