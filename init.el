@@ -19,7 +19,8 @@
 (straight-use-package 'use-package)
 (straight-use-package 'diminish)
 
-(add-to-list 'load-path "~/.emacs.d/elisp")
+
+(add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
 (when (featurep 'exwm)
   (require 'exwm-config))
@@ -62,7 +63,7 @@
   :custom
   (auto-revert-verbose nil))
 
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -659,7 +660,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :config
   (yas-global-mode +1)
   :custom
-  (yas-snippet-dirs '("~/.emacs.d/snippets/snippets/")))
+  (yas-snippet-dirs (list (expand-file-name "snippets/snippets" user-emacs-directory))))
 
 (use-package company
   :diminish company-mode
