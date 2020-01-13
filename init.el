@@ -1486,10 +1486,6 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :bind
   ("C-x m" . mathpix-screenshot))
 
-(use-package pdf-tools
-  :config
-  (pdf-tools-install))
-
 (use-package org-gcal
   :custom
   (org-gcal-client-id (password-store-get "gmail/org-gcal-client"))
