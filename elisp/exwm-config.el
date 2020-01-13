@@ -17,10 +17,6 @@
 (setq exwm-workspace-show-all-buffers t
       exwm-layout-show-all-buffers t)
 
-(require 'exwm-systemtray)
-(exwm-systemtray-enable)
-
-(window-divider-mode 1)
 (display-battery-mode 1)
 (display-time-mode 1)
 
@@ -44,15 +40,9 @@
   (interactive (list (read-shell-command "$ ")))
   (start-process-shell-command command nil command))
 
-(defun jethro/switch-to-last-buffer ()
-  (interactive)
-  (switch-to-buffer (other-buffer (current-buffer) 1)))
-
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
 (exwm-input-set-key (kbd "C-c C-p") #'ivy-pass)
 (exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
-
-(setq exwm-workspace-minibuffer-position 'bottom)
 
 (exwm-enable)
 
