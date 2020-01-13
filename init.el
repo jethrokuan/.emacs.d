@@ -1271,7 +1271,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :config
   (if (memq window-system '(mac ns))
       (setq org-download-screenshot-method "screencapture -i %s")
-    (setq org-download-screenshot-method "gnome-screenshot -a -f %s"))
+    (setq org-download-screenshot-method "maim -s %s"))
   (defun my-org-download-method (link)
     "This is a helper function for org-download.
 It creates a folder in the root directory (~/.org/img/) named after the
