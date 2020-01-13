@@ -20,19 +20,6 @@
 (display-battery-mode 1)
 (display-time-mode 1)
 
-;; A dirty hack to display the current workspace on the
-;; mode-line.  I prefer it to adding a new item to
-;; global-mode-string due to a different placement on the
-;; mode-line.  Semantically the meaning is close enough to
-;; the original meaning of this variable, so I'll leave it
-;; this way.
-(setq mode-line-frame-identification
-      '(:eval (propertize
-               (format "X%s "
-                       (funcall exwm-workspace-index-map
-                                exwm-workspace-current-index))
-               'face 'bold)))
-
 (require 'exwm-randr)
 (exwm-randr-enable)
 
@@ -40,9 +27,19 @@
   (interactive (list (read-shell-command "$ ")))
   (start-process-shell-command command nil command))
 
+(defun jethro/exwm-terminal ()
+  (interactive)
+  (call-process "urxvtc"))
+
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
 (exwm-input-set-key (kbd "C-c C-p") #'ivy-pass)
 (exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
+
+(add-hook 'exwm-manage-finish-hook
+          (lambda ()
+            (when (and exwm-class-name
+                       (string= exwm-class-name "URxvt"))
+              (exwm-input-set-local-simulation-keys '(([?\C-c ?\C-c] . ?\C-c))))))
 
 (exwm-enable)
 
