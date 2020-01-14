@@ -20,6 +20,7 @@
       exwm-layout-show-all-buffers t)
 
 (push ?\s-  exwm-input-prefix-keys)
+(push ?\M-  exwm-input-prefix-keys)
 
 (display-battery-mode 1)
 (display-time-mode 1)
@@ -46,6 +47,27 @@
             (when (and exwm-class-name
                        (string= exwm-class-name "URxvt"))
               (exwm-input-set-local-simulation-keys '(([?\C-c ?\C-c] . ?\C-c))))))
+
+(setq exwm-input-simulation-keys
+      '(
+        ;; movement
+        ([?\C-b] . [left])
+        ([?\M-b] . [C-left])
+        ([?\C-f] . [right])
+        ([?\M-f] . [C-right])
+        ([?\C-p] . [up])
+        ([?\C-n] . [down])
+        ([?\C-a] . [home])
+        ([?\C-e] . [end])
+        ([?\M-v] . [prior])
+        ([?\C-v] . [next])
+        ([?\C-d] . [delete])
+        ([?\C-k] . [S-end delete])
+        ;; copy/paste.
+        ([?\M-w] . [?\C-c])
+        ([?\C-y] . [?\C-v])
+        ;; search
+        ([?\C-s] . [?\C-f])))
 
 (use-package pulseaudio-control
   :config
