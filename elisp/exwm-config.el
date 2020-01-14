@@ -36,11 +36,17 @@
   (interactive)
   (call-process "urxvtc"))
 
+(defun jethro/switch-to-last-buffer ()
+  "Switch to last open buffer in current window."
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) 1)))
+
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
 (exwm-input-set-key (kbd "s-p") #'ivy-pass)
 (exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
 (exwm-input-set-key (kbd "s-f") #'counsel-find-file)
 (exwm-input-set-key (kbd "s-F") #'counsel-locate)
+(exwm-input-set-key (kbd "s-<tab>") #'jethro/switch-to-last-buffer)
 
 (add-hook 'exwm-manage-finish-hook
           (lambda ()
