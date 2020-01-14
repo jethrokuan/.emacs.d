@@ -186,6 +186,9 @@ timestamp."
   :init
   (load-theme 'doom-challenger-deep t))
 
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode))
+
 (use-package rainbow-delimiters
   :hook
   (prog-mode . rainbow-delimiters-mode)
