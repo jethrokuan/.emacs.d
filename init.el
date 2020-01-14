@@ -251,6 +251,10 @@ timestamp."
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
   (ivy-mode +1))
 
+(use-package anzu
+  :config
+  (anzu-mode +1))
+
 (use-package projectile
   :custom
   (projectile-use-git-grep t)
