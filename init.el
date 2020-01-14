@@ -869,6 +869,12 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (markdown-asymmetric-header t)
   (markdown-live-preview-delete-export 'delete-on-destroy))
 
+(use-package nix-mode
+  :mode ("\\.nix\\'" . nix-mode))
+
+(use-package nix-update
+  :commands nix-update-fetch)
+
 (use-package auctex
   :mode ("\\.tex\\'" . latex-mode)
   :custom
