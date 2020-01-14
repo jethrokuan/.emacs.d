@@ -53,6 +53,25 @@
   (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") #'pulseaudio-control-decrease-volume)
   (exwm-input-set-key (kbd "<XF86AudioMute>") #'pulseaudio-control-toggle-current-sink-mute))
 
+(when (executable-find "brightnessctl")
+  (defun jethro/return-brightness-percentage ()
+    (interactive)
+    (string-to-number (shell-command-to-string "brightnessctl get")))
+  (defun jethro/brightness-up ()
+    (interactive)
+    (shell-command "brightnessctl set 100+")
+    (message "Screen Brightness: %s" (jethro/return-brightness-percentage))
+    (kill-buffer "*Shell Command Output*"))
+  (defun jethro/brightness-down ()
+    (interactive)
+    (shell-command "brightnessctl set 100-")
+    (message "Screen Brightness: %s" (jethro/return-brightness-percentage))
+    (kill-buffer "*Shell Command Output*"))
+  (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") #'jethro/brightness-down)
+  (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") #'jethro/brightness-up))
+
+
+
 (exwm-enable)
 
 (provide 'exwm-config)
