@@ -190,10 +190,13 @@ timestamp."
   :hook
   (prog-mode . rainbow-delimiters-mode)
   :config
-  (rainbow-delimiters-mode +1)
-  (set-face-attribute 'rainbow-delimiters-unmatched-face nil
-                      :foreground 'unspecified
-                      :inherit 'error))
+  (rainbow-delimiters-mode +1))
+
+(use-package zoom
+  :custom
+  (zoom-size '(0.618 . 0.618))
+  :config
+  (zoom-mode +1))
 
 (setq show-paren-style 'paren
       show-paren-delay 0.03
