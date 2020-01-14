@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 (setq exwm-workspace-number 6)
-(defun jethro/exwm-rename-buffer-to-title () (exwm-workspace-rename-buffer exwm-title))
+(defun jethro/exwm-rename-buffer-to-title () (exwm-workspace-rename-buffer (format "%s - %s" exwm-class-name exwm-title)))
 (add-hook 'exwm-update-title-hook 'jethro/exwm-rename-buffer-to-title)
 (add-hook 'exwm-update-class-hook
           (defun my-exwm-update-class-hook ()
