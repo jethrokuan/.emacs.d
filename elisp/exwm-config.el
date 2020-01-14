@@ -98,7 +98,36 @@
   (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") #'jethro/brightness-down)
   (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") #'jethro/brightness-up))
 
+(define-ibuffer-column exwm-class (:name "Class")
+  (if (bound-and-true-p exwm-class-name)
+      exwm-class-name
+    ""))
+(define-ibuffer-column exwm-instance (:name "Instance")
+  (if (bound-and-true-p exwm-instance-name)
+      exwm-instance-name
+    ""))
+(define-ibuffer-column exwm-urgent (:name "U")
+  (if (bound-and-true-p exwm--hints-urgency)
+      "U"
+    " "))
 
+(defun jethro/exwm-ibuffer (&optional other-window)
+  (interactive "P")
+  (let ((name (buffer-name)))
+    (ibuffer other-window
+             "*exwm-ibuffer*"
+             '((mode . exwm-mode))
+             nil nil nil
+             '((mark exwm-urgent
+                     " "
+                     (name 64 64 :left :elide)
+                     " "
+                     (exwm-class 20 -1 :left)
+                     " "
+                     (exwm-instance 10 -1 :left))))
+    (ignore-errors (ibuffer-jump-to-buffer name))))
+
+(exwm-input-set-key (kbd "s-b") #'jethro/exwm-ibuffer)
 
 (exwm-enable)
 
