@@ -48,6 +48,13 @@
 (exwm-input-set-key (kbd "s-F") #'counsel-locate)
 (exwm-input-set-key (kbd "s-<tab>") #'jethro/switch-to-last-buffer)
 
+(mapcar (lambda (i)
+          (exwm-input-set-key (kbd (format "s-%d" i))
+                              `(lambda ()
+                                 (interactive)
+                                 (exwm-workspace-switch-create ,i))))
+        (number-sequence 0 9))
+
 (add-hook 'exwm-manage-finish-hook
           (lambda ()
             (when (and exwm-class-name
