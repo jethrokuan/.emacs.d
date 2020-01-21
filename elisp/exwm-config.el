@@ -36,6 +36,11 @@
   (interactive)
   (call-process "urxvtc"))
 
+(defun jethro/screen-to-clipboard ()
+  (interactive)
+  (shell-command "maim -s | xclip -selection clipboard -t image/png")
+  (message "Added to clipboard."))
+
 (defun jethro/switch-to-last-buffer ()
   "Switch to last open buffer in current window."
   (interactive)
@@ -47,6 +52,8 @@
 (exwm-input-set-key (kbd "s-f") #'counsel-find-file)
 (exwm-input-set-key (kbd "s-F") #'counsel-locate)
 (exwm-input-set-key (kbd "s-<tab>") #'jethro/switch-to-last-buffer)
+(exwm-input-set-key (kbd "<print>") #'jethro/screen-to-clipboard)
+
 
 (mapcar (lambda (i)
           (exwm-input-set-key (kbd (format "s-%d" i))
@@ -135,6 +142,49 @@
     (ignore-errors (ibuffer-jump-to-buffer name))))
 
 (exwm-input-set-key (kbd "s-b") #'jethro/exwm-ibuffer)
+
+(exwm-input-set-key (kbd "<s-up>") 'windmove-up)
+(exwm-input-set-key (kbd "<s-down>") 'windmove-down)
+(exwm-input-set-key (kbd "<s-right>") 'windmove-right)
+(exwm-input-set-key (kbd "<s-left>") 'windmove-left)
+
+(define-key exwm-mode-map (kbd "C-x 4 0")
+  (lambda ()
+    (interactive)
+    (kill-buffer)
+    (delete-window)))
+
+(add-hook 'exwm-manage-finish-hook
+          (defun my-exwm-urxvt-simulation-keys ()
+            (when exwm-class-name
+              (cond
+               ((string= exwm-class-name "URxvt")
+                (exwm-input-set-local-simulation-keys
+                 (mapcar (lambda (key)
+                           `([,key] . [,key]))
+                         '(?\C-d
+                           ?\C-a
+                           ?\C-e
+                           ?\C-w
+                           ?\M-w
+                           ?\C-f
+                           ?\C-b
+                           ?\C-n
+                           ?\C-p
+                           ?\M-b
+                           ?\M-f
+                           ?\M-h
+                           ?\C-y
+                           ?\C-s
+                           ?\C-k
+                           ?\C-u))))
+               ((string= exwm-class-name "Firefox")
+                (exwm-input-set-local-simulation-keys
+                 `(,@exwm-input-simulation-keys
+                   ([?\C-w] . [?\C-w]))))))))
+
+
+
 
 (exwm-enable)
 
