@@ -254,7 +254,7 @@ timestamp."
 (use-package anzu
   :defer 3
   :config
-  (anzu-mode +1))
+  (global-anzu-mode +1))
 
 (use-package projectile
   :custom
