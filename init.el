@@ -255,6 +255,14 @@ timestamp."
   :config
   (global-anzu-mode +1))
 
+(use-package emojify
+  :defer 10
+  :custom
+  (emojify-emoji-styles '(unicode))
+  :bind (("C-c e" . emojify-insert-emoji))
+  :config
+  (global-emojify-mode +1))
+
 (use-package projectile
   :custom
   (projectile-use-git-grep t)
