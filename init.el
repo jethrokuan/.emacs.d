@@ -1225,8 +1225,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :after org
   :bind
   ("C-c n d" . deft)
-  ("C-c n l" . jethro/get-linked-files)
-  ("C-c n i" . org-insert-zettel)
   :custom
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
@@ -1234,7 +1232,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-directory "~/.org/braindump/org/")
   (deft-use-filename-as-title t)
   :config
-  (setq zettel-indicator "§")
   (defun jethro/deft-insert-boilerplate ()
     (interactive)
     (when (= (buffer-size (current-buffer)) 0)
@@ -1242,28 +1239,14 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
         (insert "#+SETUPFILE:./hugo_setup.org\n")
         (insert "#+TITLE: ")
         (insert title)
-        (goto-char (point-max)))))
-  (defun org-insert-zettel (file-name)
-    "Finds a file, inserts it as a link with the base file name as the link name, and adds the zd-link-indicator I use to the front."
-    (interactive (list (completing-read "File: " (deft-find-all-files-no-prefix))))
-    (let ((org-link-file-type 'relative))
-      (org-insert-link nil (concat "file:" (concat deft-directory file-name))
-                       (concat zettel-indicator (file-name-base file-name)))))
-  (defun jethro/get-linked-files ()
-    "Show links to this file."
-    (interactive)
-    (let* ((search-term (file-name-nondirectory buffer-file-name))
-           (files deft-all-files)
-	         (tnames (mapcar #'file-truename files)))
-      (multi-occur
-       (mapcar (lambda (x)
-	               (with-current-buffer
-		                 (or (get-file-buffer x) (find-file-noselect x))
-		               (widen)
-		               (current-buffer)))
-	             files)
-       search-term
-       3))))
+        (goto-char (point-max))))))
+
+(use-package org-roam
+  :straight (:host github :repo "jethrokuan/org-roam")
+  :after deft org
+  :bind (:map org-mode-map
+              (("C-c n l" . org-roam-get-linked-files)
+               ("C-c n i" . org-roam-insert))))
 
 (use-package org-download
   :after org
