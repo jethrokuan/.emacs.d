@@ -1244,9 +1244,10 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
   :after deft org
-  :bind (:map org-mode-map
-              (("C-c n l" . org-roam-get-linked-files)
-               ("C-c n i" . org-roam-insert))))
+  :bind (("C-c n t" . org-roam-today)
+         :map org-mode-map
+         (("C-c n l" . org-roam-get-linked-files)
+          ("C-c n i" . org-roam-insert))))
 
 (use-package org-download
   :after org
