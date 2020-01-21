@@ -196,10 +196,9 @@ timestamp."
   (rainbow-delimiters-mode +1))
 
 (use-package zoom
+  :commands zoom-mode
   :custom
-  (zoom-size '(0.618 . 0.618))
-  :config
-  (zoom-mode +1))
+  (zoom-size '(0.618 . 0.618)))
 
 (setq show-paren-style 'paren
       show-paren-delay 0.03
