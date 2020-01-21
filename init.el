@@ -1480,7 +1480,6 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
                  (nil . "${author}, *${title}* (${year})."))))
 
 (use-package password-store)
-(use-package ivy-pass)
 
 (use-package mathpix.el
   :after password-store

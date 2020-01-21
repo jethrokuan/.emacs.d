@@ -42,7 +42,7 @@
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
-(exwm-input-set-key (kbd "s-p") #'ivy-pass)
+(exwm-input-set-key (kbd "s-p") #'password-store-copy)
 (exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
 (exwm-input-set-key (kbd "s-f") #'counsel-find-file)
 (exwm-input-set-key (kbd "s-F") #'counsel-locate)
