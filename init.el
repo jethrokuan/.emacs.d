@@ -1253,7 +1253,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :after deft org
   :bind (("C-c n t" . org-roam-today)
          :map org-mode-map
-         (("C-c n l" . org-roam-backlinks)
+         (("C-c n l" . org-roam)
           ("C-c n i" . org-roam-insert))))
 
 (use-package org-download
