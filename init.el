@@ -1204,8 +1204,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (defun jethro/switch-to-agenda ()
   (interactive)
-  (org-agenda nil " ")
-  (delete-other-windows))
+  (org-agenda nil " "))
 
 (bind-key "<f1>" 'jethro/switch-to-agenda)
 
