@@ -1254,7 +1254,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :bind (("C-c n t" . org-roam-today)
          :map org-mode-map
          (("C-c n l" . org-roam)
-          ("C-c n i" . org-roam-insert))))
+          ("C-c n i" . org-roam-insert)))
+  :custom
+  (org-roam-directory "~/.org/braindump/org/"))
 
 (use-package org-download
   :after org
