@@ -38,7 +38,10 @@
 
 (defun jethro/screen-to-clipboard ()
   (interactive)
-  (shell-command "maim -s | xclip -selection clipboard -t image/png")
+  (shell-command
+   (concat "bash -c 'FILENAME=$(date +'%Y-%m-%d-%H:%M:%S').png && maim -s $FILENAME"
+           " && xclip $FILENAME -selection clipboard "
+           "-t image/png &> /dev/null && rm $FILENAME'"))
   (message "Added to clipboard."))
 
 (defun jethro/switch-to-last-buffer ()
