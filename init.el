@@ -1243,6 +1243,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
     (when (= (buffer-size (current-buffer)) 0)
       (let ((title (s-join " " (-map #'capitalize (split-string (file-name-sans-extension (buffer-name)) "_")))))
         (insert "#+SETUPFILE:./hugo_setup.org\n")
+        (insert "#+HUGO_SECTION: zettels\n")
         (insert "#+TITLE: ")
         (insert title)
         (goto-char (point-max))))))
