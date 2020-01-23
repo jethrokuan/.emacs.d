@@ -1489,3 +1489,23 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   (org-gcal-client-secret (password-store-get "gmail/org-gcal"))
   (org-gcal-fetch-file-alist '(("jethrokuan95@gmail.com" . "~/.org/gtd/calendars/personal.org")
                                ("dckbhpq9bq13m03llerl09slgo@group.calendar.google.com" . "~/.org/gtd/calendars/lab.org"))))
+
+
+(use-package slack
+  :commands (slack-start)
+  :bind (:map slack-mode-map
+              (("@" . slack-message-embed-mention)
+               ("#" . slack-message-embed-channel)))
+  :custom
+  (slack-buffer-emojify t)
+  (slack-prefer-current-team t)
+  :config
+  (slack-register-team
+   :name "crslab"
+   :default t
+   :token (password-store-get "slack-tokens/crslab")
+   :full-and-display-names t))
+
+(use-package alert
+  :commands (alert)
+  :custom (alert-default-style 'message))
