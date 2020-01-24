@@ -32,10 +32,6 @@
   (interactive (list (read-shell-command "$ ")))
   (start-process-shell-command command nil command))
 
-(defun jethro/exwm-terminal ()
-  (interactive)
-  (call-process "urxvtc"))
-
 (defun jethro/screen-to-clipboard ()
   (interactive)
   (shell-command
@@ -51,7 +47,7 @@
 
 (exwm-input-set-key (kbd "s-SPC") #'jethro/launch)
 (exwm-input-set-key (kbd "s-p") #'password-store-copy)
-(exwm-input-set-key (kbd "C-x t") #'jethro/exwm-terminal)
+(exwm-input-set-key (kbd "C-x t") #'vterm)
 (exwm-input-set-key (kbd "s-t a") #'jethro/switch-to-agenda)
 (exwm-input-set-key (kbd "s-t m") #'notmuch)
 (exwm-input-set-key (kbd "s-c") #'jethro/org-inbox-capture)
@@ -164,33 +160,10 @@
           (defun my-exwm-urxvt-simulation-keys ()
             (when exwm-class-name
               (cond
-               ((string= exwm-class-name "URxvt")
-                (exwm-input-set-local-simulation-keys
-                 (mapcar (lambda (key)
-                           `([,key] . [,key]))
-                         '(?\C-d
-                           ?\C-a
-                           ?\C-e
-                           ?\C-w
-                           ?\M-w
-                           ?\C-f
-                           ?\C-b
-                           ?\C-n
-                           ?\C-p
-                           ?\M-b
-                           ?\M-f
-                           ?\M-h
-                           ?\C-y
-                           ?\C-s
-                           ?\C-k
-                           ?\C-u))))
                ((string= exwm-class-name "Firefox")
                 (exwm-input-set-local-simulation-keys
                  `(,@exwm-input-simulation-keys
                    ([?\C-w] . [?\C-w]))))))))
-
-
-
 
 (exwm-enable)
 
