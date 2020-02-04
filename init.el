@@ -98,7 +98,12 @@
              goto-address-mode))
 
 (bind-key "C-z" 'bury-buffer)
-(bind-key "C-S-s" 'isearch-forward-symbol-at-point)
+
+(use-package ctrlf
+  :defer 3
+  :straight (ctrlf :host github :repo "raxod502/ctrlf")
+  :config
+  (ctrlf-mode))
 
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
@@ -249,11 +254,6 @@ timestamp."
    '(("I" insert "insert")))
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
   (ivy-mode +1))
-
-(use-package anzu
-  :defer 3
-  :config
-  (global-anzu-mode +1))
 
 (use-package emojify
   :defer 10
