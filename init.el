@@ -22,6 +22,7 @@
 
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
+(require 'exwm)
 (when (featurep 'exwm)
   (require 'exwm-config))
 
@@ -975,6 +976,14 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (require 'org-tempo)
   (require 'ol-notmuch))
 
+(use-package org-bullets
+  :after org
+  :hook
+  (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list
+   '("◉" "○")))
+
 (require 'org)
 
 (add-hook 'org-mode-hook
@@ -1252,9 +1261,10 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :straight (:host github :repo "jethrokuan/org-roam")
   :after deft org
   :bind (("C-c n t" . org-roam-today)
+         ("C-c n l" . org-roam)
+         ("C-c n g" . org-roam-show-graph)
          :map org-mode-map
-         (("C-c n l" . org-roam)
-          ("C-c n i" . org-roam-insert)))
+         (("C-c n i" . org-roam-insert)))
   :custom
   (org-roam-directory "~/.org/braindump/org/"))
 
