@@ -948,7 +948,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (org-catch-invisible-edits 'show)
   (org-preview-latex-image-directory "/tmp/ltximg/")
   :custom-face
-  (variable-pitch ((t (:family "iA Writer Duospace" :height 0.9))))
+  (variable-pitch ((t (:family "Libre Baskerville"))))
   (org-document-title ((t (:weight bold :height 1.5))))
   (org-done ((t (:strike-through t :weight bold))))
   (org-headline-done ((t (:strike-through t))))
