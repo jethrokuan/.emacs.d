@@ -635,6 +635,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :config
   (yas-global-mode +1)
   :custom
+  (add-to-list 'load-path (expand-file-name "snippets" user-emacs-directory))
+  (require 'yasnippet-snippets)
   (yas-snippet-dirs (list (expand-file-name "snippets/snippets" user-emacs-directory))))
 
 (use-package company
@@ -1210,12 +1212,20 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
   (deft-use-filename-as-title t)
   :config
+  (defun jethro/conditional-org-hugo-auto-export ()
+    (unless (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" (buffer-file-name (current-buffer)))
+      (org-hugo-auto-export-mode +1)))
   (defun jethro/deft-insert-boilerplate ()
     (interactive)
     (when (= (buffer-size (current-buffer)) 0)
-      (let ((title (s-join " " (-map #'capitalize (split-string (file-name-sans-extension (buffer-name)) "_")))))
-        (insert "#+SETUPFILE:./hugo_setup.org\n")
-        (insert "#+HUGO_SECTION: zettels\n")
+      (let ((title (-> (buffer-name)
+                       (file-name-sans-extension)
+                       (split-string "_")
+                       (string-join " ")
+                       (s-titleize))))
+        (unless (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" title)
+          (insert "#+SETUPFILE:./hugo_setup.org\n")
+          (insert "#+HUGO_SECTION: zettels\n"))
         (insert "#+TITLE: ")
         (insert title)
         (goto-char (point-max))))))
@@ -1265,12 +1275,6 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
         (make-directory dirname))
       (expand-file-name filename-with-timestamp dirname)))
   (setq org-download-method 'my-org-download-method))
-
-(use-package org-journal
-  :custom
-  (org-journal-dir "~/.org/journal/"))
-
-(use-package org-noter)
 
 (use-package ox-hugo
   :if (executable-find "hugo")
