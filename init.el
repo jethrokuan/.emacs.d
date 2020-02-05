@@ -17,7 +17,9 @@
 
 (setq straight-use-package-by-default t)
 (straight-use-package 'use-package)
-(straight-use-package 'diminish)
+(use-package blackout
+  :straight (blackout :host github :repo "raxod502/blackout")
+  :demand t)
 
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
@@ -55,7 +57,7 @@
 
 (use-package autorevert
   :straight nil
-  :diminish t
+  :blackout t
   :hook
   (dired-mode . auto-revert-mode)
   :config
@@ -278,7 +280,7 @@ timestamp."
 
 (use-package whitespace
   :straight nil
-  :diminish whitespace-mode
+  :blackout whitespace-mode
   :hook (prog-mode . whitespace-mode)
   :custom
   (whitespace-line-column 80)
@@ -289,14 +291,14 @@ timestamp."
   (minions-mode +1))
 
 (use-package beacon
-  :diminish beacon-mode
+  :blackout beacon-mode
   :custom
   (beacon-push-mark 10)
   :config
   (beacon-mode +1))
 
 (use-package volatile-highlights
-  :diminish volatile-highlights-mode
+  :blackout volatile-highlights-mode
   :config
   (volatile-highlights-mode +1))
 
@@ -370,7 +372,7 @@ timestamp."
   (([remap kill-ring-save] . easy-kill)))
 
 (use-package aggressive-indent
-  :diminish aggressive-indent-mode
+  :blackout aggressive-indent-mode
   :config
   (global-aggressive-indent-mode +1)
   :custom
@@ -472,7 +474,7 @@ timestamp."
 (bind-key "M-z" 'zap-up-to-char)
 
 (use-package ws-butler
-  :diminish 'ws-butler-mode
+  :blackout 'ws-butler-mode
   :hook
   (prog-mode . ws-butler-mode))
 
@@ -628,14 +630,15 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (flycheck-add-mode 'proselint 'org-mode)
 
 (use-package yasnippet
-  :diminish yas-global-mode yas-minor-mode
+  :blackout ((yas-global-mode . t)
+             (yas-minor-mode . t))
   :config
   (yas-global-mode +1)
   :custom
   (yas-snippet-dirs (list (expand-file-name "snippets/snippets" user-emacs-directory))))
 
 (use-package company
-  :diminish company-mode
+  :blackout company-mode
   :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
   :commands company-abort
   :bind (("M-/" . company-complete)
@@ -663,7 +666,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (use-package flyspell
   :straight nil
-  :diminish flyspell-mode
+  :blackout flyspell-mode
   :hook
   (text-mode . flyspell-mode)
   :custom
@@ -674,7 +677,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
                                (auto-fill-mode -1)))
-(diminish 'auto-fill-mode)
+(blackout 'auto-fill-mode)
 
 (defun endless/fill-or-unfill ()
   "Like `fill-paragraph', but unfill if used twice."
@@ -690,7 +693,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                 #'endless/fill-or-unfill)
 
 (use-package dtrt-indent
-  :diminish t
+  :blackout t
   :config
   (dtrt-indent-mode +1))
 
@@ -798,13 +801,13 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                 web-mode-attr-indent-offset 2))
 
 (use-package emmet-mode
-  :diminish emmet-mode
+  :blackout emmet-mode
   :hook
   (web-mode . emmet-mode)
   (vue-mode . emmet-mode))
 
 (use-package rainbow-mode
-  :diminish rainbow-mode
+  :blackout rainbow-mode
   :hook
   (css-mode . rainbow-mode)
   (scss-mode . rainbow-mode))
