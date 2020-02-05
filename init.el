@@ -19,7 +19,6 @@
 (straight-use-package 'use-package)
 (straight-use-package 'diminish)
 
-
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
 (require 'exwm)
@@ -219,42 +218,29 @@ timestamp."
   :config
   (global-hl-todo-mode))
 
-(use-package counsel
-  :diminish ivy-mode
-  :bind
-  (("C-c C-r" . ivy-resume)
-   ("M-x" . counsel-M-x)
-   ("C-c i" . counsel-imenu)
-   ("C-x b" . ivy-switch-buffer)
-   ("C-x B" . ivy-switch-buffer-other-window)
-   ("C-x k" . kill-buffer)
-   ("C-x C-f" . counsel-find-file)
-   ("C-x l" . counsel-locate)
-   ("C-c j" . counsel-git)
-   ("M-y" . counsel-yank-pop)
-   :map help-map
-   ("f" . counsel-describe-function)
-   ("v" . counsel-describe-variable)
-   ("l" . counsel-info-lookup-symbol)
-   :map ivy-minibuffer-map
-   ("C-o" . ivy-occur)
-   ("<return>" . ivy-alt-done)
-   ("M-<return>" . ivy-immediate-done)
-   :map read-expression-map
-   ("C-r" . counsel-minibuffer-history))
-  :custom
-  (counsel-find-file-at-point t)
-  (ivy-use-virtual-buffers t)
-  (ivy-display-style 'fancy)
-  (ivy-use-selectable-prompt t)
-  (ivy-re-builders-alist
-   '((t . ivy--regex-plus)))
+(use-package selectrum
+  :straight (:host github :repo "raxod502/selectrum")
+  :hook (after-init . selectrum-mode))
+
+;; Package `prescient' is a library for intelligent sorting and
+;; filtering in various contexts.
+(use-package prescient
   :config
-  (ivy-set-actions
-   t
-   '(("I" insert "insert")))
-  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
-  (ivy-mode +1))
+  (prescient-persist-mode +1))
+
+;; Package `selectrum-prescient' provides intelligent sorting and
+;; filtering for candidates in Selectrum menus.
+(use-package selectrum-prescient
+  :straight (:host github :repo "raxod502/prescient.el"
+                   :files ("selectrum-prescient.el"))
+  :after selectrum
+  :config
+  (selectrum-prescient-mode +1))
+
+(use-package apheleia
+  :straight (apheleia :host github :repo "raxod502/apheleia")
+  :config
+  (apheleia-global-mode +1))
 
 (use-package emojify
   :defer 10
@@ -268,33 +254,14 @@ timestamp."
   :custom
   (projectile-use-git-grep t)
   (projectile-create-missing-test-files t)
-  (projectile-completion-system 'ivy)
-  (projectile-switch-project-action  #'projectile-commander)
+  (projectile-completion-system 'default)
   :config
   (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
-  (projectile-mode +1)
-  (def-projectile-commander-method ?S
-    "Run a search in the project"
-    (counsel-projectile-rg))
-  (def-projectile-commander-method ?s
-    "Open a *eshell* buffer for the project."
-    (projectile-run-eshell))
-  (def-projectile-commander-method ?d
-    "Open project root in dired."
-    (projectile-dired))
-  (def-projectile-commander-method ?g
-    "Show magit status."
-    (magit-status)))
-
-(use-package counsel-projectile
-  :after ivy projectile
-  :config
-  (counsel-projectile-mode))
+  (projectile-mode +1))
 
 (use-package wgrep
   :commands
-  wgrep-change-to-wgrep-mode
-  ivy-wgrep-change-to-wgrep-mode)
+  wgrep-change-to-wgrep-mode)
 
 (use-package deadgrep
   :if (executable-find "rg")
@@ -795,10 +762,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :commands
   (py-isort-buffer py-isort-region))
 
-(use-package blacken
-  :hook
-  (python-mode . blacken-mode))
-
 (use-package pytest
   :bind (:map python-mode-map
               ("C-c a" . pytest-all)
@@ -862,10 +825,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
               ("C-c C-l" . indium-eval-buffer))
   :hook
   ((js2-mode . indium-interaction-mode)))
-
-(use-package prettier-js
-  :hook
-  (js2-minor-mode . prettier-js-mode))
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -986,22 +945,23 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (require 'org)
 
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (setq line-spacing 0.2) ;; Add more line padding for readability
-             (variable-pitch-mode 1) ;; All fonts with variable pitch.
-             (mapc
-              (lambda (face) ;; Other fonts with fixed-pitch.
-                (set-face-attribute face nil :inherit 'fixed-pitch))
-              (list 'org-code
-                    'org-link
-                    'org-block
-                    'org-table
-                    'org-verbatim
-                    'org-block-begin-line
-                    'org-block-end-line
-                    'org-meta-line
-                    'org-document-info-keyword))))
+(defun jethro/style-org ()
+  (setq line-spacing 0.2)
+  (variable-pitch-mode +1)
+  (mapc
+   (lambda (face) ;; Other fonts with fixed-pitch.
+     (set-face-attribute face nil :inherit 'fixed-pitch))
+   (list 'org-code
+         'org-link
+         'org-block
+         'org-table
+         'org-verbatim
+         'org-block-begin-line
+         'org-block-end-line
+         'org-meta-line
+         'org-document-info-keyword)))
+
+(add-hook 'org-mode-hook #'jethro/style-org)
 
 (setq org-startup-indented nil
       org-hide-leading-stars nil
@@ -1244,7 +1204,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
-  (deft-directory "~/.org/braindump/org/")
+  (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
   (deft-use-filename-as-title t)
   :config
   (defun jethro/deft-insert-boilerplate ()
@@ -1260,13 +1220,13 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
   :after deft org
+  :hook (org-mode . org-roam-mode)
   :bind (("C-c n t" . org-roam-today)
          ("C-c n l" . org-roam)
          ("C-c n g" . org-roam-show-graph)
          :map org-mode-map
          (("C-c n i" . org-roam-insert)))
-  :custom
-  (org-roam-directory "~/.org/braindump/org/"))
+  :custom (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/"))
 
 (use-package org-download
   :after org
