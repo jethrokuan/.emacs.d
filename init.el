@@ -220,9 +220,36 @@ timestamp."
   :config
   (global-hl-todo-mode))
 
-(use-package selectrum
-  :straight (:host github :repo "raxod502/selectrum")
-  :hook (after-init . selectrum-mode))
+(use-package counsel
+  :diminish ivy-mode
+  :bind
+  (("C-c C-r" . ivy-resume)
+   ("M-x" . counsel-M-x)
+   ("C-c i" . counsel-imenu)
+   ("C-x b" . ivy-switch-buffer)
+   ("C-x B" . ivy-switch-buffer-other-window)
+   ("C-x k" . kill-buffer)
+   ("C-x C-f" . counsel-find-file)
+   ("C-x l" . counsel-locate)
+   ("C-c j" . counsel-git)
+   ("M-y" . counsel-yank-pop)
+   :map help-map
+   ("f" . counsel-describe-function)
+   ("v" . counsel-describe-variable)
+   ("l" . counsel-info-lookup-symbol)
+   :map ivy-minibuffer-map
+   ("C-o" . ivy-occur)
+   ("<return>" . ivy-alt-done)
+   ("M-<return>" . ivy-immediate-done)
+   :map read-expression-map
+   ("C-r" . counsel-minibuffer-history))
+  :custom
+  (counsel-find-file-at-point t)
+  (ivy-use-virtual-buffers t)
+  (ivy-display-style 'fancy)
+  (ivy-use-selectable-prompt t)
+  (ivy-re-builders-alist
+   '((t . ivy--regex-plus))))
 
 (use-package apheleia
   :straight (apheleia :host github :repo "raxod502/apheleia")
@@ -241,7 +268,7 @@ timestamp."
   :custom
   (projectile-use-git-grep t)
   (projectile-create-missing-test-files t)
-  (projectile-completion-system 'default)
+  (projectile-completion-system 'ivy)
   :config
   (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
   (projectile-mode +1))
