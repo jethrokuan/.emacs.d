@@ -221,6 +221,7 @@ timestamp."
   (global-hl-todo-mode))
 
 (use-package counsel
+  :demand t
   :diminish ivy-mode
   :bind
   (("C-c C-r" . ivy-resume)
@@ -249,7 +250,9 @@ timestamp."
   (ivy-display-style 'fancy)
   (ivy-use-selectable-prompt t)
   (ivy-re-builders-alist
-   '((t . ivy--regex-plus))))
+   '((t . ivy--regex-plus)))
+  :config
+  (ivy-mode +1))
 
 (use-package apheleia
   :straight (apheleia :host github :repo "raxod502/apheleia")

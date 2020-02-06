@@ -25,9 +25,6 @@
 (display-battery-mode 1)
 (display-time-mode 1)
 
-(require 'exwm-randr)
-(exwm-randr-enable)
-
 (defun jethro/launch (command)
   (interactive (list (read-shell-command "$ ")))
   (start-process-shell-command command nil command))
@@ -164,6 +161,12 @@
                 (exwm-input-set-local-simulation-keys
                  `(,@exwm-input-simulation-keys
                    ([?\C-w] . [?\C-w]))))))))
+
+(when (file-exists-p "/home/jethro/.screenlayout/desktop.sh")
+  (require 'exwm-randr)
+  (setq exwm-randr-workspace-monitor-plist '(1 "USB-C-0" 2 "HDMI-0"))
+  (call-process "bash" nil 0 nil "-c" "/home/jethro/.screenlayout/desktop.sh")
+  (exwm-randr-enable))
 
 (exwm-enable)
 
