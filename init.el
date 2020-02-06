@@ -224,21 +224,6 @@ timestamp."
   :straight (:host github :repo "raxod502/selectrum")
   :hook (after-init . selectrum-mode))
 
-;; Package `prescient' is a library for intelligent sorting and
-;; filtering in various contexts.
-(use-package prescient
-  :config
-  (prescient-persist-mode +1))
-
-;; Package `selectrum-prescient' provides intelligent sorting and
-;; filtering for candidates in Selectrum menus.
-(use-package selectrum-prescient
-  :straight (:host github :repo "raxod502/prescient.el"
-                   :files ("selectrum-prescient.el"))
-  :after selectrum
-  :config
-  (selectrum-prescient-mode +1))
-
 (use-package apheleia
   :straight (apheleia :host github :repo "raxod502/apheleia")
   :config
