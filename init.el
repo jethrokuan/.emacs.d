@@ -735,6 +735,11 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (use-package dap-mode)
 
+(use-package outshine
+  :hook
+  (emacs-lisp-mode . outshine-mode)
+  :straight (outshine :host github :repo "alphapapa/outshine"))
+
 (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 
 (use-package docker
