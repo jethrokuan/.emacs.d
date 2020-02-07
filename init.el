@@ -1242,9 +1242,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                        (s-titleize))))
         (unless (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" title)
           (insert "#+SETUPFILE:./hugo_setup.org\n")
-          (insert "#+HUGO_SECTION: zettels\n"))
-        (insert "#+TITLE: ")
-        (insert title)
+          (insert "#+HUGO_SECTION: zettels\n")
+          (insert "#+TITLE: ")
+          (insert title))
         (goto-char (point-max))))))
 
 (use-package org-roam
