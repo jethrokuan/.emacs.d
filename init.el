@@ -1232,9 +1232,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
   (deft-use-filename-as-title t)
   :config
-  (defun jethro/conditional-org-hugo-auto-export ()
-    (unless (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" (buffer-file-name (current-buffer)))
-      (org-hugo-auto-export-mode +1)))
   (defun jethro/deft-insert-boilerplate ()
     (interactive)
     (when (= (buffer-size (current-buffer)) 0)
@@ -1254,13 +1251,21 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :straight (:host github :repo "jethrokuan/org-roam")
   :after org
   :hook (org-mode . org-roam-mode)
-  :bind (("C-c n t" . org-roam-today)
-         ("C-c n l" . org-roam)
+  :bind (("C-c n l" . org-roam)
          ("C-c n f" . org-roam-find-file)
          ("C-c n g" . org-roam-show-graph)
          :map org-mode-map
          (("C-c n i" . org-roam-insert)))
   :custom (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/"))
+
+(use-package org-journal
+  :bind
+  ("C-c n j" . org-journal-new-entry)
+  :custom
+  (org-journal-date-prefix "#+TITLE: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-dir "/home/jethro/Dropbox/org/braindump/org/")
+  (org-journal-date-format "%A, %d %B %Y"))
 
 (use-package org-download
   :after org
