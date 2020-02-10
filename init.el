@@ -1252,11 +1252,20 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :after org
   :hook (org-mode . org-roam-mode)
   :bind (("C-c n l" . org-roam)
+         ("C-c n t" . org-roam-today)
          ("C-c n f" . org-roam-find-file)
          ("C-c n g" . org-roam-show-graph)
          :map org-mode-map
          (("C-c n i" . org-roam-insert)))
-  :custom (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/"))
+  :custom
+  (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
+  (org-roam-link-representation 'title)
+  (org-roam-buffer-width 0.4))
+
+(use-package org-fc
+  :straight (:host github :repo "l3kn/org-fc")
+  :custom
+  (org-fc-directories '("/home/jethro/Dropbox/org/braindump/org/")))
 
 (use-package org-journal
   :bind
@@ -1512,3 +1521,5 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
 (use-package alert
   :commands (alert)
   :custom (alert-default-style 'message))
+
+(use-package ripgrep)
