@@ -288,6 +288,7 @@ timestamp."
    ("C-x C-f" . counsel-find-file)
    ("C-x l" . counsel-locate)
    ("C-c j" . counsel-git)
+   ("C-c s" . counsel-rg)
    ("M-y" . counsel-yank-pop)
    :map help-map
    ("f" . counsel-describe-function)
