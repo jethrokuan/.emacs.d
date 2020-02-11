@@ -301,7 +301,6 @@ timestamp."
    :map read-expression-map
    ("C-r" . counsel-minibuffer-history))
   :custom
-  (counsel-find-file-at-point t)
   (ivy-use-virtual-buffers t)
   (ivy-display-style 'fancy)
   (ivy-use-selectable-prompt t)
@@ -310,6 +309,35 @@ timestamp."
   :config
   (ivy-mode +1))
 
+
+(use-package ivy-rich
+  :init
+  (setq ivy-rich-display-transformers-list ; max column width sum = (ivy-poframe-width - 1)
+	      '(ivy-switch-buffer
+          (:columns
+           ((ivy-rich-candidate (:width 30))  ; return the candidate itself
+            (ivy-rich-switch-buffer-size (:width 7))  ; return the buffer size
+            (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right)); return the buffer indicators
+            (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))          ; return the major mode info
+            (ivy-rich-switch-buffer-project (:width 15 :face success))             ; return project name using `projectile'
+            (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))  ; return file path relative to project root or `default-directory' if project is nil
+           :predicate
+           (lambda (cand) (get-buffer cand)))
+          counsel-M-x
+	        (:columns
+	         ((counsel-M-x-transformer (:width 35))
+	          (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
+	        counsel-describe-function
+	        (:columns
+	         ((counsel-describe-function-transformer (:width 35))
+	          (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
+	        counsel-describe-variable
+	        (:columns
+	         ((counsel-describe-variable-transformer (:width 35))
+	          (ivy-rich-counsel-variable-docstring (:width 34 :face font-lock-doc-face))))))
+  :config
+  (ivy-rich-mode +1)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 ;;; Project Management
 (use-package projectile
