@@ -781,7 +781,39 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (emacs-lisp-mode . outshine-mode)
   :straight (outshine :host github :repo "alphapapa/outshine"))
 
-(bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
+;;; Emacs Lisp
+
+(use-package elisp-mode
+  :straight nil
+  :bind (:map emacs-lisp-mode-map
+              ("C-c C-x" . ielm)
+              ("C-c C-c" . eval-defun)
+              ("C-c C-k" . eval-buffer)))
+
+(use-package helpful
+  :defines (counsel-describe-function-function
+            counsel-describe-variable-function)
+  :commands helpful--buffer
+  :bind (([remap describe-key] . helpful-key)
+         ([remap describe-symbol] . helpful-symbol)
+         ("C-c C-d" . helpful-at-point))
+  :init
+  (with-eval-after-load 'counsel
+    (setq counsel-describe-function-function #'helpful-callable
+          counsel-describe-variable-function #'helpful-variable))
+
+  (with-eval-after-load 'apropos
+    ;; patch apropos buttons to call helpful instead of help
+    (dolist (fun-bt '(apropos-function apropos-macro apropos-command))
+      (button-type-put
+       fun-bt 'action
+       (lambda (button)
+         (helpful-callable (button-get button 'apropos-symbol)))))
+    (dolist (var-bt '(apropos-variable apropos-user-option))
+      (button-type-put
+       var-bt 'action
+       (lambda (button)
+         (helpful-variable (button-get button 'apropos-symbol)))))))
 
 ;;; Docker
 (use-package docker
