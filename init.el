@@ -1,5 +1,5 @@
 ;;;; -*- lexical-binding: t -*-
-
+;;; Straight setup
 (setq straight-repository-branch "develop")
 
 (defvar bootstrap-version)
@@ -16,20 +16,24 @@
   (load bootstrap-file nil 'nomessage))
 
 (setq straight-use-package-by-default t)
+
+;;; Use-package Setup
 (straight-use-package 'use-package)
 (use-package blackout
   :straight (blackout :host github :repo "raxod502/blackout")
   :demand t)
 
+(use-package use-package-company
+  :straight (use-package-company :host github :repo "akirak/use-package-company"))
+
+;;; EXWM setup
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
 (require 'exwm)
 (when (featurep 'exwm)
   (require 'exwm-config))
 
-(use-package use-package-company
-  :straight (use-package-company :host github :repo "akirak/use-package-company"))
-
+;;; The Basics
 (setq user-full-name "Jethro Kuan"
       user-mail-address "jethrokuan95@gmail.com")
 
@@ -51,9 +55,6 @@
   :config
   (setq auto-save-file-name-transforms
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
-
-(setq gc-cons-threshold 50000000)
-(setq large-file-warning-threshold 100000000)
 
 (use-package autorevert
   :straight nil
@@ -88,6 +89,54 @@
 (setq create-lockfiles nil)
 (setq browse-url-browser-function 'browse-url-xdg-open)
 
+(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+
+;;; Theming
+
+(setq default-frame-alist '((font . "Iosevka-14")))
+
+(when (fboundp 'tooltip-mode)
+  (tooltip-mode -1))
+(when (fboundp 'tool-bar-mode)
+  (tool-bar-mode -1))
+(when (fboundp 'menu-bar-mode)
+  (menu-bar-mode -1))
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
+
+(use-package doom-themes
+  :init
+  (load-theme 'doom-challenger-deep t))
+
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode))
+
+(use-package rainbow-delimiters
+  :hook
+  (prog-mode . rainbow-delimiters-mode)
+  :config
+  (rainbow-delimiters-mode +1))
+
+(setq show-paren-style 'paren
+      show-paren-delay 0.03
+      show-paren-highlight-openparen t
+      show-paren-when-point-inside-paren nil
+      show-paren-when-point-in-periphery t)
+(show-paren-mode 1)
+
+(blink-cursor-mode 0)
+
+(use-package minions
+  :config
+  (minions-mode +1))
+
+(use-package hl-todo
+  :config
+  (global-hl-todo-mode))
+
+;;; Navigation
 (use-package goto-addr
   :hook ((compilation-mode . goto-address-mode)
          (prog-mode . goto-address-prog-mode)
@@ -99,16 +148,34 @@
   :commands (goto-address-prog-mode
              goto-address-mode))
 
-(bind-key "C-z" 'bury-buffer)
-
 (use-package ctrlf
   :defer 3
   :straight (ctrlf :host github :repo "raxod502/ctrlf")
   :config
   (ctrlf-mode))
 
-(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+(use-package beacon
+  :blackout beacon-mode
+  :custom
+  (beacon-push-mark 10)
+  :config
+  (beacon-mode +1))
 
+(use-package volatile-highlights
+  :blackout volatile-highlights-mode
+  :config
+  (volatile-highlights-mode +1))
+
+(use-package hydra
+  :config
+  (defhydra jethro/hydra-zoom ()
+    "zoom"
+    ("i" text-scale-increase "in")
+    ("o" text-scale-decrease "out"))
+
+  (bind-key "C-c h z" 'jethro/hydra-zoom/body))
+
+;;; Mail (notmuch)
 (use-package notmuch
   :preface (setq-default notmuch-command (executable-find "notmuch"))
   :if (executable-find "notmuch")
@@ -176,50 +243,38 @@ timestamp."
     (interactive)
     (org-capture nil "e")))
 
-(setq default-frame-alist '((font . "Iosevka-14")))
+;;; Dired
+(let ((gls (executable-find "gls")))
+  (when gls
+    (setq insert-directory-program gls)))
 
-(when (fboundp 'tooltip-mode)
-  (tooltip-mode -1))
-(when (fboundp 'tool-bar-mode)
-  (tool-bar-mode -1))
-(when (fboundp 'menu-bar-mode)
-  (menu-bar-mode -1))
-(when (fboundp 'scroll-bar-mode)
-  (scroll-bar-mode -1))
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
+(setq dired-listing-switches "-aBhl  --group-directories-first")
 
-(use-package doom-themes
-  :init
-  (load-theme 'doom-challenger-deep t))
+(setq dired-dwim-target t)
 
-(use-package doom-modeline
-  :hook (after-init . doom-modeline-mode))
+(setq dired-recursive-copies (quote always))
+(setq dired-recursive-deletes (quote top))
 
-(use-package rainbow-delimiters
-  :hook
-  (prog-mode . rainbow-delimiters-mode)
-  :config
-  (rainbow-delimiters-mode +1))
-
-(use-package zoom
-  :commands zoom-mode
+(use-package wdired
+  :commands wdired-mode wdired-change-to-wdired-mode
   :custom
-  (zoom-size '(0.618 . 0.618)))
+  (wdired-allow-to-change-permissions t))
 
-(setq show-paren-style 'paren
-      show-paren-delay 0.03
-      show-paren-highlight-openparen t
-      show-paren-when-point-inside-paren nil
-      show-paren-when-point-in-periphery t)
-(show-paren-mode 1)
+(use-package dired-narrow
+  :demand t
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow-fuzzy)))
+;;; Utilities
+(use-package crux
+  :bind (("C-c o" . crux-open-with)
+         ("C-c D" . crux-delete-file-and-buffer)
+         ("C-a" . crux-move-beginning-of-line)
+         ("M-o" . crux-smart-open-line)
+         ("C-c r" . crux-rename-file-and-buffer)
+         ("M-D" . crux-duplicate-and-comment-current-line-or-region)
+         ("s-o" . crux-smart-open-line-above)))
 
-(blink-cursor-mode 0)
-
-(use-package hl-todo
-  :config
-  (global-hl-todo-mode))
-
+;;; Ivy
 (use-package counsel
   :demand t
   :diminish ivy-mode
@@ -254,19 +309,8 @@ timestamp."
   :config
   (ivy-mode +1))
 
-(use-package apheleia
-  :straight (apheleia :host github :repo "raxod502/apheleia")
-  :config
-  (apheleia-global-mode +1))
 
-(use-package emojify
-  :defer 10
-  :custom
-  (emojify-emoji-styles '(unicode))
-  :bind (("C-c e" . emojify-insert-emoji))
-  :config
-  (global-emojify-mode +1))
-
+;;; Project Management
 (use-package projectile
   :custom
   (projectile-use-git-grep t)
@@ -284,38 +328,8 @@ timestamp."
   :if (executable-find "rg")
   :bind* (("M-s" . deadgrep)))
 
-(use-package hydra
-  :config
-  (defhydra jethro/hydra-zoom ()
-    "zoom"
-    ("i" text-scale-increase "in")
-    ("o" text-scale-decrease "out"))
-
-  (bind-key "C-c h z" 'jethro/hydra-zoom/body))
-
-(use-package whitespace
-  :straight nil
-  :blackout whitespace-mode
-  :hook (prog-mode . whitespace-mode)
-  :custom
-  (whitespace-line-column 80)
-  (whitespace-style '(face lines-tail)))
-
-(use-package minions
-  :config
-  (minions-mode +1))
-
-(use-package beacon
-  :blackout beacon-mode
-  :custom
-  (beacon-push-mark 10)
-  :config
-  (beacon-mode +1))
-
-(use-package volatile-highlights
-  :blackout volatile-highlights-mode
-  :config
-  (volatile-highlights-mode +1))
+(use-package ripgrep
+  :if (executable-find "rg"))
 
 (use-package diff-hl
   :hook
@@ -353,146 +367,7 @@ timestamp."
 
   (bind-key "C-c h v" #'jethro/hydra-diff-hl/body))
 
-(use-package crux
-  :bind (("C-c o" . crux-open-with)
-         ("C-c D" . crux-delete-file-and-buffer)
-         ("C-a" . crux-move-beginning-of-line)
-         ("M-o" . crux-smart-open-line)
-         ("C-c r" . crux-rename-file-and-buffer)
-         ("M-D" . crux-duplicate-and-comment-current-line-or-region)
-         ("s-o" . crux-smart-open-line-above)))
-
-(let ((gls (executable-find "gls")))
-  (when gls
-    (setq insert-directory-program gls)))
-
-(setq dired-listing-switches "-aBhl  --group-directories-first")
-
-(setq dired-dwim-target t)
-
-(setq dired-recursive-copies (quote always))
-(setq dired-recursive-deletes (quote top))
-
-(use-package wdired
-  :commands wdired-mode wdired-change-to-wdired-mode
-  :custom
-  (wdired-allow-to-change-permissions t))
-
-(use-package dired-narrow
-  :bind (:map dired-mode-map
-              ("/" . dired-narrow-fuzzy)))
-
-(use-package easy-kill
-  :bind*
-  (([remap kill-ring-save] . easy-kill)))
-
-(use-package aggressive-indent
-  :blackout aggressive-indent-mode
-  :config
-  (global-aggressive-indent-mode +1)
-  :custom
-  (aggressive-indent-excluded-modes
-   '(bibtex-mode
-     cider-repl-mode
-     c-mode
-     c++-mode
-     coffee-mode
-     comint-mode
-     conf-mode
-     Custom-mode
-     diff-mode
-     doc-view-mode
-     dos-mode
-     erc-mode
-     jabber-chat-mode
-     haml-mode
-     intero-mode
-     haskell-mode
-     interative-haskell-mode
-     haskell-interactive-mode
-     image-mode
-     makefile-mode
-     makefile-gmake-mode
-     minibuffer-inactive-mode
-     nix-mode
-     netcmd-mode
-     python-mode
-     sass-mode
-     slim-mode
-     special-mode
-     shell-mode
-     snippet-mode
-     eshell-mode
-     tabulated-list-mode
-     term-mode
-     TeX-output-mode
-     text-mode
-     yaml-mode
-     scala-mode)))
-
-(use-package multiple-cursors
-  :bind (("C-M-c" . mc/edit-lines)
-         ("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-previous-like-this)
-         ("C-c C-<" . mc/mark-all-like-this)))
-
-(use-package expand-region
-  :bind (("C-=" . er/expand-region)))
-
-(use-package smartparens
-  :bind (:map smartparens-mode-map
-              ("C-M-f" . sp-forward-sexp)
-              ("C-M-b" . sp-backward-sexp)
-              ("C-M-u" . sp-backward-up-sexp)
-              ("C-M-d" . sp-down-sexp)
-              ("C-M-p" . sp-backward-down-sexp)
-              ("C-M-n" . sp-up-sexp)
-              ("C-M-s" . sp-splice-sexp)
-              ("C-M-<up>" . sp-splice-sexp-killing-backward)
-              ("C-M-<down>" . sp-splice-sexp-killing-forward)
-              ("C-M-r" . sp-splice-sexp-killing-around)
-              ("C-)" . sp-forward-slurp-sexp)
-              ("C-<right>" . sp-forward-slurp-sexp)
-              ("C-}" . sp-forward-barf-sexp)
-              ("C-<left>" . sp-forward-barf-sexp)
-              ("C-(" . sp-backward-slurp-sexp)
-              ("C-M-<left>" . sp-backward-slurp-sexp)
-              ("C-{" . sp-backward-barf-sexp)
-              ("C-M-<right>" . sp-backward-barf-sexp)
-              ("M-S" . sp-split-sexp))
-  :init
-  (smartparens-global-strict-mode +1)
-  :config
-  (require 'smartparens-config)
-  ;; Org-mode config
-  (sp-with-modes 'org-mode
-    (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
-    (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
-    (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
-    (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "«" "»"))
-
-  (defun sp--org-skip-asterisk (ms mb me)
-    (or (and (= (line-beginning-position) mb)
-             (eq 32 (char-after (1+ mb))))
-        (and (= (1+ (line-beginning-position)) me)
-             (eq 32 (char-after me))))))
-
-(autoload 'zap-up-to-char "misc"
-  "Kill up to, but not including ARGth occurrence of CHAR.
-
-  \(fn arg char)"
-  'interactive)
-
-(bind-key "M-z" 'zap-up-to-char)
-
-(use-package ws-butler
-  :blackout 'ws-butler-mode
-  :hook
-  (prog-mode . ws-butler-mode))
-
+;;; Version Control
 (use-package vc
   :bind (("C-x v =" . jethro/vc-diff)
          ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
@@ -592,6 +467,168 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :custom
   (git-link-use-commit t))
 
+;;; Text Editing
+(autoload 'zap-up-to-char "misc"
+  "Kill up to, but not including ARGth occurrence of CHAR.
+
+  \(fn arg char)"
+  'interactive)
+
+(bind-key "M-z" 'zap-up-to-char)
+
+(use-package ws-butler
+  :blackout 'ws-butler-mode
+  :hook
+  (prog-mode . ws-butler-mode))
+
+(use-package easy-kill
+  :bind*
+  (([remap kill-ring-save] . easy-kill)))
+
+(use-package emojify
+  :defer 10
+  :custom
+  (emojify-emoji-styles '(unicode))
+  :bind (("C-c e" . emojify-insert-emoji))
+  :config
+  (global-emojify-mode +1))
+
+(use-package whitespace
+  :straight nil
+  :blackout whitespace-mode
+  :hook (prog-mode . whitespace-mode)
+  :custom
+  (whitespace-line-column 80)
+  (whitespace-style '(face lines-tail)))
+
+(use-package flyspell
+  :straight nil
+  :blackout flyspell-mode
+  :hook
+  (text-mode . flyspell-mode)
+  :custom
+  (flyspell-abbrev-p t)
+  (ispell-program-name "aspell")
+  (ispell-dictionary "en_GB"))
+
+(add-hook 'text-mode-hook 'auto-fill-mode)
+(add-hook 'message-mode-hook (lambda ()
+                               (auto-fill-mode -1)))
+(blackout 'auto-fill-mode)
+
+(defun endless/fill-or-unfill ()
+  "Like `fill-paragraph', but unfill if used twice."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(global-set-key [remap fill-paragraph]
+                #'endless/fill-or-unfill)
+
+;;; Programming Utilities
+(use-package highlight-indent-guides
+  :hook
+  (python-mode . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method 'character))
+
+(use-package apheleia
+  :straight (apheleia :host github :repo "raxod502/apheleia")
+  :config
+  (apheleia-global-mode +1))
+
+(use-package aggressive-indent
+  :blackout aggressive-indent-mode
+  :config
+  (global-aggressive-indent-mode +1)
+  :custom
+  (aggressive-indent-excluded-modes
+   '(bibtex-mode
+     cider-repl-mode
+     c-mode
+     c++-mode
+     coffee-mode
+     comint-mode
+     conf-mode
+     Custom-mode
+     diff-mode
+     doc-view-mode
+     dos-mode
+     erc-mode
+     jabber-chat-mode
+     haml-mode
+     intero-mode
+     haskell-mode
+     interative-haskell-mode
+     haskell-interactive-mode
+     image-mode
+     makefile-mode
+     makefile-gmake-mode
+     minibuffer-inactive-mode
+     nix-mode
+     netcmd-mode
+     python-mode
+     sass-mode
+     slim-mode
+     special-mode
+     shell-mode
+     snippet-mode
+     eshell-mode
+     tabulated-list-mode
+     term-mode
+     TeX-output-mode
+     text-mode
+     yaml-mode
+     scala-mode)))
+
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)))
+
+(use-package smartparens
+  :bind (:map smartparens-mode-map
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-M-u" . sp-backward-up-sexp)
+              ("C-M-d" . sp-down-sexp)
+              ("C-M-p" . sp-backward-down-sexp)
+              ("C-M-n" . sp-up-sexp)
+              ("C-M-s" . sp-splice-sexp)
+              ("C-M-<up>" . sp-splice-sexp-killing-backward)
+              ("C-M-<down>" . sp-splice-sexp-killing-forward)
+              ("C-M-r" . sp-splice-sexp-killing-around)
+              ("C-)" . sp-forward-slurp-sexp)
+              ("C-<right>" . sp-forward-slurp-sexp)
+              ("C-}" . sp-forward-barf-sexp)
+              ("C-<left>" . sp-forward-barf-sexp)
+              ("C-(" . sp-backward-slurp-sexp)
+              ("C-M-<left>" . sp-backward-slurp-sexp)
+              ("C-{" . sp-backward-barf-sexp)
+              ("C-M-<right>" . sp-backward-barf-sexp)
+              ("M-S" . sp-split-sexp))
+  :init
+  (smartparens-global-strict-mode +1)
+  :config
+  (require 'smartparens-config)
+  ;; Org-mode config
+  (sp-with-modes 'org-mode
+    (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
+    (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
+    (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
+    (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "«" "»"))
+
+  (defun sp--org-skip-asterisk (ms mb me)
+    (or (and (= (line-beginning-position) mb)
+             (eq 32 (char-after (1+ mb))))
+        (and (= (1+ (line-beginning-position)) me)
+             (eq 32 (char-after me))))))
+
 (use-package bury-successful-compilation
   :hook
   (prog-mode . bury-successful-compilation))
@@ -681,34 +718,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :hook
   (company-mode . company-quickhelp-mode))
 
-(use-package flyspell
-  :straight nil
-  :blackout flyspell-mode
-  :hook
-  (text-mode . flyspell-mode)
-  :custom
-  (flyspell-abbrev-p t)
-  (ispell-program-name "aspell")
-  (ispell-dictionary "en_GB"))
-
-(add-hook 'text-mode-hook 'auto-fill-mode)
-(add-hook 'message-mode-hook (lambda ()
-                               (auto-fill-mode -1)))
-(blackout 'auto-fill-mode)
-
-(defun endless/fill-or-unfill ()
-  "Like `fill-paragraph', but unfill if used twice."
-  (interactive)
-  (let ((fill-column
-         (if (eq last-command 'endless/fill-or-unfill)
-             (progn (setq this-command nil)
-                    (point-max))
-           fill-column)))
-    (call-interactively #'fill-paragraph)))
-
-(global-set-key [remap fill-paragraph]
-                #'endless/fill-or-unfill)
-
 (use-package dtrt-indent
   :blackout t
   :config
@@ -745,12 +754,14 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (bind-key "C-c C-k" 'eval-buffer emacs-lisp-mode-map)
 
+;;; Docker
 (use-package docker
   :commands docker-mode)
 
 (use-package dockerfile-mode
   :mode "Dockerfile\\'")
 
+;;; C/C++
 (use-package cc-mode
   :ensure nil
   :mode
@@ -773,9 +784,12 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :custom
   (ccls-executable "ccls"))
 
+;;; Fish
+
 (use-package fish-mode
   :mode ("\\.fish\\'" . fish-mode))
 
+;;; Rust
 (use-package rust-mode
   :mode ("\\.rs\\'" . rust-mode))
 
@@ -783,26 +797,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (lambda ()
     (setq python-remove-cwd-from-path t)))
 
-(use-package py-isort
-  :commands
-  (py-isort-buffer py-isort-region))
-
-(use-package pytest
-  :bind (:map python-mode-map
-              ("C-c a" . pytest-all)
-              ("C-c m" . pytest-module)
-              ("C-c ." . pytest-one)
-              ("C-c d" . pytest-directory)
-              ("C-c p a" . pytest-pdb-all)
-              ("C-c p m" . pytest-pdb-module)
-              ("C-c p ." . pytest-pdb-one)))
-
-(use-package highlight-indent-guides
-  :hook
-  (python-mode . highlight-indent-guides-mode)
-  :custom
-  (highlight-indent-guides-method 'character))
-
+;;; Web
 (use-package web-mode
   :mode (("\\.html\\'" . web-mode)
          ("\\.html\\.erb\\'" . web-mode)
@@ -851,6 +846,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :hook
   ((js2-mode . indium-interaction-mode)))
 
+;;; JSON
 (use-package json-mode
   :mode "\\.json\\'"
   :hook
@@ -858,6 +854,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                  (make-local-variable 'js-indent-level)
                  (setq js-indent-level 2))))
 
+;;; Markdown
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
   :commands (markdown-mode gfm-mode)
@@ -869,12 +866,14 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (markdown-asymmetric-header t)
   (markdown-live-preview-delete-export 'delete-on-destroy))
 
+;;; Nix
 (use-package nix-mode
   :mode ("\\.nix\\'" . nix-mode))
 
 (use-package nix-update
   :commands nix-update-fetch)
 
+;;; LaTeX
 (use-package auctex
   :mode ("\\.tex\\'" . latex-mode)
   :custom
@@ -902,11 +901,14 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package company-auctex
   :after auctex company-mode)
 
+;;; YAML
 (use-package yaml-mode
   :mode ("\\.yaml\\'" . yaml-mode))
 
+;;; R/ESS
 (use-package ess)
 
+;;; Org-mode
 (straight-use-package 'org-plus-contrib)
 
 (use-package org
@@ -1484,16 +1486,8 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
                  ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                  (nil . "${author}, *${title}* (${year})."))))
 
-(use-package password-store)
 
-(use-package mathpix.el
-  :after password-store
-  :straight (:host github :repo "jethrokuan/mathpix.el")
-  :custom ((mathpix-screenshot-method "maim -s %s")
-           (mathpix-app-id (password-store-get "mathpix/app-id"))
-           (mathpix-app-key (password-store-get "mathpix/app-key")))
-  :bind
-  ("C-x m" . mathpix-screenshot))
+(use-package password-store)
 
 (use-package org-gcal
   :custom
@@ -1502,6 +1496,15 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   (org-gcal-fetch-file-alist '(("jethrokuan95@gmail.com" . "~/.org/gtd/calendars/personal.org")
                                ("dckbhpq9bq13m03llerl09slgo@group.calendar.google.com" . "~/.org/gtd/calendars/lab.org"))))
 
+;;; Others
+(use-package mathpix.el
+  :after password-store
+  :straight (:host github :repo "jethrokuan/mathpix.el")
+  :custom ((mathpix-screenshot-method "maim -s %s")
+           (mathpix-app-id (password-store-get "mathpix/app-id"))
+           (mathpix-app-key (password-store-get "mathpix/app-key")))
+  :bind
+  ("C-x m" . mathpix-screenshot))
 
 (use-package slack
   :commands (slack-start)
@@ -1522,4 +1525,6 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :commands (alert)
   :custom (alert-default-style 'message))
 
-(use-package ripgrep)
+;; Local Variables:
+;; outline-regexp: ";;;+ "
+;; End:
