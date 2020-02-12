@@ -1331,6 +1331,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
     (let ((setupfile (jethro/org-get-prop "SETUPFILE"))
           (title (jethro/org-get-prop "TITLE")))
       (when (and (not setupfile)
+                 (not (s-match "hugo_setup"
+                               (file-name-sans-extension
+                                (buffer-file-name (current-buffer)))))
                  (not (s-match "dailies"
                                (file-name-sans-extension
                                 (buffer-file-name (current-buffer))))))
