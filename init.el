@@ -1297,17 +1297,20 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :config
   (defun jethro/deft-insert-boilerplate ()
     (interactive)
-    (when (= (buffer-size (current-buffer)) 0)
-      (let ((title (-> (buffer-name)
-                       (file-name-sans-extension)
-                       (split-string "_")
-                       (string-join " ")
-                       (s-titleize))))
-        (unless (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" title)
-          (insert "#+SETUPFILE:./hugo_setup.org\n")
-          (insert "#+HUGO_SECTION: zettels\n")
-          (insert "#+TITLE: ")
-          (insert title))
+    (let ((setupfile (org-element-map
+                         (org-element-parse-buffer)
+                         'keyword
+                       (lambda (kw)
+                         (when (string= (org-element-property :key kw) "SETUPFILE")
+                           (org-element-property :value kw)))
+                       :first-match t)))
+      (when (and (not setupfile)
+                 (not (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+                               (file-name-sans-extension
+                                (buffer-file-name (current-buffer))))))
+        (goto-char (point-min))
+        (insert "#+SETUPFILE:./hugo_setup.org\n")
+        (insert "#+HUGO_SECTION: zettels\n")
         (goto-char (point-max))))))
 
 (use-package org-roam
