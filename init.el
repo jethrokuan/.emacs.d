@@ -1300,7 +1300,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :after org
   :hook (org-mode . org-roam-mode)
   :bind (("C-c n l" . org-roam)
-         ("C-c n t" . org-roam-today)
          ("C-c n f" . org-roam-find-file)
          ("C-c n g" . org-roam-show-graph)
          :map org-mode-map
@@ -1332,7 +1331,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
     (let ((setupfile (jethro/org-get-prop "SETUPFILE"))
           (title (jethro/org-get-prop "TITLE")))
       (when (and (not setupfile)
-                 (not (s-match "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}$"
+                 (not (s-match "dailies"
                                (file-name-sans-extension
                                 (buffer-file-name (current-buffer))))))
         (goto-char (point-min))
@@ -1349,11 +1348,16 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package org-journal
   :bind
   ("C-c n j" . org-journal-new-entry)
+  ("C-c n t" . org-journal-today)
   :custom
   (org-journal-date-prefix "#+TITLE: ")
-  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-file-format "dailies-%Y-%m-%d.org")
   (org-journal-dir "/home/jethro/Dropbox/org/braindump/org/")
-  (org-journal-date-format "%A, %d %B %Y"))
+  (org-journal-date-format "%A, %d %B %Y")
+  :config
+  (defun org-journal-today ()
+    (interactive)
+    (org-journal-new-entry t)))
 
 (use-package org-download
   :after org
