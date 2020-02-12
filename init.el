@@ -1293,25 +1293,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
-  (deft-use-filename-as-title t)
-  :config
-  (defun jethro/deft-insert-boilerplate ()
-    (interactive)
-    (let ((setupfile (org-element-map
-                         (org-element-parse-buffer)
-                         'keyword
-                       (lambda (kw)
-                         (when (string= (org-element-property :key kw) "SETUPFILE")
-                           (org-element-property :value kw)))
-                       :first-match t)))
-      (when (and (not setupfile)
-                 (not (s-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-                               (file-name-sans-extension
-                                (buffer-file-name (current-buffer))))))
-        (goto-char (point-min))
-        (insert "#+SETUPFILE:./hugo_setup.org\n")
-        (insert "#+HUGO_SECTION: zettels\n")
-        (goto-char (point-max))))))
+  (deft-use-filename-as-title t))
 
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
@@ -1326,7 +1308,38 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :custom
   (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
   (org-roam-link-representation 'title)
-  (org-roam-buffer-width 0.4))
+  (org-roam-buffer-width 0.4)
+  (org-roam-timestamped-files t)
+  :init
+  (require 's)
+  (defun jethro/org-get-prop (prop)
+    (org-element-map
+        (org-element-parse-buffer)
+        'keyword
+      (lambda (kw)
+        (when (string= (org-element-property :key kw) prop)
+          (org-element-property :value kw)))
+      :first-match t))
+  (defun jethro/title-to-id (title)
+    "Convert TITLE to id."
+    (let* ((s (s-downcase title))
+           (s (replace-regexp-in-string "[^a-zA-Z0-9_ ]" "" s))
+           (s (s-split " " s))
+           (s (s-join "_" s)))
+      s))
+  (defun jethro/deft-insert-boilerplate ()
+    (interactive)
+    (let ((setupfile (jethro/org-get-prop "SETUPFILE"))
+          (title (jethro/org-get-prop "TITLE")))
+      (when (and (not setupfile)
+                 (not (s-match "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}$"
+                               (file-name-sans-extension
+                                (buffer-file-name (current-buffer))))))
+        (goto-char (point-min))
+        (insert "#+SETUPFILE:./hugo_setup.org\n")
+        (insert "#+HUGO_SECTION: zettels\n")
+        (insert (format "#+HUGO_SLUG: %s\n" (jethro/title-to-id (or title "EDITME"))))
+        (goto-char (point-max))))))
 
 (use-package org-fc
   :straight (:host github :repo "l3kn/org-fc")
