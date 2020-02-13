@@ -1306,7 +1306,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
   :after org
-  :hook (org-mode . org-roam-mode)
+  :hook
+  ((org-mode . org-roam-mode)
+   (after-init . org-roam--build-cache-async))
   :bind (("C-c n l" . org-roam)
          ("C-c n f" . org-roam-find-file)
          ("C-c n g" . org-roam-show-graph)
@@ -1342,7 +1344,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                  (not (s-match "hugo_setup"
                                (file-name-sans-extension
                                 (buffer-file-name (current-buffer)))))
-                 (not (s-match "dailies"
+                 (not (s-match "private"
                                (file-name-sans-extension
                                 (buffer-file-name (current-buffer))))))
         (goto-char (point-min))
@@ -1362,9 +1364,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   ("C-c n t" . org-journal-today)
   :custom
   (org-journal-date-prefix "#+TITLE: ")
-  (org-journal-file-format "dailies-%Y-%m-%d.org")
+  (org-journal-file-format "private-%Y-%m-%d.org")
   (org-journal-dir "/home/jethro/Dropbox/org/braindump/org/")
-  (org-journal-date-format "%A, %d %B %Y")
+  (org-journal-date-format "%Y-%m-%d")
   :config
   (defun org-journal-today ()
     (interactive)
