@@ -1619,6 +1619,12 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :commands (alert)
   :custom (alert-default-style 'message))
 
+(use-package gif-screencast
+  :straight (:host gitlab :repo "ambrevar/emacs-gif-screencast")
+  :config
+  (require 'gif-screencast)
+  (global-set-key (kbd "<f12>") 'gif-screencast-start-or-stop))
+
 ;; Local Variables:
 ;; outline-regexp: ";;;+ "
 ;; End:
