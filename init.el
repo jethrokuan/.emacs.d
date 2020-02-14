@@ -1366,7 +1366,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (use-package org-download
   :after org
-  :straight (:host github :repo "jethrokuan/org-download")
   :bind
   (:map org-mode-map
         (("s-Y" . org-download-screenshot)
