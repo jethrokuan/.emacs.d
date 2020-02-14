@@ -790,14 +790,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
               ("C-c C-c" . eval-defun)
               ("C-c C-k" . eval-buffer)))
 
-(use-package package-lint)
-
-(use-package flycheck-package
-  :config
-  (require 'flycheck-package)
-  (eval-after-load 'flycheck
-    (flycheck-package-setup)))
-
 (use-package helpful
   :defines (counsel-describe-function-function
             counsel-describe-variable-function)
