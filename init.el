@@ -1292,8 +1292,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
-  (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
-  (deft-use-filename-as-title t))
+  (deft-directory "/home/jethro/Dropbox/org/braindump/org/"))
 
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
