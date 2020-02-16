@@ -23,6 +23,13 @@
   :straight (blackout :host github :repo "raxod502/blackout")
   :demand t)
 
+(use-package el-patch
+  :straight (:host github
+                   :repo "raxod502/el-patch"
+                   :branch "develop"))
+(eval-when-compile
+  (require 'el-patch))
+
 (use-package use-package-company
   :straight (use-package-company :host github :repo "akirak/use-package-company"))
 
@@ -1292,7 +1299,20 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
-  (deft-directory "/home/jethro/Dropbox/org/braindump/org/"))
+  (deft-directory "/home/jethro/Dropbox/org/braindump/org/")
+  :config/el-patch
+  (defun deft-parse-title (file contents)
+    "Parse the given FILE and CONTENTS and determine the title.
+If `deft-use-filename-as-title' is nil, the title is taken to
+be the first non-empty line of the FILE.  Else the base name of the FILE is
+used as title."
+    (el-patch-swap (if deft-use-filename-as-title
+                       (deft-base-filename file)
+                     (let ((begin (string-match "^.+$" contents)))
+                       (if begin
+                           (funcall deft-parse-title-function
+                                    (substring contents begin (match-end 0))))))
+                   (org-roam--get-title-or-slug file))))
 
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
