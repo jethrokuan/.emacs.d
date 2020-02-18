@@ -537,15 +537,15 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (whitespace-line-column 80)
   (whitespace-style '(face lines-tail)))
 
-(use-package flyspell
-  :straight nil
-  :blackout flyspell-mode
-  :hook
-  (text-mode . flyspell-mode)
-  :custom
-  (flyspell-abbrev-p t)
-  (ispell-program-name "aspell")
-  (ispell-dictionary "en_GB"))
+;; (use-package flyspell
+;;   :straight nil
+;;   :blackout flyspell-mode
+;;   :hook
+;;   (text-mode . flyspell-mode)
+;;   :custom
+;;   (flyspell-abbrev-p t)
+;;   (ispell-program-name "aspell")
+;;   (ispell-dictionary "en_GB"))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
