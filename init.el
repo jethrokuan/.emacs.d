@@ -1318,13 +1318,13 @@ used as title."
   :straight (:host github :repo "jethrokuan/org-roam")
   :after org
   :hook
-  ((org-mode . org-roam-mode)
-   (after-init . org-roam--build-cache-async))
-  :bind (("C-c n l" . org-roam)
-         ("C-c n f" . org-roam-find-file)
-         ("C-c n g" . org-roam-show-graph)
-         :map org-mode-map
-         (("C-c n i" . org-roam-insert)))
+  (after-init . org-roam-mode)
+  :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-show-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert)))
   :custom
   (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
   (org-roam-link-representation 'title)
