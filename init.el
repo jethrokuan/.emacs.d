@@ -721,10 +721,10 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   :blackout ((yas-global-mode . t)
              (yas-minor-mode . t))
   :config
-  (yas-global-mode +1)
-  :custom
   (add-to-list 'load-path (expand-file-name "snippets" user-emacs-directory))
   (require 'yasnippet-snippets)
+  (yas-global-mode +1)
+  :custom
   (yas-snippet-dirs (list (expand-file-name "snippets/snippets" user-emacs-directory))))
 
 (use-package company
