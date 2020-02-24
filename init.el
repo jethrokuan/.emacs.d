@@ -1327,47 +1327,33 @@ used as title."
               (("C-c n i" . org-roam-insert)))
   :custom
   (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
-  (org-roam-link-representation 'title)
   (org-roam-buffer-width 0.4)
-  (org-roam-timestamped-files t)
-  :init
-  (require 's)
-  (defun jethro/org-get-prop (prop)
-    (org-element-map
-        (org-element-parse-buffer)
-        'keyword
-      (lambda (kw)
-        (when (string= (org-element-property :key kw) prop)
-          (org-element-property :value kw)))
-      :first-match t))
-  (defun jethro/title-to-id (title)
-    "Convert TITLE to id."
-    (let* ((s (s-downcase title))
-           (s (replace-regexp-in-string "[^a-zA-Z0-9_ ]" "" s))
-           (s (s-split " " s))
-           (s (s-join "_" s)))
-      s))
-  (defun jethro/deft-insert-boilerplate ()
-    (interactive)
-    (let ((setupfile (jethro/org-get-prop "SETUPFILE"))
-          (title (jethro/org-get-prop "TITLE")))
-      (when (and (not setupfile)
-                 (not (s-match "hugo_setup"
-                               (file-name-sans-extension
-                                (buffer-file-name (current-buffer)))))
-                 (not (s-match "private"
-                               (file-name-sans-extension
-                                (buffer-file-name (current-buffer))))))
-        (goto-char (point-min))
-        (insert "#+SETUPFILE:./hugo_setup.org\n")
-        (insert "#+HUGO_SECTION: zettels\n")
-        (insert (format "#+HUGO_SLUG: %s\n" (jethro/title-to-id (or title "EDITME"))))
-        (goto-char (point-max))))))
+  :custom-face
+  (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
+  :config
+  (defun jethro/org-roam-title-private (title)
+    (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
+          (slug (org-roam--title-to-slug title)))
+      (format "private-%s_%s" timestamp slug)))
+  (setq org-roam-templates
+        (list (list "default" (list :file #'org-roam--file-name-timestamp-title
+                                    :content "#+SETUPFILE:./hugo_setup.org
+#+HUGO_SECTION: zettels
+#+HUGO_SLUG: ${slug}
+#+TITLE: ${title}"))
+              (list "private" (list :file #'jethro/org-roam-title-private
+                                    :content "#+TITLE: ${title}")))))
 
 (use-package org-fc
-  :straight (:host github :repo "l3kn/org-fc")
+  :straight (:host github
+                   :repo "l3kn/org-fc"
+                   :files (:defaults "awk"))
+  :bind
+  ("C-c f" . org-fc-hydra/body)
   :custom
-  (org-fc-directories '("/home/jethro/Dropbox/org/braindump/org/")))
+  (org-fc-directories '("/home/jethro/Dropbox/org/braindump/org/"))
+  :config
+  (require 'org-fc-hydra))
 
 (use-package org-journal
   :bind
