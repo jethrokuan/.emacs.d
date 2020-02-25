@@ -1418,6 +1418,7 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   (org-latex-pdf-process
    (list "latexmk -shell-escape -bibtex -f -pdf %f"
          "latexmk -shell-escape -bibtex -f -pdf %f"))
+  (org-preview-latex-default-process 'imagemagick)
   (org-latex-default-table-environment "tabular")
   (org-latex-tables-booktabs t)
   (org-latex-listings 'minted)
