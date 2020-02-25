@@ -1335,12 +1335,23 @@ used as title."
     (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
           (slug (org-roam--title-to-slug title)))
       (format "private-%s_%s" timestamp slug)))
+  (defun jethro/org-roam-title-flashcard (title)
+    (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
+          (slug (org-roam--title-to-slug title)))
+      (format "flashcard-%s" timestamp slug)))
   (setq org-roam-templates
         (list (list "default" (list :file #'org-roam--file-name-timestamp-title
                                     :content "#+SETUPFILE:./hugo_setup.org
 #+HUGO_SECTION: zettels
 #+HUGO_SLUG: ${slug}
 #+TITLE: ${title}"))
+              (list "flashcard" (list :file #'jethro/org-roam-title-flashcard
+                                      :content "#+TITLE: Flashcard: ${title}
+
+# Local Variables:
+# eval: (org-hugo-auto-export-mode -1)
+# End:
+"))
               (list "private" (list :file #'jethro/org-roam-title-private
                                     :content "#+TITLE: ${title}")))))
 
