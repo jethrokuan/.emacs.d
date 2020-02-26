@@ -1316,7 +1316,6 @@ used as title."
 
 (use-package org-roam
   :straight (:host github :repo "jethrokuan/org-roam")
-  :after org
   :hook
   (after-init . org-roam-mode)
   :bind (:map org-roam-mode-map
@@ -1331,6 +1330,7 @@ used as title."
   :custom-face
   (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
   :config
+  (require 'org-roam-protocol)
   (defun jethro/org-roam-title-private (title)
     (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
           (slug (org-roam--title-to-slug title)))
