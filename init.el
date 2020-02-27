@@ -114,8 +114,10 @@
 (setq inhibit-startup-message t)
 
 (use-package doom-themes
-  :init
-  (load-theme 'doom-challenger-deep t))
+  :config
+  (load-theme 'doom-tomorrow-night t)
+  (doom-themes-visual-bell-config)
+  (doom-themes-org-config))
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode))
@@ -1030,14 +1032,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (require 'org-tempo)
   (require 'ol-notmuch))
 
-(use-package org-bullets
-  :after org
-  :hook
-  (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list
-   '("◉" "○")))
-
 (require 'org)
 
 (defun jethro/style-org ()
@@ -1326,7 +1320,7 @@ used as title."
               (("C-c n i" . org-roam-insert)))
   :custom
   (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
-  (org-roam-buffer-width 0.4)
+  (org-roam-buffer-width 0.33)
   :custom-face
   (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
   :config
