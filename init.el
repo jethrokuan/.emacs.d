@@ -122,24 +122,14 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode))
 
-(use-package rainbow-delimiters
-  :hook
-  (prog-mode . rainbow-delimiters-mode)
-  :config
-  (rainbow-delimiters-mode +1))
-
 (setq show-paren-style 'paren
-      show-paren-delay 0.03
+      show-paren-delay 0
       show-paren-highlight-openparen t
       show-paren-when-point-inside-paren nil
       show-paren-when-point-in-periphery t)
 (show-paren-mode 1)
 
 (blink-cursor-mode 0)
-
-(use-package minions
-  :config
-  (minions-mode +1))
 
 (use-package hl-todo
   :config
@@ -406,32 +396,6 @@ timestamp."
   (bind-key "C-c h v" #'jethro/hydra-diff-hl/body))
 
 ;;; Version Control
-(use-package vc
-  :bind (("C-x v =" . jethro/vc-diff)
-         ("C-x v H" . vc-region-history)) ; New command in emacs 25.x
-  :config
-  (defun jethro/vc-diff (no-whitespace)
-    "Call `vc-diff' as usual if buffer is not modified.
-If the buffer is modified (yet to be saved), call `diff-buffer-with-file'.
-If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
-    (interactive "P")
-    (let* ((no-ws-switch '("-w"))
-           (vc-git-diff-switches (if no-whitespace
-                                     no-ws-switch
-                                   vc-git-diff-switches))
-           (vc-diff-switches (if no-whitespace
-                                 no-ws-switch
-                               vc-diff-switches))
-           (diff-switches (if no-whitespace
-                              no-ws-switch
-                            diff-switches))
-           ;; Set `current-prefix-arg' to nil so that the HISTORIC arg
-           ;; of `vc-diff' stays nil.
-           current-prefix-arg)
-      (if (buffer-modified-p)
-          (diff-buffer-with-file (current-buffer))
-        (call-interactively #'vc-diff)))))
-
 (use-package smerge-mode
   :bind (("C-c h s" . jethro/hydra-smerge/body))
   :init
@@ -571,6 +535,7 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (use-package highlight-indent-guides
   :hook
   (python-mode . highlight-indent-guides-mode)
+  (yaml-mode . highlight-indent-guides-mode)
   :custom
   (highlight-indent-guides-method 'character))
 
@@ -799,6 +764,13 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
               ("C-c C-c" . eval-defun)
               ("C-c C-k" . eval-buffer)))
 
+(use-package emacsql
+  :hook
+  (emacs-mode . emacsql-fix-vector-indentation)
+  :bind
+  (:map emacs-lisp-mode-map
+        (("C-c C-e" . emacsql-show-last-sql))))
+
 (use-package helpful
   :defines (counsel-describe-function-function
             counsel-describe-variable-function)
@@ -855,7 +827,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
   (ccls-executable "ccls"))
 
 ;;; Fish
-
 (use-package fish-mode
   :mode ("\\.fish\\'" . fish-mode))
 
@@ -1027,6 +998,11 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
                                   ("el" . "src emacs-lisp")
                                   ("d" . "definition")
                                   ("t" . "theorem")))
+  (org-startup-indented nil)
+  (org-hide-leading-stars nil)
+  (org-hide-emphasis-markers nil)
+  (org-pretty-entities nil)
+  (org-adapt-indentation nil)
   :config
   (require 'org-habit)
   (require 'org-tempo)
@@ -1051,13 +1027,8 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 
 (add-hook 'org-mode-hook #'jethro/style-org)
 
-(setq org-startup-indented nil
-      org-hide-leading-stars nil
-      org-hide-emphasis-markers nil
-      org-pretty-entities nil
-      org-adapt-indentation nil)
-
-(defun org-archive-done-tasks ()
+(defun jethro/org-archive-done-tasks ()
+  "Archive all done tasks."
   (interactive)
   (org-map-entries 'org-archive-subtree "/DONE" 'file))
 
@@ -1066,7 +1037,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (setq org-agenda-files
       (find-lisp-find-files jethro/org-agenda-directory "\.org$"))
 
+;; Setup org-protocol
 (require 'org-protocol)
+
 (setq org-capture-templates
       `(("i" "inbox" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
          "* TODO %?")
@@ -1089,9 +1062,9 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
         (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
-(setq org-log-done 'time)
-(setq org-log-into-drawer t)
-(setq org-log-state-notes-insert-after-drawers nil)
+(setq org-log-done 'time
+      org-log-into-drawer t
+      org-log-state-notes-insert-after-drawers nil)
 
 (setq org-tag-alist (quote (("@errand" . ?e)
                             ("@office" . ?o)
@@ -1266,14 +1239,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
 (bind-key "<f1>" 'jethro/switch-to-agenda)
 
 (setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
-
-(use-package org-pomodoro
-  :after org
-  :bind
-  (:map org-agenda-mode-map
-        (("I" . org-pomodoro)))
-  :custom
-  (org-pomodoro-format "%s"))
 
 (use-package org-cliplink
   :bind
