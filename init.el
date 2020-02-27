@@ -1041,7 +1041,6 @@ If NO-WHITESPACE is non-nil, ignore all white space when doing diff."
    (lambda (face) ;; Other fonts with fixed-pitch.
      (set-face-attribute face nil :inherit 'fixed-pitch))
    (list 'org-code
-         'org-link
          'org-block
          'org-table
          'org-verbatim
