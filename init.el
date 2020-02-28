@@ -35,7 +35,7 @@
 
 ;;; EXWM setup
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
-
+(require 'emacsql-sqlite)
 (require 'exwm)
 (when (featurep 'exwm)
   (require 'exwm-config))
@@ -765,6 +765,7 @@ timestamp."
               ("C-c C-k" . eval-buffer)))
 
 (use-package emacsql
+  :straight nil
   :hook
   (emacs-mode . emacsql-fix-vector-indentation)
   :bind
@@ -1273,13 +1274,15 @@ used as title."
                    (org-roam--get-title-or-slug file))))
 
 (use-package org-roam
+  :ensure nil
   :straight (:host github :repo "jethrokuan/org-roam")
   :hook
   (after-init . org-roam-mode)
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-show-graph))
+               ("C-c n g" . org-roam-show-graph)
+               ("C-c n b" . org-roam-switch-to-buffer))
               :map org-mode-map
               (("C-c n i" . org-roam-insert)))
   :custom
@@ -1289,6 +1292,11 @@ used as title."
   (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
   :config
   (require 'org-roam-protocol)
+  (defun jethro/conditional-hugo-enable ()
+    (save-excursion
+      (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
+          (org-hugo-auto-export-mode +1)
+        (org-hugo-auto-export-mode -1))))
   (defun jethro/org-roam-title-private (title)
     (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
           (slug (org-roam--title-to-slug title)))
@@ -1305,10 +1313,6 @@ used as title."
 #+TITLE: ${title}"))
               (list "flashcard" (list :file #'jethro/org-roam-title-flashcard
                                       :content "#+TITLE: Flashcard: ${title}
-
-# Local Variables:
-# eval: (org-hugo-auto-export-mode -1)
-# End:
 "))
               (list "private" (list :file #'jethro/org-roam-title-private
                                     :content "#+TITLE: ${title}")))))
@@ -1332,6 +1336,7 @@ used as title."
   (org-journal-date-prefix "#+TITLE: ")
   (org-journal-file-format "private-%Y-%m-%d.org")
   (org-journal-dir "/home/jethro/Dropbox/org/braindump/org/")
+  (org-journal-carryover-items nil)
   (org-journal-date-format "%Y-%m-%d")
   :config
   (defun org-journal-today ()
