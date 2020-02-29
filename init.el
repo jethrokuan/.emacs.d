@@ -77,7 +77,7 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(delete-selection-mode 1)
+(add-hook 'after-init-hook #'delete-selection-mode)
 
 (setq sentence-end-double-space nil)
 
@@ -122,7 +122,7 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode))
 
-(setq show-paren-style 'paren
+(setq show-paren-style 'parenthesis
       show-paren-delay 0
       show-paren-highlight-openparen t
       show-paren-when-point-inside-paren nil
@@ -144,6 +144,12 @@
   (lazy-count-suffix-format nil)
   (isearch-yank-on-move 'shift)
   (isearch-allow-scroll 'unlimited))
+
+(add-hook 'after-init-hook #'column-number-mode)
+
+(use-package subword
+  :straight nil
+  :hook (prog-mode . subword-mode))
 
 (use-package hl-todo
   :config
