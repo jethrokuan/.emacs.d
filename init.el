@@ -653,12 +653,12 @@ timestamp."
   :custom
   (direnv-always-show-summary nil)
   :config
-  (eval-after-load 'flycheck
-    '(setq flycheck-executable-find
-           (lambda (cmd)
-             (add-hook 'post-command-hook #'direnv--maybe-update-environment)
-             (direnv-update-environment default-directory)
-             (executable-find cmd))))
+  (with-eval-after-load 'flycheck
+    (setq flycheck-executable-find
+          (lambda (cmd)
+            (add-hook 'post-command-hook #'direnv--maybe-update-environment)
+            (direnv-update-environment default-directory)
+            (executable-find cmd))))
   (direnv-mode +1))
 
 (use-package flycheck
@@ -846,9 +846,8 @@ timestamp."
 (use-package rust-mode
   :mode ("\\.rs\\'" . rust-mode))
 
-(eval-after-load "python-mode"
-  (lambda ()
-    (setq python-remove-cwd-from-path t)))
+(with-eval-after-load "python-mode"
+  (setq python-remove-cwd-from-path t))
 
 ;;; Web
 (use-package web-mode
@@ -1016,9 +1015,8 @@ timestamp."
   (org-pretty-entities nil)
   (org-adapt-indentation nil)
   :init
-  (eval-after-load 'flycheck
-    (lambda ()
-      (flycheck-add-mode 'proselint 'org-mode)))
+  (with-eval-after-load 'flycheck
+    (flycheck-add-mode 'proselint 'org-mode))
   :config
   (require 'org-habit)
   (require 'org-tempo)
