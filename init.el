@@ -516,9 +516,7 @@ timestamp."
   :hook
   (text-mode . flyspell-mode)
   :custom
-  (flyspell-abbrev-p t)
-  (ispell-program-name "aspell")
-  (ispell-dictionary "en_GB"))
+  (flyspell-abbrev-p t))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
