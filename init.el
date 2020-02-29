@@ -131,6 +131,20 @@
 
 (blink-cursor-mode 0)
 
+(use-package isearch
+  :straight nil
+  :custom
+  (search-highlight t)
+  (search-whitespace-regexp ".*?")
+  (isearch-lax-whitespace t)
+  (isearch-regexp-lax-whitespace nil)
+  (isearch-lazy-highlight t)
+  (isearch-lazy-count t)
+  (lazy-count-prefix-format " (%s/%s) ")
+  (lazy-count-suffix-format nil)
+  (isearch-yank-on-move 'shift)
+  (isearch-allow-scroll 'unlimited))
+
 (use-package hl-todo
   :config
   (global-hl-todo-mode))
@@ -146,12 +160,6 @@
               ("M-<RET>" . newline))
   :commands (goto-address-prog-mode
              goto-address-mode))
-
-(use-package ctrlf
-  :defer 3
-  :straight (ctrlf :host github :repo "raxod502/ctrlf")
-  :config
-  (ctrlf-mode))
 
 (use-package beacon
   :blackout beacon-mode
@@ -307,7 +315,6 @@ timestamp."
    '((t . ivy--regex-plus)))
   :config
   (ivy-mode +1))
-
 
 (use-package ivy-rich
   :init
@@ -503,15 +510,15 @@ timestamp."
   (whitespace-line-column 80)
   (whitespace-style '(face lines-tail)))
 
-;; (use-package flyspell
-;;   :straight nil
-;;   :blackout flyspell-mode
-;;   :hook
-;;   (text-mode . flyspell-mode)
-;;   :custom
-;;   (flyspell-abbrev-p t)
-;;   (ispell-program-name "aspell")
-;;   (ispell-dictionary "en_GB"))
+(use-package flyspell
+  :straight nil
+  :blackout flyspell-mode
+  :hook
+  (text-mode . flyspell-mode)
+  :custom
+  (flyspell-abbrev-p t)
+  (ispell-program-name "aspell")
+  (ispell-dictionary "en_GB"))
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'message-mode-hook (lambda ()
@@ -637,26 +644,29 @@ timestamp."
   (prog-mode . bury-successful-compilation))
 
 (use-package direnv
+  :demand t
   :if (executable-find "direnv")
   :custom
   (direnv-always-show-summary nil)
   :config
+  (eval-after-load 'flycheck
+    '(setq flycheck-executable-find
+           (lambda (cmd)
+             (add-hook 'post-command-hook #'direnv--maybe-update-environment)
+             (direnv-update-environment default-directory)
+             (executable-find cmd))))
   (direnv-mode +1))
 
 (use-package flycheck
-  :config
-  (global-flycheck-mode +1)
-
-  (setq-default flycheck-check-syntax-automatically '(save
-                                                      idle-change
-                                                      mode-enabled))
-
-  ;; Temporary workaround: Direnv needs to load PATH before flycheck looks
-  ;; for linters
-  (setq flycheck-executable-find
-        (lambda (cmd)
-          (direnv-update-environment default-directory)
-          (executable-find cmd))))
+  :commands (flycheck-mode
+             flycheck-next-error
+             flycheck-previous-error)
+  :init
+  (dolist (where '((emacs-lisp-mode-hook . emacs-lisp-mode-map)))
+    (add-hook (car where)
+              `(lambda ()
+                 (bind-key "M-n" #'flycheck-next-error ,(cdr where))
+                 (bind-key "M-p" #'flycheck-previous-error ,(cdr where))))))
 
 (use-package flycheck-hydra
   :straight nil
@@ -681,8 +691,6 @@ timestamp."
   :after flycheck
   :hook
   (flycheck-mode . flycheck-pos-tip-mode))
-
-(flycheck-add-mode 'proselint 'org-mode)
 
 (use-package yasnippet
   :blackout ((yas-global-mode . t)
@@ -756,7 +764,6 @@ timestamp."
   :straight (outshine :host github :repo "alphapapa/outshine"))
 
 ;;; Emacs Lisp
-
 (use-package elisp-mode
   :straight nil
   :bind (:map emacs-lisp-mode-map
@@ -1004,6 +1011,10 @@ timestamp."
   (org-hide-emphasis-markers nil)
   (org-pretty-entities nil)
   (org-adapt-indentation nil)
+  :init
+  (eval-after-load 'flycheck
+    (lambda ()
+      (flycheck-add-mode 'proselint 'org-mode)))
   :config
   (require 'org-habit)
   (require 'org-tempo)
@@ -1275,6 +1286,7 @@ used as title."
 
 (use-package org-roam
   :ensure nil
+  :commands (org-roam-build-cache)
   :straight (:host github :repo "jethrokuan/org-roam")
   :hook
   (after-init . org-roam-mode)
@@ -1287,7 +1299,6 @@ used as title."
               (("C-c n i" . org-roam-insert)))
   :custom
   (org-roam-directory "/home/jethro/Dropbox/org/braindump/org/")
-  (org-roam-buffer-width 0.33)
   :custom-face
   (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
   :config
@@ -1333,6 +1344,8 @@ used as title."
   (org-fc-directories '("/home/jethro/Dropbox/org/braindump/org/"))
   :config
   (require 'org-fc-hydra))
+
+(use-package erefactor)
 
 (use-package org-journal
   :bind
