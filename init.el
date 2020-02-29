@@ -1314,6 +1314,12 @@ used as title."
               (list "flashcard" (list :file #'jethro/org-roam-title-flashcard
                                       :content "#+TITLE: Flashcard: ${title}
 "))
+              (list "ref" (list :file #'org-roam--file-name-timestamp-title
+                                :content "#+SETUPFILE:./hugo_setup.org
+#+HUGO_SECTION: websites
+#+HUGO_SLUG: ${slug}
+#+ROAM_KEY: ${ref}
+#+TITLE: ${title}"))
               (list "private" (list :file #'jethro/org-roam-title-private
                                     :content "#+TITLE: ${title}")))))
 
