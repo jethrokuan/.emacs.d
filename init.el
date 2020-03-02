@@ -1280,6 +1280,7 @@ timestamp."
     (org-capture nil "l")))
 
 (use-package deft
+  :disabled t
   :after org
   :bind
   ("C-c n d" . deft)
