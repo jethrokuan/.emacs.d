@@ -120,7 +120,11 @@
   (doom-themes-org-config))
 
 (use-package doom-modeline
-  :hook (after-init . doom-modeline-mode))
+  :hook (after-init . doom-modeline-mode)
+  :config
+  (setq doom-modeline-enable-word-count t)
+  (setq doom-modeline-buffer-encoding nil)
+  (setq doom-modeline-github t))
 
 (setq show-paren-style 'parenthesis
       show-paren-delay 0
