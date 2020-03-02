@@ -256,6 +256,17 @@ timestamp."
     (interactive)
     (org-capture nil "e")))
 
+(use-package org-msg
+  ;; Only for mu4e
+  :disabled t
+  :hook (message-mode . org-msg-mode)
+  :custom
+  (org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil")
+  (org-msg-greeting-name-limit 3)
+  (org-msg-greeting-fmt "\nHi *%s*,\n\n")
+  (org-msg-startup "hidestars indent inlineimages")
+  (org-msg-signature "\n\nRegards,\nJethro Kuan"))
+
 ;;; Dired
 (let ((gls (executable-find "gls")))
   (when gls
@@ -517,6 +528,7 @@ timestamp."
   (whitespace-style '(face lines-tail)))
 
 (use-package flyspell
+  :disabled t
   :straight nil
   :blackout flyspell-mode
   :hook
