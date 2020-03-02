@@ -1342,11 +1342,13 @@ used as title."
            :head "#+SETUPFILE:./hugo_setup.org
 #+HUGO_SECTION: zettels
 #+HUGO_SLUG: ${slug}
-#+TITLE: ${title}\n")
+#+TITLE: ${title}\n"
+           :unnarrowed t)
           ("p" "private" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "private-${slug}"
-           :head "#+TITLE: ${title}\n"))))
+           :head "#+TITLE: ${title}\n"
+           :unnarrowed t))))
 
 (use-package org-fc
   :straight (:host github
