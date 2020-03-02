@@ -1335,23 +1335,18 @@ used as title."
     (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
           (slug (org-roam--title-to-slug title)))
       (format "flashcard-%s" timestamp slug)))
-  (setq org-roam-templates
-        (list (list "default" (list :file #'org-roam--file-name-timestamp-title
-                                    :content "#+SETUPFILE:./hugo_setup.org
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+SETUPFILE:./hugo_setup.org
 #+HUGO_SECTION: zettels
 #+HUGO_SLUG: ${slug}
-#+TITLE: ${title}"))
-              (list "flashcard" (list :file #'jethro/org-roam-title-flashcard
-                                      :content "#+TITLE: Flashcard: ${title}
-"))
-              (list "ref" (list :file #'org-roam--file-name-timestamp-title
-                                :content "#+SETUPFILE:./hugo_setup.org
-#+HUGO_SECTION: websites
-#+HUGO_SLUG: ${slug}
-#+ROAM_KEY: ${ref}
-#+TITLE: ${title}"))
-              (list "private" (list :file #'jethro/org-roam-title-private
-                                    :content "#+TITLE: ${title}")))))
+#+TITLE: ${title}\n")
+          ("p" "private" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "private-${slug}"
+           :head "#+TITLE: ${title}\n"))))
 
 (use-package org-fc
   :straight (:host github
