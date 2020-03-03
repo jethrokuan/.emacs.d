@@ -1358,6 +1358,7 @@ used as title."
   ("C-c f" . org-fc-hydra/body)
   :custom
   (org-fc-directories '("/home/jethro/Dropbox/org/braindump/org/"))
+  (org-fc-review-history-file "/home/jethro/Dropbox/org/braindump/org/org-fc.tsv")
   :config
   (require 'org-fc-hydra))
 
