@@ -248,12 +248,11 @@ timestamp."
   (notmuch-search-oldest-first nil)
   (notmuch-archive-tags '("-inbox" "-unread"))
   (notmuch-message-headers '("To" "Cc" "Subject" "Bcc"))
-  (notmuch-saved-searches '((:name "unread" :query "tag:unread")
-                            (:name "to-me" :query "tag:to-me")
-                            (:name "sent" :query "tag:sent")
-                            (:name "personal" :query "tag:personal")
-                            (:name "nushackers" :query "tag:nushackers")
-                            (:name "nus" :query "tag:nus")
+  (notmuch-saved-searches '((:name "unread" :query "tag:inbox and tag:unread")
+                            (:name "org-roam" :query "tag:inbox and tag:roam")
+                            (:name "personal" :query "tag:inbox and tag:personal")
+                            (:name "nushackers" :query "tag:inbox and tag:nushackers")
+                            (:name "nus" :query "tag:inbox and tag:nus")
                             (:name "drafts" :query "tag:draft")))
   :config
   (defun jethro/org-capture-email ()
@@ -1348,6 +1347,17 @@ used as title."
            "%?"
            :file-name "private-${slug}"
            :head "#+TITLE: ${title}\n"
+           :unnarrowed t)))
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "websites/${slug}"
+           :head "#+SETUPFILE:./hugo_setup.org
+#+ROAM_KEY: ${ref}
+#+HUGO_SLUG: ${slug}
+#+TITLE: ${title}
+
+- source :: ${ref}"
            :unnarrowed t))))
 
 (use-package org-fc
@@ -1625,6 +1635,8 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
 (use-package alert
   :commands (alert)
   :custom (alert-default-style 'message))
+
+(use-package anki-editor)
 
 (use-package gif-screencast
   :straight (:host gitlab :repo "ambrevar/emacs-gif-screencast")
