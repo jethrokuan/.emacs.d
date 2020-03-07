@@ -1327,14 +1327,27 @@ used as title."
       (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
           (org-hugo-auto-export-mode +1)
         (org-hugo-auto-export-mode -1))))
-  (defun jethro/org-roam-title-private (title)
-    (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
-          (slug (org-roam--title-to-slug title)))
-      (format "private-%s_%s" timestamp slug)))
-  (defun jethro/org-roam-title-flashcard (title)
-    (let ((timestamp (format-time-string "%Y%m%d%H%M%S" (current-time)))
-          (slug (org-roam--title-to-slug title)))
-      (format "flashcard-%s" timestamp slug)))
+  (defun my/org-roam--backlinks-list (file)
+    (if (org-roam--org-roam-file-p file)
+        (--reduce-from
+         (concat acc (format "- [[file:%s][%s]]\n"
+                             (file-relative-name (car it) org-roam-directory)
+                             (org-roam--get-title-or-slug (car it))))
+         "" (org-roam-sql [:select [file-from]
+                           :from file-links
+                           :where (= file-to $s1)
+                           :and file-from :not :like $s2] file "%private%"))
+      ""))
+
+  (defun my/org-export-preprocessor (_backend)
+    (let ((links (my/org-roam--backlinks-list (buffer-file-name))))
+      (unless (string= links "")
+        (save-excursion
+          (goto-char (point-max))
+          (insert (concat "\n* Backlinks\n") links)))))
+
+  (eval-after-load 'org
+    (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor))
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
