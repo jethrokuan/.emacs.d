@@ -996,7 +996,8 @@ timestamp."
   (org-babel-load-languages
    '((emacs-lisp . t)
      (python . t)
-     (dot . t)))
+     (dot . t)
+     (R . t)))
   (org-confirm-babel-evaluate nil)
   (org-use-speed-commands t)
   (org-catch-invisible-edits 'show)
