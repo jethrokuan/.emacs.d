@@ -85,13 +85,6 @@
 (setq-default js-indent-level 2)
 (setq-default indent-tabs-mode nil)
 
-(setq-default truncate-lines t)
-
-(defun jethro/truncate-lines-hook ()
-  (setq truncate-lines nil))
-
-(add-hook 'text-mode-hook 'jethro/truncate-lines-hook)
-
 ;; For when Emacs is started in GUI mode:
 (setq create-lockfiles nil)
 (setq browse-url-browser-function 'browse-url-xdg-open)
@@ -538,11 +531,6 @@ timestamp."
   (text-mode . flyspell-mode)
   :custom
   (flyspell-abbrev-p t))
-
-(add-hook 'text-mode-hook 'auto-fill-mode)
-(add-hook 'message-mode-hook (lambda ()
-                               (auto-fill-mode -1)))
-(blackout 'auto-fill-mode)
 
 (defun endless/fill-or-unfill ()
   "Like `fill-paragraph', but unfill if used twice."
@@ -1069,24 +1057,25 @@ timestamp."
 
 ;; Setup org-protocol
 (require 'org-protocol)
+(require 'org-capture)
+(add-to-list 'org-capture-templates
+             `("i" "inbox" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
+               "* TODO %?"))
+(add-to-list 'org-capture-templates
+             `("e" "email" entry (file+headline ,(concat jethro/org-agenda-directory "emails.org") "Emails")
+               "* TODO [#A] Reply: %a :@home:@school:"
+               :immediate-finish t))
+(add-to-list 'org-capture-templates
+             `("c" "org-protocol-capture" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
+               "* TODO [[%:link][%:description]]\n\n %i"
+               :immediate-finish t))
+(add-to-list 'org-capture-templates
+             `("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
+               (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org"))))
 
-(setq org-capture-templates
-      `(("i" "inbox" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
-         "* TODO %?")
-        ("e" "email" entry (file+headline ,(concat jethro/org-agenda-directory "emails.org") "Emails")
-         "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
-        ("l" "link" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
-         "* TODO %(org-cliplink-capture)" :immediate-finish t)
-        ("c" "org-protocol-capture" entry (file ,(concat jethro/org-agenda-directory "inbox.org"))
-         "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
-        ("w" "Weekly Review" entry (file+olp+datetree ,(concat jethro/org-agenda-directory "reviews.org"))
-         (file ,(concat jethro/org-agenda-directory "templates/weekly_review.org")))))
-
-(setq jethro/org-agenda-reading-view
-      `("r" "Reading" todo ""
-        ((org-agenda-files '(,(concat jethro/org-agenda-directory "reading.org"))))))
-
-(add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-reading-view)
+(add-to-list 'org-agenda-custom-commands
+             `("r" "Reading" todo ""
+               ((org-agenda-files '(,(concat jethro/org-agenda-directory "reading.org"))))))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -1125,7 +1114,8 @@ timestamp."
   (org-agenda-bulk-mark-regexp "inbox:")
   (jethro/bulk-process-entries))
 
-(defvar jethro/org-current-effort "1:00" "Current effort for agenda items.")
+(defvar jethro/org-current-effort "1:00"
+  "Current effort for agenda items.")
 
 (defun jethro/my-org-agenda-set-effort (effort)
   "Set the effort property for the current headline."
@@ -1183,8 +1173,7 @@ timestamp."
                      ""
                    (format ", skipped %d (disappeared before their turn)"
                            skipped))
-                 (if (not org-agenda-persistent-marks) "" " (kept marked)")))
-    ))
+                 (if (not org-agenda-persistent-marks) "" " (kept marked)")))))
 
 (defun jethro/org-inbox-capture ()
   (interactive)
@@ -1230,12 +1219,10 @@ timestamp."
                 (org-agenda-files '(,(concat jethro/org-agenda-directory "someday.org")
                                     ,(concat jethro/org-agenda-directory "projects.org")
                                     ,(concat jethro/org-agenda-directory "next.org")))
-                ;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "Projects")
                 (org-agenda-files '(,(concat jethro/org-agenda-directory "projects.org")))
-                ;; (org-agenda-skip-function #'jethro/org-agenda-skip-all-siblings-but-first)
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "One-off Tasks")
@@ -1244,23 +1231,6 @@ timestamp."
          nil)))
 
 (add-to-list 'org-agenda-custom-commands `,jethro/org-agenda-todo-view)
-
-(defun jethro/org-agenda-skip-all-siblings-but-first ()
-  "Skip all but the first non-done entry."
-  (let (should-skip-entry)
-    (unless (or (org-current-is-todo)
-                (not (org-get-scheduled-time (point))))
-      (setq should-skip-entry t))
-    (save-excursion
-      (while (and (not should-skip-entry) (org-goto-sibling t))
-        (when (org-current-is-todo)
-          (setq should-skip-entry t))))
-    (when should-skip-entry
-      (or (outline-next-heading)
-          (goto-char (point-max))))))
-
-(defun org-current-is-todo ()
-  (string= "TODO" (org-get-todo-state)))
 
 (defun jethro/switch-to-agenda ()
   (interactive)
@@ -1327,26 +1297,25 @@ used as title."
       (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
           (org-hugo-auto-export-mode +1)
         (org-hugo-auto-export-mode -1))))
-  (defun my/org-roam--backlinks-list (file)
-    (if (org-roam--org-roam-file-p file)
-        (--reduce-from
-         (concat acc (format "- [[file:%s][%s]]\n"
-                             (file-relative-name (car it) org-roam-directory)
-                             (org-roam--get-title-or-slug (car it))))
-         "" (org-roam-sql [:select [file-from]
-                           :from file-links
-                           :where (= file-to $s1)
-                           :and file-from :not :like $s2] file "%private%"))
-      ""))
 
-  (defun my/org-export-preprocessor (_backend)
-    (let ((links (my/org-roam--backlinks-list (buffer-file-name))))
-      (unless (string= links "")
-        (save-excursion
-          (goto-char (point-max))
-          (insert (concat "\n* Backlinks\n") links)))))
-
-  (eval-after-load 'org
+  (with-eval-after-load 'org
+    (defun my/org-roam--backlinks-list (file)
+      (if (org-roam--org-roam-file-p file)
+          (--reduce-from
+           (concat acc (format "- [[file:%s][%s]]\n"
+                               (file-relative-name (car it) org-roam-directory)
+                               (org-roam--get-title-or-slug (car it))))
+           "" (org-roam-sql [:select [file-from]
+                             :from file-links
+                             :where (= file-to $s1)
+                             :and file-from :not :like $s2] file "%private%"))
+        ""))
+    (defun my/org-export-preprocessor (_backend)
+      (let ((links (my/org-roam--backlinks-list (buffer-file-name))))
+        (unless (string= links "")
+          (save-excursion
+            (goto-char (point-max))
+            (insert (concat "\n* Backlinks\n" links))))))
     (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor))
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
@@ -1654,9 +1623,8 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
 
 (use-package gif-screencast
   :straight (:host gitlab :repo "ambrevar/emacs-gif-screencast")
-  :config
-  (require 'gif-screencast)
-  (global-set-key (kbd "<f12>") 'gif-screencast-start-or-stop))
+  :bind
+  ("<f12>" . gif-screencast-start-or-stop))
 
 ;; Local Variables:
 ;; outline-regexp: ";;;+ "
