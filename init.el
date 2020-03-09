@@ -287,12 +287,8 @@ timestamp."
 ;;; Utilities
 (use-package crux
   :bind (("C-c o" . crux-open-with)
-         ("C-c D" . crux-delete-file-and-buffer)
          ("C-a" . crux-move-beginning-of-line)
-         ("M-o" . crux-smart-open-line)
-         ("C-c r" . crux-rename-file-and-buffer)
-         ("M-D" . crux-duplicate-and-comment-current-line-or-region)
-         ("s-o" . crux-smart-open-line-above)))
+         ("C-c r" . crux-rename-file-and-buffer)))
 
 ;;; Ivy
 (use-package counsel
@@ -322,6 +318,7 @@ timestamp."
    ("C-r" . counsel-minibuffer-history))
   :custom
   (ivy-use-virtual-buffers t)
+  (enable-recursive-minibuffers t)
   (ivy-display-style 'fancy)
   (ivy-use-selectable-prompt t)
   (ivy-re-builders-alist
@@ -524,13 +521,20 @@ timestamp."
   (whitespace-style '(face lines-tail)))
 
 (use-package flyspell
-  :disabled t
   :straight nil
   :blackout flyspell-mode
   :hook
   (text-mode . flyspell-mode)
   :custom
-  (flyspell-abbrev-p t))
+  (flyspell-abbrev-p t)
+  (ispell-extra-args '("--encoding=utf-8" "--sug-mode=ultra")))
+
+(use-package flyspell-correct-ivy
+  :bind
+  (:map flyspell-mode-map
+        (("C-;" . flyspell-correct-wrapper)))
+  :custom
+  (flyspell-correct-interface #'flyspell-correct-ivy))
 
 (defun endless/fill-or-unfill ()
   "Like `fill-paragraph', but unfill if used twice."
@@ -544,6 +548,9 @@ timestamp."
 
 (global-set-key [remap fill-paragraph]
                 #'endless/fill-or-unfill)
+;;; Writing
+(use-package olivetti
+  :commands (olivetti-mode))
 
 ;;; Programming Utilities
 (use-package highlight-indent-guides
@@ -673,7 +680,10 @@ timestamp."
     (add-hook (car where)
               `(lambda ()
                  (bind-key "M-n" #'flycheck-next-error ,(cdr where))
-                 (bind-key "M-p" #'flycheck-previous-error ,(cdr where))))))
+                 (bind-key "M-p" #'flycheck-previous-error ,(cdr where)))))
+
+  (when (executable-find "proselint")
+    (add-hook 'text-mode-hook 'flycheck-mode)))
 
 (use-package flycheck-hydra
   :straight nil
@@ -1611,8 +1621,13 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :config
   (slack-register-team
    :name "crslab"
-   :default t
    :token (password-store-get "slack-tokens/crslab")
+   :full-and-display-names t)
+  (slack-register-team
+   :name "orgroam"
+   :default t
+   :token (password-store-get "slack-tokens/orgroam")
+   :subscribe '("general")
    :full-and-display-names t))
 
 (use-package alert
