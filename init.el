@@ -1,7 +1,6 @@
 ;;;; -*- lexical-binding: t -*-
 ;;; Straight setup
 (setq straight-repository-branch "develop")
-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -29,9 +28,6 @@
                    :branch "develop"))
 (eval-when-compile
   (require 'el-patch))
-
-(use-package use-package-company
-  :straight (use-package-company :host github :repo "akirak/use-package-company"))
 
 ;;; EXWM setup
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
@@ -79,7 +75,7 @@
 
 (add-hook 'after-init-hook #'delete-selection-mode)
 
-(setq sentence-end-double-space nil)
+(setq sentence-end-double-space t)
 
 (setq-default tab-width 2)
 (setq-default js-indent-level 2)
@@ -723,21 +719,36 @@ timestamp."
   :blackout company-mode
   :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
   :commands company-abort
-  :bind (("M-/" . company-complete)
-         ("C-/" . company-yasnippet)
-         :map company-active-map
-         ("M-n" . nil)
-         ("M-p" . nil)
-         ("C-n" . company-select-next)
-         ("C-p" . company-select-previous))
+  :bind (:map company-active-map
+              (("<RET>" . nil)
+               ("<tab>" . company-select-next)
+               ("<backtab>" . company-select-previous)
+               ("C-n" . company-select-next)
+               ("C-p" . company-select-previous)
+               ("M-n" . company-other-backend)))
   :custom
+  (company-minimum-prefix-length 2)
+  (company-tooltip-limit 14)
   (company-dabbrev-downcase nil)
+  (company-dabbrev-ignore-case nil)
+  (company-dabbrev-code-other-buffers t)
+  (company-tooltip-align-annotations t)
+  (company-require-match 'never)
   (company-idle-delay 0.5)
   (company-require-match nil)
-  (company-minimum-prefix-length 2)
   (company-tooltip-align-annotations t)
-  :init
-  (global-company-mode +1))
+  (company-backends '(company-capf))
+  (company-frontends '(company-pseudo-tooltip-frontend
+                       company-echo-metadata-frontend))
+  (company-global-modes '(not erc-mode message-mode help-mode gud-mode eshell-mode))
+  :config
+  (global-company-mode +1)
+  (dolist (where '((text-mode-hook . (company-dabbrev company-yasnippet company-ispell))
+                   (prog-mode-hook . (company-capf company-yasnippet))
+                   (conf-mode-hook . (company-capf company-dabbrev-code company-yasnippet))))
+    (add-hook (car where)
+              (lambda ()
+                (setq-local company-backends (cdr where))))))
 
 (use-package company-quickhelp
   :after company
@@ -745,6 +756,10 @@ timestamp."
               ("M-h" . company-quickhelp-manual-begin))
   :hook
   (company-mode . company-quickhelp-mode))
+
+(use-package company-posframe
+  :after company
+  :hook (company-mode . company-posframe-mode))
 
 (use-package dtrt-indent
   :blackout t
@@ -771,7 +786,10 @@ timestamp."
 
 (use-package company-lsp
   :after (company lsp)
-  :company lsp-mode)
+  :config
+  (add-hook 'lsp-mode-hook (lambda ()
+                             (setq-local company-backends
+                                         (cons 'company-lsp company-backends)))))
 
 (use-package dap-mode)
 
@@ -955,7 +973,6 @@ timestamp."
   (setq-default TeX-engine 'luatex)
   (add-hook 'LaTeX-mode-hook
             (lambda ()
-              (company-mode)
               (setq TeX-PDF-mode t)
               (setq TeX-source-correlate-method 'synctex)
               (setq TeX-source-correlate-start-server t)))
@@ -1316,9 +1333,9 @@ used as title."
                                (file-relative-name (car it) org-roam-directory)
                                (org-roam--get-title-or-slug (car it))))
            "" (org-roam-sql [:select [file-from]
-                             :from file-links
-                             :where (= file-to $s1)
-                             :and file-from :not :like $s2] file "%private%"))
+                                     :from file-links
+                                     :where (= file-to $s1)
+                                     :and file-from :not :like $s2] file "%private%"))
         ""))
     (defun my/org-export-preprocessor (_backend)
       (let ((links (my/org-roam--backlinks-list (buffer-file-name))))
@@ -1351,7 +1368,10 @@ used as title."
 #+TITLE: ${title}
 
 - source :: ${ref}"
-           :unnarrowed t))))
+           :unnarrowed t)))
+  (with-eval-after-load 'org
+    (require 'company-org-roam)
+    (company-org-roam-init)))
 
 (use-package org-fc
   :straight (:host github
