@@ -284,6 +284,7 @@ timestamp."
 (use-package crux
   :bind (("C-c o" . crux-open-with)
          ("C-a" . crux-move-beginning-of-line)
+         ("C-c D" . crux-delete-file-and-buffer)
          ("C-c r" . crux-rename-file-and-buffer)))
 
 ;;; Ivy
@@ -1368,10 +1369,13 @@ used as title."
 #+TITLE: ${title}
 
 - source :: ${ref}"
-           :unnarrowed t)))
-  (with-eval-after-load 'org
-    (require 'company-org-roam)
-    (company-org-roam-init)))
+           :unnarrowed t))))
+
+(use-package company-org-roam
+  :straight nil
+  :after org-roam company org
+  :config
+  (company-org-roam-init))
 
 (use-package org-fc
   :straight (:host github
