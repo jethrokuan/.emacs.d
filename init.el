@@ -661,23 +661,25 @@ timestamp."
   :custom
   (sp-max-prefix-length 25)
   (sp-max-pair-length 4)
+  :init
+  (smartparens-global-mode +1)
   :config
   (require 'smartparens-config)
   ;; Org-mode config
   (sp-with-modes 'org-mode
-    (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
-    (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
-    (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
-    (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC"))))
+                 (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
+                 (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
+                 (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
+                 (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+                 (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+                 (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC"))))
 
   (defun sp--org-skip-asterisk (ms mb me)
     (or (and (= (line-beginning-position) mb)
              (eq 32 (char-after (1+ mb))))
         (and (= (1+ (line-beginning-position)) me)
-             (eq 32 (char-after me)))))
-  (smartparens-global-mode +1))
+             (eq 32 (char-after me))))))
+
 
 (use-package bury-successful-compilation
   :hook
@@ -749,13 +751,14 @@ timestamp."
   :blackout company-mode
   :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
   :commands company-abort
-  :bind (:map company-active-map
-              (("<RET>" . nil)
-               ("<tab>" . company-select-next)
-               ("<backtab>" . company-select-previous)
-               ("C-n" . company-select-next)
-               ("C-p" . company-select-previous)
-               ("M-n" . company-other-backend)))
+  :bind (("C-/" . company-complete)
+         :map company-active-map
+         (("<RET>" . nil)
+          ("<tab>" . company-select-next)
+          ("<backtab>" . company-select-previous)
+          ("C-n" . company-select-next)
+          ("C-p" . company-select-previous)
+          ("M-n" . company-other-backend)))
   :custom
   (company-minimum-prefix-length 2)
   (company-tooltip-limit 14)
@@ -1078,6 +1081,30 @@ timestamp."
   :defer t
   :init
   (add-to-list 'latex--company-backends #'latex-symbols-company-backend nil #'eq))
+
+;;;; RefTex
+
+(use-package reftex
+  :straight nil
+  :hook (LaTeX-mode . reftex-mode)
+  :config
+  (setq reftex-cite-format
+        '((?a . "\\autocite[]{%l}")
+          (?b . "\\blockquote[]{%l}")
+          (?c . "\\cite[]{%l}")
+          (?f . "\\footcite[]{%l}")
+          (?n . "\\nocite{%l}")
+          (?p . "\\parencite{%l}")
+          (?s . "\\smartcite[]{%l}")
+          (?t . "\\textcite[]{%l}"))
+        reftex-plug-into-AUCTeX t
+        reftex-toc-split-windows-fraction 0.3))
+
+(use-package company-reftex
+  :config
+  (add-hook 'reftex-mode-hook
+            (lambda ()
+              (setq-local company-backends (cons 'company-reftex company-backends)))))
 
 ;;; YAML
 (use-package yaml-mode
@@ -1759,6 +1786,15 @@ Inspired by https://github.com/daviderestivo/emacs-config/blob/6086a7013020e19c0
   :straight (:host gitlab :repo "ambrevar/emacs-gif-screencast")
   :bind
   ("<f12>" . gif-screencast-start-or-stop))
+
+(use-package elfeed
+  :commands elfeed)
+
+(use-package elfeed-org
+  :custom
+  (rmh-elfeed-org-files '("/home/jethro/Dropbox/org/braindump/org/feeds.org"))
+  :config
+  (elfeed-org))
 
 ;; Local Variables:
 ;; outline-regexp: ";;;+ "
