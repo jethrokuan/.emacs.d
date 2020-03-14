@@ -958,31 +958,97 @@ timestamp."
   :commands nix-update-fetch)
 
 ;;; LaTeX
-(use-package auctex
-  :mode ("\\.tex\\'" . latex-mode)
+(defvar latex--company-backends nil)
+
+(use-package tex
+  :straight nil
+  :mode ("\\.tex\\'" . LaTeX-mode)
   :custom
-  (TeX-auto-save t)
-  (TeX-parse-self t)
+  (TeX-auto-save t) ; parse on save
+  (TeX-parse-self t) ; parse on load
+  ;; hidden dirs for auctex files
+  (TeX-auto-local ".auctex-auto")
+  (TeX-style-local ".auctex-style")
   (TeX-syntactic-comment t)
   ;; Synctex Support
+  (TeX-source-correlate-mode t)
+  (TeX-source-correlate-method 'synctex)
   (TeX-source-correlate-start-server nil)
   ;; Don't insert line-break at inline math
+  (TeX-electric-sub-and-superscript t)
   (LaTeX-fill-break-at-separators nil)
   (TeX-view-program-list '(("zathura" "zathura --page=%(outpage) %o")))
   (TeX-view-program-selection '((output-pdf "zathura")))
   :config
   (setq-default TeX-engine 'luatex)
+  (add-hook 'TeX-mode-hook (lambda ()
+                             (setq-local ispell-parser 'tex)
+                             (setq-local fill-nobreak-predicate (cons #'texmathp fill-nobreak-predicate))))
+  (add-hook 'TeX-mode-hook #'visual-line-mode)
+  (add-hook 'TeX-mode-hook #'TeX-fold-mode))
+
+(use-package latex
+  :straight nil
+  :custom
+  (LaTeX-section-hook '(LaTeX-section-heading
+                        LaTeX-section-title
+                        LaTeX-section-toc
+                        LaTeX-section-section
+                        LaTeX-section-label))
+  (LaTeX-fill-break-at-separators nil)
+  (LaTeX-item-indent 0)
+  :config
+  (add-hook 'LaTeX-mode-hook (lambda ()
+                               (setq-local company-backends latex--company-backends))))
+
+(use-package preview
+  :straight nil
+  :hook (LaTeX-mode . LaTeX-preview-setup)
+  :config
+  (setq-default preview-scale 1.4
+                preview-scale-function
+                (lambda () (* (/ 10.0 (preview-document-pt)) preview-scale))))
+
+(use-package cdlatex
+  :hook (LaTeX-mode . cdlatex-mode)
+  :custom
+  (cdlatex-use-dollar-to-ensure-math nil)
+  :bind
+  (:map cdlatex-mode-map
+        (("$" . nil)
+         ("(" . nil)
+         ("{" . nil)
+         ("[" . nil)
+         ("|" . nil)
+         ("<" . nil)
+         ("TAB" . nil)
+         ("^". nil)
+         ("_" . nil))))
+
+(use-package adaptive-wrap
+  :hook (LaTeX-mode . adaptive-wrap-prefix-mode)
+  :init (setq-default adaptive-wrap-extra-indent 0))
+
+(use-package auctex-latexmk
+  :after latex
+  :init
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
   (add-hook 'LaTeX-mode-hook
             (lambda ()
-              (setq TeX-PDF-mode t)
-              (setq TeX-source-correlate-method 'synctex)
-              (setq TeX-source-correlate-start-server t)))
-  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-  (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
-  (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode))
+              (setq-local TeX-command-default "LatexMk")))
+  :config
+  (auctex-latexmk-setup))
 
 (use-package company-auctex
-  :after auctex company-mode)
+  :defer t
+  :init
+  (add-to-list 'latex--company-backends #'company-auctex-environments nil #'eq)
+  (add-to-list 'latex--company-backends #'company-auctex-macros nil #'eq))
+
+(use-package company-math
+  :defer t
+  :init
+  (add-to-list 'latex--company-backends #'latex-symbols-company-backend nil #'eq))
 
 ;;; YAML
 (use-package yaml-mode
