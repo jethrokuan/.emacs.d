@@ -1,3 +1,4 @@
+* DEPRECATED: migrated to https://github.com/jethrokuan/dots/
 * Setting Up
 
 ** Org-protocol
