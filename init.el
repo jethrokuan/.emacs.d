@@ -63,11 +63,28 @@
   :straight nil
   :blackout t
   :hook
-  (dired-mode . auto-revert-mode)
-  :config
-  (global-auto-revert-mode +1)
+  (focus-in . doom-auto-revert-buffers-h)
+  (after-save . doom-auto-revert-buffers-h)
   :custom
-  (auto-revert-verbose nil))
+  (auto-revert-verbose t)
+  (auto-revert-use-notify nil)
+  (auto-revert-stop-on-user-input nil)
+  (revert-without-query '("."))
+  :config
+  (defun doom-visible-buffers (&optional buffer-list)
+    "Return a list of visible buffers (i.e. not buried)."
+    (if buffer-list
+        (cl-remove-if-not #'get-buffer-window buffer-list)
+      (delete-dups (mapcar #'window-buffer (window-list)))))
+  (defun doom-auto-revert-buffer-h ()
+    "Auto revert current buffer, if necessary."
+    (unless (or auto-revert-mode (active-minibuffer-window))
+      (auto-revert-handler)))
+  (defun doom-auto-revert-buffers-h ()
+    "Auto revert stale buffers in visible windows, if necessary."
+    (dolist (buf (doom-visible-buffers))
+      (with-current-buffer buf
+        (doom-auto-revert-buffer-h)))))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
@@ -75,14 +92,25 @@
 
 (add-hook 'after-init-hook #'delete-selection-mode)
 
-(setq sentence-end-double-space t)
+(setq-default word-wrap t
+              truncate-lines t
+              truncate-partial-width-windows nil)
 
-(setq-default tab-width 2)
+(setq sentence-end-double-space t
+      delete-trailing-lines nil
+      require-final-newline t)
+
+(setq-default tab-width 2
+              tab-always-indent t
+              indent-tabs-mode nil
+              fill-column 80)
+
 (setq-default js-indent-level 2)
-(setq-default indent-tabs-mode nil)
 
-;; For when Emacs is started in GUI mode:
-(setq create-lockfiles nil)
+(setq auto-save-default nil
+      make-backup-files nil
+      create-lockfiles nil)
+
 (setq browse-url-browser-function 'browse-url-xdg-open)
 
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
@@ -630,8 +658,9 @@ timestamp."
               ("C-{" . sp-backward-barf-sexp)
               ("C-M-<right>" . sp-backward-barf-sexp)
               ("M-S" . sp-split-sexp))
-  :init
-  (smartparens-global-strict-mode +1)
+  :custom
+  (sp-max-prefix-length 25)
+  (sp-max-pair-length 4)
   :config
   (require 'smartparens-config)
   ;; Org-mode config
@@ -641,14 +670,14 @@ timestamp."
     (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
     (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
     (sp-local-pair "~" "~" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
-    (sp-local-pair "«" "»"))
+    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC"))))
 
   (defun sp--org-skip-asterisk (ms mb me)
     (or (and (= (line-beginning-position) mb)
              (eq 32 (char-after (1+ mb))))
         (and (= (1+ (line-beginning-position)) me)
-             (eq 32 (char-after me))))))
+             (eq 32 (char-after me)))))
+  (smartparens-global-mode +1))
 
 (use-package bury-successful-compilation
   :hook
